@@ -1,0 +1,69 @@
+Principais comandos
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Comando para abrir o arquivo no Visual Studio
+type
+Ex: type resources\views\layouts\app.blade.php
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Para juntar tudo em um só comando use &&:
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+rodar no  Laragon / terminal
+//subir o servidor local
+php artisan serve
+
+
+para logar no servidor Locaweb
+ssh root@191.252.93.21
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Limpar cache no servidor:
+
+ssh root@191.252.93.21 "cd /var/www/saproweb && php artisan view:clear && php artisan cache:clear"
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+GitHub Desktop
+
+Após fazer alterações no projeto, o fluxo no GitHub Desktop é:
+1. Ver as alterações
+
+Abra o GitHub Desktop
+Na esquerda aparece a lista de arquivos alterados
+
+2. Fazer o Commit
+
+Em baixo à esquerda escreva uma mensagem descrevendo o que fez
+Ex: Layout responsivo mobile
+Clique em Commit to main
+
+3. Enviar para o GitHub
+
+Clique em Push origin (botão azul no topo)
+
+4. Atualizar o servidor
+
+No terminal SSH do servidor:
+
+cd /var/www/saproweb && git pull && php artisan view:clear && php artisan cache:clear
+Pronto! Em um comando o servidor fica atualizado! 🚀⚖️
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
