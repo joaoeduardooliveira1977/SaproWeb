@@ -25,7 +25,7 @@
 
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); }
 
-        /* ── Layout ── */
+        /* ── Layoute ── */
         .layout { display: flex; height: 100vh; overflow: hidden; }
 
         /* ── Sidebar ── */
