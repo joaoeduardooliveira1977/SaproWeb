@@ -67,13 +67,16 @@ Route::middleware('auth:usuarios')->group(function () {
     Route::get('/custas',       [RelatorioController::class, 'custasPendentes'])->name('custas');
     Route::get('/aniversarios', [RelatorioController::class, 'aniversarios'])->name('aniversarios');
     
+
     });
 
     // Portal TJSP
     Route::get('/tjsp', fn() => view('tjsp'))->name('tjsp');
 
+    // Assistente
+    Route::get('/assistente', fn() => view('assistente'))->name('assistente');
 
-   
+
 });
 
 

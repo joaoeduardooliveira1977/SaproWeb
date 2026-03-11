@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'SAPRO') — SaproWeb</title>
+    <title>@yield('title', 'Sistema Jurídico') — Web</title>
     @livewireStyles
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -227,8 +227,8 @@
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-logo">⚖️</div>
-            <div class="sidebar-title">SAPRO</div>
-            <div class="sidebar-sub">Gestão Jurídica</div>
+            <div class="sidebar-title">SISTEMA JURÍDICO</div>
+            <div class="sidebar-sub">Web</div>
         </div>
 
         @php $rota = request()->route()->getName(); @endphp
@@ -245,8 +245,16 @@
                 <span class="nav-icon">📊</span> Relatórios
             </a>
             <a href="{{ route('tjsp') }}" class="nav-item {{ $rota === 'tjsp' ? 'active' : '' }}">
-                <span class="nav-icon">🏛️</span> Consulta TJSP
+                <span class="nav-icon">🏛️</span> CONSULTA TJSP
             </a>
+
+	    <a href="{{ route('assistente') }}" class="nav-item {{ request()->is('assistente*') ? 'active' : '' }}">
+    		🤖 Assistente IA
+	    </a>
+
+
+
+
         </div>
 
         <div class="nav-group">
