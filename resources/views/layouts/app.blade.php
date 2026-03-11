@@ -245,14 +245,16 @@
                 <span class="nav-icon">📊</span> Relatórios
             </a>
             <a href="{{ route('tjsp') }}" class="nav-item {{ $rota === 'tjsp' ? 'active' : '' }}">
-                <span class="nav-icon">🏛️</span> CONSULTA TJSP
+                <span class="nav-icon">🏛️</span> Consulta TJSP
             </a>
 
 	    <a href="{{ route('assistente') }}" class="nav-item {{ request()->is('assistente*') ? 'active' : '' }}">
     		🤖 Assistente IA
 	    </a>
 
-
+           <a href="{{ route('documentos') }}" class="nav-item {{ request()->is('documentos*') ? 'active' : '' }}">
+    		📁 Documentos
+	   </a>
 
 
         </div>
@@ -272,6 +274,12 @@
             <a href="{{ route('financeiro') }}" class="nav-item {{ $rota === 'financeiro' ? 'active' : '' }}">
                 <span class="nav-icon">💰</span> Financeiro
             </a>
+
+		<a href="{{ route('honorarios') }}" class="nav-item {{ request()->is('honorarios*') ? 'active' : '' }}">
+    		💰  Honorários
+		</a>
+
+
             <a href="{{ route('tabelas') }}" class="nav-item {{ $rota === 'tabelas' ? 'active' : '' }}">
                 <span class="nav-icon">🗂️</span> Tabelas
             </a>

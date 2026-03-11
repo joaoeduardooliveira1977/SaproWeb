@@ -76,6 +76,12 @@ Route::middleware('auth:usuarios')->group(function () {
     // Assistente
     Route::get('/assistente', fn() => view('assistente'))->name('assistente');
 
+    //Honorários
+    Route::get('/honorarios', fn() => view('honorarios'))->name('honorarios');
+
+    //Documentos
+    Route::get('/documentos', fn() => view('documentos'))->name('documentos');
+
 
 });
 
