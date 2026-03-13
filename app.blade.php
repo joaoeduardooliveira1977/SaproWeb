@@ -183,20 +183,19 @@
         </div>
 
         @php
-            $rota       = request()->route()->getName();
-            $perfil     = auth('usuarios')->user()?->perfil ?? 'estagiario';
-            $isAdmin    = $perfil === 'admin';
-            $isAdvogado = in_array($perfil, ['admin','advogado']);
-            $isFinanc   = in_array($perfil, ['admin','financeiro']);
-            $canProc    = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
-            $canPessoas = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
-            $canAgenda  = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
-            $canDocs    = in_array($perfil, ['admin','advogado','estagiario']);
+            $rota        = request()->route()->getName();
+            $perfil      = auth('usuarios')->user()?->perfil ?? 'estagiario';
+            $isAdmin     = $perfil === 'admin';
+            $isAdvogado  = in_array($perfil, ['admin','advogado']);
+            $isFinanc    = in_array($perfil, ['admin','financeiro']);
+            $canProc     = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
+            $canPessoas  = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
+            $canAgenda   = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
+            $canDocs     = in_array($perfil, ['admin','advogado','estagiario']);
         @endphp
 
-        {{-- ── GERAL ── --}}
         <div class="nav-group">
-            <div class="nav-group-label">Geral</div>
+            <div class="nav-group-label">Principal</div>
             <a href="{{ route('dashboard') }}" class="nav-item {{ $rota === 'dashboard' ? 'active' : '' }}">
                 <span class="nav-icon">🏠</span> Dashboard
             </a>
@@ -204,24 +203,18 @@
             <a href="{{ route('agenda') }}" class="nav-item {{ $rota === 'agenda' ? 'active' : '' }}">
                 <span class="nav-icon">📅</span> Agenda
             </a>
-            <a href="{{ route('prazos') }}" class="nav-item {{ $rota === 'prazos' ? 'active' : '' }}">
-                <span class="nav-icon">⏳</span> Prazos
+            @endif
+            @if($isAdvogado || $isFinanc)
+            <a href="{{ route('relatorios.index') }}" class="nav-item {{ str_contains($rota ?? '', 'relatorios') ? 'active' : '' }}">
+                <span class="nav-icon">📊</span> Relatórios
             </a>
             @endif
-        </div>
-
-        {{-- ── PROCESSOS ── --}}
-        @if($canProc || $canPessoas || $canDocs)
-        <div class="nav-group">
-            <div class="nav-group-label">Processos</div>
-            @if($canProc)
-            <a href="{{ route('processos') }}" class="nav-item {{ str_contains($rota ?? '', 'processos') ? 'active' : '' }}">
-                <span class="nav-icon">⚖️</span> Processos
+            @if($isAdvogado)
+            <a href="{{ route('tjsp') }}" class="nav-item {{ $rota === 'tjsp' ? 'active' : '' }}">
+                <span class="nav-icon">🏛️</span> Consulta TJSP
             </a>
-            @endif
-            @if($canPessoas)
-            <a href="{{ route('pessoas') }}" class="nav-item {{ str_contains($rota ?? '', 'pessoas') ? 'active' : '' }}">
-                <span class="nav-icon">👥</span> Pessoas
+            <a href="{{ route('assistente') }}" class="nav-item {{ request()->is('assistente*') ? 'active' : '' }}">
+                <span class="nav-icon">🤖</span> Assistente IA
             </a>
             @endif
             @if($canDocs)
@@ -230,84 +223,54 @@
             </a>
             @endif
         </div>
-        @endif
 
-        {{-- ── FINANCEIRO ── --}}
-        @if($isFinanc)
         <div class="nav-group">
-            <div class="nav-group-label">Financeiro</div>
-            <a href="{{ route('financeiro.consolidado') }}" class="nav-item {{ $rota === 'financeiro.consolidado' ? 'active' : '' }}">
-                <span class="nav-icon">💰</span> Visão Geral
+            <div class="nav-group-label">Cadastros</div>
+            @if($canPessoas)
+            <a href="{{ route('pessoas') }}" class="nav-item {{ str_contains($rota ?? '', 'pessoas') ? 'active' : '' }}">
+                <span class="nav-icon">👥</span> Pessoas
             </a>
+            @endif
+            @if($canProc)
+            <a href="{{ route('processos') }}" class="nav-item {{ str_contains($rota ?? '', 'processos') ? 'active' : '' }}">
+                <span class="nav-icon">⚖️</span> Processos
+            </a>
+            @endif
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-group-label">Módulos</div>
+            @if($isFinanc)
             <a href="{{ route('financeiro') }}" class="nav-item {{ $rota === 'financeiro' ? 'active' : '' }}">
-                <span class="nav-icon">💳</span> Por Processo
+                <span class="nav-icon">💳</span> Financeiro
             </a>
             <a href="{{ route('honorarios') }}" class="nav-item {{ request()->is('honorarios*') ? 'active' : '' }}">
-                <span class="nav-icon">📋</span> Honorários
-            </a>
-            @if($isAdvogado || $isFinanc)
-            <a href="{{ route('relatorios.index') }}" class="nav-item {{ str_contains($rota ?? '', 'relatorios') ? 'active' : '' }}">
-                <span class="nav-icon">📊</span> Relatórios
+                <span class="nav-icon">💰</span> Honorários
             </a>
             @endif
-        </div>
-        @endif
-
-        {{-- ── FERRAMENTAS ── --}}
-        @if($isAdvogado)
-        <div class="nav-group">
-            <div class="nav-group-label">Ferramentas</div>
-            <a href="{{ route('tjsp') }}" class="nav-item {{ $rota === 'tjsp' ? 'active' : '' }}">
-                <span class="nav-icon">🏛️</span> Consulta TJSP
-            </a>
-            <a href="{{ route('aasp-publicacoes') }}" class="nav-item {{ $rota === 'aasp-publicacoes' ? 'active' : '' }}">
-                <span class="nav-icon">📰</span> Publicações AASP
-            </a>
-            <a href="{{ route('assistente') }}" class="nav-item {{ request()->is('assistente*') ? 'active' : '' }}">
-                <span class="nav-icon">🤖</span> Assistente IA
-            </a>
-            @if(!$isFinanc)
-            <a href="{{ route('relatorios.index') }}" class="nav-item {{ str_contains($rota ?? '', 'relatorios') ? 'active' : '' }}">
-                <span class="nav-icon">📊</span> Relatórios
-            </a>
-            @endif
-        </div>
-        @endif
-
-        {{-- ── PORTAL ── --}}
-        @if($isAdmin)
-        <div class="nav-group">
-            <div class="nav-group-label">Portal Cliente</div>
-            <a href="{{ route('admin.portal-acesso') }}" class="nav-item {{ $rota === 'admin.portal-acesso' ? 'active' : '' }}">
-                <span class="nav-icon">🌐</span> Acessos
-            </a>
-            <a href="{{ route('admin.portal-mensagens') }}" class="nav-item {{ $rota === 'admin.portal-mensagens' ? 'active' : '' }}">
-                <span class="nav-icon">💬</span> Mensagens
-            </a>
-        </div>
-        @endif
-
-        {{-- ── ADMINISTRAÇÃO ── --}}
-        @if($isAdmin)
-        <div class="nav-group">
-            <div class="nav-group-label">Administração</div>
-            <a href="{{ route('usuarios') }}" class="nav-item {{ $rota === 'usuarios' ? 'active' : '' }}">
-                <span class="nav-icon">👨‍💼</span> Usuários
-            </a>
+            @if($isAdmin)
             <a href="{{ route('tabelas') }}" class="nav-item {{ $rota === 'tabelas' ? 'active' : '' }}">
                 <span class="nav-icon">🗂️</span> Tabelas
             </a>
             <a href="{{ route('indices') }}" class="nav-item {{ $rota === 'indices' ? 'active' : '' }}">
                 <span class="nav-icon">📈</span> Índices
             </a>
+            @endif
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-group-label">Sistema</div>
+            @if($isAdmin)
+            <a href="{{ route('usuarios') }}" class="nav-item {{ $rota === 'usuarios' ? 'active' : '' }}">
+                <span class="nav-icon">👨‍💼</span> Usuários
+            </a>
             <a href="{{ route('auditoria') }}" class="nav-item {{ $rota === 'auditoria' ? 'active' : '' }}">
                 <span class="nav-icon">🔍</span> Auditoria
             </a>
-        </div>
-        @endif
-
-        {{-- ── CONTA ── --}}
-        <div class="nav-group">
+            <a href="{{ route('admin.portal-acesso') }}" class="nav-item {{ $rota === 'admin.portal-acesso' ? 'active' : '' }}">
+                <span class="nav-icon">🌐</span> Portal Acesso
+            </a>
+            @endif
             <a href="{{ route('minha-conta') }}" class="nav-item {{ $rota === 'minha-conta' ? 'active' : '' }}">
                 <span class="nav-icon">👤</span> Minha Conta
             </a>
@@ -338,7 +301,6 @@
             <button class="hamburger" onclick="toggleSidebar()">☰</button>
             <span class="topbar-title">@yield('page-title', 'Dashboard')</span>
             <div class="topbar-user">
-                @livewire('notificacoes-bell')
                 <div class="avatar">{{ strtoupper(substr(auth('usuarios')->user()?->nome ?? 'U', 0, 2)) }}</div>
                 <span style="display:none" class="topbar-username">{{ auth('usuarios')->user()?->nome }}</span>
             </div>

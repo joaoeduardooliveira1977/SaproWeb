@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd C:/projetos/saproweb-base && php artisan migrate 2>&1)",
+      "Bash(cmd.exe /c \"where php\" 2>&1 || cmd.exe /c \"php --version\" 2>&1)",
+      "Bash(cmd.exe /c \"php --version\" 2>&1)",
+      "Bash(cmd.exe /c \"php artisan migrate 2>&1\")",
+      "Bash(TaskOutput bxb5rkqyd:*)",
+      "Bash(powershell.exe -Command \"Get-Command php -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\" 2>&1)",
+      "Read(//c/laragon//**)",
+      "Read(//c//**)",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe artisan:*)",
+      "Bash(PHP=/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe && \"$PHP\" --version && cd \"C:/projetos/saproweb-base\" && \"$PHP\" artisan migrate --force 2>&1)",
+      "Bash(PHP=/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe && cd \"C:/projetos/saproweb-base\" && \"$PHP\" artisan tinker --execute=\"DB::select\\('PRAGMA table_info\\(usuarios\\)'\\) |> collect\\(\\) |> pluck\\('name'\\) |> dd\\(\\)\" 2>&1 | tail -20)",
+      "Bash(PHP=/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe && cd \"C:/projetos/saproweb-base\" && \"$PHP\" artisan tinker --execute=\"echo implode\\(', ', array_column\\(DB::select\\('PRAGMA table_info\\(usuarios\\)'\\), 'name'\\)\\);\" 2>&1)",
+      "Bash(PHP=/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe && \"$PHP\" -l \"C:/projetos/saproweb-base/app/Livewire/Usuarios.php\" && \"$PHP\" -l \"C:/projetos/saproweb-base/app/Http/Middleware/VerificarPerfil.php\" && \"$PHP\" -l \"C:/projetos/saproweb-base/bootstrap/app.php\" && \"$PHP\" -l \"C:/projetos/saproweb-base/routes/web.php\" && \"$PHP\" -l \"C:/projetos/saproweb-base/app/Models/Usuario.php\" 2>&1)",
+      "Bash(PHP=/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe && cd \"C:/projetos/saproweb-base\" && \"$PHP\" artisan migrate:status 2>&1 | tail -15)",
+      "Bash(PHP=/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe && cd \"C:/projetos/saproweb-base\" && \"$PHP\" artisan migrate:status 2>&1)",
+      "Bash(php artisan:*)",
+      "Bash(php -l app/Livewire/AaspPublicacoes.php && php -l app/Models/AaspAdvogado.php && php -l app/Models/AaspPublicacao.php && php -l app/Models/AaspConfig.php 2>&1)",
+      "Bash(/c/laragon/bin/php/php-8.3.14-Win32-vs16-x64/php.exe artisan:*)",
+      "Bash(ls /c/laragon/bin/php/ 2>/dev/null || ls \"C:/laragon/bin/php/\" 2>/dev/null || where php 2>/dev/null || echo \"php not in PATH\")",
+      "Bash(\"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" \"C:/projetos/saproweb-base/artisan\" migrate --path=database/migrations/2024_01_01_000040_create_prazos_table.php 2>&1)",
+      "Bash(\"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" \"C:/projetos/saproweb-base/artisan\" migrate --path=database/migrations/2024_01_01_000041_create_notificacoes_table.php 2>&1)",
+      "Bash(ls \"C:/projetos/saproweb-base/app/Models/\" && \"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" \"C:/projetos/saproweb-base/artisan\" db:table documentos 2>&1 | head -30)",
+      "Bash(\"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" \"C:/projetos/saproweb-base/artisan\" migrate --path=database/migrations/2024_01_01_000042_portal_aprimorado.php 2>&1)"
+    ]
+  }
+}

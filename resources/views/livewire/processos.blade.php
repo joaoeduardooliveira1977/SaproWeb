@@ -7,101 +7,120 @@
 
         {{-- Filtros --}}
         <div class="search-bar">
-            <input type="text" wire:model.live.debounce.300ms="busca" placeholder="Buscar por nº, cliente, advogado...">
-            <select wire:model.live="status" style="width:140px">
-                <option value="">Todos os status</option>
-                <option value="Ativo">Ativo</option>
-                <option value="Arquivado">Arquivado</option>
-                <option value="Encerrado">Encerrado</option>
-                <option value="Suspenso">Suspenso</option>
-            </select>
-            <select wire:model.live="fase_id" style="width:140px">
-                <option value="">Todas as fases</option>
-                @foreach($fases as $f)
-                    <option value="{{ $f->id }}">{{ $f->descricao }}</option>
-                @endforeach
-            </select>
-            <select wire:model.live="risco_id" style="width:120px">
-                <option value="">Todos os riscos</option>
-                @foreach($riscos as $r)
-                    <option value="{{ $r->id }}">{{ $r->descricao }}</option>
-                @endforeach
-            </select>
+            <input type="text" wire:model.live.debounce.300ms="busca" placeholder="Buscar por nº, cliente, parte contrária...">
         </div>
 
         {{-- Tabela --}}
         <div class="table-wrap">
-            <table>
+            <table style="width:100%;border-collapse:collapse;">
                 <thead>
-                    <tr>
-                        <th>Nº Processo</th><th>Cliente</th><th>Tipo</th>
-                        <th>Fase</th><th>Risco</th><th>Advogado</th>
-                        <th>Status</th><th>Ações</th>
+                    <tr style="background:#1a3a5c;color:#fff;">
+                        <th style="padding:11px 14px;text-align:left;font-size:13px;font-weight:600;">Nº Processo</th>
+                        <th style="padding:11px 14px;text-align:left;font-size:13px;font-weight:600;">Cliente</th>
+                        <th style="padding:11px 14px;text-align:left;font-size:13px;font-weight:600;">Parte Contrária</th>
+                        <th style="padding:11px 14px;text-align:center;font-size:13px;font-weight:600;width:180px;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($processos as $p)
-                    <tr>
-                        <td><a href="{{ route('processos.show', $p->id) }}" class="text-primary">{{ $p->numero }}</a></td>
-                        <td>{{ $p->cliente?->nome }}</td>
-                        <td>{{ $p->tipoAcao?->descricao ?? '—' }}</td>
-                        <td>
-                            @if($p->fase)
-                            <span class="badge" style="background:#2563a822;color:#2563a8">{{ $p->fase->descricao }}</span>
-                            @else —
-                            @endif
+                    @forelse($processos as $i => $p)
+                    <tr style="background:{{ $i % 2 === 0 ? '#ffffff' : '#eff6ff' }};border-bottom:1px solid #e2e8f0;transition:background .15s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='{{ $i % 2 === 0 ? '#ffffff' : '#eff6ff' }}'">
+
+                        <td style="padding:10px 14px;font-size:13px;font-weight:600;color:#1a3a5c;">
+                            {{ $p->numero }}
                         </td>
-                        <td>
-                            @if($p->risco)
-                            <span class="badge" style="background:{{ $p->risco->cor_hex }}22;color:{{ $p->risco->cor_hex }}">{{ $p->risco->descricao }}</span>
-                            @else —
-                            @endif
+
+                        <td style="padding:10px 14px;font-size:13px;color:#334155;">
+                            {{ $p->cliente?->nome ?? '—' }}
                         </td>
-                        <td>{{ $p->advogado?->nome ?? '—' }}</td>
-                        <td>
-                            @php $corStatus = match($p->status) { 'Ativo'=>'#16a34a', 'Arquivado'=>'#64748b', 'Encerrado'=>'#1a3a5c', default=>'#d97706' }; @endphp
-                            <span class="badge" style="background:{{ $corStatus }}22;color:{{ $corStatus }}">{{ $p->status }}</span>
+
+                        <td style="padding:10px 14px;font-size:13px;color:#334155;">
+                            {{ $p->parteContraria?->nome ?? ($p->parte_contraria ?? '—') }}
                         </td>
-                        <td>
-                            <a href="{{ route('processos.show', $p->id) }}" class="btn-icon" title="Ver">👁️</a>
-                            <a href="{{ route('processos.editar', $p->id) }}" class="btn-icon" title="Editar">✏️</a>
-                            <button wire:click="confirmarArquivar({{ $p->id }})" class="btn-icon" title="Arquivar">🗄️</button>
+
+                        <td style="padding:10px 14px;text-align:center;">
+                            <div style="display:inline-flex;gap:4px;align-items:center;">
+
+                                {{-- Ver detalhes --}}
+                                <a href="{{ route('processos.show', $p->id) }}"
+                                   title="Ver detalhes"
+                                   style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#eff6ff;border:1px solid #bfdbfe;color:#2563a8;text-decoration:none;font-size:15px;transition:background .15s;"
+                                   onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                                    👁️
+                                </a>
+
+                                {{-- Editar --}}
+                                <a href="{{ route('processos.editar', $p->id) }}"
+                                   title="Editar processo"
+                                   style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;text-decoration:none;font-size:15px;transition:background .15s;"
+                                   onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+                                    ✏️
+                                </a>
+
+                                {{-- Agenda --}}
+                                <a href="{{ route('agenda') }}?processo_id={{ $p->id }}"
+                                   title="Agenda do processo"
+                                   style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#faf5ff;border:1px solid #e9d5ff;color:#7c3aed;text-decoration:none;font-size:15px;transition:background .15s;"
+                                   onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='#faf5ff'">
+                                    📅
+                                </a>
+
+                                {{-- Custas --}}
+                                <a href="{{ route('processos.custas', $p->id) }}"
+                                   title="Custas do processo"
+                                   style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#fffbeb;border:1px solid #fde68a;color:#d97706;text-decoration:none;font-size:15px;transition:background .15s;"
+                                   onmouseover="this.style.background='#fef3c7'" onmouseout="this.style.background='#fffbeb'">
+                                    💰
+                                </a>
+
+                                {{-- Andamentos --}}
+                                <a href="{{ route('processos.andamentos', $p->id) }}"
+                                   title="Andamentos do processo"
+                                   style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#fff1f2;border:1px solid #fecdd3;color:#e11d48;text-decoration:none;font-size:15px;transition:background .15s;"
+                                   onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'">
+                                    📋
+                                </a>
+
+                            </div>
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="8" style="text-align:center;color:#64748b;padding:24px">Nenhum processo encontrado.</td></tr>
+                    <tr>
+                        <td colspan="4" style="text-align:center;color:#64748b;padding:32px;font-size:14px;">
+                            Nenhum processo encontrado.
+                        </td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        
+        {{-- Paginação --}}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;font-size:13px;color:#64748b;">
+            <span>
+                @if($processos->total() > 0)
+                    Mostrando {{ $processos->firstItem() }} a {{ $processos->lastItem() }} de {{ $processos->total() }} processos
+                @else
+                    Nenhum resultado
+                @endif
+            </span>
+            <div style="display:flex;gap:8px;">
+                @if($processos->onFirstPage())
+                    <span style="padding:6px 12px;background:#f1f5f9;border-radius:6px;color:#94a3b8;">← Anterior</span>
+                @else
+                    <button wire:click="previousPage" style="padding:6px 12px;background:#2563a8;color:white;border:none;border-radius:6px;cursor:pointer;">← Anterior</button>
+                @endif
 
-<div style="display:flex; justify-content:space-between; align-items:center; padding:16px; font-size:13px; color:#64748b;">
-    <span>Mostrando {{ $processos->firstItem() }} a {{ $processos->lastItem() }} de {{ $processos->total() }} processos</span>
-    <div style="display:flex; gap:8px;">
-        @if($processos->onFirstPage())
-            <span style="padding:6px 12px; background:#f1f5f9; border-radius:6px; color:#94a3b8;">← Anterior</span>
-        @else
-            <button wire:click="previousPage" style="padding:6px 12px; background:#2563a8; color:white; border:none; border-radius:6px; cursor:pointer;">← Anterior</button>
-        @endif
+                <span style="padding:6px 12px;background:#f1f5f9;border-radius:6px;">
+                    {{ $processos->currentPage() }} / {{ $processos->lastPage() }}
+                </span>
 
-        <span style="padding:6px 12px; background:#f1f5f9; border-radius:6px;">
-            {{ $processos->currentPage() }} / {{ $processos->lastPage() }}
-        </span>
-
-        @if($processos->hasMorePages())
-            <button wire:click="nextPage" style="padding:6px 12px; background:#2563a8; color:white; border:none; border-radius:6px; cursor:pointer;">Próxima →</button>
-        @else
-            <span style="padding:6px 12px; background:#f1f5f9; border-radius:6px; color:#94a3b8;">Próxima →</span>
-        @endif
-    </div>
-</div>
-
-
-
-
-
+                @if($processos->hasMorePages())
+                    <button wire:click="nextPage" style="padding:6px 12px;background:#2563a8;color:white;border:none;border-radius:6px;cursor:pointer;">Próxima →</button>
+                @else
+                    <span style="padding:6px 12px;background:#f1f5f9;border-radius:6px;color:#94a3b8;">Próxima →</span>
+                @endif
+            </div>
+        </div>
 
     </div>
 

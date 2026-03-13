@@ -142,6 +142,15 @@ class Documentos extends Component
         session()->flash('success', 'Documento salvo com sucesso!');
     }
 
+    public function togglePortalVisivel(int $id): void
+    {
+        $doc = DB::selectOne("SELECT portal_visivel FROM documentos WHERE id = ?", [$id]);
+        if (! $doc) return;
+
+        $novo = $doc->portal_visivel ? 0 : 1;
+        DB::update("UPDATE documentos SET portal_visivel = ?, updated_at = NOW() WHERE id = ?", [$novo, $id]);
+    }
+
     public function excluirDocumento(int $id): void
     {
         $doc = DB::selectOne("SELECT arquivo FROM documentos WHERE id = ?", [$id]);

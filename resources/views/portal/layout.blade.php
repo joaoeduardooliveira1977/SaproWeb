@@ -83,7 +83,23 @@
 
         /* Grid */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr; } }
+
+        /* Tabs */
+        .portal-tabs { display: flex; gap: 0; background: #fff; border-bottom: 2px solid #e2e8f0; overflow-x: auto; padding: 0 24px; }
+        .portal-tab { padding: 14px 20px; font-size: 13px; font-weight: 600; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; color: #64748b; white-space: nowrap; margin-bottom: -2px; transition: all .15s; position: relative; }
+        .portal-tab:hover { color: #1a3a5c; }
+        .portal-tab.active { color: #1a3a5c; border-bottom-color: #1a3a5c; }
+        .tab-badge { position: absolute; top: 8px; right: 6px; background: #dc2626; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 8px; }
+
+        /* Processo card */
+        .processo-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; cursor: pointer; transition: box-shadow .15s, border-color .15s; }
+        .processo-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); border-color: #2563a8; }
+
+        /* Info labels */
+        .info-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
+        .info-val { font-size: 13px; color: #334155; }
+
+        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr; } .portal-tabs { padding: 0 12px; } .portal-tab { padding: 12px 14px; font-size: 12px; } }
     </style>
 </head>
 <body>

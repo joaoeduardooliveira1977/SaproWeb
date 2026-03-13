@@ -34,6 +34,9 @@ Route::middleware('auth:usuarios')->group(function () {
     // Agenda
     Route::get('/agenda', fn() => view('agenda'))->name('agenda');
 
+    // Prazos
+    Route::get('/prazos', fn() => view('prazos'))->name('prazos');
+
     // Módulo do Processo (andamentos, custas)
     Route::get('/processos/{id}/andamentos', [ProcessoController::class, 'andamentos'])->name('processos.andamentos');
     Route::get('/processos/{id}/custas',     [ProcessoController::class, 'custas'])->name('processos.custas');
@@ -54,9 +57,13 @@ Route::middleware('auth:usuarios')->group(function () {
 
     // Financeiro
     Route::get('/financeiro', fn() => view('financeiro'))->name('financeiro');
+    Route::get('/financeiro-consolidado', fn() => view('financeiro-consolidado'))->name('financeiro.consolidado');
 
     // Portal Acesso
     Route::get('/admin/portal-acesso', fn() => view('portal-acesso'))->name('admin.portal-acesso');
+
+    // Portal Mensagens (admin)
+    Route::get('/admin/portal-mensagens', fn() => view('portal-mensagens'))->name('admin.portal-mensagens');
 
     Route::prefix('relatorios')->name('relatorios.')->group(function () {
     Route::get('/',             fn() => view('relatorios.index'))->name('index');
@@ -82,6 +89,11 @@ Route::middleware('auth:usuarios')->group(function () {
     //Documentos
     Route::get('/documentos', fn() => view('documentos'))->name('documentos');
 
+    // Usuários (somente admin via VerificarPerfil middleware)
+    Route::get('/usuarios', fn() => view('usuarios'))->name('usuarios')->middleware('perfil:usuarios');
+
+    // Publicações AASP
+    Route::get('/aasp-publicacoes', fn() => view('aasp-publicacoes'))->name('aasp-publicacoes')->middleware('perfil:aasp-publicacoes');
 
 });
 

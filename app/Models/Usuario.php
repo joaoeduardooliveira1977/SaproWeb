@@ -14,7 +14,7 @@ class Usuario extends Authenticatable
 
     // Laravel espera 'password' para autenticação automática
     protected $fillable = [
-        'pessoa_id', 'login', 'password', 'perfil', 'ativo', 'ultimo_acesso',
+        'pessoa_id', 'nome', 'login', 'email', 'password', 'perfil', 'telefone', 'ativo', 'ultimo_acesso',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -65,7 +65,7 @@ public function username(): string
 
     public function getNomeAttribute(): string
     {
-        return $this->pessoa?->nome ?? $this->login;
+        return $this->attributes['nome'] ?? $this->pessoa?->nome ?? $this->login;
     }
 
     // ── Scope ──────────────────────────────────────

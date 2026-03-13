@@ -11,7 +11,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 Para juntar tudo em um só comando use &&:
 
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
+C:\projetos\saproweb-base
 
 rodar no  Laragon / terminal
 //subir o servidor local
@@ -30,8 +30,7 @@ ssh root@191.252.93.21 "cd /var/www/saproweb && php artisan view:clear && php ar
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
-
-
+Mail::raw('Teste SAPRO', function($m) { $m->to('joaoeduardooliveira1977@gmail.com')->subject('Teste'); });
 
 
 
@@ -64,6 +63,121 @@ cd /var/www/saproweb && git pull && php artisan view:clear && php artisan cache:
 Pronto! Em um comando o servidor fica atualizado! 🚀⚖️
 
 ////////////////////////////////////////////////////////////////////////////////////////////
+
+scp C:\projetos\saproweb-base\database\migrations\2024_01_01_000010_create_honorarios_table.php root@191.252.93.21:/var/www/saproweb/database/migrations/
+
+2024_01_01_000010_create_honorarios_table
+
+
+
+
+{
+  "intimacoes": [
+    {
+      "jornal": {
+        "nomeJornal": "DJENTRT17",
+        "dataTratamento": "2026-03-09T11:22:44.7",
+        "dataDisponibilizacao_Publicacao": "2026-03-10T00:00:00",
+        "totalIntimacoes": 0,
+        ...
+      },
+      "textoPublicacao": "..texto completo da intimação...",
+      "titulo": "TRT17 Diário de Justiça...",
+      "numeroPublicacao": 1903,
+      "numeroUnicoProcesso": "0000269-77.2018.5.17.0012"
+    }
+  ]
+}
+```
+
+**Tenho tudo que preciso para construir o módulo!** 🚀
+
+O prompt para o Claude Code:
+```
+Crie o módulo de Publicações AASP no SAPRO com:
+
+1. MIGRATION: tabela aasp_advogados (id, nome, codigo_aasp, chave_aasp, email, ativo)
+   tabela aasp_publicacoes (id, codigo_aasp, data, jornal, numero_processo, titulo, texto, numero_publicacao, created_at)
+
+2. COMPONENTE Livewire AaspPublicacoes com:
+   - Cadastro de advogados com código AASP e chave individual
+   - Busca manual por data (padrão = hoje)
+   - Botão "Buscar Publicações" que chama a API:
+     GET https://intimacaoapi.aasp.org.br/api/Associado/intimacao/json
+     ?chave={chave_aasp}&data={data}&diferencial=false
+   - Busca todos os advogados cadastrados em sequência
+   - Salva resultados na tabela aasp_publicacoes
+   - Exibe resultado em tabela com: data, advogado, jornal, processo, título
+   - Botão "Gerar Word" que monta documento unificado com todas as publicações do dia
+   - Botão "Enviar por E-mail" que envia o documento para lista de e-mails configurada
+
+3. CONFIG: tabela aasp_config (emails_destino, horario_rotina, ativo)
+
+4. ROTA: /aasp-publicacoes
+
+5. MENU: adicionar item "📰 Publicações AASP" visível só para admin e advogado
+
+Analise o projeto existente antes de criar. Use Http::get() do Laravel para chamar a API.
+
+
+
+
+
+No módulo AASP Publicações, melhore o formato do e-mail HTML e do PDF gerado:
+
+PDF:
+- Capa com nome do escritório, data e total de publicações
+- Publicações agrupadas por advogado (seção com nome do advogado em destaque)
+- Cada publicação numerada com: Jornal, Data disponibilização, Número publicação, 
+  Processo, e texto completo (textoPublicacao)
+- Linha separadora entre publicações
+- Rodapé com "Gerado pelo Sistema Jurídico SAPRO"
+
+E-MAIL HTML:
+- Cabeçalho azul escuro com "Publicações AASP - [data]"
+- Resumo: total de publicações e advogados
+- Publicações agrupadas por advogado com fundo cinza claro no nome
+- Cada publicação em card branco com borda esquerda azul
+- Número do processo em negrito
+- Texto completo da publicação
+- Separador entre publicações
+
+
+
+No módulo AASP Publicações, o campo textoPublicacao vem da API com espaçamentos 
+irregulares e quebras de linha inconsistentes, deixando o texto feio no PDF.
+
+Crie uma função para limpar o texto antes de exibir no PDF e no e-mail:
+1. Substituir múltiplos espaços por espaço único (regex: /\s+/ => ' ')
+2. Remover espaços antes de pontuação (: ; , .)
+3. Preservar quebras de parágrafo (duplo \n vira <br><br> no HTML ou nova linha no PDF)
+4. Trim no início e fim do texto
+
+Aplicar essa limpeza em todo lugar que o textoPublicacao é renderizado 
+(PDF e e-mail HTML).
+
+
+
+
+No módulo AASP Publicações, melhore o formato do e-mail HTML e do PDF gerado:
+
+PDF:
+- Capa com nome do escritório, data e total de publicações
+- Publicações agrupadas por advogado (seção com nome do advogado em destaque)
+- Cada publicação numerada com: Jornal, Data disponibilização, Número publicação, 
+  Processo, e texto completo (textoPublicacao)
+- Linha separadora entre publicações
+- Dar mais espaço nas laterais 
+- Rodapé com "Gerado pelo Sistema Jurídico SAPRO"
+
+E-MAIL HTML:
+- Cabeçalho azul escuro com "Publicações AASP - [data]"
+- Resumo: total de publicações e advogados
+- Publicações agrupadas por advogado com fundo cinza claro no nome
+- Cada publicação em card branco com borda esquerda azul
+- Número do processo em negrito
+- Texto completo da publicação
+- Separador entre publicações
 
 
 
