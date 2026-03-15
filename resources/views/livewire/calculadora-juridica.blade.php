@@ -69,8 +69,8 @@
                     'SELIC'  => 'SELIC — Taxa de Referência do Banco Central',
                     'nenhum' => 'Sem correção monetária',
                 ] as $val => $label)
-                <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid {{ $indiceCorrecao === $val ? '#2563a8' : 'var(--border)' }};border-radius:7px;cursor:pointer;background:{{ $indiceCorrecao === $val ? '#eff6ff' : '#fff' }};font-size:13px;">
-                    <input wire:model.live="indiceCorrecao" type="radio" value="{{ $val }}" style="accent-color:#2563a8;">
+                <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid {{ $indiceCorrecao === $val ? '#2563a8' : 'var(--border)' }};border-radius:7px;cursor:pointer;background:{{ $indiceCorrecao === $val ? '#eff6ff' : '#fff' }};font-size:13px;line-height:1.4;">
+                    <input wire:model.live="indiceCorrecao" type="radio" value="{{ $val }}" style="accent-color:#2563a8;flex-shrink:0;margin:0;width:15px;height:15px;cursor:pointer;">
                     <span>{{ $label }}</span>
                 </label>
                 @endforeach
@@ -82,8 +82,8 @@
             <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">JUROS MORATÓRIOS</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
                 @foreach(['mensal' => '% ao mês (simples)', 'selic' => 'SELIC acumulada', 'nenhum' => 'Sem juros'] as $val => $label)
-                <label style="display:flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid {{ $tipoJuros === $val ? '#2563a8' : 'var(--border)' }};border-radius:20px;cursor:pointer;background:{{ $tipoJuros === $val ? '#eff6ff' : '#fff' }};font-size:12px;font-weight:600;">
-                    <input wire:model.live="tipoJuros" type="radio" value="{{ $val }}" style="accent-color:#2563a8;">
+                <label style="display:flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid {{ $tipoJuros === $val ? '#2563a8' : 'var(--border)' }};border-radius:20px;cursor:pointer;background:{{ $tipoJuros === $val ? '#eff6ff' : '#fff' }};font-size:12px;font-weight:600;line-height:1.4;">
+                    <input wire:model.live="tipoJuros" type="radio" value="{{ $val }}" style="accent-color:#2563a8;flex-shrink:0;margin:0;width:14px;height:14px;cursor:pointer;">
                     {{ $label }}
                 </label>
                 @endforeach
