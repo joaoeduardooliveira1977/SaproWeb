@@ -10,26 +10,22 @@
 
   {{-- Cabeçalho + ação --}}
   <div class="card" style="margin-bottom:16px">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
       <div>
         <div style="font-weight:700;font-size:15px;color:var(--primary)">📈 Índices Monetários</div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px">
           IPCA, IGP-M, SELIC e TR — importados via API do Banco Central do Brasil (SGS/BACEN).
-          Atualização automática todo dia 15.
         </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <select wire:model="siglaFiltro"
-                style="padding:7px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <div class="card-actions">
+        <select wire:model="siglaFiltro">
           <option value="">Todos os índices</option>
           <option value="IPCA">IPCA</option>
           <option value="IGPM">IGP-M</option>
           <option value="SELIC">SELIC</option>
           <option value="TR">TR</option>
         </select>
-        <button wire:click="atualizarTodos"
-                wire:loading.attr="disabled"
-                wire:target="atualizarTodos"
+        <button wire:click="atualizarTodos" wire:loading.attr="disabled" wire:target="atualizarTodos"
                 class="btn btn-primary btn-sm">
           <span wire:loading.remove wire:target="atualizarTodos">🔄 Atualizar agora</span>
           <span wire:loading wire:target="atualizarTodos">Buscando BACEN...</span>
@@ -54,7 +50,7 @@
     </div>
   @else
     {{-- Resumo por sigla --}}
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px">
+    <div class="stat-grid">
       @php
         $corSigla = ['IPCA'=>'#2563eb','IGPM'=>'#7c3aed','SELIC'=>'#16a34a','TR'=>'#d97706'];
       @endphp

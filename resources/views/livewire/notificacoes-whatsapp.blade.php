@@ -22,7 +22,7 @@ TWILIO_CANAL_PADRAO=whatsapp</pre>
   @endif
 
   {{-- KPIs --}}
-  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px">
+  <div class="stat-grid">
     <div class="stat-card" style="border-left-color:#64748b">
       <div class="stat-icon">📊</div>
       <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Total</div>
@@ -71,18 +71,18 @@ TWILIO_CANAL_PADRAO=whatsapp</pre>
 
   {{-- Filtros + Novo --}}
   <div class="card" style="margin-bottom:16px">
-    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-      <select wire:model.live="filtroStatus" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+    <div class="filter-bar">
+      <select wire:model.live="filtroStatus">
         <option value="">Todos os status</option>
         <option value="enviado">Enviado</option>
         <option value="falha">Falha</option>
       </select>
-      <select wire:model.live="filtroCanal" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <select wire:model.live="filtroCanal">
         <option value="">Todos os canais</option>
         <option value="whatsapp">WhatsApp</option>
         <option value="sms">SMS</option>
       </select>
-      <select wire:model.live="filtroTipo" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <select wire:model.live="filtroTipo">
         <option value="">Todos os tipos</option>
         <option value="prazo_fatal">Prazo Fatal</option>
         <option value="prazo_vencendo">Prazo Vencendo</option>
@@ -91,8 +91,7 @@ TWILIO_CANAL_PADRAO=whatsapp</pre>
         <option value="audiencia">Audiência</option>
         <option value="teste">Teste</option>
       </select>
-      <span style="margin-left:auto;font-size:13px;color:var(--muted)">{{ $total }} registro(s)</span>
-      <button wire:click="abrirTeste" class="btn btn-success btn-sm">📲 Enviar Teste</button>
+      <button wire:click="abrirTeste" class="btn btn-success btn-sm" style="flex-shrink:0;margin-left:auto;">📲 Enviar Teste</button>
     </div>
   </div>
 
@@ -107,9 +106,9 @@ TWILIO_CANAL_PADRAO=whatsapp</pre>
             <tr>
               <th>Data</th>
               <th>Canal</th>
-              <th>Tipo</th>
+              <th class="hide-sm">Tipo</th>
               <th>Destinatário</th>
-              <th>Mensagem</th>
+              <th class="hide-sm">Mensagem</th>
               <th style="text-align:center">Status</th>
             </tr>
           </thead>
@@ -126,14 +125,14 @@ TWILIO_CANAL_PADRAO=whatsapp</pre>
                     <span class="badge" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;font-size:11px">📱 SMS</span>
                   @endif
                 </td>
-                <td style="font-size:12px;color:var(--muted)">
+                <td class="hide-sm" style="font-size:12px;color:var(--muted)">
                   {{ str_replace('_', ' ', ucfirst($log->tipo)) }}
                 </td>
                 <td>
                   <div style="font-weight:600;color:var(--text);font-size:13px">{{ $log->destinatario_nome }}</div>
                   <div style="font-size:11px;color:var(--muted);font-family:monospace">{{ $log->destinatario_telefone }}</div>
                 </td>
-                <td style="max-width:250px">
+                <td class="hide-sm" style="max-width:250px">
                   <div style="font-size:12px;color:var(--muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:pre-wrap">{{ $log->mensagem }}</div>
                   @if($log->erro)
                     <div style="font-size:11px;color:#dc2626;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ $log->erro }}">
@@ -153,9 +152,7 @@ TWILIO_CANAL_PADRAO=whatsapp</pre>
           </tbody>
         </table>
       </div>
-      @if($logs->hasPages())
-        <div class="pagination">{{ $logs->links() }}</div>
-      @endif
+      <div class="pagination-bar" style="padding:12px 16px;">{{ $logs->links() }}</div>
     @endif
   </div>
 

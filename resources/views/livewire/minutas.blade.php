@@ -1,11 +1,10 @@
 <div>
 
     {{-- ── Header ── --}}
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-        <input type="text" wire:model.live.debounce.300ms="busca" placeholder="🔍 Buscar template..."
-            style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;width:280px;">
+    <div class="filter-bar" style="margin-bottom:20px;">
+        <input type="text" wire:model.live.debounce.300ms="busca" placeholder="🔍 Buscar template...">
         @if(!$mostrarForm)
-        <button wire:click="novo" class="btn btn-primary btn-sm">+ Novo Template</button>
+        <button wire:click="novo" class="btn btn-primary btn-sm" style="flex-shrink:0;margin-left:auto;">+ Novo Template</button>
         @endif
     </div>
 
@@ -17,7 +16,7 @@
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;padding:4px 0;">
 
-            <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;">
+            <div class="form-grid" style="grid-template-columns:1fr auto;align-items:start;">
                 <div>
                     <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px;">Título *</label>
                     <input type="text" wire:model="titulo" placeholder="Nome do template"
