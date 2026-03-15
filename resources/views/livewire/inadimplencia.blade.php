@@ -45,6 +45,11 @@
         <option value="valor_asc">Menor valor primeiro</option>
         <option value="nome_asc">Nome (A–Z)</option>
       </select>
+      <button wire:click="exportarCsv" wire:loading.attr="disabled"
+          class="btn btn-sm btn-secondary-outline" title="Exportar CSV">
+          <span wire:loading.remove wire:target="exportarCsv">📥 CSV</span>
+          <span wire:loading wire:target="exportarCsv">Gerando…</span>
+      </button>
     </div>
   </div>
 

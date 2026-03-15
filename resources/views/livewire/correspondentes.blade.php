@@ -52,6 +52,11 @@
           <option value="{{ $adv->id }}">{{ $adv->nome }}</option>
         @endforeach
       </select>
+      <button wire:click="exportarCsv" wire:loading.attr="disabled"
+          class="btn btn-sm btn-secondary-outline" title="Exportar CSV">
+          <span wire:loading.remove wire:target="exportarCsv">📥 CSV</span>
+          <span wire:loading wire:target="exportarCsv">Gerando…</span>
+      </button>
       <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="flex-shrink:0;">＋ Nova Correspondência</button>
     </div>
   </div>

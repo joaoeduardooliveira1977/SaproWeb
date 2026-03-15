@@ -208,6 +208,57 @@ class Inadimplencia extends Component
         $this->dispatch('toast', message: 'Pagamento registrado com sucesso.', type: 'success');
     }
 
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $where = "WHERE hp.status = 'atrasado'";
+        $params = [];
+
+        if ($this->filtroCliente) {
+            $where .= " AND p.nome ILIKE ?";
+            $params[] = "%{$this->filtroCliente}%";
+        }
+        if ($this->filtroStatus === 'atrasado') {
+            $where .= " AND (CURRENT_DATE - hp.vencimento) BETWEEN 1 AND 15";
+        } elseif ($this->filtroStatus === 'em_cobranca') {
+            $where .= " AND (CURRENT_DATE - hp.vencimento) BETWEEN 16 AND 30";
+        } elseif ($this->filtroStatus === 'inadimplente') {
+            $where .= " AND (CURRENT_DATE - hp.vencimento) > 30";
+        }
+
+        $rows = \Illuminate\Support\Facades\DB::select("
+            SELECT
+                p.nome AS cliente_nome, p.email AS cliente_email, p.celular AS cliente_celular,
+                COUNT(hp.id) AS qtd_parcelas,
+                COALESCE(SUM(hp.valor), 0) AS total_devido,
+                MAX(CURRENT_DATE - hp.vencimento) AS max_dias,
+                MIN(hp.vencimento) AS primeira_vencimento
+            FROM honorario_parcelas hp
+            JOIN honorarios h ON h.id = hp.honorario_id
+            JOIN pessoas p ON p.id = h.cliente_id
+            {$where}
+            GROUP BY p.id, p.nome, p.email, p.celular
+            ORDER BY max_dias DESC
+        ", $params);
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputs($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Cliente','E-mail','Celular','Parcelas em Atraso','Total Devido','Maior Atraso (dias)','Primeira Vencimento'], ';');
+            foreach ($rows as $r) {
+                fputcsv($out, [
+                    $r->cliente_nome,
+                    $r->cliente_email ?? '',
+                    $r->cliente_celular ?? '',
+                    $r->qtd_parcelas,
+                    number_format($r->total_devido, 2, ',', '.'),
+                    $r->max_dias,
+                    $r->primeira_vencimento ? \Carbon\Carbon::parse($r->primeira_vencimento)->format('d/m/Y') : '',
+                ], ';');
+            }
+            fclose($out);
+        }, 'inadimplencia-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     // ── Render ────────────────────────────────────────────────
 
     public function render()

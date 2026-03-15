@@ -179,6 +179,43 @@ class Audiencias extends Component
         $this->resetErrorBag();
     }
 
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $rows = \App\Models\Audiencia::with(['processo.cliente', 'juiz', 'advogado'])
+            ->when($this->filtroStatus,   fn($q) => $q->where('status', $this->filtroStatus))
+            ->when($this->filtroTipo,     fn($q) => $q->where('tipo', $this->filtroTipo))
+            ->when($this->filtroProcesso, fn($q) => $q->where('processo_id', $this->filtroProcesso))
+            ->when($this->filtroBusca,    fn($q) => $q->whereHas('processo', fn($p) =>
+                $p->where('numero', 'ilike', "%{$this->filtroBusca}%")
+                  ->orWhereHas('cliente', fn($c) => $c->where('nome', 'ilike', "%{$this->filtroBusca}%"))
+            ))
+            ->when($this->filtroDataIni,  fn($q) => $q->whereDate('data_hora', '>=', $this->filtroDataIni))
+            ->when($this->filtroDataFim,  fn($q) => $q->whereDate('data_hora', '<=', $this->filtroDataFim))
+            ->orderByDesc('data_hora')
+            ->get();
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputs($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Processo','Cliente','Data/Hora','Tipo','Status','Local','Sala','Juiz','Advogado','Observações'], ';');
+            foreach ($rows as $a) {
+                fputcsv($out, [
+                    $a->processo?->numero ?? '',
+                    $a->processo?->cliente?->nome ?? '',
+                    $a->data_hora?->format('d/m/Y H:i') ?? '',
+                    $a->tipo,
+                    $a->status,
+                    $a->local ?? '',
+                    $a->sala ?? '',
+                    $a->juiz?->nome ?? '',
+                    $a->advogado?->nome ?? '',
+                    $a->observacoes ?? '',
+                ], ';');
+            }
+            fclose($out);
+        }, 'audiencias-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     // ── Render ───────────────────────────────────────────────
 
     public function render()

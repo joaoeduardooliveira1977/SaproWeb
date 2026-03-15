@@ -306,6 +306,65 @@ class Honorarios extends Component
         $this->dispatch('toast', message: 'Honorário excluído.', type: 'success');
     }
 
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $where = "WHERE 1=1";
+        $params = [];
+
+        if ($this->busca) {
+            $where .= " AND (p.nome ILIKE ? OR h.descricao ILIKE ?)";
+            $params[] = "%{$this->busca}%";
+            $params[] = "%{$this->busca}%";
+        }
+        if ($this->filtroStatus) {
+            $where .= " AND h.status = ?";
+            $params[] = $this->filtroStatus;
+        }
+        if ($this->filtroTipo) {
+            $where .= " AND h.tipo = ?";
+            $params[] = $this->filtroTipo;
+        }
+
+        $rows = \Illuminate\Support\Facades\DB::select("
+            SELECT h.tipo, h.descricao, h.status,
+                p.nome as cliente_nome,
+                pr.numero as processo_numero,
+                COUNT(hp.id) as total_parcelas_count,
+                SUM(CASE WHEN hp.status = 'pago' THEN 1 ELSE 0 END) as parcelas_pagas,
+                COALESCE(SUM(hp.valor), 0) as valor_total,
+                COALESCE(SUM(CASE WHEN hp.status = 'pago' THEN hp.valor_pago ELSE 0 END), 0) as valor_recebido,
+                COALESCE(SUM(CASE WHEN hp.status IN ('pendente','atrasado') THEN hp.valor ELSE 0 END), 0) as valor_pendente
+            FROM honorarios h
+            JOIN pessoas p ON p.id = h.cliente_id
+            LEFT JOIN processos pr ON pr.id = h.processo_id
+            LEFT JOIN honorario_parcelas hp ON hp.honorario_id = h.id
+            {$where}
+            GROUP BY h.id, h.tipo, h.descricao, h.status, p.nome, pr.numero
+            ORDER BY h.created_at DESC
+        ", $params);
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputs($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Cliente','Processo','Tipo','Descrição','Status','Parcelas','Pagas','Valor Total','Recebido','Pendente'], ';');
+            foreach ($rows as $r) {
+                fputcsv($out, [
+                    $r->cliente_nome,
+                    $r->processo_numero ?? '',
+                    $r->tipo,
+                    $r->descricao,
+                    $r->status,
+                    $r->total_parcelas_count,
+                    $r->parcelas_pagas,
+                    number_format($r->valor_total, 2, ',', '.'),
+                    number_format($r->valor_recebido, 2, ',', '.'),
+                    number_format($r->valor_pendente, 2, ',', '.'),
+                ], ';');
+            }
+            fclose($out);
+        }, 'honorarios-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function render()
     {
         // Resumo financeiro

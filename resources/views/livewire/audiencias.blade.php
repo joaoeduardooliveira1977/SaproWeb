@@ -39,6 +39,11 @@
         </select>
         <input wire:model.live="filtroDataIni" type="date" title="De">
         <input wire:model.live="filtroDataFim" type="date" title="Até">
+        <button wire:click="exportarCsv" wire:loading.attr="disabled"
+            class="btn btn-sm btn-secondary-outline" title="Exportar CSV">
+            <span wire:loading.remove wire:target="exportarCsv">📥 CSV</span>
+            <span wire:loading wire:target="exportarCsv">Gerando…</span>
+        </button>
         <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="flex-shrink:0;">+ Nova Audiência</button>
     </div>
 </div>

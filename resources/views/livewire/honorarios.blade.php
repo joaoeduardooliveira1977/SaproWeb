@@ -38,6 +38,11 @@
             <option value="encerrado">Encerrado</option>
             <option value="suspenso">Suspenso</option>
         </select>
+        <button wire:click="exportarCsv" wire:loading.attr="disabled"
+            class="btn btn-sm btn-secondary-outline" title="Exportar CSV">
+            <span wire:loading.remove wire:target="exportarCsv">📥 CSV</span>
+            <span wire:loading wire:target="exportarCsv">Gerando…</span>
+        </button>
         <button wire:click="novoHonorario" class="btn btn-primary" style="flex-shrink:0;">+ Novo Honorário</button>
     </div>
 </div>

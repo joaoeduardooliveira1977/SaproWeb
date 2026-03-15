@@ -191,6 +191,51 @@ class Correspondentes extends Component
         $this->resetErrorBag();
     }
 
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $rows = \App\Models\Correspondente::with(['processo.cliente', 'advogado'])
+            ->when($this->filtroStatus,   fn($q) => $q->where('status', $this->filtroStatus))
+            ->when($this->filtroTipo,     fn($q) => $q->where('tipo', $this->filtroTipo))
+            ->when($this->filtroAdvogado, fn($q) => $q->where('advogado_id', $this->filtroAdvogado))
+            ->when($this->filtroBusca, fn($q) =>
+                $q->where(fn($s) =>
+                    $s->where('comarca', 'ilike', "%{$this->filtroBusca}%")
+                      ->orWhere('descricao', 'ilike', "%{$this->filtroBusca}%")
+                      ->orWhereHas('advogado', fn($a) =>
+                          $a->where('nome', 'ilike', "%{$this->filtroBusca}%")
+                      )
+                      ->orWhereHas('processo', fn($p) =>
+                          $p->where('numero', 'ilike', "%{$this->filtroBusca}%")
+                      )
+                )
+            )
+            ->orderBy('data_prazo')
+            ->get();
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputs($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Processo','Cliente','Advogado','Tipo','Comarca','Estado','Status','Descrição','Data Solicitação','Data Prazo','Valor Combinado','Valor Pago'], ';');
+            foreach ($rows as $c) {
+                fputcsv($out, [
+                    $c->processo?->numero ?? '',
+                    $c->processo?->cliente?->nome ?? '',
+                    $c->advogado?->nome ?? '',
+                    $c->tipo,
+                    $c->comarca ?? '',
+                    $c->estado ?? '',
+                    $c->status,
+                    $c->descricao ?? '',
+                    $c->data_solicitacao?->format('d/m/Y') ?? '',
+                    $c->data_prazo?->format('d/m/Y') ?? '',
+                    $c->valor_combinado ? number_format($c->valor_combinado, 2, ',', '.') : '',
+                    $c->valor_pago ? number_format($c->valor_pago, 2, ',', '.') : '',
+                ], ';');
+            }
+            fclose($out);
+        }, 'correspondentes-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     // ── Render ────────────────────────────────────────────────
 
     public function render()
