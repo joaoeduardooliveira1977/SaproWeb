@@ -170,6 +170,49 @@
             .content { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
         }
 
+        /* ── Stat Grid (auto-fit) ── */
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 20px; }
+
+        /* ── Card Actions ── */
+        .card-header { flex-wrap: wrap; gap: 8px; }
+        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+        /* ── Action buttons in tables ── */
+        .btn-actions { display: inline-flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+        .btn-action {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 30px; height: 30px; border-radius: 6px; text-decoration: none;
+            font-size: 15px; border: 1px solid transparent; cursor: pointer;
+            background: none; transition: filter .15s;
+        }
+        .btn-action:hover { filter: brightness(.9); }
+        .btn-action-blue   { background: #eff6ff; border-color: #bfdbfe; color: #2563a8; }
+        .btn-action-green  { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
+        .btn-action-purple { background: #faf5ff; border-color: #e9d5ff; color: #7c3aed; }
+        .btn-action-yellow { background: #fffbeb; border-color: #fde68a; color: #d97706; }
+        .btn-action-red    { background: #fff1f2; border-color: #fecdd3; color: #e11d48; }
+
+        /* ── Pagination Bar ── */
+        .pagination-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 12px 0; gap: 8px; font-size: 13px; color: var(--muted); }
+        .page-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        .page-btn { padding: 6px 12px; background: var(--white); color: var(--primary); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; cursor: pointer; transition: background .15s; }
+        .page-btn:hover:not(:disabled) { background: #eff6ff; }
+        .page-btn:disabled { background: #f1f5f9; color: #94a3b8; cursor: default; }
+        .page-current { padding: 6px 12px; background: #f1f5f9; border-radius: 6px; font-size: 12px; color: var(--text); }
+
+        /* ── Btn secondary outline ── */
+        .btn-secondary-outline { background: #f1f5f9; color: #475569; border: 1.5px solid var(--border); }
+
+        /* ── Filter Bar ── */
+        .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+        .filter-bar input, .filter-bar select { padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 7px; font-size: 13px; flex: 1; min-width: 120px; max-width: 220px; }
+        .filter-bar input[type=text] { flex: 2; min-width: 160px; }
+        .filter-bar .filter-actions { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+
+        /* ── Responsive visibility ── */
+        .hide-sm { display: table-cell; }
+        .hide-xs { display: table-cell; }
+
         /* ── Utilities ── */
         .text-primary { color: var(--primary-light); font-weight: 600; }
         .mb-4 { margin-bottom: 16px; }
@@ -195,11 +238,19 @@
             .search-bar { flex-direction: column; }
             .search-bar select { width: 100%; }
             .modal { padding: 20px; border-radius: 0; width: 100%; max-width: 100vw; height: 100vh; max-height: 100vh; }
+            .hide-sm { display: none !important; }
+            .filter-bar input, .filter-bar select { max-width: 100%; }
+            .filter-bar .filter-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
+            .topbar > div[style*="max-width:440px"] { max-width: 200px; }
         }
         @media (max-width: 480px) {
             .grid-3 { grid-template-columns: 1fr; }
             .topbar-title { font-size: 14px; }
             .card { padding: 14px; }
+            .hide-xs { display: none !important; }
+            .btn-action { width: 28px; height: 28px; font-size: 13px; }
+            .stat-grid { grid-template-columns: 1fr 1fr; }
+            .topbar > div[style*="max-width:440px"] { display: none; }
         }
     </style>
 </head>

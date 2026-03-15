@@ -173,7 +173,7 @@
   {{-- ─── Modal Nova Solicitação ──────────────────────────── --}}
   @if($modalAberto)
   <div class="modal-backdrop" wire:click.self="fecharModal">
-    <div class="modal" style="width:640px;max-height:90vh;overflow-y:auto">
+    <div class="modal" style="max-width:640px;max-height:90vh;overflow-y:auto">
       <div class="modal-header">
         <span class="modal-title">✍️ Nova Solicitação de Assinatura</span>
         <button wire:click="fecharModal" class="modal-close">×</button>
@@ -303,7 +303,7 @@
   {{-- ─── Modal Detalhe ────────────────────────────────────── --}}
   @if($modalDetalhe && $detalhe)
   <div class="modal-backdrop" wire:click.self="$set('modalDetalhe', false)">
-    <div class="modal" style="width:520px;max-height:85vh;overflow-y:auto">
+    <div class="modal" style="max-width:520px;max-height:85vh;overflow-y:auto">
       <div class="modal-header">
         <span class="modal-title">🔍 {{ $detalhe->titulo }}</span>
         <button wire:click="$set('modalDetalhe', false)" class="modal-close">×</button>

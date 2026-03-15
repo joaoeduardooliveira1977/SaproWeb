@@ -159,7 +159,7 @@
     {{-- ── Modal Salvar Apontamento ── --}}
     @if($modalAberto)
     <div class="modal-backdrop" wire:click.self="fecharModal">
-        <div class="modal" style="width:480px;">
+        <div class="modal" style="max-width:480px;">
             <div class="modal-header">
                 <span class="modal-title">
                     {{ $editandoId ? '✏️ Editar Apontamento' : '⏱️ Salvar Apontamento' }}

@@ -163,7 +163,7 @@ TWILIO_CANAL_PADRAO=whatsapp</pre>
   {{-- ─── Modal Teste ─────────────────────────────────────── --}}
   @if($modalTeste)
   <div class="modal-backdrop" wire:click.self="$set('modalTeste', false)">
-    <div class="modal" style="width:460px">
+    <div class="modal" style="max-width:460px">
       <div class="modal-header">
         <span class="modal-title">📲 Enviar Mensagem de Teste</span>
         <button wire:click="$set('modalTeste', false)" class="modal-close">×</button>

@@ -22,7 +22,8 @@
     .dias-perdido  { background:#1e293b;color:#fff; }
 
     .filtros-bar { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center; }
-    .filtros-bar select, .filtros-bar input { padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px; }
+    .filtros-bar select, .filtros-bar input { padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;min-width:120px;flex:1; }
+    @media(max-width:768px){.filtros-bar select,.filtros-bar input{max-width:100%;}.filtros-bar .filter-actions{margin-left:0!important;width:100%;justify-content:flex-end;display:flex;}}
 </style>
 
 {{-- Flash --}}
@@ -31,7 +32,7 @@
 @endif
 
 {{-- ══ KPIs ══ --}}
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">
+<div class="stat-grid">
     <div class="stat-card" style="border-left-color:var(--primary);">
         <div class="stat-icon">⏳</div>
         <div class="stat-val">{{ $totalAbertos }}</div>
@@ -73,14 +74,14 @@
         @endforeach
     </select>
 
-    <select wire:model.live="filtroResponsavel" style="min-width:180px;">
+    <select wire:model.live="filtroResponsavel">
         <option value="">Todos os responsáveis</option>
         @foreach($usuarios as $u)
             <option value="{{ $u->id }}">{{ $u->nome }}</option>
         @endforeach
     </select>
 
-    <select wire:model.live="filtroProcesso" style="min-width:220px;">
+    <select wire:model.live="filtroProcesso">
         <option value="">Todos os processos</option>
         @foreach($processos as $p)
             <option value="{{ $p->id }}">{{ $p->numero }} — {{ $p->cliente?->nome ?? '—' }}</option>
@@ -90,13 +91,13 @@
     <input type="date" wire:model.live="filtroDataIni" title="Prazo a partir de">
     <input type="date" wire:model.live="filtroDataFim" title="Prazo até">
 
-    <div style="display:flex;gap:6px;margin-left:auto;">
-        <button class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1.5px solid var(--border);"
+    <div class="filter-actions" style="margin-left:auto;">
+        <button class="btn btn-sm btn-secondary-outline"
                 wire:click="exportarPdf" wire:loading.attr="disabled" title="Exportar PDF">
             <span wire:loading.remove wire:target="exportarPdf">📄 PDF</span>
             <span wire:loading wire:target="exportarPdf">Gerando…</span>
         </button>
-        <button class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1.5px solid var(--border);"
+        <button class="btn btn-sm btn-secondary-outline"
                 wire:click="exportarCsv" wire:loading.attr="disabled" title="Exportar CSV">
             <span wire:loading.remove wire:target="exportarCsv">📥 CSV</span>
             <span wire:loading wire:target="exportarCsv">Gerando…</span>

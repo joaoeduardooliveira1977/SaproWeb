@@ -2,9 +2,9 @@
     <div class="card">
         <div class="card-header">
             <span class="card-title">👥 Pessoas Cadastradas</span>
-            <div style="display:flex;gap:8px;">
+            <div class="card-actions">
                 <button wire:click="exportarCsv" wire:loading.attr="disabled"
-                    class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1.5px solid var(--border);" title="Exportar CSV">
+                    class="btn btn-sm btn-secondary-outline" title="Exportar CSV">
                     <span wire:loading.remove wire:target="exportarCsv">📥 CSV</span>
                     <span wire:loading wire:target="exportarCsv">Gerando…</span>
                 </button>
@@ -14,7 +14,7 @@
 
         <div class="search-bar">
             <input type="text" wire:model.live.debounce.300ms="busca" placeholder="Buscar por nome, CPF, e-mail...">
-            <select wire:model.live="tipo" style="width:180px">
+            <select wire:model.live="tipo">
                 <option value="">Todos os tipos</option>
                 @foreach($tiposDisponiveis as $t)
                     <option value="{{ $t }}">{{ $t }}</option>
@@ -25,13 +25,20 @@
         <div class="table-wrap">
             <table>
                 <thead>
-                    <tr><th>Nome</th><th>CPF/CNPJ</th><th>Tipos</th><th>Telefone</th><th>Email</th><th>Ações</th></tr>
+                    <tr>
+                        <th>Nome</th>
+                        <th class="hide-sm">CPF/CNPJ</th>
+                        <th>Tipos</th>
+                        <th class="hide-sm">Telefone</th>
+                        <th class="hide-sm">Email</th>
+                        <th>Ações</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @forelse($pessoas as $p)
                     <tr>
                         <td><strong>{{ $p->nome }}</strong></td>
-                        <td>{{ $p->cpf_cnpj ?? '—' }}</td>
+                        <td class="hide-sm">{{ $p->cpf_cnpj ?? '—' }}</td>
                         <td>
                             @foreach($tiposPorPessoa->get($p->id, []) as $tipo)
                             @php
@@ -46,8 +53,8 @@
                             <span class="badge" style="color:{{ $corTipo[0] }};background:{{ $corTipo[1] }};margin-right:3px">{{ $tipo }}</span>
                             @endforeach
                         </td>
-                        <td>{{ $p->telefone ?? $p->celular ?? '—' }}</td>
-                        <td>{{ $p->email ?? '—' }}</td>
+                        <td class="hide-sm">{{ $p->telefone ?? $p->celular ?? '—' }}</td>
+                        <td class="hide-sm">{{ $p->email ?? '—' }}</td>
                         <td>
                             <button wire:click="abrirModal({{ $p->id }})" class="btn-icon" title="Editar">✏️</button>
                             <button wire:click="desativar({{ $p->id }})" class="btn-icon" title="Desativar" onclick="return confirm('Desativar {{ addslashes($p->nome) }}?')">🗑️</button>
@@ -60,30 +67,13 @@
             </table>
         </div>
 
-        <div class="pagination">
-            
-            
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; font-size:13px; color:#64748b;">
-    <span>Mostrando {{ $pessoas->firstItem() }} a {{ $pessoas->lastItem() }} de {{ $pessoas->total() }} pessoas</span>
-    <div style="display:flex; gap:8px;">
-        @if($pessoas->onFirstPage())
-            <span style="padding:6px 12px; background:#f1f5f9; border-radius:6px; color:#94a3b8;">← Anterior</span>
-        @else
-            <button wire:click="previousPage" style="padding:6px 12px; background:#2563a8; color:white; border:none; border-radius:6px; cursor:pointer;">← Anterior</button>
-        @endif
-        <span style="padding:6px 12px; background:#f1f5f9; border-radius:6px;">
-            {{ $pessoas->currentPage() }} / {{ $pessoas->lastPage() }}
-        </span>
-        @if($pessoas->hasMorePages())
-            <button wire:click="nextPage" style="padding:6px 12px; background:#2563a8; color:white; border:none; border-radius:6px; cursor:pointer;">Próxima →</button>
-        @else
-            <span style="padding:6px 12px; background:#f1f5f9; border-radius:6px; color:#94a3b8;">Próxima →</span>
-        @endif
-    </div>
-</div>
-        
-        
-        
+        <div class="pagination-bar">
+            <span>Mostrando {{ $pessoas->firstItem() }}–{{ $pessoas->lastItem() }} de {{ $pessoas->total() }}</span>
+            <div class="page-btns">
+                <button wire:click="previousPage" class="page-btn" @disabled($pessoas->onFirstPage())>← Anterior</button>
+                <span class="page-current">{{ $pessoas->currentPage() }} / {{ $pessoas->lastPage() }}</span>
+                <button wire:click="nextPage" class="page-btn" @disabled(!$pessoas->hasMorePages())>Próxima →</button>
+            </div>
         </div>
 
         <div style="margin-top:12px;padding:10px 14px;background:#f0f9ff;border-radius:8px;font-size:12px;color:#64748b;border:1px solid #bae6fd">

@@ -192,7 +192,7 @@
     {{-- ══ Modal ══ --}}
     @if($modalAberto)
     <div class="modal-backdrop" wire:click.self="fecharModal">
-        <div class="modal" style="width:560px">
+        <div class="modal" style="max-width:560px">
             <div class="modal-header">
                 <span class="modal-title">
                     {{ $registroId ? '✏️ Editar' : '＋ Novo' }}

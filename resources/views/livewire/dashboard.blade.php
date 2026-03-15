@@ -1,6 +1,6 @@
 <div>
     {{-- ── Stat Cards ── --}}
-    <div class="grid-3 mb-4">
+    <div class="stat-grid">
         @php
         $cards = [
             ['icon'=>'⚖️', 'label'=>'Processos Ativos',       'val'=>$stats['processos_ativos'],                                          'cor'=>'#2563a8'],

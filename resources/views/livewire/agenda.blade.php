@@ -2,50 +2,50 @@
     <div class="card">
         <div class="card-header">
             <span class="card-title">📅 Agenda</span>
-            <div style="display:flex;gap:8px;">
+            <div class="card-actions">
                 {{-- Toggle vista --}}
                 <div style="display:flex;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;">
                     <button wire:click="{{ $vistaCalendario ? 'toggleVista' : '' }}"
                         style="padding:5px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;
-                               background:{{ !$vistaCalendario ? '#1a3a5c' : 'transparent' }};
+                               background:{{ !$vistaCalendario ? 'var(--primary)' : 'transparent' }};
                                color:{{ !$vistaCalendario ? '#fff' : 'var(--muted)' }};">
                         ☰ Lista
                     </button>
                     <button wire:click="{{ !$vistaCalendario ? 'toggleVista' : '' }}"
                         style="padding:5px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;
-                               background:{{ $vistaCalendario ? '#1a3a5c' : 'transparent' }};
+                               background:{{ $vistaCalendario ? 'var(--primary)' : 'transparent' }};
                                color:{{ $vistaCalendario ? '#fff' : 'var(--muted)' }};">
-                        📅 Calendário
+                        📅 Cal.
                     </button>
                 </div>
                 <button wire:click="exportarCsv" wire:loading.attr="disabled"
-                    class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1.5px solid var(--border);" title="Exportar CSV">
+                    class="btn btn-sm btn-secondary-outline hide-xs" title="Exportar CSV">
                     <span wire:loading.remove wire:target="exportarCsv">📥 CSV</span>
                     <span wire:loading wire:target="exportarCsv">Gerando…</span>
                 </button>
-                <button wire:click="abrirModal()" class="btn btn-primary btn-sm">＋ Novo Evento</button>
+                <button wire:click="abrirModal()" class="btn btn-primary btn-sm">＋ Novo</button>
             </div>
         </div>
 
         {{-- Filtros --}}
-        <div class="search-bar" style="flex-wrap:wrap">
+        <div class="filter-bar">
             @if(!$vistaCalendario)
-            <input type="date" wire:model.live="data_ini" style="width:150px">
-            <input type="date" wire:model.live="data_fim" style="width:150px">
+            <input type="date" wire:model.live="data_ini">
+            <input type="date" wire:model.live="data_fim">
             @endif
-            <select wire:model.live="tipo" style="width:140px">
+            <select wire:model.live="tipo">
                 <option value="">Todos os tipos</option>
                 @foreach(['Audiência','Prazo','Reunião','Consulta','Despacho','Outros'] as $t)
                     <option value="{{ $t }}">{{ $t }}</option>
                 @endforeach
             </select>
-            <select wire:model.live="responsavel_id" style="width:160px">
+            <select wire:model.live="responsavel_id">
                 <option value="">Todos os resp.</option>
                 @foreach($responsaveis as $r)
                     <option value="{{ $r->id }}">{{ $r->nome }}</option>
                 @endforeach
             </select>
-            <label style="display:flex;align-items:center;gap:6px;font-size:13px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;flex-shrink:0;">
                 <input type="checkbox" wire:model.live="so_pendentes" style="width:auto"> Só pendentes
             </label>
         </div>
@@ -231,7 +231,7 @@
     {{-- ── Modal ── --}}
     @if($modalAberto)
     <div class="modal-backdrop" wire:click.self="fecharModal">
-        <div class="modal" style="width:520px">
+        <div class="modal" style="max-width:520px">
             <div class="modal-header">
                 <span class="modal-title">{{ $eventoId ? '✏️ Editar Evento' : '📅 Novo Evento' }}</span>
                 <button wire:click="fecharModal" class="modal-close">×</button>

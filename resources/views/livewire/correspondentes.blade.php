@@ -183,7 +183,7 @@
   {{-- ─── Modal Principal ──────────────────────────────────── --}}
   @if($modalAberto)
   <div class="modal-backdrop" wire:click.self="fecharModal">
-    <div class="modal" style="width:620px;max-height:90vh;overflow-y:auto">
+    <div class="modal" style="max-width:620px;max-height:90vh;overflow-y:auto">
       <div class="modal-header">
         <span class="modal-title">
           {{ $correspondente_id ? '✏️ Editar Correspondência' : '＋ Nova Correspondência' }}
@@ -301,7 +301,7 @@
   {{-- ─── Modal Avançar Status ─────────────────────────────── --}}
   @if($modalAvancar)
   <div class="modal-backdrop" wire:click.self="$set('modalAvancar', false)">
-    <div class="modal" style="width:380px">
+    <div class="modal" style="max-width:380px">
       @php $labelProximo = \App\Models\Correspondente::statusLabel()[$avancarStatus] ?? $avancarStatus; @endphp
       <div class="modal-header">
         <span class="modal-title">Marcar como {{ $labelProximo }}</span>

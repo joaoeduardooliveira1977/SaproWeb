@@ -187,7 +187,7 @@
   {{-- ─── Modal Registrar Contato ─────────────────────────── --}}
   @if($modalContato)
   <div class="modal-backdrop" wire:click.self="$set('modalContato', false)">
-    <div class="modal" style="width:500px">
+    <div class="modal" style="max-width:500px">
       <div class="modal-header">
         <span class="modal-title">📝 Registrar Tentativa de Contato</span>
         <button wire:click="$set('modalContato', false)" class="modal-close">×</button>
@@ -234,7 +234,7 @@
   {{-- ─── Modal Enviar E-mail ─────────────────────────────── --}}
   @if($modalEmail)
   <div class="modal-backdrop" wire:click.self="$set('modalEmail', false)">
-    <div class="modal" style="width:460px">
+    <div class="modal" style="max-width:460px">
       <div class="modal-header">
         <span class="modal-title">✉️ Enviar E-mail de Cobrança</span>
         <button wire:click="$set('modalEmail', false)" class="modal-close">×</button>
@@ -279,7 +279,7 @@
   {{-- ─── Modal Pagamento Rápido ─────────────────────────── --}}
   @if($modalPagamento)
   <div class="modal-backdrop" wire:click.self="$set('modalPagamento', false)">
-    <div class="modal" style="width:400px">
+    <div class="modal" style="max-width:400px">
       <div class="modal-header">
         <span class="modal-title">💰 Registrar Pagamento</span>
         <button wire:click="$set('modalPagamento', false)" class="modal-close">×</button>
