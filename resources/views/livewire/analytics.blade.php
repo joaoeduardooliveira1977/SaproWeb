@@ -14,7 +14,7 @@
 </style>
 
 {{-- ══ KPIs ══ --}}
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;">
+<div class="stat-grid">
     <div class="stat-card" style="border-left-color:var(--primary);">
         <div class="stat-icon">⚖️</div>
         <div class="stat-val">{{ $kpis['processos_ativos'] }}</div>

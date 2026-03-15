@@ -1,6 +1,6 @@
 <div>
 <style>
-    .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid var(--border); overflow-x: auto; }
     .tab-btn {
         padding: 9px 20px; font-size: 13px; font-weight: 600; cursor: pointer;
         background: none; border: none; border-bottom: 3px solid transparent;
@@ -140,8 +140,8 @@
                         <tr>
                             <th>Data</th>
                             <th>Advogado</th>
-                            <th>Jornal</th>
-                            <th>Processo</th>
+                            <th class="hide-sm">Jornal</th>
+                            <th class="hide-sm">Processo</th>
                             <th>Título / Texto</th>
                         </tr>
                     </thead>
@@ -155,8 +155,8 @@
                                     {{ $pub->data ? $pub->data->format('d/m/Y') : '—' }}
                                 </td>
                                 <td>{{ $nomeAdv }}</td>
-                                <td style="font-size:11px;">{{ $pub->jornal ?: '—' }}</td>
-                                <td style="font-family:monospace;font-size:11px;white-space:nowrap;">
+                                <td class="hide-sm" style="font-size:11px;">{{ $pub->jornal ?: '—' }}</td>
+                                <td class="hide-sm" style="font-family:monospace;font-size:11px;white-space:nowrap;">
                                     {{ $pub->numero_processo ?: '—' }}
                                 </td>
                                 <td>
@@ -203,22 +203,22 @@
                     <thead>
                         <tr>
                             <th>Nome</th>
-                            <th>Código AASP</th>
-                            <th>Chave AASP</th>
-                            <th>E-mail</th>
+                            <th class="hide-sm">Código AASP</th>
+                            <th class="hide-sm">Chave AASP</th>
+                            <th class="hide-sm">E-mail</th>
                             <th>Status</th>
-                            <th style="width:80px;">Ações</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($advogados as $adv)
                             <tr>
                                 <td>{{ $adv->nome }}</td>
-                                <td class="chave-col">{{ $adv->codigo_aasp }}</td>
-                                <td class="chave-col">
+                                <td class="chave-col hide-sm">{{ $adv->codigo_aasp }}</td>
+                                <td class="chave-col hide-sm">
                                     {{ substr($adv->chave_aasp, 0, 6) }}••••••••
                                 </td>
-                                <td style="font-size:12px;">{{ $adv->email ?: '—' }}</td>
+                                <td class="hide-sm" style="font-size:12px;">{{ $adv->email ?: '—' }}</td>
                                 <td>
                                     @if($adv->ativo)
                                         <span class="pill-ativo">Ativo</span>
