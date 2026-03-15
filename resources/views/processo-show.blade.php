@@ -28,7 +28,7 @@
                 @if($processo->vara) &nbsp;&middot;&nbsp; {{ $processo->vara }} @endif
             </p>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="card-actions">
             @if($processo->tjsp_ultima_consulta)
                 <span style="font-size:11px;color:var(--muted)">
                     🏛️ DATAJUD: {{ \Carbon\Carbon::parse($processo->tjsp_ultima_consulta)->format('d/m/Y H:i') }}
@@ -41,7 +41,7 @@
     </div>
 
     {{-- ── Abas ── --}}
-    <div style="display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:20px;overflow-x:auto;">
+    <div style="display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:20px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
         @php
         $totalTarefas = \Illuminate\Support\Facades\DB::selectOne(
             'SELECT COUNT(*) as total, SUM(CASE WHEN concluida THEN 1 ELSE 0 END) as concluidas FROM processo_tarefas WHERE processo_id = ?',

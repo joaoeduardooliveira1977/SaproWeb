@@ -1,7 +1,7 @@
 <div>
 
 {{-- ══ KPIs ══════════════════════════════════════════════════════ --}}
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;">
+<div class="stat-grid">
 
     <div class="stat-card" style="border-left-color:#16a34a;">
         <div class="stat-icon">📥</div>
@@ -42,7 +42,7 @@
 </div>
 
 {{-- ══ Abas ══════════════════════════════════════════════════════ --}}
-<div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--border);">
+<div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--border);overflow-x:auto;white-space:nowrap;">
     @foreach([
         'visao-geral' => '📊 Visão Geral',
         'fluxo'       => '📈 Fluxo de Caixa',

@@ -7,124 +7,119 @@
 @endif
 
 {{-- Cards Resumo --}}
-<div class="grid-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+<div class="stat-grid">
     <div class="card" style="border-left:4px solid var(--primary);">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Total Contratado</div>
-        <div style="font-size:24px;font-weight:700;color:var(--primary);">R$ {{ number_format($resumo->total_contratado,2,',','.') }}</div>
+        <div class="stat-label">Total Contratado</div>
+        <div class="stat-val" style="color:var(--primary);font-size:20px;">R$ {{ number_format($resumo->total_contratado,2,',','.') }}</div>
         <div style="font-size:12px;color:var(--muted);">{{ $resumo->total_contratos }} contratos ativos</div>
     </div>
     <div class="card" style="border-left:4px solid var(--success);">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Recebido</div>
-        <div style="font-size:24px;font-weight:700;color:var(--success);">R$ {{ number_format($resumo->total_recebido,2,',','.') }}</div>
+        <div class="stat-label">Recebido</div>
+        <div class="stat-val" style="color:var(--success);font-size:20px;">R$ {{ number_format($resumo->total_recebido,2,',','.') }}</div>
     </div>
     <div class="card" style="border-left:4px solid var(--warning);">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Pendente</div>
-        <div style="font-size:24px;font-weight:700;color:var(--warning);">R$ {{ number_format($resumo->total_pendente,2,',','.') }}</div>
+        <div class="stat-label">Pendente</div>
+        <div class="stat-val" style="color:var(--warning);font-size:20px;">R$ {{ number_format($resumo->total_pendente,2,',','.') }}</div>
     </div>
     <div class="card" style="border-left:4px solid var(--danger);">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Atrasado</div>
-        <div style="font-size:24px;font-weight:700;color:var(--danger);">R$ {{ number_format($resumo->total_atrasado,2,',','.') }}</div>
+        <div class="stat-label">Atrasado</div>
+        <div class="stat-val" style="color:var(--danger);font-size:20px;">R$ {{ number_format($resumo->total_atrasado,2,',','.') }}</div>
     </div>
 </div>
 
 {{-- Filtros + Botão --}}
 <div class="card" style="margin-bottom:16px;">
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-        <input wire:model.live="busca" type="text" placeholder="🔍 Buscar cliente ou descrição..." style="flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
-        <select wire:model.live="filtroTipo" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+    <div class="filter-bar">
+        <input wire:model.live="busca" type="text" placeholder="🔍 Buscar cliente ou descrição...">
+        <select wire:model.live="filtroTipo">
             <option value="">Todos os tipos</option>
             <option value="fixo_mensal">Fixo Mensal</option>
             <option value="exito">Êxito</option>
             <option value="hora">Por Hora</option>
             <option value="ato_diligencia">Ato/Diligência</option>
         </select>
-        <select wire:model.live="filtroStatus" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        <select wire:model.live="filtroStatus">
             <option value="">Todos os status</option>
             <option value="ativo">Ativo</option>
             <option value="encerrado">Encerrado</option>
             <option value="suspenso">Suspenso</option>
         </select>
-        <button wire:click="novoHonorario" class="btn btn-primary">+ Novo Honorário</button>
+        <button wire:click="novoHonorario" class="btn btn-primary" style="flex-shrink:0;">+ Novo Honorário</button>
     </div>
 </div>
 
 {{-- Tabela --}}
-<div class="card">
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
-        <thead>
-            <tr style="background:var(--primary);color:#fff;">
-                <th style="padding:10px 12px;text-align:left;">Cliente</th>
-                <th style="padding:10px 12px;text-align:left;">Processo</th>
-                <th style="padding:10px 12px;text-align:left;">Tipo</th>
-                <th style="padding:10px 12px;text-align:left;">Descrição</th>
-                <th style="padding:10px 12px;text-align:right;">Contrato</th>
-                <th style="padding:10px 12px;text-align:right;">Recebido</th>
-                <th style="padding:10px 12px;text-align:right;">Pendente</th>
-                <th style="padding:10px 12px;text-align:center;">Parcelas</th>
-                <th style="padding:10px 12px;text-align:center;">Status</th>
-                <th style="padding:10px 12px;text-align:center;">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($honorarios as $h)
-            <tr style="border-bottom:1px solid var(--border);" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
-                <td style="padding:10px 12px;font-weight:600;">{{ $h->cliente_nome }}</td>
-                <td style="padding:10px 12px;color:var(--muted);">{{ $h->processo_numero ?? '—' }}</td>
-                <td style="padding:10px 12px;">
-                    @php
-                        $tipos = ['fixo_mensal'=>['label'=>'Fixo','color'=>'#2563a8'],
-                                  'exito'=>['label'=>'Êxito','color'=>'#16a34a'],
-                                  'hora'=>['label'=>'Hora','color'=>'#d97706'],
-                                  'ato_diligencia'=>['label'=>'Ato','color'=>'#7c3aed']];
-                        $t = $tipos[$h->tipo] ?? ['label'=>$h->tipo,'color'=>'#64748b'];
-                    @endphp
-                    <span style="background:{{ $t['color'] }}20;color:{{ $t['color'] }};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">{{ $t['label'] }}</span>
-                </td>
-                <td style="padding:10px 12px;">{{ $h->descricao }}</td>
-                <td style="padding:10px 12px;text-align:right;font-weight:600;">R$ {{ number_format($h->valor_contrato,2,',','.') }}</td>
-                <td style="padding:10px 12px;text-align:right;color:var(--success);">R$ {{ number_format($h->valor_recebido,2,',','.') }}</td>
-                <td style="padding:10px 12px;text-align:right;color:{{ $h->parcelas_atrasadas > 0 ? 'var(--danger)' : 'var(--warning)' }};">
-                    R$ {{ number_format($h->valor_pendente,2,',','.') }}
-                    @if($h->parcelas_atrasadas > 0)
-                        <span style="font-size:10px;"> ⚠️{{ $h->parcelas_atrasadas }}</span>
-                    @endif
-                </td>
-                <td style="padding:10px 12px;text-align:center;">
-                    <span style="font-size:12px;">{{ $h->parcelas_pagas }}/{{ $h->total_parcelas_count }}</span>
-                </td>
-                <td style="padding:10px 12px;text-align:center;">
-                    @php
-                        $statusCores = ['ativo'=>'var(--success)','encerrado'=>'var(--muted)','suspenso'=>'var(--warning)'];
-                        $cor = $statusCores[$h->status] ?? 'var(--muted)';
-                    @endphp
-                    <span style="color:{{ $cor }};font-size:12px;font-weight:600;">{{ ucfirst($h->status) }}</span>
-                </td>
-                <td style="padding:10px 12px;text-align:center;">
-                    <div style="display:flex;gap:6px;justify-content:center;">
-                        <button wire:click="verParcelas({{ $h->id }})" title="Ver parcelas" style="background:none;border:none;cursor:pointer;font-size:16px;">💰</button>
-                        <button wire:click="editarHonorario({{ $h->id }})" title="Editar" style="background:none;border:none;cursor:pointer;font-size:16px;">✏️</button>
-                        <button wire:click="excluirHonorario({{ $h->id }})" title="Excluir" onclick="return confirm('Excluir este honorário?')" style="background:none;border:none;cursor:pointer;font-size:16px;">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-            @empty
-            <tr><td colspan="10" style="padding:32px;text-align:center;color:var(--muted);">Nenhum honorário cadastrado.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
+<div class="card" style="padding:0;overflow:hidden;">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th class="hide-sm">Processo</th>
+                    <th>Tipo</th>
+                    <th class="hide-sm">Descrição</th>
+                    <th style="text-align:right;">Contrato</th>
+                    <th class="hide-sm" style="text-align:right;">Recebido</th>
+                    <th class="hide-sm" style="text-align:right;">Pendente</th>
+                    <th class="hide-sm" style="text-align:center;">Parcelas</th>
+                    <th style="text-align:center;">Status</th>
+                    <th style="text-align:center;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($honorarios as $h)
+                <tr>
+                    <td style="font-weight:600;">{{ $h->cliente_nome }}</td>
+                    <td class="hide-sm" style="color:var(--muted);">{{ $h->processo_numero ?? '—' }}</td>
+                    <td>
+                        @php
+                            $tipos = ['fixo_mensal'=>['label'=>'Fixo','color'=>'#2563a8'],
+                                      'exito'=>['label'=>'Êxito','color'=>'#16a34a'],
+                                      'hora'=>['label'=>'Hora','color'=>'#d97706'],
+                                      'ato_diligencia'=>['label'=>'Ato','color'=>'#7c3aed']];
+                            $t = $tipos[$h->tipo] ?? ['label'=>$h->tipo,'color'=>'#64748b'];
+                        @endphp
+                        <span class="badge" style="background:{{ $t['color'] }}20;color:{{ $t['color'] }};">{{ $t['label'] }}</span>
+                    </td>
+                    <td class="hide-sm">{{ $h->descricao }}</td>
+                    <td style="text-align:right;font-weight:600;">R$ {{ number_format($h->valor_contrato,2,',','.') }}</td>
+                    <td class="hide-sm" style="text-align:right;color:var(--success);">R$ {{ number_format($h->valor_recebido,2,',','.') }}</td>
+                    <td class="hide-sm" style="text-align:right;color:{{ $h->parcelas_atrasadas > 0 ? 'var(--danger)' : 'var(--warning)' }};">
+                        R$ {{ number_format($h->valor_pendente,2,',','.') }}
+                        @if($h->parcelas_atrasadas > 0)<span style="font-size:10px;"> ⚠️{{ $h->parcelas_atrasadas }}</span>@endif
+                    </td>
+                    <td class="hide-sm" style="text-align:center;font-size:12px;">{{ $h->parcelas_pagas }}/{{ $h->total_parcelas_count }}</td>
+                    <td style="text-align:center;">
+                        @php $statusCores = ['ativo'=>'var(--success)','encerrado'=>'var(--muted)','suspenso'=>'var(--warning)']; @endphp
+                        <span style="color:{{ $statusCores[$h->status] ?? 'var(--muted)' }};font-size:12px;font-weight:600;">{{ ucfirst($h->status) }}</span>
+                    </td>
+                    <td style="text-align:center;">
+                        <div class="btn-actions" style="justify-content:center;">
+                            <button wire:click="verParcelas({{ $h->id }})" title="Ver parcelas" class="btn-icon">💰</button>
+                            <button wire:click="editarHonorario({{ $h->id }})" title="Editar" class="btn-icon">✏️</button>
+                            <button wire:click="excluirHonorario({{ $h->id }})" title="Excluir" onclick="return confirm('Excluir este honorário?')" class="btn-icon">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="10" style="padding:32px;text-align:center;color:var(--muted);">Nenhum honorário cadastrado.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 {{-- Modal Honorário --}}
 @if($modalHonorario)
-<div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;">
-    <div style="background:#fff;border-radius:12px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto;">
-        <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-            <h3 style="margin:0;color:var(--primary);">{{ $honorarioId ? 'Editar' : 'Novo' }} Honorário</h3>
-            <button wire:click="$set('modalHonorario',false)" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
+<div class="modal-backdrop">
+    <div class="modal" style="max-width:620px;">
+        <div class="modal-header">
+            <span class="modal-title">{{ $honorarioId ? 'Editar' : 'Novo' }} Honorário</span>
+            <button wire:click="$set('modalHonorario',false)" class="modal-close">✕</button>
         </div>
-        <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:16px;">
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="form-grid">
                 <div style="grid-column:1/-1;">
                     <label style="font-size:12px;font-weight:600;color:var(--muted);">CLIENTE *</label>
                     <select wire:model.live="cliente_id" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
@@ -269,7 +264,7 @@
             </div>
             @endif
 
-            <div style="display:flex;gap:12px;justify-content:flex-end;">
+            <div class="modal-footer">
                 <button wire:click="$set('modalHonorario',false)" class="btn btn-secondary">Cancelar</button>
                 <button wire:click="salvarHonorario" class="btn btn-primary">💾 Salvar</button>
             </div>
@@ -280,35 +275,35 @@
 
 {{-- Modal Parcelas --}}
 @if($modalParcelas && $parcelasModal !== null)
-<div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;">
-    <div style="background:#fff;border-radius:12px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;">
-        <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+<div class="modal-backdrop">
+    <div class="modal" style="max-width:700px;">
+        <div class="modal-header">
             <div>
-                <h3 style="margin:0;color:var(--primary);">💰 Parcelas</h3>
+                <span class="modal-title">💰 Parcelas</span>
                 <div style="font-size:13px;color:var(--muted);">{{ $honorarioNome }}</div>
             </div>
-            <button wire:click="$set('modalParcelas',false)" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
+            <button wire:click="$set('modalParcelas',false)" class="modal-close">✕</button>
         </div>
-        <div style="padding:16px;">
-            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <div class="table-wrap">
+            <table>
                 <thead>
-                    <tr style="background:var(--bg);">
-                        <th style="padding:8px 12px;text-align:center;">#</th>
-                        <th style="padding:8px 12px;text-align:left;">Vencimento</th>
-                        <th style="padding:8px 12px;text-align:right;">Valor</th>
-                        <th style="padding:8px 12px;text-align:center;">Status</th>
-                        <th style="padding:8px 12px;text-align:left;">Pagamento</th>
-                        <th style="padding:8px 12px;text-align:right;">Valor Pago</th>
-                        <th style="padding:8px 12px;text-align:center;">Ação</th>
+                    <tr>
+                        <th style="text-align:center;">#</th>
+                        <th>Vencimento</th>
+                        <th style="text-align:right;">Valor</th>
+                        <th style="text-align:center;">Status</th>
+                        <th class="hide-sm">Pagamento</th>
+                        <th class="hide-sm" style="text-align:right;">Valor Pago</th>
+                        <th style="text-align:center;">Ação</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($parcelasModal as $p)
-                    <tr style="border-bottom:1px solid var(--border);">
-                        <td style="padding:8px 12px;text-align:center;font-weight:600;">{{ $p->numero_parcela }}</td>
-                        <td style="padding:8px 12px;">{{ \Carbon\Carbon::parse($p->vencimento)->format('d/m/Y') }}</td>
-                        <td style="padding:8px 12px;text-align:right;">R$ {{ number_format($p->valor,2,',','.') }}</td>
-                        <td style="padding:8px 12px;text-align:center;">
+                    <tr>
+                        <td style="text-align:center;font-weight:600;">{{ $p->numero_parcela }}</td>
+                        <td>{{ \Carbon\Carbon::parse($p->vencimento)->format('d/m/Y') }}</td>
+                        <td style="text-align:right;">R$ {{ number_format($p->valor,2,',','.') }}</td>
+                        <td style="text-align:center;">
                             @php
                                 $cores = ['pago'=>'var(--success)','pendente'=>'var(--warning)','atrasado'=>'var(--danger)','cancelado'=>'var(--muted)'];
                                 $labels = ['pago'=>'✅ Pago','pendente'=>'⏳ Pendente','atrasado'=>'⚠️ Atrasado','cancelado'=>'❌ Cancelado'];
@@ -317,17 +312,15 @@
                                 {{ $labels[$p->status] ?? $p->status }}
                             </span>
                         </td>
-                        <td style="padding:8px 12px;color:var(--muted);">
+                        <td class="hide-sm" style="color:var(--muted);">
                             {{ $p->data_pagamento ? \Carbon\Carbon::parse($p->data_pagamento)->format('d/m/Y') : '—' }}
                         </td>
-                        <td style="padding:8px 12px;text-align:right;color:var(--success);">
+                        <td class="hide-sm" style="text-align:right;color:var(--success);">
                             {{ $p->valor_pago ? 'R$ ' . number_format($p->valor_pago,2,',','.') : '—' }}
                         </td>
-                        <td style="padding:8px 12px;text-align:center;">
+                        <td style="text-align:center;">
                             @if(in_array($p->status, ['pendente','atrasado']))
-                            <button wire:click="abrirPagamento({{ $p->id }})" class="btn btn-primary" style="padding:4px 10px;font-size:12px;">
-                                💵 Pagar
-                            </button>
+                            <button wire:click="abrirPagamento({{ $p->id }})" class="btn btn-primary btn-sm">💵 Pagar</button>
                             @endif
                         </td>
                     </tr>
@@ -341,13 +334,13 @@
 
 {{-- Modal Pagamento --}}
 @if($modalPagamento)
-<div style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1100;display:flex;align-items:center;justify-content:center;padding:16px;">
-    <div style="background:#fff;border-radius:12px;width:100%;max-width:400px;">
-        <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-            <h3 style="margin:0;color:var(--primary);">💵 Registrar Pagamento</h3>
-            <button wire:click="$set('modalPagamento',false)" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
+<div class="modal-backdrop" style="z-index:1100;">
+    <div class="modal" style="max-width:400px;">
+        <div class="modal-header">
+            <span class="modal-title">💵 Registrar Pagamento</span>
+            <button wire:click="$set('modalPagamento',false)" class="modal-close">✕</button>
         </div>
-        <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:16px;">
             <div>
                 <label style="font-size:12px;font-weight:600;color:var(--muted);">DATA DO PAGAMENTO</label>
                 <input wire:model="data_pagamento" type="date" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
@@ -371,7 +364,7 @@
                 <label style="font-size:12px;font-weight:600;color:var(--muted);">OBSERVAÇÕES</label>
                 <input wire:model="obs_pagamento" type="text" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
             </div>
-            <div style="display:flex;gap:12px;justify-content:flex-end;">
+            <div class="modal-footer">
                 <button wire:click="$set('modalPagamento',false)" class="btn btn-secondary">Cancelar</button>
                 <button wire:click="registrarPagamento" class="btn btn-primary">✅ Confirmar</button>
             </div>

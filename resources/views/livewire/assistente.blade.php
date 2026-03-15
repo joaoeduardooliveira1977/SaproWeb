@@ -32,7 +32,7 @@
     }
     </style>
 
-    <div style="display: flex; flex-direction: column; height: calc(100vh - 140px); max-width: 900px; margin: 0 auto;">
+    <div style="display: flex; flex-direction: column; height: calc(100dvh - 140px); max-width: 900px; margin: 0 auto;">
 
         {{-- Header --}}
         <div class="card" style="margin-bottom: 12px; padding: 16px 20px;">
@@ -98,7 +98,7 @@
         </div>
 
         {{-- Sugestões --}}
-        <div style="padding: 10px 0; display: flex; gap: 8px; flex-wrap: wrap;">
+        <div style="padding: 10px 0; display: flex; gap: 6px; flex-wrap: wrap; overflow-x: auto;">
             <button wire:click="$set('pergunta', 'Quais processos vencem prazo essa semana?')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">📅 Prazos da semana</button>
             <button wire:click="$set('pergunta', 'Tem alguma audiência hoje ou amanhã?')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">⚖️ Audiências</button>
             <button wire:click="$set('pergunta', 'Quantos processos ativos temos?')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">📋 Processos ativos</button>
