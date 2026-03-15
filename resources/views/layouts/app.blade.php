@@ -536,9 +536,14 @@
                 @livewire('busca-global')
             </div>
             <div class="topbar-user">
-                <button id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro"
+                <button id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro (Theme)"
                     style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px 6px;color:var(--muted);line-height:1;flex-shrink:0;">
                     🌙
+                </button>
+                <button onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'?',bubbles:true}))"
+                    title="Atalhos de teclado (?)"
+                    style="background:none;border:1.5px solid var(--border);cursor:pointer;font-size:11px;font-weight:700;padding:2px 7px;color:var(--muted);line-height:1.6;border-radius:5px;flex-shrink:0;">
+                    ?
                 </button>
                 @livewire('notificacoes-bell')
                 <div class="avatar">{{ strtoupper(substr(auth('usuarios')->user()?->nome ?? 'U', 0, 2)) }}</div>
@@ -654,6 +659,63 @@
         const t = document.documentElement.getAttribute('data-theme') || 'light';
         const btn = document.getElementById('themeToggle');
         if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    }());
+
+    // ── Keyboard Shortcuts ──
+    (function () {
+        function inTextField() {
+            const t = document.activeElement?.tagName;
+            return t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT' || document.activeElement?.isContentEditable;
+        }
+
+        document.addEventListener('keydown', function (e) {
+            // Ignora combinações com Ctrl/Meta (não interfere com atalhos do browser/OS)
+            if (e.ctrlKey || e.metaKey) return;
+
+            // / → foca busca global
+            if (e.key === '/' && !inTextField()) {
+                e.preventDefault();
+                const input = document.querySelector('.topbar input[type="text"]');
+                if (input) { input.focus(); input.select(); }
+                return;
+            }
+
+            // Esc → fecha modal aberto ou sidebar mobile
+            if (e.key === 'Escape') {
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    const close = backdrop.querySelector('.modal-close');
+                    close ? close.click() : backdrop.click();
+                    return;
+                }
+                if (document.getElementById('sidebar')?.classList.contains('open')) {
+                    toggleSidebar();
+                }
+                return;
+            }
+
+            // Alt+N → clica no primeiro botão "Novo" da página
+            if (e.altKey && (e.key === 'n' || e.key === 'N') && !inTextField()) {
+                e.preventDefault();
+                const content = document.querySelector('.content');
+                if (!content) return;
+                const btn = [...content.querySelectorAll('button, a')]
+                    .find(el => /novo|new/i.test(el.textContent.trim()));
+                if (btn) btn.click();
+                return;
+            }
+
+            // ? → exibe atalhos disponíveis
+            if (e.key === '?' && !inTextField()) {
+                toast(
+                    '<strong>Atalhos de teclado</strong><br>' +
+                    '<code style="font-size:11px">/</code> Busca global &nbsp;|&nbsp; ' +
+                    '<code style="font-size:11px">Esc</code> Fechar modal &nbsp;|&nbsp; ' +
+                    '<code style="font-size:11px">Alt+N</code> Novo registro',
+                    'info', 6000
+                );
+            }
+        });
     }());
 
     // ── Service Worker (PWA) ──
