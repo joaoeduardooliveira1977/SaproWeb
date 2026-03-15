@@ -31,11 +31,6 @@
         @endif
     </div>
 
-    @if($erroCalculo)
-    <div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:13px;">
-        ⚠️ {{ $erroCalculo }}
-    </div>
-    @endif
 
     <div style="display:flex;flex-direction:column;gap:14px;">
 

@@ -1,12 +1,5 @@
 <div @if($verificacao?->emAndamento()) wire:poll.2000ms @endif>
 
-    {{-- Erro de inicialização --}}
-    @if($erroMensagem)
-    <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:12px 16px;border-radius:8px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
-        <span>⚠️ {{ $erroMensagem }}</span>
-        <button wire:click="$set('erroMensagem','')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#991b1b;">✕</button>
-    </div>
-    @endif
 
     {{-- Cabeçalho --}}
     <div style="margin-bottom:24px;">
