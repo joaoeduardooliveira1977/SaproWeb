@@ -12,6 +12,11 @@ class Dashboard extends Component
     public array $processos      = [];
     public array $prazosProximos = [];
 
+    public function placeholder(): \Illuminate\View\View
+    {
+        return view('livewire.partials.skeleton', ['cards' => 4, 'blocks' => 2, 'blockHeight' => 240]);
+    }
+
     public function mount(): void
     {
         $this->carregarDados();

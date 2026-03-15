@@ -16,6 +16,11 @@ class FinanceiroConsolidado extends Component
     public string $filtroStatus = 'pendente'; // pendente | todos
     public int    $periodoFluxo = 6;           // 3 | 6 | 12 meses
 
+    public function placeholder(): \Illuminate\View\View
+    {
+        return view('livewire.partials.skeleton', ['cards' => 3, 'blocks' => 3, 'blockHeight' => 300]);
+    }
+
     public function mount(): void
     {
         $this->filtroMes = now()->format('Y-m');

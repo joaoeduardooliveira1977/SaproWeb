@@ -215,6 +215,22 @@
         .hide-sm { display: table-cell; }
         .hide-xs { display: table-cell; }
 
+        /* ── Skeleton Loader ── */
+        @keyframes shimmer {
+            0%   { background-position: -400px 0; }
+            100% { background-position:  400px 0; }
+        }
+        .skeleton-card {
+            border-radius: 10px;
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 800px 100%;
+            animation: shimmer 1.4s infinite linear;
+        }
+        [data-theme="dark"] .skeleton-card {
+            background: linear-gradient(90deg, #1e293b 25%, #243044 50%, #1e293b 75%);
+            background-size: 800px 100%;
+        }
+
         /* ── Utilities ── */
         .text-primary { color: var(--primary-light); font-weight: 600; }
         .mb-4 { margin-bottom: 16px; }

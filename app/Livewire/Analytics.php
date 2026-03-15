@@ -9,6 +9,11 @@ use Livewire\Component;
 
 class Analytics extends Component
 {
+    public function placeholder(): \Illuminate\View\View
+    {
+        return view('livewire.partials.skeleton', ['cards' => 4, 'blocks' => 3, 'blockHeight' => 280]);
+    }
+
     public function render(): \Illuminate\View\View
     {
         // ── KPIs ─────────────────────────────────────────────────

@@ -12,6 +12,11 @@ class ProdutividadeAdvogado extends Component
     public string $dataIni    = '';
     public string $dataFim    = '';
 
+    public function placeholder(): \Illuminate\View\View
+    {
+        return view('livewire.partials.skeleton', ['cards' => 4, 'blocks' => 2, 'blockHeight' => 320]);
+    }
+
     public function mount(): void
     {
         $this->dataIni = now()->startOfMonth()->format('Y-m-d');
