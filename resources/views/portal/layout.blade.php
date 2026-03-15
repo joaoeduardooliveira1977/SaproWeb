@@ -99,7 +99,23 @@
         .info-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
         .info-val { font-size: 13px; color: #334155; }
 
-        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr; } .portal-tabs { padding: 0 12px; } .portal-tab { padding: 12px 14px; font-size: 12px; } }
+        .portal-hide-sm { display: table-cell; }
+        @media (max-width: 768px) {
+            .portal-hide-sm { display: none !important; }
+            .container { padding: 16px 12px; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .portal-tabs { padding: 0 8px; }
+            .portal-tab { padding: 10px 12px; font-size: 12px; }
+            .card-body { padding: 16px; }
+            .card-header { padding: 12px 16px; }
+            table { font-size: 12px; }
+            th, td { padding: 8px 10px; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .navbar-brand { font-size: 15px; }
+        }
     </style>
 </head>
 <body>

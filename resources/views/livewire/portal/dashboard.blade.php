@@ -456,12 +456,12 @@
                 <thead>
                     <tr>
                         <th>Parcela</th>
-                        <th>Contrato</th>
-                        <th>Processo</th>
+                        <th class="portal-hide-sm">Contrato</th>
+                        <th class="portal-hide-sm">Processo</th>
                         <th>Vencimento</th>
                         <th style="text-align:right;">Valor</th>
                         <th>Status</th>
-                        <th>Pgto</th>
+                        <th class="portal-hide-sm">Pgto</th>
                         @if($pixConfigurado)<th></th>@endif
                     </tr>
                 </thead>
@@ -478,8 +478,8 @@
                     @endphp
                     <tr>
                         <td style="text-align:center;font-weight:600;">{{ $parc->numero_parcela }}ª</td>
-                        <td style="font-size:12px;">{{ $parc->contrato ?? '—' }}</td>
-                        <td style="font-size:12px;font-family:monospace;">{{ $parc->processo_numero ?? '—' }}</td>
+                        <td class="portal-hide-sm" style="font-size:12px;">{{ $parc->contrato ?? '—' }}</td>
+                        <td class="portal-hide-sm" style="font-size:12px;font-family:monospace;">{{ $parc->processo_numero ?? '—' }}</td>
                         <td style="{{ $vencido ? 'color:#dc2626;font-weight:600;' : '' }}">
                             {{ \Carbon\Carbon::parse($parc->vencimento)->format('d/m/Y') }}
                         </td>
@@ -489,7 +489,7 @@
                                 {{ ucfirst($parc->status) }}
                             </span>
                         </td>
-                        <td style="font-size:12px;color:#64748b;">
+                        <td class="portal-hide-sm" style="font-size:12px;color:#64748b;">
                             {{ $parc->data_pagamento ? \Carbon\Carbon::parse($parc->data_pagamento)->format('d/m/Y') : '—' }}
                         </td>
                         @if($pixConfigurado)
