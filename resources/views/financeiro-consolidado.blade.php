@@ -8,5 +8,5 @@
     <p style="font-size:13px;color:#64748b;margin-top:4px;">Visão geral de recebimentos, despesas, fluxo de caixa e honorários</p>
 </div>
 
-@livewire('financeiro-consolidado', lazy: true)
+@livewire('financeiro-consolidado')
 @endsection

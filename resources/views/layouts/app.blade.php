@@ -47,7 +47,7 @@
             transition: transform .3s ease; z-index: 100;
         }
         .sidebar-header { padding: 20px 18px 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
-        .sidebar-logo { font-size: 22px; margin-bottom: 4px; }
+        .sidebar-logo { margin-bottom: 4px; display:flex; align-items:center; }
         .sidebar-title { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
         .sidebar-sub { font-size: 10px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: 1.5px; }
 
@@ -75,7 +75,7 @@
         }
         .nav-item:hover { color: #fff; background: rgba(255,255,255,.05); }
         .nav-item.active { color: var(--accent); background: rgba(232,160,32,.12); border-left-color: var(--accent); font-weight: 600; }
-        .nav-icon { width: 20px; text-align: center; font-size: 16px; }
+        .nav-icon { width: 20px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
 
         .perfil-badge {
             display: inline-block; padding: 2px 8px; border-radius: 10px;
@@ -399,7 +399,7 @@
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-logo">⚖️</div>
+            <div class="sidebar-logo"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg></div>
             <div class="sidebar-title">SISTEMA JURÍDICO</div>
             <div class="sidebar-sub">Web</div>
         </div>
@@ -423,25 +423,25 @@
             </div>
             <div class="nav-group-items" id="group-geral">
                 <a href="{{ route('dashboard') }}" class="nav-item {{ $rota === 'dashboard' ? 'active' : '' }}">
-                    <span class="nav-icon">🏠</span> Dashboard
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Dashboard
                 </a>
                 @if($isAdvogado || $isAdmin)
                 <a href="{{ route('analytics') }}" class="nav-item {{ $rota === 'analytics' ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span> Analytics
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span> Analytics
                 </a>
                 <a href="{{ route('produtividade') }}" class="nav-item {{ $rota === 'produtividade' ? 'active' : '' }}">
-                    <span class="nav-icon">👨‍⚖️</span> Produtividade
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Produtividade
                 </a>
                 @endif
                 @if($canAgenda)
                 <a href="{{ route('agenda') }}" class="nav-item {{ $rota === 'agenda' ? 'active' : '' }}">
-                    <span class="nav-icon">📅</span> Agenda
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Agenda
                 </a>
                 <a href="{{ route('prazos') }}" class="nav-item {{ $rota === 'prazos' ? 'active' : '' }}">
-                    <span class="nav-icon">⏳</span> Prazos
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> Prazos
                 </a>
                 <a href="{{ route('audiencias') }}" class="nav-item {{ $rota === 'audiencias' ? 'active' : '' }}">
-                    <span class="nav-icon">🗓️</span> Audiências
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Audiências
                 </a>
                 @endif
             </div>
@@ -456,27 +456,27 @@
             <div class="nav-group-items" id="group-processos">
                 @if($canProc)
                 <a href="{{ route('processos') }}" class="nav-item {{ str_contains($rota ?? '', 'processos') ? 'active' : '' }}">
-                    <span class="nav-icon">⚖️</span> Processos
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg></span> Processos
                 </a>
                 @endif
                 @if($canPessoas)
                 <a href="{{ route('pessoas') }}" class="nav-item {{ $rota === 'pessoas' ? 'active' : '' }}">
-                    <span class="nav-icon">👥</span> Pessoas
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span> Pessoas
                 </a>
                 <a href="{{ route('correspondentes') }}" class="nav-item {{ request()->is('correspondentes*') ? 'active' : '' }}">
-                    <span class="nav-icon">🤝</span> Correspondentes
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span> Correspondentes
                 </a>
                 @endif
                 @if($canDocs)
                 <a href="{{ route('documentos') }}" class="nav-item {{ request()->is('documentos*') ? 'active' : '' }}">
-                    <span class="nav-icon">📁</span> Documentos
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span> Documentos
                 </a>
                 @endif
                 <a href="{{ route('minutas') }}" class="nav-item {{ $rota === 'minutas' ? 'active' : '' }}">
-                    <span class="nav-icon">📄</span> Minutas
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Minutas
                 </a>
                 <a href="{{ route('assinatura-digital') }}" class="nav-item {{ request()->is('assinatura-digital*') ? 'active' : '' }}">
-                    <span class="nav-icon">✍️</span> Assinatura Digital
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> Assinatura Digital
                 </a>
             </div>
         </div>
@@ -490,20 +490,20 @@
             </div>
             <div class="nav-group-items" id="group-financeiro">
                 <a href="{{ route('financeiro.consolidado') }}" class="nav-item {{ $rota === 'financeiro.consolidado' ? 'active' : '' }}">
-                    <span class="nav-icon">💰</span> Visão Geral
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span> Visão Geral
                 </a>
                 <a href="{{ route('financeiro') }}" class="nav-item {{ $rota === 'financeiro' ? 'active' : '' }}">
-                    <span class="nav-icon">💳</span> Por Processo
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg></span> Por Processo
                 </a>
                 <a href="{{ route('honorarios') }}" class="nav-item {{ request()->is('honorarios*') ? 'active' : '' }}">
-                    <span class="nav-icon">📋</span> Honorários
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> Honorários
                 </a>
                 <a href="{{ route('inadimplencia') }}" class="nav-item {{ request()->is('inadimplencia*') ? 'active' : '' }}">
-                    <span class="nav-icon">⚠️</span> Inadimplência
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> Inadimplência
                 </a>
                 @if($isAdvogado || $isFinanc)
                 <a href="{{ route('relatorios.index') }}" class="nav-item {{ str_contains($rota ?? '', 'relatorios') ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span> Relatórios
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span> Relatórios
                 </a>
                 @endif
             </div>
@@ -518,20 +518,20 @@
             </div>
             <div class="nav-group-items" id="group-ferramentas">
                 <a href="{{ route('calculadora') }}" class="nav-item {{ $rota === 'calculadora' ? 'active' : '' }}">
-                    <span class="nav-icon">🧮</span> Calculadora
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="12" y1="10" x2="14" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="12" y1="14" x2="14" y2="14"/><line x1="16" y1="14" x2="16" y2="18"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="12" y1="18" x2="14" y2="18"/></svg></span> Calculadora
                 </a>
                 <a href="{{ route('tjsp') }}" class="nav-item {{ $rota === 'tjsp' ? 'active' : '' }}">
-                    <span class="nav-icon">🏛️</span> Consulta Judicial
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="10"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span> Consulta Judicial
                 </a>
                 <a href="{{ route('aasp-publicacoes') }}" class="nav-item {{ $rota === 'aasp-publicacoes' ? 'active' : '' }}">
-                    <span class="nav-icon">📰</span> Publicações AASP
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Publicações AASP
                 </a>
                 <a href="{{ route('assistente') }}" class="nav-item {{ request()->is('assistente*') ? 'active' : '' }}">
-                    <span class="nav-icon">🤖</span> Assistente IA
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 8h10M7 12h10M7 16h10"/></svg></span> Assistente IA
                 </a>
                 @if(!$isFinanc)
                 <a href="{{ route('relatorios.index') }}" class="nav-item {{ str_contains($rota ?? '', 'relatorios') ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span> Relatórios
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span> Relatórios
                 </a>
                 @endif
             </div>
@@ -546,13 +546,13 @@
             </div>
             <div class="nav-group-items" id="group-portal">
                 <a href="{{ route('admin.portal-acesso') }}" class="nav-item {{ $rota === 'admin.portal-acesso' ? 'active' : '' }}">
-                    <span class="nav-icon">🌐</span> Acessos
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></span> Acessos
                 </a>
                 <a href="{{ route('admin.portal-mensagens') }}" class="nav-item {{ $rota === 'admin.portal-mensagens' ? 'active' : '' }}">
-                    <span class="nav-icon">💬</span> Mensagens
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span> Mensagens
                 </a>
                 <a href="{{ route('admin.notificacoes-whatsapp') }}" class="nav-item {{ request()->is('admin/notificacoes-whatsapp*') ? 'active' : '' }}">
-                    <span class="nav-icon">📲</span> WhatsApp/SMS
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span> WhatsApp/SMS
                 </a>
             </div>
         </div>
@@ -566,16 +566,16 @@
             </div>
             <div class="nav-group-items" id="group-admin">
                 <a href="{{ route('usuarios') }}" class="nav-item {{ $rota === 'usuarios' ? 'active' : '' }}">
-                    <span class="nav-icon">👨‍💼</span> Usuários
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Usuários
                 </a>
                 <a href="{{ route('tabelas') }}" class="nav-item {{ $rota === 'tabelas' ? 'active' : '' }}">
-                    <span class="nav-icon">🗂️</span> Tabelas
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> Tabelas
                 </a>
                 <a href="{{ route('indices') }}" class="nav-item {{ $rota === 'indices' ? 'active' : '' }}">
-                    <span class="nav-icon">📈</span> Índices
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Índices
                 </a>
                 <a href="{{ route('auditoria') }}" class="nav-item {{ $rota === 'auditoria' ? 'active' : '' }}">
-                    <span class="nav-icon">🔍</span> Auditoria
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span> Auditoria
                 </a>
             </div>
         </div>
@@ -584,7 +584,7 @@
         {{-- ── CONTA ── --}}
         <div class="nav-group">
             <a href="{{ route('minha-conta') }}" class="nav-item {{ $rota === 'minha-conta' ? 'active' : '' }}">
-                <span class="nav-icon">👤</span> Minha Conta
+                <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Minha Conta
             </a>
         </div>
 

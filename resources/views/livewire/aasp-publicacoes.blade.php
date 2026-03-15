@@ -34,13 +34,13 @@
 {{-- ══ Abas ══ --}}
 <div class="tabs">
     <button class="tab-btn {{ $aba === 'publicacoes' ? 'active' : '' }}" wire:click="$set('aba','publicacoes')">
-        📰 Publicações
+        Publicações
     </button>
     <button class="tab-btn {{ $aba === 'advogados' ? 'active' : '' }}" wire:click="$set('aba','advogados')">
-        👨‍⚖️ Advogados
+        Advogados
     </button>
     <button class="tab-btn {{ $aba === 'configuracoes' ? 'active' : '' }}" wire:click="$set('aba','configuracoes')">
-        ⚙️ Configurações
+        Configurações
     </button>
 </div>
 
@@ -52,17 +52,17 @@
     {{-- Stats --}}
     <div class="stats-row">
         <div class="stat-card" style="border-left-color: var(--primary);">
-            <div class="stat-icon">📰</div>
+            <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a4 4 0 01-4-4V6H2v14a4 4 0 004 4z"/><line x1="12" y1="6" x2="18" y2="6"/><line x1="12" y1="10" x2="18" y2="10"/><line x1="8" y1="14" x2="18" y2="14"/><line x1="8" y1="18" x2="18" y2="18"/></svg></div>
             <div class="stat-val">{{ $totalDia }}</div>
             <div class="stat-label">Publicações no dia filtrado</div>
         </div>
         <div class="stat-card" style="border-left-color: var(--accent);">
-            <div class="stat-icon">👨‍⚖️</div>
+            <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
             <div class="stat-val">{{ $advogados->where('ativo', true)->count() }}</div>
             <div class="stat-label">Advogados ativos</div>
         </div>
         <div class="stat-card" style="border-left-color: var(--success);">
-            <div class="stat-icon">📅</div>
+            <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
             <div class="stat-val">{{ \App\Models\AaspPublicacao::count() }}</div>
             <div class="stat-label">Total de publicações salvas</div>
         </div>
@@ -76,8 +76,8 @@
         <div class="action-bar">
             <input type="date" wire:model="dataBusca" class="form-control">
             <button class="btn btn-primary" wire:click="buscarPublicacoes" wire:loading.attr="disabled">
-                <span wire:loading.remove wire:target="buscarPublicacoes">🔍 Buscar Publicações</span>
-                <span wire:loading wire:target="buscarPublicacoes">⏳ Buscando…</span>
+                <span wire:loading.remove wire:target="buscarPublicacoes" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Buscar Publicações</span>
+                <span wire:loading wire:target="buscarPublicacoes" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Buscando…</span>
             </button>
         </div>
         <p style="font-size:11px;color:var(--muted);">
@@ -108,13 +108,13 @@
         </select>
         @if(count($publicacoes) > 0)
             <button class="btn btn-success btn-sm" wire:click="gerarPdf" wire:loading.attr="disabled">
-                <span wire:loading.remove wire:target="gerarPdf">📄 Gerar PDF</span>
-                <span wire:loading wire:target="gerarPdf">⏳ Gerando…</span>
+                <span wire:loading.remove wire:target="gerarPdf" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Gerar PDF</span>
+                <span wire:loading wire:target="gerarPdf" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Gerando…</span>
             </button>
             <button class="btn btn-primary btn-sm" wire:click="enviarEmail" wire:loading.attr="disabled"
                     wire:confirm="Enviar as publicações por e-mail para os destinatários configurados?">
-                <span wire:loading.remove wire:target="enviarEmail">📧 Enviar por E-mail</span>
-                <span wire:loading wire:target="enviarEmail">⏳ Enviando…</span>
+                <span wire:loading.remove wire:target="enviarEmail" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Enviar por E-mail</span>
+                <span wire:loading wire:target="enviarEmail" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Enviando…</span>
             </button>
         @endif
     </div>
@@ -130,11 +130,11 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Data</th>
-                            <th>Advogado</th>
-                            <th class="hide-sm">Jornal</th>
-                            <th class="hide-sm">Processo</th>
-                            <th>Título / Texto</th>
+                            <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Data</th>
+                            <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Advogado</th>
+                            <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Jornal</th>
+                            <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Processo</th>
+                            <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Título / Texto</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -194,12 +194,12 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th class="hide-sm">Código AASP</th>
-                            <th class="hide-sm">Chave AASP</th>
-                            <th class="hide-sm">E-mail</th>
-                            <th>Status</th>
-                            <th>Ações</th>
+                            <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Nome</th>
+                            <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Código AASP</th>
+                            <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Chave AASP</th>
+                            <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">E-mail</th>
+                            <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Status</th>
+                            <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -219,8 +219,8 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <button class="btn-icon" title="Editar" wire:click="editarAdvogado({{ $adv->id }})">✏️</button>
-                                    <button class="btn-icon" title="Excluir" wire:click="confirmarExcluirAdvogado({{ $adv->id }})">🗑️</button>
+                                    <button title="Editar" wire:click="editarAdvogado({{ $adv->id }})" style="width:30px;height:30px;border:none;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:#e0f2fe;color:#0369a1;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                                    <button title="Excluir" wire:click="confirmarExcluirAdvogado({{ $adv->id }})" style="width:30px;height:30px;border:none;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:#fee2e2;color:#dc2626;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
                                 </td>
                             </tr>
                         @endforeach
@@ -236,7 +236,7 @@
             <div class="modal" style="max-width:420px;">
                 <div class="modal-header">
                     <span class="modal-title">Confirmar Exclusão</span>
-                    <button class="modal-close" wire:click="fecharModal">✕</button>
+                    <button class="modal-close" wire:click="fecharModal"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                 </div>
                 <p>Deseja realmente excluir este advogado? As publicações salvas não serão removidas.</p>
                 <div class="modal-footer">
@@ -253,7 +253,7 @@
             <div class="modal">
                 <div class="modal-header">
                     <span class="modal-title">{{ $advogadoId ? 'Editar Advogado' : 'Novo Advogado' }}</span>
-                    <button class="modal-close" wire:click="fecharModal">✕</button>
+                    <button class="modal-close" wire:click="fecharModal"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                 </div>
 
                 <div class="form-grid">
@@ -341,7 +341,7 @@
         </div>
 
         <div style="text-align:right;">
-            <button class="btn btn-primary" wire:click="salvarConfig">💾 Salvar Configurações</button>
+            <button class="btn btn-primary" wire:click="salvarConfig" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar Configurações</button>
         </div>
     </div>
 

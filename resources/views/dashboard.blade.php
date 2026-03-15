@@ -2,6 +2,6 @@
 @section('page-title', 'Dashboard')
 @section('content')
 
-@livewire('dashboard', lazy: true)
+@livewire('dashboard')
 
 @endsection

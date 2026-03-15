@@ -51,7 +51,10 @@
         {{-- Campo de anexo opcional --}}
         <div style="margin-top:16px;">
             <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">
-                &#128206; Anexar Arquivo <span style="font-weight:400; color:#94a3b8;">(opcional, máx. 20MB)</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                    Anexar Arquivo <span style="font-weight:400; color:#94a3b8;">(opcional, máx. 20MB)</span>
+                </span>
             </label>
             <input wire:model="arquivo" type="file"
                 style="width:100%; padding:8px; border:1.5px dashed #e2e8f0; border-radius:8px; font-size:13px; background:#f8fafc; cursor:pointer;">
@@ -91,8 +94,15 @@
     <div class="modal-backdrop">
         <div class="modal" style="max-width:480px;">
             <div class="modal-header">
-                <span class="modal-title">📎 Anexar Arquivo ao Andamento</span>
-                <button wire:click="fecharUploadModal" class="modal-close">✕</button>
+                <span class="modal-title">
+                    <span style="display:inline-flex;align-items:center;gap:6px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                        Anexar Arquivo ao Andamento
+                    </span>
+                </span>
+                <button wire:click="fecharUploadModal" style="background:none;border:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
             </div>
             <div class="form-field" style="margin-bottom:16px;">
                 <label class="lbl">Arquivo <span style="font-weight:400;color:var(--muted)">(máx. 20MB)</span></label>
@@ -103,7 +113,12 @@
             <div class="modal-footer">
                 <button wire:click="fecharUploadModal" class="btn btn-secondary">Cancelar</button>
                 <button wire:click="salvarUploadAndamento" wire:loading.attr="disabled" class="btn btn-primary">
-                    <span wire:loading.remove wire:target="salvarUploadAndamento">💾 Salvar</span>
+                    <span wire:loading.remove wire:target="salvarUploadAndamento">
+                        <span style="display:inline-flex;align-items:center;gap:6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Salvar
+                        </span>
+                    </span>
                     <span wire:loading wire:target="salvarUploadAndamento">Salvando...</span>
                 </button>
             </div>
@@ -115,7 +130,9 @@
     <div class="card" style="padding:0;overflow:hidden;">
         @if($andamentos->isEmpty())
         <div style="padding:60px; text-align:center; color:#94a3b8;">
-            <div style="font-size:40px; margin-bottom:12px;">&#128203;</div>
+            <div style="margin-bottom:12px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </div>
             <p style="font-size:15px; font-weight:600;">Nenhum andamento cadastrado</p>
             <p style="font-size:13px; margin-top:4px;">Clique em "Novo Andamento" para adicionar</p>
         </div>
@@ -123,9 +140,9 @@
         <table style="width:100%; border-collapse:collapse;">
             <thead>
                 <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
-                    <th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:700; color:#64748b; width:120px;">DATA</th>
-                    <th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:700; color:#64748b;">DESCRICAO</th>
-                    <th style="padding:12px 16px; text-align:center; font-size:12px; font-weight:700; color:#64748b; width:130px;">ACOES</th>
+                    <th style="padding:12px 16px; text-align:left; font-size:11px; text-transform:uppercase; color:var(--muted); letter-spacing:.5px; width:120px;">DATA</th>
+                    <th style="padding:12px 16px; text-align:left; font-size:11px; text-transform:uppercase; color:var(--muted); letter-spacing:.5px;">DESCRICAO</th>
+                    <th style="padding:12px 16px; text-align:center; font-size:11px; text-transform:uppercase; color:var(--muted); letter-spacing:.5px; width:130px;">ACOES</th>
                 </tr>
             </thead>
             <tbody>
@@ -148,7 +165,8 @@
                                 <a href="{{ Storage::url($doc->arquivo) }}" target="_blank"
                                     style="display:inline-flex; align-items:center; gap:4px; color:#0369a1; text-decoration:none; font-weight:500;"
                                     title="{{ $doc->arquivo_original }}">
-                                    &#128206; {{ Str::limit($doc->arquivo_original, 30) }}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                                    {{ Str::limit($doc->arquivo_original, 30) }}
                                 </a>
                                 <button wire:click="excluirDocumento({{ $doc->id }})"
                                     title="Remover arquivo"
@@ -164,22 +182,22 @@
                         <div style="display:flex; gap:6px; justify-content:center; align-items:center;">
                             {{-- Ícone de clipe se tem documento --}}
                             @if($docsAndamento->isNotEmpty())
-                            <span title="{{ $docsAndamento->count() }} arquivo(s)" style="font-size:16px; color:#0369a1;">
-                                &#128206;
+                            <span title="{{ $docsAndamento->count() }} arquivo(s)" style="color:#0369a1;display:inline-flex;align-items:center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
                             </span>
                             @endif
                             {{-- Botão upload --}}
                             <button wire:click="abrirUploadModal({{ $andamento->id }})" title="Anexar arquivo"
-                                style="padding:6px 8px; background:#f0f9ff; color:#0369a1; border:1px solid #bae6fd; border-radius:6px; cursor:pointer; font-size:13px;">
-                                &#128190;
+                                style="width:30px;height:30px;border:none;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:#eff6ff;color:#0369a1;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                             </button>
                             <button wire:click="editar({{ $andamento->id }})" title="Editar"
-                                style="padding:6px 10px; background:#e0f2fe; color:#0369a1; border:none; border-radius:6px; cursor:pointer; font-size:14px;">
-                                &#9999;
+                                style="width:30px;height:30px;border:none;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:#e0f2fe;color:#0369a1;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
                             <button wire:click="confirmarExclusao({{ $andamento->id }})" title="Excluir"
-                                style="padding:6px 10px; background:#fee2e2; color:#dc2626; border:none; border-radius:6px; cursor:pointer; font-size:14px;">
-                                &#128465;
+                                style="width:30px;height:30px;border:none;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:#fee2e2;color:#dc2626;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                             </button>
                         </div>
                     </td>

@@ -16,24 +16,24 @@
 {{-- ══ KPIs ══ --}}
 <div class="stat-grid">
     <div class="stat-card" style="border-left-color:var(--primary);">
-        <div class="stat-icon">⚖️</div>
+        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg></div>
         <div class="stat-val">{{ $kpis['processos_ativos'] }}</div>
         <div class="stat-label">Processos Ativos</div>
     </div>
     <div class="stat-card" style="border-left-color:#16a34a;">
-        <div class="stat-icon">💰</div>
+        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
         <div class="stat-val" style="color:#16a34a;font-size:20px;">
             R$ {{ number_format($kpis['receita_mes'], 0, ',', '.') }}
         </div>
         <div class="stat-label">Receita este Mês</div>
     </div>
     <div class="stat-card" style="border-left-color:#2563a8;">
-        <div class="stat-icon">⏱️</div>
+        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div class="stat-val" style="color:#2563a8;">{{ number_format($kpis['horas_mes'], 1, ',', '.') }}h</div>
         <div class="stat-label">Horas este Mês</div>
     </div>
     <div class="stat-card" style="border-left-color:#9d174d;">
-        <div class="stat-icon">⚠️</div>
+        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <div class="stat-val" style="color:#9d174d;">{{ $kpis['prazos_fatais'] }}</div>
         <div class="stat-label">Prazos Fatais em Aberto</div>
     </div>

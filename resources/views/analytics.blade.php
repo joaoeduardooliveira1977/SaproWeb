@@ -2,5 +2,5 @@
 @section('title', 'Analytics')
 @section('page-title', '📊 Analytics')
 @section('content')
-    @livewire('analytics', lazy: true)
+    @livewire('analytics')
 @endsection

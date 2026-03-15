@@ -2,7 +2,7 @@
 
 {{-- Cabeçalho --}}
 <div style="margin-bottom:24px;">
-    <h2 style="font-size:20px;font-weight:700;color:#1a3a5c;">🧮 Calculadora Jurídica</h2>
+    <h2 style="font-size:20px;font-weight:700;color:#1a3a5c;"><div style="display:flex;align-items:center;gap:10px;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10" stroke-linecap="round" stroke-width="3"/><line x1="12" y1="10" x2="12" y2="10" stroke-linecap="round" stroke-width="3"/><line x1="16" y1="10" x2="16" y2="10" stroke-linecap="round" stroke-width="3"/><line x1="8" y1="14" x2="8" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="12" y1="14" x2="12" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="16" y1="14" x2="16" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="8" y1="18" x2="12" y2="18"/><line x1="16" y1="18" x2="16" y2="18" stroke-linecap="round" stroke-width="3"/></svg> Calculadora Jurídica</div></h2>
     <p style="font-size:13px;color:#64748b;margin-top:4px;">
         Correção monetária, juros moratórios, multa e honorários advocatícios
     </p>
@@ -11,7 +11,7 @@
 {{-- Índices disponíveis --}}
 @if(!empty($indicesDisponiveis))
 <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 16px;margin-bottom:20px;font-size:12px;color:#1e40af;display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
-    <span style="font-weight:600;">📊 Índices cadastrados:</span>
+    <span style="font-weight:600;display:inline-flex;align-items:center;gap:5px;"><svg width="14" height="14" fill="none" stroke="#1e40af" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Índices cadastrados:</span>
     @foreach($indicesDisponiveis as $idx)
         <span style="background:#dbeafe;padding:2px 10px;border-radius:12px;">
             {{ $idx['sigla'] }}: {{ $idx['de'] }} → {{ $idx['ate'] }}
@@ -137,7 +137,7 @@
 
         <button wire:click="calcular" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;"
             wire:loading.attr="disabled">
-            <span wire:loading.remove wire:target="calcular">🧮 Calcular</span>
+            <span wire:loading.remove wire:target="calcular" style="display:inline-flex;align-items:center;gap:6px;"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10" stroke-linecap="round" stroke-width="3"/><line x1="12" y1="10" x2="12" y2="10" stroke-linecap="round" stroke-width="3"/><line x1="16" y1="10" x2="16" y2="10" stroke-linecap="round" stroke-width="3"/><line x1="8" y1="14" x2="8" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="12" y1="14" x2="12" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="16" y1="14" x2="16" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="8" y1="18" x2="12" y2="18"/><line x1="16" y1="18" x2="16" y2="18" stroke-linecap="round" stroke-width="3"/></svg> Calcular</span>
             <span wire:loading wire:target="calcular">Calculando...</span>
         </button>
 
@@ -148,7 +148,7 @@
 <div>
     @if(!$calculado)
     <div class="card" style="text-align:center;padding:60px 24px;color:var(--muted);">
-        <div style="font-size:48px;margin-bottom:16px;">🧮</div>
+        <div style="margin-bottom:16px;display:flex;justify-content:center;"><svg width="48" height="48" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10" stroke-linecap="round" stroke-width="3"/><line x1="12" y1="10" x2="12" y2="10" stroke-linecap="round" stroke-width="3"/><line x1="16" y1="10" x2="16" y2="10" stroke-linecap="round" stroke-width="3"/><line x1="8" y1="14" x2="8" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="12" y1="14" x2="12" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="16" y1="14" x2="16" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="8" y1="18" x2="12" y2="18"/><line x1="16" y1="18" x2="16" y2="18" stroke-linecap="round" stroke-width="3"/></svg></div>
         <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Preencha os dados ao lado</div>
         <div style="font-size:13px;">O resultado aparecerá aqui após o cálculo.</div>
     </div>
@@ -174,8 +174,8 @@
                 </div>
             </div>
             <button onclick="window.print()" title="Imprimir"
-                style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;color:var(--muted);">
-                🖨️ Imprimir
+                style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:5px;">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Imprimir
             </button>
         </div>
 
@@ -200,26 +200,26 @@
                     'cor' => $cor, 'bg' => $bg,
                 ];
                 $linhas = [
-                    $linha('💰', 'Valor Original', $r['valor_original'], null, '#1a3a5c', '#eff6ff'),
+                    $linha('<svg width="14" height="14" fill="none" stroke="#1a3a5c" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>', 'Valor Original', $r['valor_original'], null, '#1a3a5c', '#eff6ff'),
                 ];
                 if ($r['indice'] !== 'Sem correção') {
-                    $linhas[] = $linha('📈', 'Correção Monetária ('.$r['indice'].')', $r['correcao_reais'], $r['correcao_pct'], '#0891b2');
+                    $linhas[] = $linha('<svg width="14" height="14" fill="none" stroke="#0891b2" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>', 'Correção Monetária ('.$r['indice'].')', $r['correcao_reais'], $r['correcao_pct'], '#0891b2');
                 }
                 if ($r['juros_reais'] > 0) {
-                    $linhas[] = $linha('💹', 'Juros Moratórios', $r['juros_reais'], $r['juros_pct'], '#d97706');
+                    $linhas[] = $linha('<svg width="14" height="14" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>', 'Juros Moratórios', $r['juros_reais'], $r['juros_pct'], '#d97706');
                 }
                 if ($r['multa_reais'] > 0) {
-                    $linhas[] = $linha('⚠️', 'Multa ('.$r['multa_pct'].'%)', $r['multa_reais'], $r['multa_pct'], '#dc2626');
+                    $linhas[] = $linha('<svg width="14" height="14" fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', 'Multa ('.$r['multa_pct'].'%)', $r['multa_reais'], $r['multa_pct'], '#dc2626');
                 }
                 if ($r['honorarios_reais'] > 0) {
-                    $linhas[] = $linha('⚖️', 'Honorários Advocatícios ('.$r['honorarios_pct'].'%)', $r['honorarios_reais'], $r['honorarios_pct'], '#7c3aed');
+                    $linhas[] = $linha('<svg width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><path d="M3 6l9-3 9 3"/><path d="M3 18l4-8 4 8"/><path d="M13 18l4-8 4 8"/><line x1="2" y1="18" x2="9" y2="18"/><line x1="15" y1="18" x2="22" y2="18"/></svg>', 'Honorários Advocatícios ('.$r['honorarios_pct'].'%)', $r['honorarios_reais'], $r['honorarios_pct'], '#7c3aed');
                 }
             @endphp
 
             @foreach($linhas as $lin)
             <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:6px;background:{{ $lin['bg'] }};">
-                <div style="font-size:13px;color:#475569;">
-                    {{ $lin['icon'] }} {{ $lin['label'] }}
+                <div style="font-size:13px;color:#475569;display:flex;align-items:center;gap:6px;">
+                    {!! $lin['icon'] !!} {{ $lin['label'] }}
                 </div>
                 <div style="text-align:right;">
                     <div style="font-size:14px;font-weight:700;color:{{ $lin['cor'] }};">{{ $fmt($lin['valor']) }}</div>
@@ -246,12 +246,12 @@
         </div>
 
         @if($r['juros_desc'])
-        <div style="margin-top:12px;font-size:11px;color:var(--muted);">
-            ℹ️ Juros: {{ $r['juros_desc'] }}
+        <div style="margin-top:12px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Juros: {{ $r['juros_desc'] }}
         </div>
         @endif
-        <div style="margin-top:4px;font-size:11px;color:var(--muted);">
-            ⚠️ Cálculo gerado em {{ $r['gerado_em'] }}. Apenas para referência — consulte um advogado para fins processuais.
+        <div style="margin-top:4px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Cálculo gerado em {{ $r['gerado_em'] }}. Apenas para referência — consulte um advogado para fins processuais.
         </div>
     </div>
 
@@ -259,7 +259,7 @@
     @if(!empty($detalhes))
     <div class="card">
         <div class="card-header" style="cursor:pointer;" wire:click="$toggle('mostrarDetalhes')">
-            <span class="card-title">📋 Detalhes mensais — {{ $resultado['indice'] }}</span>
+            <span class="card-title" style="display:inline-flex;align-items:center;gap:6px;"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Detalhes mensais — {{ $resultado['indice'] }}</span>
             <span style="font-size:18px;color:var(--muted);">{{ $mostrarDetalhes ? '▲' : '▼' }}</span>
         </div>
         @if($mostrarDetalhes)
@@ -267,10 +267,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Mês</th>
-                        <th style="text-align:right;">% do mês</th>
-                        <th class="hide-sm" style="text-align:right;">Fator acumulado</th>
-                        <th style="text-align:right;">Valor atualizado</th>
+                        <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Mês</th>
+                        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">% do mês</th>
+                        <th class="hide-sm" style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Fator acumulado</th>
+                        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Valor atualizado</th>
                     </tr>
                 </thead>
                 <tbody>

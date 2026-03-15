@@ -4,7 +4,10 @@
   <div class="card" style="margin-bottom:16px">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
-        <div style="font-weight:700;font-size:15px;color:var(--primary)">🔍 Log de Auditoria</div>
+        <div style="font-weight:700;font-size:15px;color:var(--primary);display:flex;align-items:center;gap:6px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Log de Auditoria
+        </div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px">Histórico de todas as ações realizadas no sistema.</div>
       </div>
     </div>
@@ -48,12 +51,12 @@
       <table>
         <thead>
           <tr>
-            <th>Data/Hora</th>
-            <th>Usuário</th>
-            <th>Ação</th>
-            <th class="hide-sm">Tabela</th>
-            <th class="hide-xs">Registro</th>
-            <th class="hide-sm">IP</th>
+            <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Data/Hora</th>
+            <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Usuário</th>
+            <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Ação</th>
+            <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Tabela</th>
+            <th class="hide-xs" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Registro</th>
+            <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">IP</th>
             <th></th>
           </tr>
         </thead>
@@ -118,7 +121,9 @@
             {{ $detalhe->login }} · {{ \Carbon\Carbon::parse($detalhe->created_at)->format('d/m/Y H:i:s') }}
           </div>
         </div>
-        <button wire:click="fecharDetalhe" class="modal-close">✕</button>
+        <button wire:click="fecharDetalhe" style="background:none;border:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
 
       <div class="form-grid">
