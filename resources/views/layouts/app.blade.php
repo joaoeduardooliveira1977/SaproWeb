@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>@yield('title', 'Sistema Jurídico') — SAPRO</title>
+    {{-- Anti-FOUC: aplica tema antes do render --}}
+    <script>(function(){var t=localStorage.getItem('sapro-theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}());</script>
 
     {{-- PWA --}}
     <link rel="manifest" href="/manifest.json">
@@ -252,6 +254,33 @@
             .stat-grid { grid-template-columns: 1fr 1fr; }
             .topbar > div[style*="max-width:440px"] { display: none; }
         }
+
+        /* ── Dark Mode ─────────────────────────────────────────────────────── */
+        [data-theme="dark"] {
+            --bg:    #0f172a;
+            --white: #1e293b;
+            --text:  #e2e8f0;
+            --muted: #94a3b8;
+            --border:#334155;
+        }
+        [data-theme="dark"] body { background: var(--bg); }
+        [data-theme="dark"] .topbar { box-shadow: 0 1px 4px rgba(0,0,0,.4); }
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea { background: #0f172a; color: var(--text); border-color: var(--border); }
+        [data-theme="dark"] tbody tr:nth-child(even) td { background: #243044; }
+        [data-theme="dark"] tbody tr:hover td { background: #1e3a5f; }
+        [data-theme="dark"] tbody td { border-bottom-color: var(--border); }
+        [data-theme="dark"] .btn-secondary { background: #334155; color: var(--text); }
+        [data-theme="dark"] .btn-secondary-outline { background: #243044; color: #cbd5e1; border-color: var(--border); }
+        [data-theme="dark"] .modal-backdrop { background: rgba(0,0,0,.7); }
+        [data-theme="dark"] .alert-success { background: #14532d; color: #86efac; border-color: #166534; }
+        [data-theme="dark"] .alert-error   { background: #450a0a; color: #fca5a5; border-color: #991b1b; }
+        [data-theme="dark"] .page-btn { background: #1e293b; border-color: var(--border); color: var(--text); }
+        [data-theme="dark"] .page-btn:hover:not(:disabled) { background: #243044; }
+        [data-theme="dark"] .page-current { background: #243044; color: var(--text); }
+        [data-theme="dark"] .filter-bar input,
+        [data-theme="dark"] .filter-bar select { background: #0f172a; }
     </style>
 </head>
 <body>
@@ -478,6 +507,10 @@
                 @livewire('busca-global')
             </div>
             <div class="topbar-user">
+                <button id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro"
+                    style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px 6px;color:var(--muted);line-height:1;flex-shrink:0;">
+                    🌙
+                </button>
                 @livewire('notificacoes-bell')
                 <div class="avatar">{{ strtoupper(substr(auth('usuarios')->user()?->nome ?? 'U', 0, 2)) }}</div>
                 <span style="display:none" class="topbar-username">{{ auth('usuarios')->user()?->nome }}</span>
@@ -557,6 +590,19 @@
     }
 
     initAccordion();
+
+    // ── Dark Mode ──
+    function toggleTheme() {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('sapro-theme', next);
+        document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+    (function () {
+        const t = document.documentElement.getAttribute('data-theme') || 'light';
+        const btn = document.getElementById('themeToggle');
+        if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    }());
 
     // ── Service Worker (PWA) ──
     if ('serviceWorker' in navigator) {
