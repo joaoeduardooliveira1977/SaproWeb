@@ -255,6 +255,39 @@
             .topbar > div[style*="max-width:440px"] { display: none; }
         }
 
+        /* ── Print ─────────────────────────────────────────────────────────── */
+        @media print {
+            @page { margin: 1.5cm; }
+
+            /* Oculta elementos de navegação e interação */
+            .sidebar, .sidebar-overlay, .topbar, #toast-container,
+            .hamburger, .filter-bar, .pagination-bar, .btn-actions,
+            .card-actions, #themeToggle,
+            button:not(.print-keep), a.btn { display: none !important; }
+
+            /* Layout: remove flex/overflow para impressão linear */
+            html, body { height: auto !important; background: #fff !important; }
+            .layout { display: block !important; height: auto !important; }
+            .main   { display: block !important; }
+            .content { overflow: visible !important; padding: 0 !important; }
+
+            /* Cards: sem sombra, sem overflow */
+            .card, .stat-card { box-shadow: none !important; border: 1px solid #ccc !important; page-break-inside: avoid; }
+            .stat-grid { grid-template-columns: repeat(4, 1fr) !important; }
+
+            /* Tabelas: repete cabeçalho em cada página, sem quebra de linha */
+            .table-wrap { overflow: visible !important; }
+            thead { display: table-header-group; }
+            tr { page-break-inside: avoid; }
+            thead th { background: #1a3a5c !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+            /* Mostra colunas ocultas em telas pequenas */
+            .hide-sm, .hide-xs { display: table-cell !important; }
+
+            /* Preserva cores de fundo (badges, status) */
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+
         /* ── Dark Mode ─────────────────────────────────────────────────────── */
         [data-theme="dark"] {
             --bg:    #0f172a;
@@ -539,6 +572,10 @@
                 <button id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro (Theme)"
                     style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px 6px;color:var(--muted);line-height:1;flex-shrink:0;">
                     🌙
+                </button>
+                <button onclick="window.print()" title="Imprimir página (Ctrl+P)"
+                    style="background:none;border:1.5px solid var(--border);cursor:pointer;font-size:13px;padding:2px 7px;color:var(--muted);line-height:1.6;border-radius:5px;flex-shrink:0;">
+                    🖨️
                 </button>
                 <button onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'?',bubbles:true}))"
                     title="Atalhos de teclado (?)"
