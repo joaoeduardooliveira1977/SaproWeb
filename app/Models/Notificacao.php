@@ -26,7 +26,7 @@ class Notificacao extends Model
     // ── Scopes ──────────────────────────────────────────────────
 
     /** Notificações visíveis para um usuário (dele + globais) */
-    public function scopeParaUsuario($query, int $usuarioId)
+    public function scopeParaUsuario($query, ?int $usuarioId)
     {
         return $query->where(function ($q) use ($usuarioId) {
             $q->where('usuario_id', $usuarioId)

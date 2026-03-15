@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use App\Models\Notificacao;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class NotificacoesBell extends Component
@@ -24,7 +23,7 @@ class NotificacoesBell extends Component
     {
         Notificacao::where('id', $id)
             ->where(function ($q) {
-                $q->where('usuario_id', Auth::id())
+                $q->where('usuario_id', auth('usuarios')->id())
                   ->orWhereNull('usuario_id');
             })
             ->update(['lida' => true]);
@@ -32,15 +31,12 @@ class NotificacoesBell extends Component
 
     public function marcarTodasLidas(): void
     {
-        $usuarioId = Auth::id();
+        $usuarioId = auth('usuarios')->id();
 
-        // Marca as individuais do usuário
         Notificacao::where('usuario_id', $usuarioId)
             ->where('lida', false)
             ->update(['lida' => true]);
 
-        // Marca as globais (usuario_id null) criando cópia marcada como lida
-        // Solução simples: atualiza globais também (elas ficam lidas para todos)
         Notificacao::whereNull('usuario_id')
             ->where('lida', false)
             ->update(['lida' => true]);
@@ -48,7 +44,7 @@ class NotificacoesBell extends Component
 
     public function render(): \Illuminate\View\View
     {
-        $usuarioId = Auth::id();
+        $usuarioId = auth('usuarios')->id();
 
         $notificacoes = Notificacao::paraUsuario($usuarioId)
             ->orderBy('lida')
