@@ -6,7 +6,7 @@
   @endif
 
   {{-- KPIs --}}
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:20px">
+  <div class="stat-grid">
     <div class="stat-card" style="border-left-color:#d97706">
       <div class="stat-icon">⏳</div>
       <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Pendentes</div>
@@ -36,31 +36,28 @@
 
   {{-- Filtros + Novo --}}
   <div class="card" style="margin-bottom:16px">
-    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-      <div style="flex:1;min-width:200px">
-        <input wire:model.live.debounce.300ms="filtroBusca" type="text"
-               placeholder="Buscar comarca, advogado, processo..."
-               class="search-bar" style="width:100%">
-      </div>
-      <select wire:model.live="filtroStatus" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+    <div class="filter-bar">
+      <input wire:model.live.debounce.300ms="filtroBusca" type="text"
+             placeholder="🔍 Buscar comarca, advogado, processo...">
+      <select wire:model.live="filtroStatus">
         <option value="">Todos os status</option>
         @foreach(\App\Models\Correspondente::statusLabel() as $val => $label)
           <option value="{{ $val }}">{{ $label }}</option>
         @endforeach
       </select>
-      <select wire:model.live="filtroTipo" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <select wire:model.live="filtroTipo">
         <option value="">Todos os tipos</option>
         @foreach(\App\Models\Correspondente::tiposLabel() as $val => $label)
           <option value="{{ $val }}">{{ $label }}</option>
         @endforeach
       </select>
-      <select wire:model.live="filtroAdvogado" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <select wire:model.live="filtroAdvogado">
         <option value="">Todos os advogados</option>
         @foreach($advogados as $adv)
           <option value="{{ $adv->id }}">{{ $adv->nome }}</option>
         @endforeach
       </select>
-      <button wire:click="abrirModal()" class="btn btn-primary btn-sm">＋ Nova Correspondência</button>
+      <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="flex-shrink:0;">＋ Nova Correspondência</button>
     </div>
   </div>
 
@@ -78,10 +75,10 @@
           <thead>
             <tr>
               <th>Advogado</th>
-              <th>Comarca / UF</th>
-              <th>Tipo</th>
-              <th>Processo</th>
-              <th>Prazo</th>
+              <th class="hide-sm">Comarca / UF</th>
+              <th class="hide-sm">Tipo</th>
+              <th class="hide-sm">Processo</th>
+              <th class="hide-xs">Prazo</th>
               <th style="text-align:right">Valor</th>
               <th style="text-align:center">Status</th>
               <th></th>
@@ -100,18 +97,18 @@
                     <div style="font-size:11px;color:var(--muted)">OAB {{ $c->advogado->oab }}</div>
                   @endif
                 </td>
-                <td>
+                <td class="hide-sm">
                   <div style="color:var(--text)">{{ $c->comarca }}</div>
                   @if($c->estado)
                     <div style="font-size:11px;color:var(--muted)">{{ $c->estado }}</div>
                   @endif
                 </td>
-                <td>
+                <td class="hide-sm">
                   <span class="badge" style="background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;font-size:11px">
                     {{ $c->tipoLabel() }}
                   </span>
                 </td>
-                <td>
+                <td class="hide-sm">
                   @if($c->processo)
                     <div style="font-size:12px;font-family:monospace;color:var(--muted)">{{ $c->processo->numero }}</div>
                     <div style="font-size:11px;color:var(--muted)">{{ $c->processo->cliente?->nome }}</div>
@@ -119,7 +116,7 @@
                     <span style="color:var(--muted)">—</span>
                   @endif
                 </td>
-                <td>
+                <td class="hide-xs">
                   @if($c->data_prazo)
                     <div style="font-size:13px;{{ $prazoAtrasado ? 'color:#dc2626;font-weight:700' : 'color:var(--text)' }}">
                       {{ $c->data_prazo->format('d/m/Y') }}
@@ -173,9 +170,7 @@
           </tbody>
         </table>
       </div>
-      @if($correspondencias->hasPages())
-        <div class="pagination">{{ $correspondencias->links() }}</div>
-      @endif
+      <div class="pagination-bar" style="padding:12px 16px;">{{ $correspondencias->links() }}</div>
     @endif
   </div>
 

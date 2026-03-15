@@ -62,24 +62,16 @@
 
 {{-- ══ Filtros (abas com lista) ══════════════════════════════════ --}}
 @if(in_array($aba, ['receber','pagar','honorarios']))
-<div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+<div class="filter-bar" style="margin-bottom:16px;">
     @if($aba !== 'honorarios')
-    <div>
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-right:6px;">Mês</label>
-        <input type="month" wire:model.live="filtroMes"
-            style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;">
-    </div>
-    <div>
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-right:6px;">Status</label>
-        <select wire:model.live="filtroStatus"
-            style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;">
-            <option value="pendente">Apenas pendentes</option>
-            <option value="todos">Todos</option>
-        </select>
-    </div>
+    <input type="month" wire:model.live="filtroMes" title="Mês">
+    <select wire:model.live="filtroStatus">
+        <option value="pendente">Apenas pendentes</option>
+        <option value="todos">Todos</option>
+    </select>
     @endif
     <button wire:click="exportarCsv" wire:loading.attr="disabled"
-        class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1.5px solid var(--border);margin-left:auto;">
+        class="btn btn-sm btn-secondary-outline" style="margin-left:auto;flex-shrink:0;">
         <span wire:loading.remove wire:target="exportarCsv">📥 CSV</span>
         <span wire:loading wire:target="exportarCsv">Gerando…</span>
     </button>
@@ -92,7 +84,7 @@
     <div class="card-header">
         <span class="card-title">Resumo Financeiro</span>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+    <div class="form-grid">
         <div>
             <h3 style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">Recebimentos</h3>
             <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px;">
@@ -182,7 +174,7 @@
                 <tr>
                     <th>Mês</th>
                     <th style="text-align:right;">Recebimentos</th>
-                    <th style="text-align:right;">Honorários recebidos</th>
+                    <th class="hide-sm" style="text-align:right;">Honorários recebidos</th>
                     <th style="text-align:right;">Despesas pagas</th>
                     <th style="text-align:right;">Saldo do mês</th>
                 </tr>
@@ -192,7 +184,7 @@
                 <tr>
                     <td style="font-weight:600;">{{ $linha['label'] }}</td>
                     <td style="text-align:right;color:#16a34a;">R$ {{ number_format($linha['recebido'],2,',','.') }}</td>
-                    <td style="text-align:right;color:#0891b2;">R$ {{ number_format($linha['honorarios'],2,',','.') }}</td>
+                    <td class="hide-sm" style="text-align:right;color:#0891b2;">R$ {{ number_format($linha['honorarios'],2,',','.') }}</td>
                     <td style="text-align:right;color:#dc2626;">R$ {{ number_format($linha['pago'],2,',','.') }}</td>
                     <td style="text-align:right;font-weight:700;color:{{ $linha['saldo'] >= 0 ? '#16a34a' : '#dc2626' }};">
                         R$ {{ number_format($linha['saldo'],2,',','.') }}
@@ -206,7 +198,7 @@
                     <td style="text-align:right;font-weight:700;color:#16a34a;">
                         R$ {{ number_format(collect($fluxo)->sum('recebido'),2,',','.') }}
                     </td>
-                    <td style="text-align:right;font-weight:700;color:#0891b2;">
+                    <td class="hide-sm" style="text-align:right;font-weight:700;color:#0891b2;">
                         R$ {{ number_format(collect($fluxo)->sum('honorarios'),2,',','.') }}
                     </td>
                     <td style="text-align:right;font-weight:700;color:#dc2626;">
@@ -333,9 +325,9 @@
             <thead>
                 <tr>
                     <th>Data</th>
-                    <th>Processo</th>
+                    <th class="hide-sm">Processo</th>
                     <th>Cliente</th>
-                    <th>Descrição</th>
+                    <th class="hide-sm">Descrição</th>
                     <th style="text-align:right;">Valor</th>
                     <th>Status</th>
                     <th></th>
@@ -347,9 +339,9 @@
                     <td style="white-space:nowrap;">
                         {{ $row->data ? \Carbon\Carbon::parse($row->data)->format('d/m/Y') : '—' }}
                     </td>
-                    <td style="font-family:monospace;font-size:11px;">{{ $row->processo_numero ?? '—' }}</td>
+                    <td class="hide-sm" style="font-family:monospace;font-size:11px;">{{ $row->processo_numero ?? '—' }}</td>
                     <td>{{ $row->cliente_nome ?? '—' }}</td>
-                    <td style="font-size:12px;">{{ $row->descricao ?? '—' }}</td>
+                    <td class="hide-sm" style="font-size:12px;">{{ $row->descricao ?? '—' }}</td>
                     <td style="text-align:right;font-weight:600;color:#16a34a;">
                         R$ {{ number_format($row->valor,2,',','.') }}
                     </td>
@@ -404,10 +396,10 @@
             <thead>
                 <tr>
                     <th>Vencimento</th>
-                    <th>Processo</th>
+                    <th class="hide-sm">Processo</th>
                     <th>Cliente</th>
-                    <th>Fornecedor</th>
-                    <th>Descrição</th>
+                    <th class="hide-sm">Fornecedor</th>
+                    <th class="hide-sm">Descrição</th>
                     <th style="text-align:right;">Valor</th>
                     <th>Status</th>
                     <th></th>
@@ -423,10 +415,10 @@
                         {{ $row->data_vencimento ? \Carbon\Carbon::parse($row->data_vencimento)->format('d/m/Y') : '—' }}
                         @if($vencido) <span style="font-size:10px;">⚠️</span> @endif
                     </td>
-                    <td style="font-family:monospace;font-size:11px;">{{ $row->processo_numero ?? '—' }}</td>
+                    <td class="hide-sm" style="font-family:monospace;font-size:11px;">{{ $row->processo_numero ?? '—' }}</td>
                     <td>{{ $row->cliente_nome ?? '—' }}</td>
-                    <td style="font-size:12px;">{{ $row->fornecedor_nome ?? '—' }}</td>
-                    <td style="font-size:12px;">{{ $row->descricao ?? '—' }}</td>
+                    <td class="hide-sm" style="font-size:12px;">{{ $row->fornecedor_nome ?? '—' }}</td>
+                    <td class="hide-sm" style="font-size:12px;">{{ $row->descricao ?? '—' }}</td>
                     <td style="text-align:right;font-weight:600;color:#dc2626;">
                         R$ {{ number_format($row->valor,2,',','.') }}
                     </td>
@@ -483,11 +475,11 @@
             <thead>
                 <tr>
                     <th>Vencimento</th>
-                    <th>Dias em atraso</th>
+                    <th>Atraso</th>
                     <th>Cliente</th>
-                    <th>Processo</th>
-                    <th>Contrato</th>
-                    <th>Parcela</th>
+                    <th class="hide-sm">Processo</th>
+                    <th class="hide-sm">Contrato</th>
+                    <th class="hide-xs">Parcela</th>
                     <th style="text-align:right;">Valor</th>
                 </tr>
             </thead>
@@ -503,9 +495,9 @@
                         </span>
                     </td>
                     <td>{{ $row->cliente_nome ?? '—' }}</td>
-                    <td style="font-family:monospace;font-size:11px;">{{ $row->processo_numero ?? '—' }}</td>
-                    <td style="font-size:12px;">{{ $row->honorario_descricao ?? '—' }}</td>
-                    <td style="text-align:center;">{{ $row->numero_parcela }}ª</td>
+                    <td class="hide-sm" style="font-family:monospace;font-size:11px;">{{ $row->processo_numero ?? '—' }}</td>
+                    <td class="hide-sm" style="font-size:12px;">{{ $row->honorario_descricao ?? '—' }}</td>
+                    <td class="hide-xs" style="text-align:center;">{{ $row->numero_parcela }}ª</td>
                     <td style="text-align:right;font-weight:600;color:#7c3aed;">
                         R$ {{ number_format($row->valor,2,',','.') }}
                     </td>
