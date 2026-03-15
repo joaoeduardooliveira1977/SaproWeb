@@ -281,12 +281,41 @@
         [data-theme="dark"] .page-current { background: #243044; color: var(--text); }
         [data-theme="dark"] .filter-bar input,
         [data-theme="dark"] .filter-bar select { background: #0f172a; }
+
+        /* ── Toasts ── */
+        #toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 8px;
+            pointer-events: none; max-width: 360px; width: calc(100vw - 40px);
+        }
+        .toast {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 12px 16px; border-radius: 10px; font-size: 13px; font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0,0,0,.18); pointer-events: all;
+            animation: toastIn .25s ease; transition: opacity .3s, transform .3s;
+            word-break: break-word;
+        }
+        .toast.hiding { opacity: 0; transform: translateX(20px); }
+        .toast-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .toast-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .toast-warning { background: #fef9c3; color: #92400e; border: 1px solid #fde68a; }
+        .toast-info    { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .toast-body    { flex: 1; line-height: 1.4; }
+        .toast-close   { background: none; border: none; cursor: pointer; font-size: 16px; color: currentColor; opacity: .45; padding: 0; line-height: 1; flex-shrink: 0; }
+        .toast-close:hover { opacity: 1; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+        [data-theme="dark"] .toast-success { background: #14532d; color: #86efac; border-color: #166534; }
+        [data-theme="dark"] .toast-error   { background: #450a0a; color: #fca5a5; border-color: #991b1b; }
+        [data-theme="dark"] .toast-warning { background: #451a03; color: #fed7aa; border-color: #92400e; }
+        [data-theme="dark"] .toast-info    { background: #1e3a8a; color: #bfdbfe; border-color: #1d4ed8; }
+        @media (max-width: 480px) { #toast-container { top: 12px; right: 12px; width: calc(100vw - 24px); } }
     </style>
 </head>
 <body>
 <div class="layout">
 
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div id="toast-container"></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -518,12 +547,6 @@
         </div>
 
         <div class="content">
-            @if(session('sucesso') || session('success'))
-                <div class="alert alert-success">✅ {{ session('sucesso') ?? session('success') }}</div>
-            @endif
-            @if(session('erro') || session('error'))
-                <div class="alert alert-error">❌ {{ session('erro') ?? session('error') }}</div>
-            @endif
             @yield('content')
             @yield('conteudo')
         </div>
@@ -590,6 +613,35 @@
     }
 
     initAccordion();
+
+    // ── Toasts ──
+    const TOAST_ICONS = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    window.toast = function (message, type = 'success', duration = 4000) {
+        const el = document.createElement('div');
+        el.className = 'toast toast-' + type;
+        el.innerHTML = '<span class="toast-body">' + (TOAST_ICONS[type] || '') + ' ' + message + '</span>'
+                     + '<button class="toast-close" onclick="this.closest(\'.toast\').remove()">×</button>';
+        document.getElementById('toast-container').appendChild(el);
+        if (duration > 0) {
+            setTimeout(() => {
+                el.classList.add('hiding');
+                setTimeout(() => el.remove(), 320);
+            }, duration);
+        }
+    };
+    // Session flash → toast
+    @if(session('sucesso') || session('success'))
+        toast(@json(session('sucesso') ?? session('success')), 'success');
+    @endif
+    @if(session('erro') || session('error'))
+        toast(@json(session('erro') ?? session('error')), 'error');
+    @endif
+    // Livewire events → toast
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('toast', ({ message, type = 'success', duration = 4000 }) => {
+            toast(message, type, duration);
+        });
+    });
 
     // ── Dark Mode ──
     function toggleTheme() {
