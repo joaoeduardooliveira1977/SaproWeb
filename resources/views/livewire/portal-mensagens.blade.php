@@ -1,8 +1,5 @@
 <div>
 
-@if(session('sucesso'))
-    <div class="alert alert-success">✅ {{ session('sucesso') }}</div>
-@endif
 
 <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;height:calc(100vh - 160px);min-height:400px;">
 

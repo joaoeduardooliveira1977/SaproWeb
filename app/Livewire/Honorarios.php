@@ -219,7 +219,7 @@ class Honorarios extends Component
         }
 
         $this->modalHonorario = false;
-        session()->flash('success', 'Honorário salvo com sucesso!');
+        $this->dispatch('toast', message: 'Honorário salvo com sucesso!', type: 'success');
     }
 
     private function gerarParcelas(int $honorarioId, float $valorTotal, int $total, string $dataInicio): void
@@ -296,14 +296,14 @@ class Honorarios extends Component
         $parcela = DB::selectOne("SELECT honorario_id FROM honorario_parcelas WHERE id = ?", [$this->parcelaId]);
         if ($parcela) $this->verParcelas($parcela->honorario_id);
 
-        session()->flash('success', 'Pagamento registrado!');
+        $this->dispatch('toast', message: 'Pagamento registrado!', type: 'success');
     }
 
     public function excluirHonorario(int $id): void
     {
         DB::delete("DELETE FROM honorario_parcelas WHERE honorario_id = ?", [$id]);
         DB::delete("DELETE FROM honorarios WHERE id = ?", [$id]);
-        session()->flash('success', 'Honorário excluído.');
+        $this->dispatch('toast', message: 'Honorário excluído.', type: 'success');
     }
 
     public function render()

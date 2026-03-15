@@ -23,7 +23,9 @@
       "Bash(\"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" \"C:/projetos/saproweb-base/artisan\" migrate --path=database/migrations/2024_01_01_000040_create_prazos_table.php 2>&1)",
       "Bash(\"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" \"C:/projetos/saproweb-base/artisan\" migrate --path=database/migrations/2024_01_01_000041_create_notificacoes_table.php 2>&1)",
       "Bash(ls \"C:/projetos/saproweb-base/app/Models/\" && \"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" \"C:/projetos/saproweb-base/artisan\" db:table documentos 2>&1 | head -30)",
-      "Bash(\"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" \"C:/projetos/saproweb-base/artisan\" migrate --path=database/migrations/2024_01_01_000042_portal_aprimorado.php 2>&1)"
+      "Bash(\"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" \"C:/projetos/saproweb-base/artisan\" migrate --path=database/migrations/2024_01_01_000042_portal_aprimorado.php 2>&1)",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe /c/projetos/saproweb-base/artisan notificacoes:gerar 2>&1)",
+      "Bash(npm update:*)"
     ]
   }
 }

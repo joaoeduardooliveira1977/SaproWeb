@@ -31,14 +31,6 @@
     .pill-inativo { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
 </style>
 
-{{-- Flash messages Livewire --}}
-@if(session('sucesso'))
-    <div class="alert alert-success">✅ {{ session('sucesso') }}</div>
-@endif
-@if(session('erro'))
-    <div class="alert alert-error">❌ {{ session('erro') }}</div>
-@endif
-
 {{-- ══ Abas ══ --}}
 <div class="tabs">
     <button class="tab-btn {{ $aba === 'publicacoes' ? 'active' : '' }}" wire:click="$set('aba','publicacoes')">

@@ -12,7 +12,6 @@ use App\Jobs\VerificarAndamentosTjsp;
 class TjspConsulta extends Component
 {
     public ?int    $verificacaoId  = null;
-    public string  $erroMensagem   = '';
     public bool    $consultando    = false;
 
     // Filtros
@@ -24,8 +23,7 @@ class TjspConsulta extends Component
 
     public function iniciarVerificacao(): void
     {
-        $this->erroMensagem = '';
-        $this->consultando  = true;
+        $this->consultando = true;
 
         try {
             // Reset qualquer verificação travada (pendente OU rodando)
@@ -35,7 +33,7 @@ class TjspConsulta extends Component
             $processos = $this->queryProcessos();
 
             if ($processos->isEmpty()) {
-                $this->erroMensagem = 'Nenhum processo encontrado com os filtros selecionados.';
+                $this->dispatch('toast', message: 'Nenhum processo encontrado com os filtros selecionados.', type: 'error');
                 return;
             }
 
@@ -46,9 +44,7 @@ class TjspConsulta extends Component
             );
 
             if ($semTribunal->count() === $processos->count()) {
-                $this->erroMensagem =
-                    'Nenhum processo selecionado possui número CNJ reconhecível pelo DATAJUD. ' .
-                    'Verifique se os números estão no formato correto (ex: 0001234-56.2023.8.26.0001).';
+                $this->dispatch('toast', message: 'Nenhum processo selecionado possui número CNJ reconhecível pelo DATAJUD. Verifique se os números estão no formato correto (ex: 0001234-56.2023.8.26.0001).', type: 'error');
                 return;
             }
 
@@ -72,7 +68,7 @@ class TjspConsulta extends Component
             VerificarAndamentosTjsp::dispatch($verificacao->id, $processoIds);
 
         } catch (\Throwable $e) {
-            $this->erroMensagem = 'Erro ao iniciar a verificação: ' . $e->getMessage();
+            $this->dispatch('toast', message: 'Erro ao iniciar a verificação: ' . $e->getMessage(), type: 'error');
             $this->verificacaoId = null;
         } finally {
             $this->consultando = false;

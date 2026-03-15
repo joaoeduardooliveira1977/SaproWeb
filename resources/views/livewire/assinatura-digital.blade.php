@@ -13,13 +13,7 @@
   </div>
   @endif
 
-  {{-- Flash --}}
-  @if(session('sucesso'))
-    <div class="alert-success" style="margin-bottom:16px">✅ {{ session('sucesso') }}</div>
-  @endif
-  @if(session('erro') || $erroEnvio)
-    <div class="alert-error" style="margin-bottom:16px">⚠️ {{ session('erro') ?: $erroEnvio }}</div>
-  @endif
+
 
   {{-- KPIs --}}
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">

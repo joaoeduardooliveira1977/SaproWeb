@@ -151,7 +151,7 @@ class Documentos extends Component
 
         $this->modalDocumento = false;
         $this->reset(['arquivo']);
-        session()->flash('success', 'Documento salvo com sucesso!');
+        $this->dispatch('toast', message: 'Documento salvo com sucesso!', type: 'success');
     }
 
     public function ordenar(string $coluna): void
@@ -239,7 +239,7 @@ class Documentos extends Component
             Storage::disk('public')->delete($doc->arquivo);
         }
         DB::delete("DELETE FROM documentos WHERE id = ?", [$id]);
-        session()->flash('success', 'Documento excluído.');
+        $this->dispatch('toast', message: 'Documento excluído.', type: 'success');
     }
 
     public function downloadUrl(int $id): void

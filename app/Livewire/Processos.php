@@ -42,7 +42,7 @@ class Processos extends Component
 
         $this->confirmandoExclusao  = false;
         $this->processoParaExcluir  = null;
-        session()->flash('sucesso', "Processo {$processo->numero} arquivado.");
+        $this->dispatch('toast', message: "Processo {$processo->numero} arquivado.", type: 'success');
     }
 
     public function cancelarExclusao(): void

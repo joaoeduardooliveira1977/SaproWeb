@@ -161,7 +161,7 @@ class Financeiro extends Component
 
         $this->fecharModal();
         $this->atualizarTotais();
-        session()->flash('sucesso', 'Registro salvo com sucesso!');
+        $this->dispatch('toast', message: 'Registro salvo com sucesso!', type: 'success');
     }
 
     private function salvarPagamento(): void
@@ -232,7 +232,7 @@ class Financeiro extends Component
             'apontamentos' => Apontamento::findOrFail($id)->delete(),
         };
         $this->atualizarTotais();
-        session()->flash('sucesso', 'Registro removido.');
+        $this->dispatch('toast', message: 'Registro removido.', type: 'success');
     }
 
     // ── Helpers ────────────────────────────────

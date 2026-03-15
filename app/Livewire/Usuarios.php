@@ -101,13 +101,13 @@ class Usuarios extends Component
         }
 
         $this->modal = false;
-        session()->flash('success', 'Usuário salvo com sucesso!');
+        $this->dispatch('toast', message: 'Usuário salvo com sucesso!', type: 'success');
     }
 
     public function toggleAtivo(int $id): void
     {
         if ($id === auth()->id()) {
-            session()->flash('error', 'Você não pode desativar sua própria conta!');
+            $this->dispatch('toast', message: 'Você não pode desativar sua própria conta!', type: 'error');
             return;
         }
         DB::update("UPDATE usuarios SET ativo = NOT ativo WHERE id = ?", [$id]);
@@ -116,11 +116,11 @@ class Usuarios extends Component
     public function excluir(int $id): void
     {
         if ($id === auth()->id()) {
-            session()->flash('error', 'Você não pode excluir sua própria conta!');
+            $this->dispatch('toast', message: 'Você não pode excluir sua própria conta!', type: 'error');
             return;
         }
         DB::delete("DELETE FROM usuarios WHERE id = ?", [$id]);
-        session()->flash('success', 'Usuário excluído.');
+        $this->dispatch('toast', message: 'Usuário excluído.', type: 'success');
     }
 
     public function render()

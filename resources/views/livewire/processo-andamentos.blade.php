@@ -24,13 +24,6 @@
     @endif
     @endif
 
-    {{-- Mensagem de sucesso --}}
-    @if(session('sucesso'))
-    <div style="background:#dcfce7; border-radius:8px; padding:12px 16px; margin-bottom:20px; font-size:14px; color:#16a34a;">
-        &#10003; {{ session('sucesso') }}
-    </div>
-    @endif
-
     {{-- Formulario --}}
     @if($mostrarFormulario)
     <div class="card" style="margin-bottom:24px;border-left:4px solid var(--primary-light);">

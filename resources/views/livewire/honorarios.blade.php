@@ -1,10 +1,4 @@
 <div>
-{{-- Flash --}}
-@if(session('success'))
-    <div style="background:#dcfce7;border:1px solid #16a34a;color:#15803d;padding:12px 16px;border-radius:8px;margin-bottom:16px;">
-        ✅ {{ session('success') }}
-    </div>
-@endif
 
 {{-- Cards Resumo --}}
 <div class="stat-grid">

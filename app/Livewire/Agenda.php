@@ -166,7 +166,7 @@ class Agenda extends Component
         }
 
         $this->fecharModal();
-        session()->flash('sucesso', 'Evento salvo!');
+        $this->dispatch('toast', message: 'Evento salvo!', type: 'success');
     }
 
     public function concluir(int $id): void
@@ -177,7 +177,7 @@ class Agenda extends Component
     public function excluir(int $id): void
     {
         AgendaModel::findOrFail($id)->delete();
-        session()->flash('sucesso', 'Evento removido.');
+        $this->dispatch('toast', message: 'Evento removido.', type: 'success');
     }
 
     // ── Render ─────────────────────────────────────────────────

@@ -1,10 +1,5 @@
 <div>
 
-  {{-- Flash --}}
-  @if(session('sucesso'))
-    <div class="alert-success" style="margin-bottom:16px">✅ {{ session('sucesso') }}</div>
-  @endif
-
   {{-- KPIs --}}
   <div class="stat-grid">
     <div class="stat-card" style="border-left-color:#d97706">

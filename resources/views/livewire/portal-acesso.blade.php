@@ -10,13 +10,6 @@
         </a>
     </div>
 
-    {{-- Mensagem --}}
-    @if($mensagem)
-    <div style="background:#dcfce7; border:1px solid #86efac; border-radius:8px; padding:12px 16px; margin-bottom:20px; font-size:14px; color:#16a34a;">
-        ✅ {{ $mensagem }}
-    </div>
-    @endif
-
     {{-- Busca --}}
     <div style="margin-bottom:20px;">
         <input wire:model.live="busca" type="text" placeholder="🔍 Buscar cliente..."
@@ -89,10 +82,6 @@
     <div style="position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:50;">
         <div style="background:white; border-radius:16px; padding:32px; width:100%; max-width:400px;">
             <h3 style="font-size:16px; font-weight:600; color:#1a3a5c; margin-bottom:20px;">🔑 Definir Senha do Portal</h3>
-
-            @if($erro)
-            <div style="background:#fee2e2; border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:13px; color:#dc2626;">{{ $erro }}</div>
-            @endif
 
             <div style="margin-bottom:16px;">
                 <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Nova senha</label>

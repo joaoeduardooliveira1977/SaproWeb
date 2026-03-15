@@ -50,7 +50,6 @@ class AssinaturaDigital extends Component
 
     // ── Estado de envio ───────────────────────────────────────
     public bool   $enviando      = false;
-    public string $erroEnvio     = '';
 
     public function updatedFiltroBusca(): void  { $this->resetPage(); }
     public function updatedFiltroStatus(): void { $this->resetPage(); }
@@ -169,7 +168,7 @@ class AssinaturaDigital extends Component
         }
 
         $this->fecharModal();
-        session()->flash('sucesso', 'Solicitação de assinatura criada como rascunho.');
+        $this->dispatch('toast', message: 'Solicitação de assinatura criada como rascunho.', type: 'success');
     }
 
     // ── Enviar para ClickSign ─────────────────────────────────
@@ -177,8 +176,7 @@ class AssinaturaDigital extends Component
     public function enviarAssinatura(int $id): void
     {
         $assinatura = Assinatura::with('signatarios')->findOrFail($id);
-        $this->erroEnvio = '';
-        $this->enviando  = true;
+        $this->enviando = true;
 
         try {
             $service = new AssinaturaDigitalService();
@@ -224,7 +222,7 @@ class AssinaturaDigital extends Component
                 }
             }
 
-            session()->flash('sucesso', 'Documento enviado para assinatura com sucesso!');
+            $this->dispatch('toast', message: 'Documento enviado para assinatura com sucesso!', type: 'success');
 
         } catch (\Throwable $e) {
             Log::error('AssinaturaDigital: falha ao enviar', [
@@ -237,7 +235,7 @@ class AssinaturaDigital extends Component
                 'erro_mensagem'   => $e->getMessage(),
             ]);
 
-            $this->erroEnvio = 'Falha ao enviar: ' . $e->getMessage();
+            $this->dispatch('toast', message: 'Falha ao enviar: ' . $e->getMessage(), type: 'error');
         } finally {
             $this->enviando = false;
         }
@@ -261,7 +259,7 @@ class AssinaturaDigital extends Component
         }
 
         $assinatura->update(['status' => 'cancelado']);
-        session()->flash('sucesso', 'Assinatura cancelada.');
+        $this->dispatch('toast', message: 'Assinatura cancelada.', type: 'success');
     }
 
     // ── Sync status manual ────────────────────────────────────
@@ -285,10 +283,10 @@ class AssinaturaDigital extends Component
             $novoStatus = $statusMap[$lista['status'] ?? ''] ?? $assinatura->status;
             $assinatura->update(['status' => $novoStatus]);
 
-            session()->flash('sucesso', 'Status sincronizado: ' . Assinatura::statusLabel()[$novoStatus]);
+            $this->dispatch('toast', message: 'Status sincronizado: ' . Assinatura::statusLabel()[$novoStatus], type: 'success');
 
         } catch (\Throwable $e) {
-            session()->flash('erro', 'Falha ao sincronizar: ' . $e->getMessage());
+            $this->dispatch('toast', message: 'Falha ao sincronizar: ' . $e->getMessage(), type: 'error');
         }
     }
 
@@ -304,11 +302,11 @@ class AssinaturaDigital extends Component
     {
         $assinatura = Assinatura::findOrFail($id);
         if (!in_array($assinatura->status, ['rascunho', 'cancelado', 'erro'])) {
-            session()->flash('erro', 'Só é possível excluir rascunhos ou cancelados.');
+            $this->dispatch('toast', message: 'Só é possível excluir rascunhos ou cancelados.', type: 'error');
             return;
         }
         $assinatura->delete();
-        session()->flash('sucesso', 'Solicitação excluída.');
+        $this->dispatch('toast', message: 'Solicitação excluída.', type: 'success');
     }
 
     // ── Helpers ───────────────────────────────────────────────

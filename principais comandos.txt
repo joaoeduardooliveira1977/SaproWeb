@@ -181,3 +181,154 @@ E-MAIL HTML:
 
 
 
+
+
+No módulo de Consulta TJSP do SAPRO, expandir para suportar múltiplos tribunais 
+usando a API DATAJUD do CNJ.
+
+1. Criar um mapa de tribunais baseado no código do processo (posição J.TT no número CNJ):
+
+   8.26 = TJSP → api_publica_tjsp
+   8.19 = TJMG → api_publica_tjmg
+   5.02 = TRT2 → api_publica_trt2
+   5.15 = TRT15 → api_publica_trt15
+   4.03 = TRF3 → api_publica_trf3
+   4.02 = TRF2 → api_publica_trf2
+   4.01 = TRF1 → api_publica_trf1
+   3.00 = STJ  → api_publica_stj
+   1.00 = STF  → api_publica_stf
+   6.00 = TST  → api_publica_tst
+
+2. No TjspService.php (ou renomear para TribunalService.php), criar método que:
+   - Recebe o número do processo
+   - Extrai o código J.TT automaticamente via regex
+   - Determina o endpoint correto
+   - Faz a consulta no tribunal correto
+   - Retorna os dados no mesmo formato atual
+
+3. Atualizar o componente Livewire e a view para:
+   - Remover a palavra "TJSP" do título, usar "Consulta Judicial"
+   - Mostrar qual tribunal foi detectado automaticamente
+   - Exibir o nome do tribunal nos resultados
+
+4. Atualizar o job VerificarAndamentosTjsp para usar o novo serviço,
+   detectando o tribunal de cada processo automaticamente.
+
+5. Manter a mesma chave de API: cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==
+
+6. Renomear o menu de "Consulta TJSP" para "Consulta Judicial" no app.blade.php
+
+
+
+
+
+
+
+
+
+
+
+
+
+criar o campo em processo:
+Extrajudicial ai eu confirmo com ela como tratamos os campos secretaria etc etc
+Assim segrega processos reais de extrajudiciais.
+
+_______________
+Em Andamento de processo colocar upload dos documentos para relacionar aos andamentos;
+
+________________
+Relatório de andamentos por clientes e escolhe todos, judiciais e extrajudiciais (coloca intervalo também)
+________________
+Área do cliente só acrescentar no filtro todos/judiciais e extrajudiciais
+________________
+
+
+
+
+
+
+No SAPRO, implementar 3 melhorias:
+
+--- MELHORIA 1: Upload de documentos em Andamentos ---
+No componente ProcessoAndamentos.php e sua view, adicionar:
+- Botão de upload de arquivo ao lado de cada andamento existente
+- Ao adicionar novo andamento, campo opcional para anexar arquivo
+- Salvar o arquivo em storage/app/public/andamentos/{processo_id}/
+- Registrar na tabela documentos (já existente) com referência ao andamento_id
+  (adicionar coluna andamento_id nullable na tabela documentos se não existir)
+- Exibir ícone de clipe 📎 nos andamentos que possuem documento, clicável para download
+
+--- MELHORIA 2: Relatório de Andamentos por Cliente ---
+Criar novo relatório PDF no módulo de Relatórios:
+- Filtros: 
+  * Cliente (select com todos os clientes)
+  * Data início e Data fim
+  * Tipo: Todos / Somente Judiciais / Somente Extrajudiciais 
+    (por enquanto Extrajudicial = processo sem número CNJ ou com flag futura)
+- Conteúdo do PDF:
+  * Cabeçalho com nome do cliente e período
+  * Agrupado por processo (número + título)
+  * Lista de andamentos do período com data e descrição
+  * Total de andamentos por processo
+- Adicionar esse relatório na tela de Relatórios junto aos existentes
+
+--- MELHORIA 3: Filtro no Portal do Cliente ---
+No componente Portal (PortalDashboard.php ou similar) e sua view:
+- Adicionar filtro de abas ou select: Todos / Judiciais / Extrajudiciais
+- Por enquanto Judicial = processo com número CNJ preenchido
+- Extrajudicial = processo sem número CNJ
+- Filtro deve funcionar sem recarregar a página (Livewire)
+
+
+
+
+
+No SAPRO, configurar o agendamento automático do módulo AASP Publicações:
+
+1. No arquivo routes/console.php (ou app/Console/Kernel.php), adicionar schedule:
+   - Todo dia útil às 08:00 buscar publicações do dia anterior na API AASP
+   - Para cada advogado ativo cadastrado na tabela aasp_advogados
+   - Salvar as publicações na tabela aasp_publicacoes
+   - Enviar e-mail automaticamente para o endereço configurado em aasp_config
+   - Registrar no log se sucesso ou falha
+
+2. Criar um comando Artisan chamado "aasp:buscar-publicacoes" que:
+   - Aceita parâmetro opcional --data=DD/MM/YYYY (se não informado usa ontem)
+   - Executa a mesma lógica do botão "Buscar Publicações" da tela
+   - Exibe progresso no terminal (quantos advogados processados)
+
+3. No arquivo bootstrap/app.php ou Kernel.php registrar o schedule:
+   ->command('aasp:buscar-publicacoes')
+   ->weekdays()
+   ->at('08:00')
+   ->timezone('America/Sao_Paulo')
+
+4. No servidor de produção, verificar se o cron do Laravel está configurado.
+   Criar arquivo de instrução: CRON_SETUP.md com o comando:
+   * * * * * cd /var/www/saproweb && php artisan schedule:run >> /dev/null 2>&1
+
+5. Na tela de Configurações do módulo AASP, adicionar:
+   - Toggle para ativar/desativar envio automático
+   - Campo para horário do envio (padrão 08:00)
+   - Último envio automático: [data/hora]
+   - Status: Ativo/Inativo
+
+
+
+
+type C:\projetos\saproweb-base\database\migrations\2024_01_01_000040_create_prazos_table.php
+
+
+
+
+
+Class "App\Models\Documento" not found 
+
+
+
+
+
+
+
+

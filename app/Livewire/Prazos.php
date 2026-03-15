@@ -152,11 +152,11 @@ class Prazos extends Component
 
         if ($this->prazoid) {
             Prazo::findOrFail($this->prazoid)->update($dados);
-            session()->flash('sucesso', 'Prazo atualizado.');
+            $this->dispatch('toast', message: 'Prazo atualizado.', type: 'success');
         } else {
             $dados['status'] = 'aberto';
             $prazo = Prazo::create($dados);
-            session()->flash('sucesso', 'Prazo cadastrado.');
+            $this->dispatch('toast', message: 'Prazo cadastrado.', type: 'success');
             $this->enviarLembreteSeNecessario($prazo);
         }
 
@@ -169,13 +169,13 @@ class Prazos extends Component
             'status'           => 'cumprido',
             'data_cumprimento' => today(),
         ]);
-        session()->flash('sucesso', 'Prazo marcado como cumprido.');
+        $this->dispatch('toast', message: 'Prazo marcado como cumprido.', type: 'success');
     }
 
     public function marcarPerdido(int $id): void
     {
         Prazo::findOrFail($id)->update(['status' => 'perdido']);
-        session()->flash('sucesso', 'Prazo marcado como perdido.');
+        $this->dispatch('toast', message: 'Prazo marcado como perdido.', type: 'success');
     }
 
     public function reabrir(int $id): void
@@ -197,7 +197,7 @@ class Prazos extends Component
         if ($this->confirmarExcluir) {
             Prazo::findOrFail($this->confirmarExcluir)->delete();
             $this->confirmarExcluir = null;
-            session()->flash('sucesso', 'Prazo removido.');
+            $this->dispatch('toast', message: 'Prazo removido.', type: 'success');
         }
     }
 

@@ -91,7 +91,7 @@ class FinanceiroConsolidado extends Component
             'valor_recebido'    => DB::table('recebimentos')->where('id', $id)->value('valor'),
             'updated_at'        => now(),
         ]);
-        session()->flash('sucesso', 'Recebimento marcado como recebido.');
+        $this->dispatch('toast', message: 'Recebimento marcado como recebido.', type: 'success');
     }
 
     public function marcarPago(int $id): void
@@ -102,7 +102,7 @@ class FinanceiroConsolidado extends Component
             'valor_pago'     => DB::table('pagamentos')->where('id', $id)->value('valor'),
             'updated_at'     => now(),
         ]);
-        session()->flash('sucesso', 'Pagamento marcado como pago.');
+        $this->dispatch('toast', message: 'Pagamento marcado como pago.', type: 'success');
     }
 
     // ── Exportar CSV ────────────────────────────────────────────

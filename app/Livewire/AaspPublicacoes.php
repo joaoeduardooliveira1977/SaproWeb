@@ -176,7 +176,7 @@ class AaspPublicacoes extends Component
         $publicacoes = $this->queryPublicacoes()->get();
 
         if ($publicacoes->isEmpty()) {
-            session()->flash('erro', 'Nenhuma publicação para gerar o PDF.');
+            $this->dispatch('toast', message: 'Nenhuma publicação para gerar o PDF.', type: 'error');
             return null;
         }
 
@@ -326,14 +326,14 @@ class AaspPublicacoes extends Component
         $config = AaspConfig::first();
 
         if (!$config || empty($config->emails_destino)) {
-            session()->flash('erro', 'Nenhum e-mail de destino configurado. Configure na aba Configurações.');
+            $this->dispatch('toast', message: 'Nenhum e-mail de destino configurado. Configure na aba Configurações.', type: 'error');
             return;
         }
 
         $publicacoes = $this->queryPublicacoes()->get();
 
         if ($publicacoes->isEmpty()) {
-            session()->flash('erro', 'Nenhuma publicação para enviar.');
+            $this->dispatch('toast', message: 'Nenhuma publicação para enviar.', type: 'error');
             return;
         }
 
@@ -467,9 +467,9 @@ class AaspPublicacoes extends Component
 
         $enviados = count($emails) - $erros;
         if ($enviados > 0) {
-            session()->flash('sucesso', "{$enviados} e-mail(s) enviado(s) com sucesso.");
+            $this->dispatch('toast', message: "{$enviados} e-mail(s) enviado(s) com sucesso.", type: 'success');
         } else {
-            session()->flash('erro', 'Falha ao enviar os e-mails. Verifique a configuração de e-mail do sistema.');
+            $this->dispatch('toast', message: 'Falha ao enviar os e-mails. Verifique a configuração de e-mail do sistema.', type: 'error');
         }
     }
 
@@ -567,10 +567,10 @@ class AaspPublicacoes extends Component
 
         if ($this->advogadoId) {
             AaspAdvogado::find($this->advogadoId)?->update($dados);
-            session()->flash('sucesso', 'Advogado atualizado com sucesso.');
+            $this->dispatch('toast', message: 'Advogado atualizado com sucesso.', type: 'success');
         } else {
             AaspAdvogado::create($dados);
-            session()->flash('sucesso', 'Advogado cadastrado com sucesso.');
+            $this->dispatch('toast', message: 'Advogado cadastrado com sucesso.', type: 'success');
         }
 
         $this->modalAdvogado = false;
@@ -586,7 +586,7 @@ class AaspPublicacoes extends Component
     {
         if ($this->confirmarExcluirAdv) {
             AaspAdvogado::find($this->confirmarExcluirAdv)?->delete();
-            session()->flash('sucesso', 'Advogado removido.');
+            $this->dispatch('toast', message: 'Advogado removido.', type: 'success');
             $this->confirmarExcluirAdv = null;
         }
     }
@@ -629,7 +629,7 @@ class AaspPublicacoes extends Component
             ]
         );
 
-        session()->flash('sucesso', 'Configurações salvas com sucesso.');
+        $this->dispatch('toast', message: 'Configurações salvas com sucesso.', type: 'success');
     }
 
     // ══ Query ════════════════════════════════════════════════

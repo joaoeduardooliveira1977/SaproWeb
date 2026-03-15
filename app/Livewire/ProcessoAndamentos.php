@@ -93,7 +93,7 @@ class ProcessoAndamentos extends Component
 
         $this->resetForm();
         $this->mostrarFormulario = false;
-        session()->flash('sucesso', 'Andamento salvo com sucesso!');
+        $this->dispatch('toast', message: 'Andamento salvo com sucesso!', type: 'success');
     }
 
     // ── Upload para andamento já existente ────────────────────────────
@@ -120,7 +120,7 @@ class ProcessoAndamentos extends Component
 
         $this->persistirArquivo($this->arquivoUpload, $this->uploadAndamentoId);
         $this->fecharUploadModal();
-        session()->flash('sucesso', 'Arquivo anexado com sucesso!');
+        $this->dispatch('toast', message: 'Arquivo anexado com sucesso!', type: 'success');
     }
 
     public function excluirDocumento(int $docId): void
@@ -130,7 +130,7 @@ class ProcessoAndamentos extends Component
             Storage::disk('public')->delete($doc->arquivo);
         }
         DB::delete('DELETE FROM documentos WHERE id = ?', [$docId]);
-        session()->flash('sucesso', 'Documento removido com sucesso!');
+        $this->dispatch('toast', message: 'Documento removido com sucesso!', type: 'success');
     }
 
     // ── Exclusão de andamento ─────────────────────────────────────────
@@ -152,7 +152,7 @@ class ProcessoAndamentos extends Component
 
             Andamento::findOrFail($this->excluindoId)->delete();
             $this->excluindoId = null;
-            session()->flash('sucesso', 'Andamento excluído com sucesso!');
+            $this->dispatch('toast', message: 'Andamento excluído com sucesso!', type: 'success');
         }
     }
 

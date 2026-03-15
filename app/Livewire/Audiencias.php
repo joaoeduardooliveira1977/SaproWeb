@@ -120,11 +120,11 @@ class Audiencias extends Component
 
         if ($this->audienciaId) {
             Audiencia::findOrFail($this->audienciaId)->update($dados);
-            session()->flash('sucesso', 'Audiência atualizada.');
+            $this->dispatch('toast', message: 'Audiência atualizada.', type: 'success');
         } else {
             $dados['criado_por'] = Auth::id();
             Audiencia::create($dados);
-            session()->flash('sucesso', 'Audiência cadastrada.');
+            $this->dispatch('toast', message: 'Audiência cadastrada.', type: 'success');
         }
 
         $this->fecharModal();
@@ -133,7 +133,7 @@ class Audiencias extends Component
     public function excluir(int $id): void
     {
         Audiencia::findOrFail($id)->delete();
-        session()->flash('sucesso', 'Audiência excluída.');
+        $this->dispatch('toast', message: 'Audiência excluída.', type: 'success');
     }
 
     // ── Registrar resultado rápido ───────────────────────────
@@ -161,7 +161,7 @@ class Audiencias extends Component
 
         $this->modalResultado = false;
         $this->resultadoId    = null;
-        session()->flash('sucesso', 'Resultado registrado.');
+        $this->dispatch('toast', message: 'Resultado registrado.', type: 'success');
     }
 
     // ── Helpers ──────────────────────────────────────────────

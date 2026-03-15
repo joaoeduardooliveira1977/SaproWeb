@@ -10,20 +10,15 @@ class Indices extends Component
 {
     public bool   $atualizando = false;
     public string $siglaFiltro = '';
-    public string $mensagem    = '';
-    public string $erro        = '';
 
     public function atualizarTodos(): void
     {
-        $this->mensagem = '';
-        $this->erro     = '';
-
         try {
             Artisan::call('indices:atualizar', ['--sigla' => $this->siglaFiltro ?: null]);
             $output = Artisan::output();
-            $this->mensagem = 'Atualização concluída. ' . trim(strip_tags($output));
+            $this->dispatch('toast', message: 'Atualização concluída. ' . trim(strip_tags($output)), type: 'success');
         } catch (\Throwable $e) {
-            $this->erro = 'Erro: ' . $e->getMessage();
+            $this->dispatch('toast', message: 'Erro: ' . $e->getMessage(), type: 'error');
         }
     }
 

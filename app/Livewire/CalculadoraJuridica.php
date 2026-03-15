@@ -24,7 +24,6 @@ class CalculadoraJuridica extends Component
     public bool    $calculado         = false;
     public array   $resultado         = [];
     public array   $detalhes          = [];
-    public string  $erroCalculo       = '';
 
     // ── Índices disponíveis no banco ─────────────────────────────
     public array $indicesDisponiveis  = [];
@@ -52,19 +51,18 @@ class CalculadoraJuridica extends Component
 
     public function calcular(): void
     {
-        $this->erroCalculo = '';
-        $this->resultado   = [];
-        $this->detalhes    = [];
+        $this->resultado = [];
+        $this->detalhes  = [];
 
         // Validações básicas
         $valor = str_replace(['.', ','], ['', '.'], $this->valorOriginal);
         $valor = (float) $valor;
         if ($valor <= 0) {
-            $this->erroCalculo = 'Informe um valor original válido.';
+            $this->dispatch('toast', message: 'Informe um valor original válido.', type: 'error');
             return;
         }
         if (!$this->dataInicio || !$this->dataFim) {
-            $this->erroCalculo = 'Informe as datas de início e fim.';
+            $this->dispatch('toast', message: 'Informe as datas de início e fim.', type: 'error');
             return;
         }
 
@@ -72,7 +70,7 @@ class CalculadoraJuridica extends Component
         $dataFim = Carbon::parse($this->dataFim)->startOfMonth();
 
         if ($dataFim <= $dataIni) {
-            $this->erroCalculo = 'A data final deve ser posterior à data inicial.';
+            $this->dispatch('toast', message: 'A data final deve ser posterior à data inicial.', type: 'error');
             return;
         }
 
@@ -104,8 +102,7 @@ class CalculadoraJuridica extends Component
             $fatorCorrecao = $acumulado;
 
             if ($indicesUsados === 0) {
-                $this->erroCalculo = "Nenhum índice {$this->indiceCorrecao} encontrado para o período. "
-                    . "Verifique os índices cadastrados em Administração → Índices.";
+                $this->dispatch('toast', message: "Nenhum índice {$this->indiceCorrecao} encontrado para o período. Verifique os índices cadastrados em Administração → Índices.", type: 'error');
                 return;
             }
         }
@@ -189,7 +186,6 @@ class CalculadoraJuridica extends Component
         $this->calculado          = false;
         $this->resultado          = [];
         $this->detalhes           = [];
-        $this->erroCalculo        = '';
         $this->valorOriginal      = '';
         $this->processoRef        = '';
         $this->percentualMulta    = '0';

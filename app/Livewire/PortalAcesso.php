@@ -12,8 +12,6 @@ class PortalAcesso extends Component
     public ?int $pessoaId = null;
     public string $novaSenha = '';
     public string $confirmaSenha = '';
-    public ?string $mensagem = null;
-    public ?string $erro = null;
 
     public function get()
     {
@@ -27,31 +25,30 @@ class PortalAcesso extends Component
     public function ativar(int $id): void
     {
         Pessoa::where('id', $id)->update(['portal_ativo' => true]);
-        $this->mensagem = 'Acesso ao portal ativado!';
+        $this->dispatch('toast', message: 'Acesso ao portal ativado!', type: 'success');
     }
 
     public function desativar(int $id): void
     {
         Pessoa::where('id', $id)->update(['portal_ativo' => false]);
-        $this->mensagem = 'Acesso ao portal desativado.';
+        $this->dispatch('toast', message: 'Acesso ao portal desativado.', type: 'success');
     }
 
     public function abrirDefinirSenha(int $id): void
     {
-        $this->pessoaId     = $id;
-        $this->novaSenha    = '';
+        $this->pessoaId      = $id;
+        $this->novaSenha     = '';
         $this->confirmaSenha = '';
-        $this->erro = null;
     }
 
     public function definirSenha(): void
     {
         if (strlen($this->novaSenha) < 6) {
-            $this->erro = 'A senha deve ter pelo menos 6 caracteres.';
+            $this->dispatch('toast', message: 'A senha deve ter pelo menos 6 caracteres.', type: 'error');
             return;
         }
         if ($this->novaSenha !== $this->confirmaSenha) {
-            $this->erro = 'As senhas não conferem.';
+            $this->dispatch('toast', message: 'As senhas não conferem.', type: 'error');
             return;
         }
 
@@ -61,7 +58,7 @@ class PortalAcesso extends Component
         ]);
 
         $this->pessoaId = null;
-        $this->mensagem = 'Senha definida e acesso ativado com sucesso!';
+        $this->dispatch('toast', message: 'Senha definida e acesso ativado com sucesso!', type: 'success');
     }
 
     public function render()

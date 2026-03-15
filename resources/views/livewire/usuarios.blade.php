@@ -1,10 +1,4 @@
 <div>
-@if(session('success'))
-    <div style="background:#dcfce7;border:1px solid #16a34a;color:#15803d;padding:12px 16px;border-radius:8px;margin-bottom:16px;">✅ {{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div style="background:#fee2e2;border:1px solid #dc2626;color:#dc2626;padding:12px 16px;border-radius:8px;margin-bottom:16px;">❌ {{ session('error') }}</div>
-@endif
 
 {{-- KPIs --}}
 <div class="stat-grid">

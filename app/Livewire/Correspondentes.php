@@ -114,11 +114,11 @@ class Correspondentes extends Component
 
         if ($this->correspondente_id) {
             Correspondente::findOrFail($this->correspondente_id)->update($dados);
-            session()->flash('sucesso', 'Correspondência atualizada.');
+            $this->dispatch('toast', message: 'Correspondência atualizada.', type: 'success');
         } else {
             $dados['solicitado_por'] = Auth::id();
             Correspondente::create($dados);
-            session()->flash('sucesso', 'Correspondência cadastrada.');
+            $this->dispatch('toast', message: 'Correspondência cadastrada.', type: 'success');
         }
 
         $this->fecharModal();
@@ -127,7 +127,7 @@ class Correspondentes extends Component
     public function excluir(int $id): void
     {
         Correspondente::findOrFail($id)->delete();
-        session()->flash('sucesso', 'Correspondência excluída.');
+        $this->dispatch('toast', message: 'Correspondência excluída.', type: 'success');
     }
 
     // ── Avançar status ────────────────────────────────────────
@@ -168,7 +168,7 @@ class Correspondentes extends Component
         $c->update($update);
 
         $label = Correspondente::statusLabel()[$this->avancarStatus] ?? $this->avancarStatus;
-        session()->flash('sucesso', "Correspondência marcada como {$label}.");
+        $this->dispatch('toast', message: "Correspondência marcada como {$label}.", type: 'success');
         $this->modalAvancar = false;
     }
 

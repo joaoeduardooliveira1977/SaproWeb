@@ -118,7 +118,7 @@ class Pessoas extends Component
         Auth::user()->registrarAuditoria($acao, 'pessoas', $pessoa->id, null, ['nome' => $this->nome, 'tipos' => $this->tipos_selecionados]);
 
         $this->fecharModal();
-        session()->flash('sucesso', "Pessoa \"{$this->nome}\" salva com sucesso!");
+        $this->dispatch('toast', message: "Pessoa \"{$this->nome}\" salva com sucesso!", type: 'success');
     }
 
     public function desativar(int $id): void
@@ -127,7 +127,7 @@ class Pessoas extends Component
         $pessoa = Pessoa::findOrFail($id);
         $pessoa->update(['ativo' => false]);
         Auth::user()->registrarAuditoria('Desativou pessoa', 'pessoas', $id);
-        session()->flash('sucesso', "Pessoa \"{$pessoa->nome}\" desativada.");
+        $this->dispatch('toast', message: "Pessoa \"{$pessoa->nome}\" desativada.", type: 'success');
     }
 
     private function limparFormulario(): void

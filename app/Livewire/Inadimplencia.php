@@ -73,9 +73,9 @@ class Inadimplencia extends Component
 
         // Se tipo = acordo, marca parcela como paga com 0 (tratamento especial)
         if ($this->tipoContato === 'acordo') {
-            session()->flash('sucesso', 'Acordo registrado. Não esqueça de registrar o pagamento quando efetivado.');
+            $this->dispatch('toast', message: 'Acordo registrado. Não esqueça de registrar o pagamento quando efetivado.', type: 'success');
         } else {
-            session()->flash('sucesso', 'Tentativa de contato registrada.');
+            $this->dispatch('toast', message: 'Tentativa de contato registrada.', type: 'success');
         }
 
         $this->modalContato = false;
@@ -163,7 +163,7 @@ class Inadimplencia extends Component
 
             $this->emailSucesso = "E-mail enviado com sucesso para {$this->clienteEmailAddr}.";
             $this->modalEmail   = false;
-            session()->flash('sucesso', $this->emailSucesso);
+            $this->dispatch('toast', message: $this->emailSucesso, type: 'success');
 
         } catch (\Throwable $e) {
             $this->emailErro = 'Falha ao enviar e-mail: ' . $e->getMessage();
@@ -205,7 +205,7 @@ class Inadimplencia extends Component
         ]);
 
         $this->modalPagamento = false;
-        session()->flash('sucesso', 'Pagamento registrado com sucesso.');
+        $this->dispatch('toast', message: 'Pagamento registrado com sucesso.', type: 'success');
     }
 
     // ── Render ────────────────────────────────────────────────

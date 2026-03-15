@@ -114,11 +114,11 @@ class ProcessoForm extends Component
         if ($this->processoId) {
             $processo = Processo::findOrFail($this->processoId);
             $processo->update($dados);
-            session()->flash('sucesso', 'Processo atualizado com sucesso!');
+            $this->dispatch('toast', message: 'Processo atualizado com sucesso!', type: 'success');
         } else {
             $dados['criado_por'] = Auth::id();
             $processo = Processo::create($dados);
-            session()->flash('sucesso', 'Processo cadastrado com sucesso!');
+            $this->dispatch('toast', message: 'Processo cadastrado com sucesso!', type: 'success');
         }
 
         $this->redirect(route('processos.show', $processo->id));

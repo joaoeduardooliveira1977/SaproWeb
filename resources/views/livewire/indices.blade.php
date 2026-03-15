@@ -1,12 +1,5 @@
 <div>
 
-  {{-- Flash --}}
-  @if($mensagem)
-    <div class="alert-success" style="margin-bottom:16px">✅ {{ $mensagem }}</div>
-  @endif
-  @if($erro)
-    <div class="alert-error" style="margin-bottom:16px">⚠️ {{ $erro }}</div>
-  @endif
 
   {{-- Cabeçalho + ação --}}
   <div class="card" style="margin-bottom:16px">

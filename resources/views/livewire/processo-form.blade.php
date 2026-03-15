@@ -8,10 +8,6 @@
     <a href="{{ route('processos') }}" style="font-size:13px;color:var(--muted);text-decoration:none">← Voltar</a>
   </div>
 
-  @if(session('sucesso'))
-    <div class="alert-success" style="margin-bottom:16px">✅ {{ session('sucesso') }}</div>
-  @endif
-
   <div class="card">
     <div class="form-grid">
 

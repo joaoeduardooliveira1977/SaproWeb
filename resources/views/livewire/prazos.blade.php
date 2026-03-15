@@ -26,11 +26,6 @@
     @media(max-width:768px){.filtros-bar select,.filtros-bar input{max-width:100%;}.filtros-bar .filter-actions{margin-left:0!important;width:100%;justify-content:flex-end;display:flex;}}
 </style>
 
-{{-- Flash --}}
-@if(session('sucesso'))
-    <div class="alert alert-success">✅ {{ session('sucesso') }}</div>
-@endif
-
 {{-- ══ KPIs ══ --}}
 <div class="stat-grid">
     <div class="stat-card" style="border-left-color:var(--primary);">
