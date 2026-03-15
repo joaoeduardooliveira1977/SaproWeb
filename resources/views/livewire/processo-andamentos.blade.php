@@ -1,34 +1,25 @@
 <div>
     {{-- Cabecalho (oculto quando embutido em abas) --}}
     @if(!$embed)
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:10px;">
         <div>
-            <h2 style="font-size:20px; font-weight:700; color:#1a3a5c;">Andamentos</h2>
-            <p style="font-size:13px; color:#64748b; margin-top:4px;">
+            <h2 style="font-size:20px;font-weight:700;color:var(--primary);">Andamentos</h2>
+            <p style="font-size:13px;color:var(--muted);margin-top:4px;">
                 Processo: <strong>{{ $processo->numero }}</strong> &mdash; {{ $processo->cliente->nome ?? '&mdash;' }}
             </p>
         </div>
-        <div style="display:flex; gap:12px;">
-            <a href="{{ route('processos.show', $processo->id) }}"
-                style="padding:10px 20px; background:#f1f5f9; color:#334155; border-radius:8px; font-size:13px; text-decoration:none;">
-                &larr; Voltar
-            </a>
+        <div class="card-actions">
+            <a href="{{ route('processos.show', $processo->id) }}" class="btn btn-secondary btn-sm">&larr; Voltar</a>
             @if(!$mostrarFormulario)
-            <button wire:click="novoAndamento"
-                style="padding:10px 20px; background:#2563a8; color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
-                + Novo Andamento
-            </button>
+            <button wire:click="novoAndamento" class="btn btn-primary btn-sm">+ Novo Andamento</button>
             @endif
         </div>
     </div>
     @else
     {{-- Botao inline quando embutido --}}
     @if(!$mostrarFormulario)
-    <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
-        <button wire:click="novoAndamento"
-            style="padding:8px 16px; background:#2563a8; color:white; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
-            + Novo Andamento
-        </button>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+        <button wire:click="novoAndamento" class="btn btn-primary btn-sm">+ Novo Andamento</button>
     </div>
     @endif
     @endif
@@ -42,12 +33,12 @@
 
     {{-- Formulario --}}
     @if($mostrarFormulario)
-    <div style="background:white; border-radius:12px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,0.08); margin-bottom:24px; border-left:4px solid #2563a8;">
-        <h3 style="font-size:16px; font-weight:700; color:#1a3a5c; margin-bottom:20px;">
+    <div class="card" style="margin-bottom:24px;border-left:4px solid var(--primary-light);">
+        <h3 style="font-size:16px;font-weight:700;color:var(--primary);margin-bottom:20px;">
             {{ $editandoId ? 'Editar Andamento' : 'Novo Andamento' }}
         </h3>
 
-        <div style="display:grid; grid-template-columns:200px 1fr; gap:16px; align-items:start;">
+        <div class="form-grid" style="align-items:start;">
             <div>
                 <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Data *</label>
                 <input wire:model="data" type="date"
@@ -77,13 +68,9 @@
             </div>
         </div>
 
-        <div style="margin-top:16px; display:flex; gap:12px; justify-content:flex-end;">
-            <button wire:click="cancelar"
-                style="padding:10px 20px; background:#f1f5f9; color:#334155; border:none; border-radius:8px; font-size:14px; cursor:pointer;">
-                Cancelar
-            </button>
-            <button wire:click="salvar" wire:loading.attr="disabled"
-                style="padding:10px 20px; background:#16a34a; color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
+        <div class="modal-footer" style="margin-top:16px;">
+            <button wire:click="cancelar" class="btn btn-secondary">Cancelar</button>
+            <button wire:click="salvar" wire:loading.attr="disabled" class="btn btn-success">
                 <span wire:loading.remove wire:target="salvar">Salvar</span>
                 <span wire:loading wire:target="salvar">Salvando...</span>
             </button>
@@ -93,17 +80,13 @@
 
     {{-- Confirmacao de exclusao --}}
     @if($excluindoId)
-    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:20px; margin-bottom:24px;">
-        <p style="font-size:14px; color:#dc2626; font-weight:600; margin-bottom:12px;">
+    <div class="alert alert-error" style="border-radius:12px;padding:20px;margin-bottom:24px;">
+        <p style="font-weight:600;margin-bottom:12px;">
             Tem certeza que deseja excluir este andamento? Os arquivos anexados também serão removidos.
         </p>
-        <div style="display:flex; gap:12px;">
-            <button wire:click="cancelar"
-                style="padding:8px 20px; background:#f1f5f9; color:#334155; border:none; border-radius:8px; font-size:14px; cursor:pointer;">
-                Cancelar
-            </button>
-            <button wire:click="excluir"
-                style="padding:8px 20px; background:#dc2626; color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button wire:click="cancelar" class="btn btn-secondary">Cancelar</button>
+            <button wire:click="excluir" class="btn btn-danger">
                 Excluir
             </button>
         </div>
@@ -112,30 +95,22 @@
 
     {{-- Modal de upload para andamento existente --}}
     @if($mostrarUploadModal)
-    <div style="position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; display:flex; align-items:center; justify-content:center;">
-        <div style="background:white; border-radius:12px; padding:28px; width:100%; max-width:480px; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
-            <h3 style="font-size:16px; font-weight:700; color:#1a3a5c; margin-bottom:20px;">
-                &#128206; Anexar Arquivo ao Andamento
-            </h3>
-            <div>
-                <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">
-                    Arquivo <span style="font-weight:400; color:#94a3b8;">(máx. 20MB)</span>
-                </label>
-                <input wire:model="arquivoUpload" type="file"
-                    style="width:100%; padding:8px; border:1.5px dashed #e2e8f0; border-radius:8px; font-size:13px; background:#f8fafc; cursor:pointer;">
-                @error('arquivoUpload') <span style="color:#dc2626; font-size:12px;">{{ $message }}</span> @enderror
-                <div wire:loading wire:target="arquivoUpload" style="font-size:12px; color:#2563a8; margin-top:4px;">
-                    Carregando arquivo...
-                </div>
+    <div class="modal-backdrop">
+        <div class="modal" style="max-width:480px;">
+            <div class="modal-header">
+                <span class="modal-title">📎 Anexar Arquivo ao Andamento</span>
+                <button wire:click="fecharUploadModal" class="modal-close">✕</button>
             </div>
-            <div style="margin-top:20px; display:flex; gap:12px; justify-content:flex-end;">
-                <button wire:click="fecharUploadModal"
-                    style="padding:10px 20px; background:#f1f5f9; color:#334155; border:none; border-radius:8px; font-size:14px; cursor:pointer;">
-                    Cancelar
-                </button>
-                <button wire:click="salvarUploadAndamento" wire:loading.attr="disabled" wire:target="salvarUploadAndamento"
-                    style="padding:10px 20px; background:#2563a8; color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">
-                    <span wire:loading.remove wire:target="salvarUploadAndamento">&#128190; Salvar</span>
+            <div class="form-field" style="margin-bottom:16px;">
+                <label class="lbl">Arquivo <span style="font-weight:400;color:var(--muted)">(máx. 20MB)</span></label>
+                <input wire:model="arquivoUpload" type="file">
+                @error('arquivoUpload') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                <div wire:loading wire:target="arquivoUpload" style="font-size:12px;color:var(--primary-light);margin-top:4px;">Carregando arquivo...</div>
+            </div>
+            <div class="modal-footer">
+                <button wire:click="fecharUploadModal" class="btn btn-secondary">Cancelar</button>
+                <button wire:click="salvarUploadAndamento" wire:loading.attr="disabled" class="btn btn-primary">
+                    <span wire:loading.remove wire:target="salvarUploadAndamento">💾 Salvar</span>
                     <span wire:loading wire:target="salvarUploadAndamento">Salvando...</span>
                 </button>
             </div>
@@ -144,7 +119,7 @@
     @endif
 
     {{-- Lista de andamentos --}}
-    <div style="background:white; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.08); overflow:hidden;">
+    <div class="card" style="padding:0;overflow:hidden;">
         @if($andamentos->isEmpty())
         <div style="padding:60px; text-align:center; color:#94a3b8;">
             <div style="font-size:40px; margin-bottom:12px;">&#128203;</div>

@@ -6,7 +6,7 @@
   @endif
 
   {{-- KPIs --}}
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:20px">
+  <div class="stat-grid">
     <div class="stat-card" style="border-left-color:#dc2626">
       <div class="stat-icon">⚠️</div>
       <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Clientes Inadimplentes</div>
@@ -36,22 +36,19 @@
 
   {{-- Filtros --}}
   <div class="card" style="margin-bottom:16px">
-    <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <div style="flex:1;min-width:200px">
-        <input wire:model.live.debounce.300ms="filtroCliente" type="text"
-               placeholder="Buscar cliente..." class="search-bar" style="width:100%">
-      </div>
-      <select wire:model.live="filtroStatus" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+    <div class="filter-bar">
+      <input wire:model.live.debounce.300ms="filtroCliente" type="text" placeholder="Buscar cliente...">
+      <select wire:model.live="filtroStatus">
         <option value="">Todos os status</option>
         <option value="atrasado">Atrasado (1–15 dias)</option>
         <option value="em_cobranca">Em Cobrança (16–30 dias)</option>
         <option value="inadimplente">Inadimplente (+30 dias)</option>
       </select>
-      <select wire:model.live="filtroOrdem" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <select wire:model.live="filtroOrdem">
         <option value="dias_desc">Maior atraso primeiro</option>
         <option value="valor_desc">Maior valor primeiro</option>
         <option value="valor_asc">Menor valor primeiro</option>
-        <option value="nome_asc">Nome do cliente (A–Z)</option>
+        <option value="nome_asc">Nome (A–Z)</option>
       </select>
     </div>
   </div>

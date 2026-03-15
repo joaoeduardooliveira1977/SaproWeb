@@ -13,18 +13,15 @@
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px">
       <div class="form-field">
         <label class="lbl">Usuário</label>
-        <input wire:model.live.debounce.300ms="filtroUsuario" type="text" placeholder="Login..."
-               style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+        <input wire:model.live.debounce.300ms="filtroUsuario" type="text" placeholder="Login...">
       </div>
       <div class="form-field">
         <label class="lbl">Ação</label>
-        <input wire:model.live.debounce.300ms="filtroAcao" type="text" placeholder="Ex: login, criar..."
-               style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+        <input wire:model.live.debounce.300ms="filtroAcao" type="text" placeholder="Ex: login, criar...">
       </div>
       <div class="form-field">
         <label class="lbl">Tabela</label>
-        <select wire:model.live="filtroTabela"
-                style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+        <select wire:model.live="filtroTabela">
           <option value="">Todas</option>
           @foreach($tabelas as $t)
             <option value="{{ $t }}">{{ $t }}</option>
@@ -33,18 +30,14 @@
       </div>
       <div class="form-field">
         <label class="lbl">De</label>
-        <input wire:model.live="filtroDataIni" type="date"
-               style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+        <input wire:model.live="filtroDataIni" type="date">
       </div>
       <div class="form-field">
         <label class="lbl">Até</label>
-        <input wire:model.live="filtroDataFim" type="date"
-               style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+        <input wire:model.live="filtroDataFim" type="date">
       </div>
       <div class="form-field" style="display:flex;align-items:flex-end">
-        <button wire:click="limpar" class="btn" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--muted)">
-          Limpar
-        </button>
+        <button wire:click="limpar" class="btn btn-secondary-outline" style="width:100%">Limpar</button>
       </div>
     </div>
   </div>
@@ -58,9 +51,9 @@
             <th>Data/Hora</th>
             <th>Usuário</th>
             <th>Ação</th>
-            <th>Tabela</th>
-            <th>Registro</th>
-            <th>IP</th>
+            <th class="hide-sm">Tabela</th>
+            <th class="hide-xs">Registro</th>
+            <th class="hide-sm">IP</th>
             <th></th>
           </tr>
         </thead>
@@ -77,23 +70,16 @@
           @endphp
           <tr>
             <td style="white-space:nowrap;font-size:12px;color:var(--muted)">
-              {{ \Carbon\Carbon::parse($a->created_at)->format('d/m/Y H:i:s') }}
+              {{ \Carbon\Carbon::parse($a->created_at)->format('d/m/Y H:i') }}
             </td>
-            <td style="font-weight:600;font-size:13px">{{ $a->login ?? '—' }}</td>
-            <td>
-              <span class="badge" style="background:{{ $corAcao['bg'] }};color:{{ $corAcao['txt'] }}">
-                {{ $a->acao }}
-              </span>
-            </td>
-            <td style="font-size:12px;color:var(--muted);font-family:monospace">{{ $a->tabela ?? '—' }}</td>
-            <td style="font-size:12px;color:var(--muted)">#{{ $a->registro_id ?? '—' }}</td>
-            <td style="font-size:12px;color:var(--muted)">{{ $a->ip ?? '—' }}</td>
+            <td style="font-weight:600;">{{ $a->login ?? '—' }}</td>
+            <td><span class="badge" style="background:{{ $corAcao['bg'] }};color:{{ $corAcao['txt'] }}">{{ $a->acao }}</span></td>
+            <td class="hide-sm" style="font-size:12px;color:var(--muted);font-family:monospace">{{ $a->tabela ?? '—' }}</td>
+            <td class="hide-xs" style="font-size:12px;color:var(--muted)">#{{ $a->registro_id ?? '—' }}</td>
+            <td class="hide-sm" style="font-size:12px;color:var(--muted)">{{ $a->ip ?? '—' }}</td>
             <td>
               @if($a->dados_antes || $a->dados_apos)
-              <button wire:click="verDetalhe({{ $a->id }})" class="btn btn-sm"
-                      style="background:var(--bg);border:1px solid var(--border);color:var(--muted);font-size:11px">
-                Ver diff
-              </button>
+              <button wire:click="verDetalhe({{ $a->id }})" class="btn btn-sm btn-secondary-outline" style="font-size:11px">diff</button>
               @endif
             </td>
           </tr>
@@ -110,9 +96,13 @@
 
     {{-- Paginação --}}
     @if($registros->hasPages())
-    <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)">
-      <span>{{ $registros->firstItem() }}–{{ $registros->lastItem() }} de {{ $registros->total() }} registros</span>
-      {{ $registros->links() }}
+    <div class="pagination-bar" style="padding:12px 16px;border-top:1px solid var(--border);">
+      <span>{{ $registros->firstItem() }}–{{ $registros->lastItem() }} de {{ $registros->total() }}</span>
+      <div class="page-btns">
+        <button wire:click="previousPage" class="page-btn" @disabled($registros->onFirstPage())>← Anterior</button>
+        <span class="page-current">{{ $registros->currentPage() }} / {{ $registros->lastPage() }}</span>
+        <button wire:click="nextPage" class="page-btn" @disabled(!$registros->hasMorePages())>Próxima →</button>
+      </div>
     </div>
     @endif
   </div>
@@ -128,10 +118,10 @@
             {{ $detalhe->login }} · {{ \Carbon\Carbon::parse($detalhe->created_at)->format('d/m/Y H:i:s') }}
           </div>
         </div>
-        <button wire:click="fecharDetalhe" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)">✕</button>
+        <button wire:click="fecharDetalhe" class="modal-close">✕</button>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-grid">
 
         {{-- Antes --}}
         <div>

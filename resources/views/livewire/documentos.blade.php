@@ -6,7 +6,7 @@
 @endif
 
 {{-- Cards Resumo --}}
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+<div class="stat-grid">
     <div class="card" style="border-left:4px solid var(--primary);text-align:center;">
         <div style="font-size:32px;">📁</div>
         <div style="font-size:24px;font-weight:700;color:var(--primary);">{{ $resumo->total }}</div>
@@ -34,10 +34,9 @@
 
 {{-- Filtros --}}
 <div class="card" style="margin-bottom:16px;">
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-        <input wire:model.live.debounce.300ms="busca" type="text" placeholder="🔍 Buscar por título, cliente ou processo..."
-            style="flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
-        <select wire:model.live="filtroTipo" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+    <div class="filter-bar">
+        <input wire:model.live.debounce.300ms="busca" type="text" placeholder="🔍 Buscar por título, cliente ou processo...">
+        <select wire:model.live="filtroTipo">
             <option value="">Todos os tipos</option>
             <option value="peticao">Petição</option>
             <option value="contrato">Contrato</option>
@@ -47,20 +46,18 @@
             <option value="sentenca">Sentença/Decisão</option>
             <option value="outro">Outro</option>
         </select>
-        <select wire:model.live="filtroVinculo" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        <select wire:model.live="filtroVinculo">
             <option value="">Todos</option>
             <option value="processo">Por processo</option>
             <option value="cliente">Por cliente</option>
         </select>
-        <input wire:model.live="filtroDataIni" type="date" title="Data início"
-            style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
-        <input wire:model.live="filtroDataFim" type="date" title="Data fim"
-            style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
-        <button wire:click="exportarCsv" class="btn btn-secondary" title="Exportar CSV" wire:loading.attr="disabled">
+        <input wire:model.live="filtroDataIni" type="date" title="Data início">
+        <input wire:model.live="filtroDataFim" type="date" title="Data fim">
+        <button wire:click="exportarCsv" class="btn btn-secondary-outline btn-sm" title="Exportar CSV" wire:loading.attr="disabled" style="flex-shrink:0">
             <span wire:loading.remove wire:target="exportarCsv">⬇️ CSV</span>
             <span wire:loading wire:target="exportarCsv">...</span>
         </button>
-        <button wire:click="novoDocumento" class="btn btn-primary">+ Novo Documento</button>
+        <button wire:click="novoDocumento" class="btn btn-primary btn-sm" style="flex-shrink:0">+ Novo</button>
     </div>
 </div>
 
