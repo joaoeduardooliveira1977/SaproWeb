@@ -86,6 +86,7 @@ class Pessoas extends Component
 
     public function salvar(): void
     {
+        abort_unless(Auth::user()->temAcao('pessoas.editar'), 403, 'Sem permissão.');
         $this->validate();
 
         $dados = [
@@ -122,6 +123,7 @@ class Pessoas extends Component
 
     public function desativar(int $id): void
     {
+        abort_unless(Auth::user()->temAcao('pessoas.desativar'), 403, 'Sem permissão.');
         $pessoa = Pessoa::findOrFail($id);
         $pessoa->update(['ativo' => false]);
         Auth::user()->registrarAuditoria('Desativou pessoa', 'pessoas', $id);
@@ -137,6 +139,39 @@ class Pessoas extends Component
         $this->oab = $this->observacoes = '';
         $this->tipos_selecionados = [];
         $this->resetErrorBag();
+    }
+
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $rows = Pessoa::ativos()
+            ->with('tipos')
+            ->when($this->busca, fn($q) => $q->busca($this->busca))
+            ->when($this->tipo,  fn($q) => $q->doTipo($this->tipo))
+            ->orderBy('nome')
+            ->get();
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputs($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Nome','CPF/CNPJ','RG','Tipos','Email','Telefone','Celular','Cidade','Estado','CEP','OAB'], ';');
+            foreach ($rows as $p) {
+                $tipos = implode(', ', $p->listaTipos());
+                fputcsv($out, [
+                    $p->nome,
+                    $p->cpf_cnpj ?? '',
+                    $p->rg ?? '',
+                    $tipos,
+                    $p->email ?? '',
+                    $p->telefone ?? '',
+                    $p->celular ?? '',
+                    $p->cidade ?? '',
+                    $p->estado ?? '',
+                    $p->cep ?? '',
+                    $p->oab ?? '',
+                ], ';');
+            }
+            fclose($out);
+        }, 'pessoas-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     public function render()

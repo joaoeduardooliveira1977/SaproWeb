@@ -3,6 +3,7 @@
 namespace App\Livewire\Portal;
 
 use App\Models\{Pessoa, Processo, Andamento, Agenda};
+use App\Services\PixService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -10,13 +11,25 @@ use Livewire\Component;
 
 class PortalDashboard extends Component
 {
-    public ?Pessoa $pessoa       = null;
-    public string  $aba          = 'inicio';
+    public ?Pessoa $pessoa         = null;
+    public string  $aba            = 'inicio';
     public ?int    $processoAberto = null;  // processo em detalhe
+
+    // Filtro de processos: 'todos' | 'judiciais' | 'extrajudiciais'
+    public string $filtroProcessos = 'todos';
 
     // Mensagens
     public string $novaMensagem   = '';
     public string $msgProcessoId  = '';
+
+    // PIX
+    public bool   $modalPix       = false;
+    public int    $pixParcelaId   = 0;
+    public string $pixPayload     = '';
+    public string $pixQrUrl       = '';
+    public float  $pixValor       = 0;
+    public string $pixDescricao   = '';
+    public bool   $pixPago        = false;
 
     public function mount(): void
     {
@@ -37,6 +50,12 @@ class PortalDashboard extends Component
     {
         $this->aba = $aba;
         $this->processoAberto = null;
+    }
+
+    public function setFiltroProcessos(string $filtro): void
+    {
+        $this->filtroProcessos = $filtro;
+        $this->processoAberto  = null;
     }
 
     public function abrirProcesso(int $id): void
@@ -78,6 +97,64 @@ class PortalDashboard extends Component
         $this->novaMensagem = '';
     }
 
+    // ── PIX ──────────────────────────────────────────────────────
+
+    public function abrirPix(int $parcelaId): void
+    {
+        if (! PixService::configurado()) return;
+
+        $parcela = DB::table('honorario_parcelas as hp')
+            ->join('honorarios as h', 'h.id', '=', 'hp.honorario_id')
+            ->where('hp.id', $parcelaId)
+            ->where('h.cliente_id', $this->pessoa->id)
+            ->whereIn('hp.status', ['pendente', 'atrasado'])
+            ->select('hp.id', 'hp.numero_parcela', 'hp.valor', 'hp.vencimento', 'h.descricao')
+            ->first();
+
+        if (! $parcela) return;
+
+        $descricao = 'Honorarios ' . ($parcela->numero_parcela ? $parcela->numero_parcela.'a parcela' : '');
+
+        $this->pixParcelaId = $parcela->id;
+        $this->pixValor     = (float) $parcela->valor;
+        $this->pixDescricao = $descricao;
+        $this->pixPago      = false;
+
+        $payload = PixService::gerar(
+            chave:     config('services.pix.chave'),
+            nome:      config('services.pix.nome', 'ESCRITORIO'),
+            cidade:    config('services.pix.cidade', 'SAO PAULO'),
+            valor:     $this->pixValor,
+            descricao: $descricao,
+            txid:      'PARC' . $parcela->id,
+        );
+
+        $this->pixPayload = $payload;
+        $this->pixQrUrl   = PixService::qrCodeUrl($payload);
+        $this->modalPix   = true;
+    }
+
+    public function confirmarPagamentoPix(): void
+    {
+        DB::table('portal_mensagens')->insert([
+            'pessoa_id'       => $this->pessoa->id,
+            'processo_id'     => null,
+            'usuario_id'      => null,
+            'mensagem'        => '💰 Realizei o pagamento via PIX no valor de R$ ' . number_format($this->pixValor, 2, ',', '.') . ' (' . $this->pixDescricao . '). Por favor, confirme o recebimento.',
+            'de'              => 'cliente',
+            'lida_escritorio' => false,
+            'lida_cliente'    => true,
+            'created_at'      => now(),
+            'updated_at'      => now(),
+        ]);
+
+        $this->pixPago    = true;
+        $this->modalPix   = false;
+
+        // Switch to messages tab so client sees their message
+        $this->aba = 'mensagens';
+    }
+
     // ── Sair ─────────────────────────────────────────────────────
 
     public function sair(): void
@@ -112,9 +189,25 @@ class PortalDashboard extends Component
             ->take(5)
             ->get();
 
+        $ultimosAndamentos = \App\Models\Andamento::with('processo')
+            ->whereIn('processo_id', $processosIds)
+            ->orderByDesc('data')
+            ->take(6)
+            ->get();
+
+        $prazosProximos = \App\Models\Prazo::with('processo')
+            ->whereIn('processo_id', $processosIds)
+            ->where('status', 'aberto')
+            ->where('data_prazo', '<=', now()->addDays(30))
+            ->orderBy('data_prazo')
+            ->take(5)
+            ->get();
+
         // ── Processos ──
         $processos = Processo::with(['fase', 'risco', 'advogado'])
             ->where('cliente_id', $this->pessoa->id)
+            ->when($this->filtroProcessos === 'judiciais',      fn ($q) => $q->whereNotNull('numero')->where('numero', '!=', ''))
+            ->when($this->filtroProcessos === 'extrajudiciais', fn ($q) => $q->where(fn ($i) => $i->whereNull('numero')->orWhere('numero', '')))
             ->orderByDesc('data_distribuicao')
             ->get();
 
@@ -138,6 +231,14 @@ class PortalDashboard extends Component
                     ->where('status', 'aberto')
                     ->orderBy('data_prazo')
                     ->get();
+
+                // Documentos agrupados por andamento_id (apenas os que têm andamento_id)
+                $docsAndamentos = DB::table('documentos')
+                    ->whereIn('andamento_id', $andamentos->pluck('id'))
+                    ->whereNotNull('andamento_id')
+                    ->select('andamento_id', 'id', 'titulo', 'arquivo', 'arquivo_original', 'mime_type')
+                    ->get()
+                    ->groupBy('andamento_id');
             }
         }
 
@@ -196,9 +297,11 @@ class PortalDashboard extends Component
 
         $processosFiltro = $processos->where('status', 'Ativo');
 
+        $docsAndamentos  = $docsAndamentos  ?? collect();
+
         return view('livewire.portal.dashboard', compact(
-            'stats', 'proximosEventos',
-            'processos', 'processoDetalhe', 'andamentos', 'prazosProcesso',
+            'stats', 'proximosEventos', 'ultimosAndamentos', 'prazosProximos',
+            'processos', 'processoDetalhe', 'andamentos', 'prazosProcesso', 'docsAndamentos',
             'documentos', 'honorarios', 'mensagens', 'processosFiltro'
         ))->layout('portal.layout');
     }

@@ -1,4 +1,5 @@
 <div>
+@php $pixConfigurado = \App\Services\PixService::configurado(); @endphp
 
 {{-- ── Navbar ── --}}
 <nav class="navbar">
@@ -87,6 +88,86 @@
         </div>
     </div>
 
+    {{-- Prazos próximos --}}
+    @if($prazosProximos->isNotEmpty())
+    <div class="card">
+        <div class="card-header">⏳ Prazos Próximos (30 dias)</div>
+        <div class="card-body" style="padding-top:8px;">
+            @foreach($prazosProximos as $prazo)
+            @php
+                $dias = (int) now()->startOfDay()->diffInDays($prazo->data_prazo, false);
+                $cor  = $dias < 0 ? '#dc2626' : ($dias <= 5 ? '#ea580c' : ($dias <= 15 ? '#ca8a04' : '#16a34a'));
+            @endphp
+            <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f1f5f9;">
+                <span style="font-size:12px;font-weight:700;color:{{ $cor }};min-width:70px;white-space:nowrap;">
+                    {{ $prazo->data_prazo->format('d/m/Y') }}
+                </span>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        {{ $prazo->titulo }}
+                    </div>
+                    <div style="font-size:11px;color:#64748b;">
+                        Proc. {{ $prazo->processo?->numero }}
+                        · {{ $dias >= 0 ? $dias.' dia(s)' : abs($dias).' dia(s) em atraso' }}
+                        @if($prazo->prazo_fatal) · <span style="color:#9d174d;font-weight:700;">⚠ Fatal</span> @endif
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Últimas atualizações --}}
+    @if($ultimosAndamentos->isNotEmpty())
+    <div class="card">
+        <div class="card-header">📋 Últimas Atualizações</div>
+        <div class="card-body" style="padding-top:8px;">
+            @foreach($ultimosAndamentos as $and)
+            <div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #f1f5f9;cursor:pointer;"
+                 wire:click="abrirProcesso({{ $and->processo_id }})">
+                <div style="min-width:72px;font-size:12px;color:#94a3b8;padding-top:1px;">
+                    {{ $and->data->format('d/m/Y') }}
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:11px;font-weight:700;color:#2563a8;margin-bottom:2px;">
+                        {{ $and->processo?->numero }}
+                    </div>
+                    <div style="font-size:13px;color:#334155;line-height:1.4;
+                                display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                        {{ $and->descricao }}
+                    </div>
+                </div>
+                <span style="color:#94a3b8;font-size:12px;align-self:center;">→</span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    @php
+        $totalAtrasadoInicio = \Illuminate\Support\Facades\DB::table('honorario_parcelas as hp')
+            ->join('honorarios as h', 'h.id', '=', 'hp.honorario_id')
+            ->where('h.cliente_id', $pessoa->id)
+            ->whereIn('hp.status', ['pendente','atrasado'])
+            ->sum('hp.valor');
+    @endphp
+
+    @if($totalAtrasadoInicio > 0 && $pixConfigurado)
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 20px;background:#fef9c3;border:1px solid #fde047;border-radius:12px;margin-bottom:24px;">
+        <div>
+            <div style="font-size:14px;font-weight:600;color:#854d0e;">💰 Você possui honorários em aberto</div>
+            <div style="font-size:13px;color:#92400e;margin-top:2px;">
+                Total pendente: <strong>R$ {{ number_format($totalAtrasadoInicio, 2, ',', '.') }}</strong>
+            </div>
+        </div>
+        <button wire:click="trocarAba('honorarios')"
+                style="background:#854d0e;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">
+            🔑 Ver e Pagar via PIX →
+        </button>
+    </div>
+    @endif
+
     <div class="card" style="background:#f0f9ff;border:1px solid #bae6fd;">
         <div class="card-body" style="padding:16px 24px;">
             <p style="font-size:13px;color:#0369a1;margin:0;">
@@ -101,6 +182,21 @@
 {{-- ABA: PROCESSOS                                            --}}
 {{-- ══════════════════════════════════════════════════════════ --}}
 @if($aba === 'processos')
+
+    {{-- Filtro Judicial / Extrajudicial --}}
+    @if(!$processoAberto)
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        @foreach(['todos' => '⚖️ Todos', 'judiciais' => '🏛️ Judiciais', 'extrajudiciais' => '📝 Extrajudiciais'] as $chave => $rotulo)
+        <button wire:click="setFiltroProcessos('{{ $chave }}')"
+            style="padding:7px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:2px solid {{ $filtroProcessos === $chave ? '#2563a8' : '#e2e8f0' }};background:{{ $filtroProcessos === $chave ? '#2563a8' : 'white' }};color:{{ $filtroProcessos === $chave ? 'white' : '#64748b' }};">
+            {{ $rotulo }}
+        </button>
+        @endforeach
+        <span style="font-size:12px;color:#94a3b8;align-self:center;margin-left:4px;">
+            {{ $processos->count() }} processo(s)
+        </span>
+    </div>
+    @endif
 
     {{-- Detalhe do processo --}}
     @if($processoDetalhe)
@@ -175,10 +271,25 @@
                 @else
                 <div class="timeline">
                     @foreach($andamentos as $a)
+                    @php $docs = $docsAndamentos->get($a->id, collect()); @endphp
                     <div class="timeline-item">
                         <div class="timeline-dot"></div>
                         <div class="timeline-date">{{ $a->data->format('d/m/Y') }}</div>
-                        <div class="timeline-text">{{ $a->descricao }}</div>
+                        <div class="timeline-text">
+                            {{ $a->descricao }}
+                            @if($docs->isNotEmpty())
+                            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
+                                @foreach($docs as $doc)
+                                <a href="{{ Storage::url($doc->arquivo) }}" target="_blank"
+                                   style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+                                          background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;
+                                          font-size:11px;font-weight:600;color:#1d4ed8;text-decoration:none;">
+                                    📎 {{ $doc->arquivo_original ?? $doc->titulo ?? 'Documento' }}
+                                </a>
+                                @endforeach
+                            </div>
+                            @endif
+                        </div>
                     </div>
                     @endforeach
                 </div>
@@ -303,6 +414,12 @@
         $totalAtrasado = $honorarios->where('status','atrasado')->sum('valor');
     @endphp
 
+    @if($pixPago)
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;margin-bottom:20px;font-size:13px;color:#166534;">
+        ✅ <strong>Aviso de pagamento enviado!</strong> Nossa equipe irá confirmar o recebimento em breve. Confira sua aba de mensagens.
+    </div>
+    @endif
+
     <div class="stats-grid" style="margin-bottom:20px;">
         <div class="stat-card">
             <div class="stat-value" style="color:#16a34a;">R$ {{ number_format($totalPago,2,',','.') }}</div>
@@ -317,6 +434,12 @@
             <div class="stat-label">⚠️ Em atraso</div>
         </div>
     </div>
+
+    @if($pixConfigurado)
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;margin-bottom:20px;font-size:13px;color:#1e40af;">
+        💡 <span>Para parcelas pendentes ou em atraso, clique em <strong>Pagar via PIX</strong> para gerar o QR Code instantaneamente.</span>
+    </div>
+    @endif
 
     @if($honorarios->isEmpty())
         <div class="card">
@@ -339,6 +462,7 @@
                         <th style="text-align:right;">Valor</th>
                         <th>Status</th>
                         <th>Pgto</th>
+                        @if($pixConfigurado)<th></th>@endif
                     </tr>
                 </thead>
                 <tbody>
@@ -368,6 +492,16 @@
                         <td style="font-size:12px;color:#64748b;">
                             {{ $parc->data_pagamento ? \Carbon\Carbon::parse($parc->data_pagamento)->format('d/m/Y') : '—' }}
                         </td>
+                        @if($pixConfigurado)
+                        <td style="white-space:nowrap;">
+                            @if(in_array($parc->status, ['pendente','atrasado']))
+                            <button wire:click="abrirPix({{ $parc->id }})"
+                                    style="background:#22c55e;color:#fff;border:none;padding:5px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                                <span style="font-size:14px;">🔑</span> Pagar via PIX
+                            </button>
+                            @endif
+                        </td>
+                        @endif
                     </tr>
                     @endforeach
                 </tbody>
@@ -457,4 +591,85 @@
 @endif
 
 </div>{{-- /container --}}
+
+
+{{-- ── Modal PIX ── --}}
+@if($modalPix)
+<div class="modal-overlay" wire:click.self="$set('modalPix', false)">
+    <div class="modal" style="max-width:440px;width:100%">
+        <div class="modal-header">
+            <h3>🔑 Pagamento via PIX</h3>
+            <button class="btn-close" wire:click="$set('modalPix', false)">×</button>
+        </div>
+        <div class="modal-body">
+
+            {{-- Valor --}}
+            <div style="text-align:center;margin-bottom:20px;">
+                <div style="font-size:13px;color:#64748b;margin-bottom:4px;">Valor a pagar</div>
+                <div style="font-size:32px;font-weight:700;color:#1a3a5c;">
+                    R$ {{ number_format($pixValor, 2, ',', '.') }}
+                </div>
+                <div style="font-size:12px;color:#94a3b8;margin-top:2px;">{{ $pixDescricao }}</div>
+            </div>
+
+            {{-- QR Code --}}
+            <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:20px;">
+                <img src="{{ $pixQrUrl }}" alt="QR Code PIX"
+                     style="width:220px;height:220px;border:6px solid #f1f5f9;border-radius:12px;"
+                     onerror="this.style.display='none';document.getElementById('pix-qr-error').style.display='block'">
+                <div id="pix-qr-error" style="display:none;font-size:12px;color:#94a3b8;text-align:center;">
+                    QR Code indisponível — use o código abaixo para copiar e colar.
+                </div>
+                <div style="font-size:12px;color:#64748b;">Aponte a câmera do celular para o QR Code</div>
+            </div>
+
+            {{-- Copia e Cola --}}
+            <div style="margin-bottom:20px;">
+                <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">
+                    Ou copie o código Pix Copia e Cola:
+                </div>
+                <div style="display:flex;gap:8px;align-items:stretch;">
+                    <input id="pix-payload-input" readonly value="{{ $pixPayload }}"
+                           style="flex:1;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:10px;font-family:monospace;color:#475569;background:#f8fafc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    <button onclick="
+                        const inp = document.getElementById('pix-payload-input');
+                        navigator.clipboard.writeText(inp.value).then(() => {
+                            const btn = this;
+                            btn.textContent = '✅ Copiado!';
+                            btn.style.background = '#16a34a';
+                            setTimeout(() => { btn.textContent = '📋 Copiar'; btn.style.background = '#1a3a5c'; }, 2500);
+                        });
+                    " style="background:#1a3a5c;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
+                        📋 Copiar
+                    </button>
+                </div>
+            </div>
+
+            {{-- Instrução --}}
+            <div style="padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:12px;color:#166534;line-height:1.5;margin-bottom:20px;">
+                <strong>Como pagar:</strong><br>
+                1. Abra o app do seu banco e selecione <strong>PIX → Ler QR Code</strong> ou <strong>Pix Copia e Cola</strong>.<br>
+                2. Insira o código ou escaneie o QR Code acima.<br>
+                3. Confirme o valor de <strong>R$ {{ number_format($pixValor, 2, ',', '.') }}</strong> e conclua o pagamento.<br>
+                4. Clique em <strong>"Já paguei"</strong> para notificar o escritório.
+            </div>
+
+            {{-- Ações --}}
+            <div style="display:flex;gap:10px;">
+                <button wire:click="$set('modalPix', false)"
+                        class="btn btn-outline" style="flex:1;">
+                    Fechar
+                </button>
+                <button wire:click="confirmarPagamentoPix"
+                        style="flex:1;background:#16a34a;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+                    ✅ Já paguei
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+@endif
+
+
 </div>

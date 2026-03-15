@@ -10,3 +10,11 @@ Artisan::command('inspire', function () {
 
 // Gera notificações internas e envia e-mail resumo diário às 7h
 Schedule::command('notificacoes:gerar')->dailyAt('07:00');
+
+// Envia notificações WhatsApp/SMS: prazos + audiências às 7:15, cobranças às 8h
+Schedule::command('notificacoes:whatsapp --tipo=prazo')->dailyAt('07:15');
+Schedule::command('notificacoes:whatsapp --tipo=audiencia')->dailyAt('07:15');
+Schedule::command('notificacoes:whatsapp --tipo=cobranca')->dailyAt('08:00');
+
+// Atualiza índices monetários (IPCA, IGPM, SELIC, TR) todo dia 15 às 6h
+Schedule::command('indices:atualizar')->monthlyOn(15, '06:00');

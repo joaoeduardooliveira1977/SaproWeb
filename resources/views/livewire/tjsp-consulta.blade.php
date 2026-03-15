@@ -1,9 +1,17 @@
 <div @if($verificacao?->emAndamento()) wire:poll.2000ms @endif>
 
+    {{-- Erro de inicialização --}}
+    @if($erroMensagem)
+    <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:12px 16px;border-radius:8px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+        <span>⚠️ {{ $erroMensagem }}</span>
+        <button wire:click="$set('erroMensagem','')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#991b1b;">✕</button>
+    </div>
+    @endif
+
     {{-- Cabeçalho --}}
     <div style="margin-bottom:24px;">
-        <h2 style="font-size:20px; font-weight:700; color:#1a3a5c;">🏛️ Atualizações do TJSP</h2>
-            <p style="font-size:13px; color:#64748b; margin-top:4px;">Verifique se houve novos andamentos nos processos</p>
+        <h2 style="font-size:20px; font-weight:700; color:#1a3a5c;">🏛️ Consulta Judicial</h2>
+            <p style="font-size:13px; color:#64748b; margin-top:4px;">Verifique novos andamentos via DATAJUD/CNJ — tribunal detectado automaticamente pelo número do processo</p>
     </div>
 
 
@@ -77,35 +85,72 @@
     {{-- Botão verificar atualização --}}
     <div style="display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-top:16px; padding-top:16px; border-top:1px solid #f1f5f9;">
         <span style="font-size:13px; color:#64748b;">{{ $totalFiltrado }} processo(s) selecionado(s)</span>
+        @php $bloqueado = $consultando || $verificacao?->emAndamento() || $totalFiltrado === 0; @endphp
         <button wire:click="iniciarVerificacao"
-            @if($verificacao?->emAndamento() || $totalFiltrado === 0) disabled @endif
-        style="padding:12px 24px; background:{{ $verificacao?->emAndamento() || $totalFiltrado === 0 ? '#94a3b8' : '#16a34a' }}; color:white; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:{{ $verificacao?->emAndamento() || $totalFiltrado === 0 ? 'not-allowed' : 'pointer' }};">
-        {{ $verificacao?->emAndamento() ? '⏳ Verificando...' : '🔄 Verificar Atualizações' }}
-    </button>
+            wire:loading.attr="disabled" wire:target="iniciarVerificacao"
+            @if($bloqueado) disabled @endif
+            style="padding:12px 24px; background:{{ $bloqueado ? '#94a3b8' : '#16a34a' }}; color:white; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:{{ $bloqueado ? 'not-allowed' : 'pointer' }};">
+            <span wire:loading.remove wire:target="iniciarVerificacao">
+                {{ $verificacao?->emAndamento() ? '⏳ Verificando...' : '🔄 Verificar Atualizações' }}
+            </span>
+            <span wire:loading wire:target="iniciarVerificacao">⏳ Iniciando...</span>
+        </button>
     </div>
 
 
 
-    {{-- Barra de progresso --}}
+    {{-- Barra de progresso + feed ao vivo --}}
     @if($verificacao?->emAndamento())
-    <div style="background:white; border-radius:12px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,0.08); margin-bottom:24px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <span style="font-size:14px; font-weight:600; color:#1a3a5c;">Consultando processos no DATAJUD/CNJ...</span>
-            <span style="font-size:14px; font-weight:700; color:#2563a8;">{{ $verificacao->porcentagem() }}%</span>
+    <div class="card" style="margin-bottom:20px">
+
+        {{-- Cabeçalho progresso --}}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-size:14px;font-weight:700;color:var(--primary)">
+                🔄 Consultando processos no DATAJUD/CNJ...
+            </span>
+            <span style="font-size:16px;font-weight:800;color:var(--primary)">{{ $verificacao->porcentagem() }}%</span>
         </div>
-        <div style="background:#e2e8f0; border-radius:99px; height:12px; overflow:hidden; margin-bottom:10px;">
-            <div style="background:linear-gradient(90deg,#2563a8,#16a34a); height:12px; border-radius:99px; transition:width 0.5s ease;
-                width:{{ $verificacao->porcentagem() }}%;"></div>
+
+        {{-- Barra --}}
+        <div style="background:var(--border);border-radius:99px;height:10px;overflow:hidden;margin-bottom:10px">
+            <div style="background:linear-gradient(90deg,var(--primary),#16a34a);height:10px;border-radius:99px;transition:width .5s ease;width:{{ $verificacao->porcentagem() }}%"></div>
         </div>
-        <div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b;">
+
+        {{-- Contadores --}}
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin-bottom:12px">
             <span>{{ $verificacao->processado }} / {{ $verificacao->total }} processos</span>
-            @if($verificacao->processo_atual)
-            <span>📄 {{ $verificacao->processo_atual }}</span>
+            @if($verificacao->novos_total > 0)
+            <span style="color:var(--success);font-weight:700">✅ {{ $verificacao->novos_total }} andamento(s) novo(s) encontrado(s)</span>
             @endif
         </div>
-        @if($verificacao->novos_total > 0)
-        <div style="margin-top:12px; padding:8px 12px; background:#dcfce7; border-radius:6px; font-size:13px; color:#16a34a; font-weight:600;">
-            ✅ {{ $verificacao->novos_total }} novo(s) andamento(s) encontrado(s) até agora...
+
+        {{-- Feed ao vivo --}}
+        @if(!empty($verificacao->log_linhas))
+        @php
+            $linhas = array_reverse(array_slice($verificacao->log_linhas, -15)); // últimas 15, mais recentes no topo
+            $icones = ['consultando'=>'🔍','ok'=>'✅','sem_novos'=>'➖','erro'=>'❌','ignorado'=>'⚪'];
+            $cores  = ['consultando'=>'var(--primary)','ok'=>'var(--success)','sem_novos'=>'var(--muted)','erro'=>'var(--danger)','ignorado'=>'var(--muted)'];
+        @endphp
+        <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden">
+            <div style="padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">
+                Log em tempo real
+            </div>
+            <div style="max-height:220px;overflow-y:auto;font-family:monospace;font-size:12px">
+                @foreach($linhas as $linha)
+                <div style="display:flex;align-items:baseline;gap:8px;padding:5px 12px;border-bottom:1px solid #f8fafc;{{ $loop->first ? 'background:#f0fdf4' : '' }}">
+                    <span style="color:var(--muted);flex-shrink:0;font-size:10px">{{ $linha['ts'] }}</span>
+                    <span style="flex-shrink:0">{{ $icones[$linha['tipo']] ?? '•' }}</span>
+                    <span style="color:var(--text);font-weight:600;flex-shrink:0;min-width:220px">{{ $linha['numero'] }}</span>
+                    @if($linha['tribunal'])
+                    <span style="background:#e0f2fe;color:#0369a1;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;flex-shrink:0">{{ $linha['tribunal'] }}</span>
+                    @endif
+                    <span style="color:{{ $cores[$linha['tipo']] ?? 'var(--muted)' }}">{{ $linha['msg'] }}</span>
+                    @if(($linha['novos'] ?? 0) > 0)
+                    <span style="background:var(--success);color:#fff;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;margin-left:auto;flex-shrink:0">+{{ $linha['novos'] }}</span>
+                    @endif
+                </div>
+                @endforeach
+            </div>
         </div>
         @endif
     </div>
@@ -120,10 +165,16 @@
         </div>
 
         @if(count($verificacao->novos_andamentos ?? []) > 0)
-        <div style="background:#dcfce7; border:1px solid #86efac; border-radius:12px; padding:16px 20px; margin-bottom:20px;">
-            <strong style="color:#16a34a; font-size:15px;">
+        <div style="background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <strong style="color:#16a34a;font-size:15px;">
                 ✅ {{ count($verificacao->novos_andamentos) }} processo(s) com andamentos novos!
             </strong>
+            @if(($verificacao->prazos_criados ?? 0) > 0)
+            <a href="{{ route('prazos') }}"
+               style="display:inline-flex;align-items:center;gap:6px;background:#1a3a5c;color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;">
+                ⏳ {{ $verificacao->prazos_criados }} prazo(s) criado(s) automaticamente →
+            </a>
+            @endif
         </div>
 
         @foreach($verificacao->novos_andamentos as $item)
@@ -132,6 +183,11 @@
                 <div>
                     <span style="font-size:14px; font-weight:700; color:#1a3a5c;">{{ $item['numero'] }}</span>
                     <span style="font-size:13px; color:#64748b; margin-left:12px;">{{ $item['cliente'] }}</span>
+                    @if(!empty($item['tribunal']))
+                    <span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:600; margin-left:8px;">
+                        {{ $item['tribunal'] }}
+                    </span>
+                    @endif
                 </div>
                 <span style="background:#16a34a; color:white; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:600;">
                     {{ count($item['andamentos']) }} novo(s)

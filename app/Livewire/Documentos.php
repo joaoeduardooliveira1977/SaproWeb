@@ -16,6 +16,18 @@ class Documentos extends Component
     public string $busca = '';
     public string $filtroTipo = '';
     public string $filtroVinculo = '';
+    public string $filtroDataIni = '';
+    public string $filtroDataFim = '';
+
+    // Ordenação
+    public string $ordenarPor  = 'created_at';
+    public string $ordenarDir  = 'DESC';
+
+    // Preview
+    public bool   $modalPreview  = false;
+    public string $previewUrl    = '';
+    public string $previewTitulo = '';
+    public string $previewMime   = '';
 
     // Modal
     public bool $modalDocumento = false;
@@ -142,6 +154,35 @@ class Documentos extends Component
         session()->flash('success', 'Documento salvo com sucesso!');
     }
 
+    public function ordenar(string $coluna): void
+    {
+        if ($this->ordenarPor === $coluna) {
+            $this->ordenarDir = $this->ordenarDir === 'ASC' ? 'DESC' : 'ASC';
+        } else {
+            $this->ordenarPor = $coluna;
+            $this->ordenarDir = 'DESC';
+        }
+    }
+
+    public function abrirPreview(int $id): void
+    {
+        $doc = DB::selectOne("SELECT titulo, arquivo, mime_type FROM documentos WHERE id = ?", [$id]);
+        if (! $doc || ! $doc->arquivo) return;
+
+        $this->previewUrl    = Storage::url($doc->arquivo);
+        $this->previewTitulo = $doc->titulo;
+        $this->previewMime   = $doc->mime_type ?? '';
+        $this->modalPreview  = true;
+    }
+
+    public function fecharPreview(): void
+    {
+        $this->modalPreview  = false;
+        $this->previewUrl    = '';
+        $this->previewTitulo = '';
+        $this->previewMime   = '';
+    }
+
     public function togglePortalVisivel(int $id): void
     {
         $doc = DB::selectOne("SELECT portal_visivel FROM documentos WHERE id = ?", [$id]);
@@ -149,6 +190,46 @@ class Documentos extends Component
 
         $novo = $doc->portal_visivel ? 0 : 1;
         DB::update("UPDATE documentos SET portal_visivel = ?, updated_at = NOW() WHERE id = ?", [$novo, $id]);
+    }
+
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        [$where, $params] = $this->buildWhere();
+
+        $docs = DB::select("
+            SELECT d.titulo, d.tipo, d.data_documento, d.arquivo_original,
+                   d.tamanho, d.portal_visivel, d.created_at,
+                   pe.nome as cliente_nome, pr.numero as processo_numero
+            FROM documentos d
+            LEFT JOIN pessoas pe ON pe.id = d.cliente_id
+            LEFT JOIN processos pr ON pr.id = d.processo_id
+            {$where}
+            ORDER BY d.{$this->ordenarPor} {$this->ordenarDir}
+        ", $params);
+
+        $tipos = ['peticao'=>'Petição','contrato'=>'Contrato','procuracao'=>'Procuração',
+                  'laudo'=>'Laudo','documento_cliente'=>'Doc. Cliente','sentenca'=>'Sentença','outro'=>'Outro'];
+
+        return response()->streamDownload(function () use ($docs, $tipos) {
+            $out = fopen('php://output', 'w');
+            fputs($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Título','Tipo','Data','Cliente','Processo','Arquivo','Tamanho','Portal','Cadastrado em'], ';');
+            foreach ($docs as $d) {
+                $kb = $d->tamanho ? ($d->tamanho > 1048576 ? number_format($d->tamanho/1048576,1).' MB' : number_format($d->tamanho/1024,0).' KB') : '';
+                fputcsv($out, [
+                    $d->titulo,
+                    $tipos[$d->tipo] ?? $d->tipo,
+                    $d->data_documento ? \Carbon\Carbon::parse($d->data_documento)->format('d/m/Y') : '',
+                    $d->cliente_nome ?? '',
+                    $d->processo_numero ?? '',
+                    $d->arquivo_original ?? '',
+                    $kb,
+                    $d->portal_visivel ? 'Sim' : 'Não',
+                    \Carbon\Carbon::parse($d->created_at)->format('d/m/Y'),
+                ], ';');
+            }
+            fclose($out);
+        }, 'documentos-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     public function excluirDocumento(int $id): void
@@ -169,22 +250,9 @@ class Documentos extends Component
         }
     }
 
-    public function render()
+    private function buildWhere(): array
     {
-        // Resumo
-        $resumo = DB::selectOne("
-            SELECT
-                COUNT(*) as total,
-                SUM(tamanho) as total_tamanho,
-                SUM(CASE WHEN tipo='peticao' THEN 1 ELSE 0 END) as peticoes,
-                SUM(CASE WHEN tipo='contrato' THEN 1 ELSE 0 END) as contratos,
-                SUM(CASE WHEN tipo='sentenca' THEN 1 ELSE 0 END) as sentencas,
-                SUM(CASE WHEN tipo='documento_cliente' THEN 1 ELSE 0 END) as docs_cliente
-            FROM documentos
-        ");
-
-        // Lista
-        $where = "WHERE 1=1";
+        $where  = "WHERE 1=1";
         $params = [];
 
         if ($this->busca) {
@@ -200,17 +268,44 @@ class Documentos extends Component
         } elseif ($this->filtroVinculo === 'cliente') {
             $where .= " AND d.cliente_id IS NOT NULL AND d.processo_id IS NULL";
         }
+        if ($this->filtroDataIni) {
+            $where .= " AND d.data_documento >= ?";
+            $params[] = $this->filtroDataIni;
+        }
+        if ($this->filtroDataFim) {
+            $where .= " AND d.data_documento <= ?";
+            $params[] = $this->filtroDataFim;
+        }
+
+        return [$where, $params];
+    }
+
+    public function render()
+    {
+        $resumo = DB::selectOne("
+            SELECT COUNT(*) as total,
+                SUM(tamanho) as total_tamanho,
+                SUM(CASE WHEN tipo='peticao' THEN 1 ELSE 0 END) as peticoes,
+                SUM(CASE WHEN tipo='contrato' THEN 1 ELSE 0 END) as contratos,
+                SUM(CASE WHEN tipo='sentenca' THEN 1 ELSE 0 END) as sentencas,
+                SUM(CASE WHEN tipo='documento_cliente' THEN 1 ELSE 0 END) as docs_cliente
+            FROM documentos
+        ");
+
+        [$where, $params] = $this->buildWhere();
+
+        $colunasSafe = ['created_at', 'data_documento', 'titulo', 'tipo', 'tamanho'];
+        $col = in_array($this->ordenarPor, $colunasSafe) ? $this->ordenarPor : 'created_at';
+        $dir = $this->ordenarDir === 'ASC' ? 'ASC' : 'DESC';
 
         $documentos = DB::select("
-            SELECT d.*,
-                pe.nome as cliente_nome,
-                pr.numero as processo_numero
+            SELECT d.*, pe.nome as cliente_nome, pr.numero as processo_numero
             FROM documentos d
             LEFT JOIN pessoas pe ON pe.id = d.cliente_id
             LEFT JOIN processos pr ON pr.id = d.processo_id
             {$where}
-            ORDER BY d.created_at DESC
-            LIMIT 100
+            ORDER BY d.{$col} {$dir}
+            LIMIT 200
         ", $params);
 
         return view('livewire.documentos', compact('resumo', 'documentos'));

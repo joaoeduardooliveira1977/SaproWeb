@@ -5,16 +5,25 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\{Agenda as AgendaModel, Processo};
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\{Auth, DB};
+use Carbon\Carbon;
 
 class Agenda extends Component
 {
     use WithPagination;
 
-    public string $data_ini    = '';
-    public string $data_fim    = '';
-    public string $tipo        = '';
-    public bool   $so_pendentes = true;
+    // Filtros lista
+    public string $data_ini     = '';
+    public string $data_fim     = '';
+    public string $tipo         = '';
+    public bool   $so_pendentes  = true;
+    public string $responsavel_id = '';
+
+    // Vista
+    public bool $vistaCalendario = false;
+    public int  $mesCalendario;
+    public int  $anoCalendario;
+    public string $diaSelecionado = '';
 
     // Modal
     public bool   $modalAberto  = false;
@@ -28,18 +37,52 @@ class Agenda extends Component
     public string $observacoes  = '';
 
     protected $rules = [
-        'titulo'    => 'required|string|max:200',
-        'data_hora' => 'required|date',
-        'tipo_evento' => 'required',
+        'titulo'     => 'required|string|max:200',
+        'data_hora'  => 'required|date',
+        'tipo_evento'=> 'required',
     ];
 
     public function mount(): void
     {
-        $this->data_ini = today()->format('Y-m-d');
-        $this->data_fim = today()->addDays(30)->format('Y-m-d');
+        $this->data_ini        = today()->format('Y-m-d');
+        $this->data_fim        = today()->addDays(30)->format('Y-m-d');
+        $this->mesCalendario   = (int) now()->format('m');
+        $this->anoCalendario   = (int) now()->format('Y');
     }
 
-    public function abrirModal(?int $id = null): void
+    // ── Vista ──────────────────────────────────────────────────
+
+    public function toggleVista(): void
+    {
+        $this->vistaCalendario = ! $this->vistaCalendario;
+        $this->diaSelecionado  = '';
+    }
+
+    public function mesAnterior(): void
+    {
+        $d = Carbon::create($this->anoCalendario, $this->mesCalendario, 1)->subMonth();
+        $this->anoCalendario = $d->year;
+        $this->mesCalendario = $d->month;
+        $this->diaSelecionado = '';
+    }
+
+    public function proximoMes(): void
+    {
+        $d = Carbon::create($this->anoCalendario, $this->mesCalendario, 1)->addMonth();
+        $this->anoCalendario = $d->year;
+        $this->mesCalendario = $d->month;
+        $this->diaSelecionado = '';
+    }
+
+    public function selecionarDia(string $data): void
+    {
+        $this->diaSelecionado = ($this->diaSelecionado === $data) ? '' : $data;
+        $this->resetPage();
+    }
+
+    // ── Modal ──────────────────────────────────────────────────
+
+    public function abrirModal(?int $id = null, string $data = ''): void
     {
         $this->eventoId    = $id;
         $this->modalAberto = true;
@@ -57,7 +100,7 @@ class Agenda extends Component
             $this->titulo = $this->local = $this->processo_id = $this->observacoes = '';
             $this->tipo_evento = 'Outros';
             $this->urgente = false;
-            $this->data_hora = now()->format('Y-m-d\TH:i');
+            $this->data_hora = ($data ? $data . 'T09:00' : now()->format('Y-m-d\TH:i'));
         }
     }
 
@@ -68,19 +111,52 @@ class Agenda extends Component
         $this->resetErrorBag();
     }
 
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $rows = AgendaModel::with(['processo', 'responsavel.pessoa'])
+            ->when($this->data_ini, fn($q) => $q->where('data_hora', '>=', $this->data_ini))
+            ->when($this->data_fim, fn($q) => $q->where('data_hora', '<=', $this->data_fim . ' 23:59:59'))
+            ->when($this->tipo,           fn($q) => $q->where('tipo', $this->tipo))
+            ->when($this->so_pendentes,   fn($q) => $q->where('concluido', false))
+            ->when($this->responsavel_id, fn($q) => $q->where('responsavel_id', $this->responsavel_id))
+            ->orderBy('data_hora')
+            ->get();
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputs($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Título','Data','Hora','Tipo','Local','Processo','Responsável','Urgente','Concluído','Observações'], ';');
+            foreach ($rows as $ev) {
+                fputcsv($out, [
+                    $ev->titulo,
+                    $ev->data_hora->format('d/m/Y'),
+                    $ev->data_hora->format('H:i'),
+                    $ev->tipo,
+                    $ev->local ?? '',
+                    $ev->processo?->numero ?? '',
+                    $ev->responsavel?->pessoa?->nome ?? '',
+                    $ev->urgente ? 'Sim' : 'Não',
+                    $ev->concluido ? 'Sim' : 'Não',
+                    $ev->observacoes ?? '',
+                ], ';');
+            }
+            fclose($out);
+        }, 'agenda-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function salvar(): void
     {
         $this->validate();
 
         $dados = [
-            'titulo'        => $this->titulo,
-            'data_hora'     => $this->data_hora,
-            'local'         => $this->local ?: null,
-            'tipo'          => $this->tipo_evento,
-            'urgente'       => $this->urgente,
-            'processo_id'   => $this->processo_id ?: null,
-            'responsavel_id'=> Auth::id(),
-            'observacoes'   => $this->observacoes ?: null,
+            'titulo'         => $this->titulo,
+            'data_hora'      => $this->data_hora,
+            'local'          => $this->local ?: null,
+            'tipo'           => $this->tipo_evento,
+            'urgente'        => $this->urgente,
+            'processo_id'    => $this->processo_id ?: null,
+            'responsavel_id' => Auth::id(),
+            'observacoes'    => $this->observacoes ?: null,
         ];
 
         if ($this->eventoId) {
@@ -104,19 +180,44 @@ class Agenda extends Component
         session()->flash('sucesso', 'Evento removido.');
     }
 
+    // ── Render ─────────────────────────────────────────────────
+
     public function render()
     {
-        $eventos = AgendaModel::with('processo')
-            ->when($this->data_ini, fn($q) => $q->where('data_hora', '>=', $this->data_ini))
-            ->when($this->data_fim, fn($q) => $q->where('data_hora', '<=', $this->data_fim . ' 23:59:59'))
-            ->when($this->tipo,     fn($q) => $q->where('tipo', $this->tipo))
-            ->when($this->so_pendentes, fn($q) => $q->where('concluido', false))
+        // ── Lista ──
+        $eventos = AgendaModel::with(['processo', 'responsavel.pessoa'])
+            ->when($this->diaSelecionado, fn($q) => $q->whereDate('data_hora', $this->diaSelecionado))
+            ->when(!$this->diaSelecionado && $this->data_ini, fn($q) => $q->where('data_hora', '>=', $this->data_ini))
+            ->when(!$this->diaSelecionado && $this->data_fim, fn($q) => $q->where('data_hora', '<=', $this->data_fim . ' 23:59:59'))
+            ->when($this->tipo,           fn($q) => $q->where('tipo', $this->tipo))
+            ->when($this->so_pendentes,   fn($q) => $q->where('concluido', false))
+            ->when($this->responsavel_id, fn($q) => $q->where('responsavel_id', $this->responsavel_id))
             ->orderBy('data_hora')
             ->paginate(20);
 
+        // ── Calendário ──
+        $inicioMes   = Carbon::create($this->anoCalendario, $this->mesCalendario, 1)->startOfMonth();
+        $fimMes      = $inicioMes->copy()->endOfMonth();
+
+        $eventosMes  = AgendaModel::whereBetween('data_hora', [$inicioMes, $fimMes])
+            ->when($this->so_pendentes,   fn($q) => $q->where('concluido', false))
+            ->when($this->tipo,           fn($q) => $q->where('tipo', $this->tipo))
+            ->when($this->responsavel_id, fn($q) => $q->where('responsavel_id', $this->responsavel_id))
+            ->get()
+            ->groupBy(fn($e) => $e->data_hora->format('Y-m-d'));
+
+        $responsaveis = DB::table('usuarios as u')
+            ->join('pessoas as p', 'p.id', '=', 'u.pessoa_id')
+            ->orderBy('p.nome')
+            ->select('u.id', 'p.nome')
+            ->get();
+
         return view('livewire.agenda', [
-            'eventos'   => $eventos,
-            'processos' => Processo::where('status', 'Ativo')->orderBy('numero')->get(),
+            'eventos'      => $eventos,
+            'eventosMes'   => $eventosMes,
+            'inicioMes'    => $inicioMes,
+            'processos'    => Processo::where('status', 'Ativo')->orderBy('numero')->get(),
+            'responsaveis' => $responsaveis,
         ]);
     }
 }

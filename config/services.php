@@ -31,4 +31,23 @@ return [
         ],
     ],
 
+    'clicksign' => [
+        'token'   => env('CLICKSIGN_ACCESS_TOKEN', ''),
+        'sandbox' => env('CLICKSIGN_SANDBOX', true),
+    ],
+
+    'pix' => [
+        'chave'  => env('PIX_CHAVE', ''),
+        'nome'   => env('PIX_NOME', 'ESCRITORIO'),
+        'cidade' => env('PIX_CIDADE', 'SAO PAULO'),
+    ],
+
+    'twilio' => [
+        'sid'           => env('TWILIO_ACCOUNT_SID', ''),
+        'token'         => env('TWILIO_AUTH_TOKEN', ''),
+        'from_whatsapp' => env('TWILIO_WHATSAPP_FROM', ''),
+        'from_sms'      => env('TWILIO_SMS_FROM', ''),
+        'canal_padrao'  => env('TWILIO_CANAL_PADRAO', 'whatsapp'),
+    ],
+
 ];

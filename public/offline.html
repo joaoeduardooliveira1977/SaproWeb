@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sem conexão — SAPRO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #0f2540;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+  .card {
+    background: #1a3a5c;
+    border-radius: 16px;
+    padding: 48px 40px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+  }
+  .icon { font-size: 64px; margin-bottom: 24px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+  p { font-size: 14px; color: rgba(255,255,255,.6); line-height: 1.6; margin-bottom: 28px; }
+  .btn {
+    display: inline-block; padding: 12px 28px; background: #e8a020;
+    color: #fff; border: none; border-radius: 8px; font-size: 14px;
+    font-weight: 700; cursor: pointer; text-decoration: none;
+  }
+  .btn:hover { opacity: .88; }
+  .logo { font-size: 13px; color: rgba(255,255,255,.25); margin-top: 32px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📵</div>
+    <h1>Sem conexão com a internet</h1>
+    <p>
+      O Sistema Jurídico SAPRO precisa de conexão para funcionar.<br>
+      Verifique sua rede e tente novamente.
+    </p>
+    <button class="btn" onclick="window.location.reload()">↻ Tentar novamente</button>
+    <div class="logo">⚖️ SAPRO — Sistema Jurídico</div>
+  </div>
+</body>
+</html>

@@ -26,18 +26,34 @@ class TjspService
                 ];
             }
 
-            $response = Http::timeout(30)
-                ->withHeaders([
-                    'Authorization' => self::API_KEY,
-                    'Content-Type'  => 'application/json',
-                ])
-                ->post(self::API_URL, [
-                    'query' => [
-                        'match' => [
-                            'numeroProcesso' => $numeroLimpo,
+            Log::debug('TjspService: consultando', [
+                'url'    => self::API_URL,
+                'numero' => $numeroLimpo,
+            ]);
+
+            try {
+                $response = Http::timeout(15)
+                    ->withHeaders([
+                        'Authorization' => self::API_KEY,
+                        'Content-Type'  => 'application/json',
+                    ])
+                    ->post(self::API_URL, [
+                        'query' => [
+                            'match' => [
+                                'numeroProcesso' => $numeroLimpo,
+                            ],
                         ],
-                    ],
+                    ]);
+            } catch (\Illuminate\Http\Client\ConnectionException $e) {
+                Log::warning('TjspService: timeout/conexão', [
+                    'url'  => self::API_URL,
+                    'erro' => $e->getMessage(),
                 ]);
+                return [
+                    'sucesso' => false,
+                    'erro'    => 'O DATAJUD/TJSP não respondeu no tempo limite (15s). Tente novamente mais tarde.',
+                ];
+            }
 
             if (!$response->successful()) {
                 return [

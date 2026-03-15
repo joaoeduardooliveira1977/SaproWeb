@@ -48,6 +48,10 @@ class Honorarios extends Component
     public ?array $parcelasModal = null;
     public string $honorarioNome = '';
 
+    // Cálculo automático pela causa
+    public string $valorCausa    = '';   // valor_causa do processo selecionado
+    public float  $valorCalculado = 0;  // percentual_exito × valor_causa
+
     protected array $rules = [
         'cliente_id'        => 'required|integer|min:1',
         'tipo'              => 'required|in:fixo_mensal,exito,hora,ato_diligencia',
@@ -80,19 +84,71 @@ class Honorarios extends Component
 
     public function updatedClienteId(): void
     {
+        $this->processo_id  = null;
+        $this->valorCausa   = '';
+        $this->valorCalculado = 0;
+
         if ($this->cliente_id) {
             $this->processos = DB::select("
-                SELECT id, numero, vara FROM processos
+                SELECT id, numero, vara, valor_causa FROM processos
                 WHERE cliente_id = ? AND status = 'Ativo'
                 ORDER BY numero
             ", [$this->cliente_id]);
         }
     }
 
+    public function updatedProcessoId(): void
+    {
+        $this->valorCausa     = '';
+        $this->valorCalculado = 0;
+
+        if ($this->processo_id) {
+            $proc = DB::selectOne("SELECT valor_causa FROM processos WHERE id = ?", [$this->processo_id]);
+            $this->valorCausa = $proc?->valor_causa ?? '';
+        }
+
+        $this->recalcularExito();
+    }
+
+    public function updatedPercentualExito(): void
+    {
+        $this->recalcularExito();
+    }
+
+    public function updatedTipo(): void
+    {
+        $this->recalcularExito();
+    }
+
+    private function recalcularExito(): void
+    {
+        if ($this->tipo === 'exito' && $this->valorCausa && $this->percentual_exito) {
+            $causa = (float) $this->valorCausa;
+            $perc  = (float) str_replace(',', '.', $this->percentual_exito);
+            $this->valorCalculado = round($causa * $perc / 100, 2);
+        } else {
+            $this->valorCalculado = 0;
+        }
+    }
+
+    public function aplicarPercentual(float $perc): void
+    {
+        $this->percentual_exito = number_format($perc, 2, '.', '');
+        $this->recalcularExito();
+    }
+
+    public function usarValorCalculado(): void
+    {
+        if ($this->valorCalculado > 0) {
+            $this->valor_contrato = number_format($this->valorCalculado, 2, '.', '');
+        }
+    }
+
     public function novoHonorario(): void
     {
         $this->reset(['honorarioId','processo_id','cliente_id','tipo','descricao',
-            'valor_contrato','percentual_exito','total_parcelas','data_fim','observacoes','processos']);
+            'valor_contrato','percentual_exito','total_parcelas','data_fim','observacoes','processos',
+            'valorCausa','valorCalculado']);
         $this->tipo = 'fixo_mensal';
         $this->total_parcelas = 1;
         $this->status = 'ativo';
@@ -119,6 +175,11 @@ class Honorarios extends Component
         $this->observacoes     = $h->observacoes ?? '';
 
         $this->updatedClienteId();
+        if ($h->processo_id) {
+            $proc = DB::selectOne("SELECT valor_causa FROM processos WHERE id = ?", [$h->processo_id]);
+            $this->valorCausa = $proc?->valor_causa ?? '';
+        }
+        $this->recalcularExito();
         $this->modalHonorario = true;
     }
 

@@ -2,7 +2,14 @@
     <div class="card">
         <div class="card-header">
             <span class="card-title">👥 Pessoas Cadastradas</span>
-            <button wire:click="abrirModal()" class="btn btn-primary btn-sm">＋ Nova Pessoa</button>
+            <div style="display:flex;gap:8px;">
+                <button wire:click="exportarCsv" wire:loading.attr="disabled"
+                    class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1.5px solid var(--border);" title="Exportar CSV">
+                    <span wire:loading.remove wire:target="exportarCsv">📥 CSV</span>
+                    <span wire:loading wire:target="exportarCsv">Gerando…</span>
+                </button>
+                <button wire:click="abrirModal()" class="btn btn-primary btn-sm">＋ Nova Pessoa</button>
+            </div>
         </div>
 
         <div class="search-bar">

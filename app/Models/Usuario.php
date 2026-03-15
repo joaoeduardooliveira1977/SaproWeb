@@ -63,6 +63,30 @@ public function username(): string
         return in_array($this->perfil, ['admin', 'advogado']);
     }
 
+    /** Verifica acesso a um módulo (usado em Livewire) */
+    public function can($abilities, $arguments = []): bool
+    {
+        // Compatibilidade com o sistema de gate do Laravel
+        if (is_string($abilities) && !str_contains($abilities, '.')) {
+            return $this->temModulo($abilities);
+        }
+        return parent::can($abilities, $arguments);
+    }
+
+    public function temModulo(string $modulo): bool
+    {
+        if ($this->perfil === 'admin') return true;
+        $permissoes = \App\Http\Middleware\VerificarPerfil::PERMISSOES[$this->perfil] ?? [];
+        return in_array($modulo, $permissoes);
+    }
+
+    public function temAcao(string $acao): bool
+    {
+        if ($this->perfil === 'admin') return true;
+        $acoes = \App\Http\Middleware\VerificarPerfil::ACOES[$this->perfil] ?? [];
+        return in_array($acao, $acoes);
+    }
+
     public function getNomeAttribute(): string
     {
         return $this->attributes['nome'] ?? $this->pessoa?->nome ?? $this->login;

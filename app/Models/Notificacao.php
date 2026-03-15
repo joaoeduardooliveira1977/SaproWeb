@@ -58,11 +58,12 @@ class Notificacao extends Model
     public function icone(): string
     {
         return match ($this->tipo) {
-            'prazo_fatal'        => '🚨',
-            'prazo_vencendo'     => '⏳',
-            'prazo_vencido'      => '❌',
-            'honorario_atrasado' => '💸',
-            default              => '🔔',
+            'prazo_fatal'           => '🚨',
+            'prazo_vencendo'        => '⏳',
+            'prazo_vencido'         => '❌',
+            'honorario_atrasado'    => '💸',
+            'processo_sem_andamento'=> '📋',
+            default                 => '🔔',
         };
     }
 
@@ -70,11 +71,12 @@ class Notificacao extends Model
     public function cor(): string
     {
         return match ($this->tipo) {
-            'prazo_fatal'        => '#fce7f3',
-            'prazo_vencendo'     => '#fef9c3',
-            'prazo_vencido'      => '#fee2e2',
-            'honorario_atrasado' => '#ede9fe',
-            default              => '#f1f5f9',
+            'prazo_fatal'           => '#fce7f3',
+            'prazo_vencendo'        => '#fef9c3',
+            'prazo_vencido'         => '#fee2e2',
+            'honorario_atrasado'    => '#ede9fe',
+            'processo_sem_andamento'=> '#f0fdf4',
+            default                 => '#f1f5f9',
         };
     }
 }

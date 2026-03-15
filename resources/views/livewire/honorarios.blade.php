@@ -138,18 +138,23 @@
                 @if(count($processos) > 0)
                 <div style="grid-column:1/-1;">
                     <label style="font-size:12px;font-weight:600;color:var(--muted);">PROCESSO (opcional)</label>
-                    <select wire:model="processo_id" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
+                    <select wire:model.live="processo_id" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
                         <option value="">Sem processo vinculado</option>
                         @foreach($processos as $p)
-                            <option value="{{ $p->id }}">{{ $p->numero }} — {{ $p->vara }}</option>
+                            <option value="{{ $p->id }}">{{ $p->numero }}{{ $p->vara ? ' — '.$p->vara : '' }}{{ $p->valor_causa ? ' · R$ '.number_format($p->valor_causa,2,',','.') : '' }}</option>
                         @endforeach
                     </select>
+                    @if($valorCausa)
+                    <div style="margin-top:6px;padding:8px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;font-size:12px;color:#1d4ed8;display:flex;align-items:center;gap:6px;">
+                        ⚖️ <span>Valor da causa: <strong>R$ {{ number_format((float)$valorCausa,2,',','.') }}</strong></span>
+                    </div>
+                    @endif
                 </div>
                 @endif
 
                 <div>
                     <label style="font-size:12px;font-weight:600;color:var(--muted);">TIPO *</label>
-                    <select wire:model="tipo" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
+                    <select wire:model.live="tipo" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
                         <option value="fixo_mensal">Fixo Mensal</option>
                         <option value="exito">Por Êxito</option>
                         <option value="hora">Por Hora</option>
@@ -172,14 +177,66 @@
                 </div>
 
                 <div>
-                    <label style="font-size:12px;font-weight:600;color:var(--muted);">VALOR TOTAL (R$) *</label>
-                    <input wire:model="valor_contrato" type="number" step="0.01" placeholder="0,00" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--muted);">
+                        VALOR TOTAL (R$) *
+                        @if($tipo === 'exito' && $valorCalculado > 0)
+                            <span style="font-weight:400;color:#16a34a;margin-left:6px;">← calculado automaticamente</span>
+                        @endif
+                    </label>
+                    <input wire:model="valor_contrato" type="number" step="0.01" placeholder="0,00"
+                           style="width:100%;padding:8px 12px;border:1px solid {{ ($tipo==='exito'&&$valorCalculado>0&&(float)$valor_contrato===$valorCalculado) ? '#86efac' : 'var(--border)' }};border-radius:6px;margin-top:4px;">
                 </div>
 
                 @if($tipo === 'exito')
-                <div>
-                    <label style="font-size:12px;font-weight:600;color:var(--muted);">% ÊXITO SOBRE CAUSA</label>
-                    <input wire:model="percentual_exito" type="number" step="0.01" placeholder="Ex: 20" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
+                <div style="grid-column:1/-1;">
+                    <label style="font-size:12px;font-weight:600;color:var(--muted);">% ÊXITO SOBRE A CAUSA</label>
+                    <div style="display:flex;gap:8px;margin-top:4px;align-items:center;">
+                        <input wire:model.live="percentual_exito" type="number" step="0.01" min="0" max="100"
+                               placeholder="Ex: 20"
+                               style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+                        <span style="font-size:13px;color:var(--muted);">%</span>
+                    </div>
+
+                    {{-- Sugestões de percentual --}}
+                    <div style="margin-top:8px;">
+                        <div style="font-size:11px;color:var(--muted);margin-bottom:5px;">⚡ Sugestões rápidas:</div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            @foreach([5, 10, 15, 20, 25, 30] as $perc)
+                            <button wire:click="aplicarPercentual({{ $perc }})"
+                                    type="button"
+                                    style="padding:4px 12px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;
+                                           border:1px solid {{ (float)$percentual_exito == $perc ? 'var(--primary)' : 'var(--border)' }};
+                                           background:{{ (float)$percentual_exito == $perc ? 'var(--primary)' : '#fff' }};
+                                           color:{{ (float)$percentual_exito == $perc ? '#fff' : 'var(--muted)' }};">
+                                {{ $perc }}%
+                            </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Preview do cálculo --}}
+                    @if($valorCalculado > 0)
+                    <div style="margin-top:10px;padding:12px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;">
+                        <div style="font-size:12px;color:#166534;margin-bottom:8px;">
+                            📐 <strong>Cálculo:</strong>
+                            {{ number_format((float)$percentual_exito,2,',','.') }}%
+                            × R$ {{ number_format((float)$valorCausa,2,',','.') }}
+                            = <strong style="font-size:14px;">R$ {{ number_format($valorCalculado,2,',','.') }}</strong>
+                        </div>
+                        <button wire:click="usarValorCalculado" type="button"
+                                style="background:#16a34a;color:#fff;border:none;padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">
+                            ✓ Usar este valor
+                        </button>
+                    </div>
+                    @elseif($valorCausa && !$percentual_exito)
+                    <div style="margin-top:8px;font-size:12px;color:var(--muted);">
+                        👆 Selecione um percentual acima para calcular automaticamente.
+                    </div>
+                    @elseif(!$valorCausa)
+                    <div style="margin-top:8px;font-size:12px;color:var(--muted);">
+                        ℹ️ Selecione um processo com valor da causa para usar o cálculo automático.
+                    </div>
+                    @endif
                 </div>
                 @endif
 

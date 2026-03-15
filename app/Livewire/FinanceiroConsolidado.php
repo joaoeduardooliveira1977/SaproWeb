@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -10,9 +11,10 @@ class FinanceiroConsolidado extends Component
 {
     use WithPagination;
 
-    public string $aba        = 'visao-geral';
-    public string $filtroMes  = '';
+    public string $aba          = 'visao-geral';
+    public string $filtroMes    = '';
     public string $filtroStatus = 'pendente'; // pendente | todos
+    public int    $periodoFluxo = 6;           // 3 | 6 | 12 meses
 
     public function mount(): void
     {
@@ -79,12 +81,103 @@ class FinanceiroConsolidado extends Component
         );
     }
 
-    // ── Fluxo de Caixa (últimos 6 meses) ────────────────────────
+    // ── Ações rápidas ───────────────────────────────────────────
+
+    public function marcarRecebido(int $id): void
+    {
+        DB::table('recebimentos')->where('id', $id)->update([
+            'recebido'          => true,
+            'data_recebimento'  => today(),
+            'valor_recebido'    => DB::table('recebimentos')->where('id', $id)->value('valor'),
+            'updated_at'        => now(),
+        ]);
+        session()->flash('sucesso', 'Recebimento marcado como recebido.');
+    }
+
+    public function marcarPago(int $id): void
+    {
+        DB::table('pagamentos')->where('id', $id)->update([
+            'pago'           => true,
+            'data_pagamento' => today(),
+            'valor_pago'     => DB::table('pagamentos')->where('id', $id)->value('valor'),
+            'updated_at'     => now(),
+        ]);
+        session()->flash('sucesso', 'Pagamento marcado como pago.');
+    }
+
+    // ── Exportar CSV ────────────────────────────────────────────
+
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        if ($this->aba === 'receber') {
+            $rows = $this->queryReceber()->get();
+            return response()->streamDownload(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputs($out, "\xEF\xBB\xBF");
+                fputcsv($out, ['Data','Processo','Cliente','Descrição','Valor','Status'], ';');
+                foreach ($rows as $r) {
+                    fputcsv($out, [
+                        $r->data ? Carbon::parse($r->data)->format('d/m/Y') : '',
+                        $r->processo_numero ?? '',
+                        $r->cliente_nome ?? '',
+                        $r->descricao ?? '',
+                        number_format($r->valor, 2, ',', '.'),
+                        $r->recebido ? 'Recebido' : 'Pendente',
+                    ], ';');
+                }
+                fclose($out);
+            }, 'receber-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }
+
+        if ($this->aba === 'pagar') {
+            $rows = $this->queryPagar()->get();
+            return response()->streamDownload(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputs($out, "\xEF\xBB\xBF");
+                fputcsv($out, ['Vencimento','Processo','Cliente','Fornecedor','Descrição','Valor','Status'], ';');
+                foreach ($rows as $r) {
+                    $vencido = !$r->pago && $r->data_vencimento && Carbon::parse($r->data_vencimento)->isPast();
+                    fputcsv($out, [
+                        $r->data_vencimento ? Carbon::parse($r->data_vencimento)->format('d/m/Y') : '',
+                        $r->processo_numero ?? '',
+                        $r->cliente_nome ?? '',
+                        $r->fornecedor_nome ?? '',
+                        $r->descricao ?? '',
+                        number_format($r->valor, 2, ',', '.'),
+                        $r->pago ? 'Pago' : ($vencido ? 'Vencido' : 'Pendente'),
+                    ], ';');
+                }
+                fclose($out);
+            }, 'pagar-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }
+
+        // honorarios
+        $rows = $this->queryHonorariosAtrasados()->get();
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputs($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Vencimento','Dias Atraso','Cliente','Processo','Contrato','Parcela','Valor'], ';');
+            foreach ($rows as $r) {
+                fputcsv($out, [
+                    Carbon::parse($r->vencimento)->format('d/m/Y'),
+                    $r->dias_atraso,
+                    $r->cliente_nome ?? '',
+                    $r->processo_numero ?? '',
+                    $r->honorario_descricao ?? '',
+                    $r->numero_parcela.'ª',
+                    number_format($r->valor, 2, ',', '.'),
+                ], ';');
+            }
+            fclose($out);
+        }, 'honorarios-atraso-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    // ── Fluxo de Caixa (período configurável) ───────────────────
 
     private function fluxoCaixa(): array
     {
         $meses = [];
-        for ($i = 5; $i >= 0; $i--) {
+        for ($i = $this->periodoFluxo - 1; $i >= 0; $i--) {
             $meses[] = now()->subMonths($i)->format('Y-m');
         }
 

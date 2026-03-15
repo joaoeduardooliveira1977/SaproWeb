@@ -56,6 +56,9 @@
 
 {{-- ══ Filtros + botão novo ══ --}}
 <div class="filtros-bar">
+    <input type="text" wire:model.live.debounce.300ms="filtroBusca"
+           placeholder="🔍 Buscar por título…" style="min-width:200px;">
+
     <select wire:model.live="filtroStatus">
         <option value="aberto">Em aberto</option>
         <option value="cumprido">Cumpridos</option>
@@ -84,9 +87,24 @@
         @endforeach
     </select>
 
-    <button class="btn btn-primary btn-sm" wire:click="abrirModal()" style="margin-left:auto;">
-        + Novo Prazo
-    </button>
+    <input type="date" wire:model.live="filtroDataIni" title="Prazo a partir de">
+    <input type="date" wire:model.live="filtroDataFim" title="Prazo até">
+
+    <div style="display:flex;gap:6px;margin-left:auto;">
+        <button class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1.5px solid var(--border);"
+                wire:click="exportarPdf" wire:loading.attr="disabled" title="Exportar PDF">
+            <span wire:loading.remove wire:target="exportarPdf">📄 PDF</span>
+            <span wire:loading wire:target="exportarPdf">Gerando…</span>
+        </button>
+        <button class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1.5px solid var(--border);"
+                wire:click="exportarCsv" wire:loading.attr="disabled" title="Exportar CSV">
+            <span wire:loading.remove wire:target="exportarCsv">📥 CSV</span>
+            <span wire:loading wire:target="exportarCsv">Gerando…</span>
+        </button>
+        <button class="btn btn-primary btn-sm" wire:click="abrirModal()">
+            + Novo Prazo
+        </button>
+    </div>
 </div>
 
 {{-- ══ Lista ══ --}}

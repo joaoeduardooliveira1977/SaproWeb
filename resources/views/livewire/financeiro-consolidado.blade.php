@@ -78,6 +78,11 @@
         </select>
     </div>
     @endif
+    <button wire:click="exportarCsv" wire:loading.attr="disabled"
+        class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1.5px solid var(--border);margin-left:auto;">
+        <span wire:loading.remove wire:target="exportarCsv">📥 CSV</span>
+        <span wire:loading wire:target="exportarCsv">Gerando…</span>
+    </button>
 </div>
 @endif
 
@@ -137,9 +142,39 @@
 
 {{-- ══ ABA: FLUXO DE CAIXA ══════════════════════════════════════ --}}
 @if($aba === 'fluxo')
+
+@php
+    $labels     = collect($fluxo)->pluck('label');
+    $recebidos  = collect($fluxo)->pluck('recebido');
+    $honorarios = collect($fluxo)->pluck('honorarios');
+    $pagos      = collect($fluxo)->pluck('pago');
+    $saldos     = collect($fluxo)->pluck('saldo');
+@endphp
+
+{{-- Gráfico --}}
+<div class="card" style="margin-bottom:16px;">
+    <div class="card-header">
+        <span class="card-title">📊 Fluxo de Caixa — Últimos {{ $periodoFluxo }} meses</span>
+        <div style="display:flex;gap:4px;">
+            @foreach([3 => '3m', 6 => '6m', 12 => '12m'] as $val => $label)
+            <button wire:click="$set('periodoFluxo', {{ $val }})"
+                style="padding:4px 12px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;border:1.5px solid var(--border);
+                       background:{{ $periodoFluxo == $val ? 'var(--primary)' : 'transparent' }};
+                       color:{{ $periodoFluxo == $val ? '#fff' : 'var(--muted)' }};">
+                {{ $label }}
+            </button>
+            @endforeach
+        </div>
+    </div>
+    <div style="position:relative;height:280px;">
+        <canvas id="chartFluxo"></canvas>
+    </div>
+</div>
+
+{{-- Tabela --}}
 <div class="card">
     <div class="card-header">
-        <span class="card-title">Fluxo de Caixa — Últimos 6 meses</span>
+        <span class="card-title">Detalhamento mensal</span>
     </div>
     <div class="table-wrap">
         <table>
@@ -185,6 +220,100 @@
         </table>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    const ctx = document.getElementById('chartFluxo');
+    if (!ctx) return;
+
+    const labels     = @json($labels);
+    const recebidos  = @json($recebidos);
+    const honorarios = @json($honorarios);
+    const pagos      = @json($pagos);
+    const saldos     = @json($saldos);
+
+    new Chart(ctx, {
+        data: {
+            labels,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Recebimentos',
+                    data: recebidos,
+                    backgroundColor: '#16a34a33',
+                    borderColor: '#16a34a',
+                    borderWidth: 2,
+                    borderRadius: 5,
+                },
+                {
+                    type: 'bar',
+                    label: 'Honorários',
+                    data: honorarios,
+                    backgroundColor: '#0891b233',
+                    borderColor: '#0891b2',
+                    borderWidth: 2,
+                    borderRadius: 5,
+                },
+                {
+                    type: 'bar',
+                    label: 'Despesas',
+                    data: pagos,
+                    backgroundColor: '#dc262633',
+                    borderColor: '#dc2626',
+                    borderWidth: 2,
+                    borderRadius: 5,
+                },
+                {
+                    type: 'line',
+                    label: 'Saldo',
+                    data: saldos,
+                    borderColor: '#e8a020',
+                    backgroundColor: '#e8a02022',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#e8a020',
+                    pointRadius: 5,
+                    tension: 0.3,
+                    fill: true,
+                    yAxisID: 'ySaldo',
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'top', labels: { font: { size: 12 }, padding: 16 } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' R$ ' + ctx.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+                    },
+                },
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: {
+                    position: 'left',
+                    ticks: {
+                        callback: v => 'R$ ' + (v / 1000).toFixed(0) + 'k',
+                        font: { size: 11 },
+                    },
+                    grid: { color: '#f1f5f9' },
+                },
+                ySaldo: {
+                    position: 'right',
+                    grid: { drawOnChartArea: false },
+                    ticks: {
+                        callback: v => 'R$ ' + (v / 1000).toFixed(0) + 'k',
+                        font: { size: 11 },
+                    },
+                },
+            },
+        },
+    });
+})();
+</script>
 @endif
 
 {{-- ══ ABA: CONTAS A RECEBER ═════════════════════════════════════ --}}
@@ -209,6 +338,7 @@
                     <th>Descrição</th>
                     <th style="text-align:right;">Valor</th>
                     <th>Status</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -228,6 +358,15 @@
                             <span class="badge" style="background:#dcfce7;color:#166534;">Recebido</span>
                         @else
                             <span class="badge" style="background:#fef9c3;color:#854d0e;">Pendente</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if(!$row->recebido)
+                        <button wire:click="marcarRecebido({{ $row->id }})"
+                            wire:confirm="Marcar como recebido hoje?"
+                            class="btn btn-sm btn-success" style="font-size:11px;padding:3px 8px;">
+                            ✓ Recebido
+                        </button>
                         @endif
                     </td>
                 </tr>
@@ -271,6 +410,7 @@
                     <th>Descrição</th>
                     <th style="text-align:right;">Valor</th>
                     <th>Status</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -297,6 +437,15 @@
                             <span class="badge" style="background:#fee2e2;color:#991b1b;">Vencido</span>
                         @else
                             <span class="badge" style="background:#fef9c3;color:#854d0e;">Pendente</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if(!$row->pago)
+                        <button wire:click="marcarPago({{ $row->id }})"
+                            wire:confirm="Marcar como pago hoje?"
+                            class="btn btn-sm" style="font-size:11px;padding:3px 8px;background:#fef9c3;color:#854d0e;border:1px solid #fde68a;">
+                            ✓ Pago
+                        </button>
                         @endif
                     </td>
                 </tr>

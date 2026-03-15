@@ -6,12 +6,17 @@ use Livewire\Component;
 use App\Models\Processo;
 use App\Models\Pessoa;
 use App\Models\Fase;
+use App\Services\TribunalService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class ProcessoForm extends Component
 {
     public ?int $processoId = null;
+
+    // Detecção de tribunal ao vivo
+    public string $tribunalDetectado = '';
+    public bool   $numeroValido      = false;
 
     // Campos do formulário
     public string  $numero            = '';
@@ -33,6 +38,20 @@ class ProcessoForm extends Component
     public string  $observacoes       = '';
     public string  $status            = 'Ativo';
 
+    public function updatedNumero(): void
+    {
+        $service = new TribunalService();
+        $tribunal = $service->detectarTribunal($this->numero);
+
+        if ($tribunal) {
+            $this->tribunalDetectado = $tribunal['nome'];
+            $this->numeroValido      = true;
+        } else {
+            $this->tribunalDetectado = '';
+            $this->numeroValido      = strlen(preg_replace('/[^0-9]/', '', $this->numero)) >= 15 ? false : false;
+        }
+    }
+
     public function mount(?int $processoId = null): void
 	{
     		$this->processoId = $processoId;
@@ -40,6 +59,7 @@ class ProcessoForm extends Component
         if ($processoId) {
             $processo = Processo::findOrFail($processoId);
             $this->numero            = $processo->numero ?? '';
+            $this->updatedNumero();
             $this->data_distribuicao = $processo->data_distribuicao ? $processo->data_distribuicao->format('Y-m-d') : '';
             $this->cliente_id        = $processo->cliente_id;
             $this->parte_contraria   = $processo->parte_contraria ?? '';

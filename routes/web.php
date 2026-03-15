@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AssinaturaWebhookController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\RelatorioController;
@@ -19,83 +20,95 @@ Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
 // ─── Área Autenticada ──────────────────────────
 Route::middleware('auth:usuarios')->group(function () {
 
-    // Dashboard
-    Route::get('/', fn() => view('dashboard'))->name('dashboard');
-
-    // Pessoas
-    Route::get('/pessoas', fn() => view('pessoas'))->name('pessoas');
-
-    // Processos
-    Route::get('/processos',           fn() => view('processos'))->name('processos');
-    Route::get('/processos/novo',      fn() => view('processo-form'))->name('processos.novo');
-    Route::get('/processos/{id}/editar', fn($id) => view('processo-form', ['id' => $id]))->name('processos.editar');
-    Route::get('/processos/{id}',      [ProcessoController::class, 'show'])->name('processos.show');
-
-    // Agenda
-    Route::get('/agenda', fn() => view('agenda'))->name('agenda');
-
-    // Prazos
-    Route::get('/prazos', fn() => view('prazos'))->name('prazos');
-
-    // Módulo do Processo (andamentos, custas)
-    Route::get('/processos/{id}/andamentos', [ProcessoController::class, 'andamentos'])->name('processos.andamentos');
-    Route::get('/processos/{id}/custas',     [ProcessoController::class, 'custas'])->name('processos.custas');
-
-    // Tabelas de domínio
-    Route::get('/tabelas', fn() => view('tabelas'))->name('tabelas');
-
-    // Índices Monetários
-    Route::get('/indices', fn() => view('indices'))->name('indices');
-
-    // Auditoria (admin)
-    Route::get('/auditoria', fn() => view('auditoria'))->name('auditoria');
-
-    // Trocar senha
-    Route::get('/minha-conta', fn() => view('minha-conta'))->name('minha-conta');
-
-    Route::post('/minha-conta', [AuthController::class, 'trocarSenha'])->name('minha-conta.salvar');
-
-    // Financeiro
-    Route::get('/financeiro', fn() => view('financeiro'))->name('financeiro');
-    Route::get('/financeiro-consolidado', fn() => view('financeiro-consolidado'))->name('financeiro.consolidado');
-
-    // Portal Acesso
-    Route::get('/admin/portal-acesso', fn() => view('portal-acesso'))->name('admin.portal-acesso');
-
-    // Portal Mensagens (admin)
-    Route::get('/admin/portal-mensagens', fn() => view('portal-mensagens'))->name('admin.portal-mensagens');
-
-    Route::prefix('relatorios')->name('relatorios.')->group(function () {
-    Route::get('/',             fn() => view('relatorios.index'))->name('index');
-    Route::get('/por-fase',     [RelatorioController::class, 'processosPorFase'])->name('por-fase');
-    Route::get('/por-advogado', [RelatorioController::class, 'processosPorAdvogado'])->name('por-advogado');
-    Route::get('/por-risco',    [RelatorioController::class, 'processosPorRisco'])->name('por-risco');
-    Route::get('/agenda',       [RelatorioController::class, 'agendaPeriodo'])->name('agenda');
-    Route::get('/custas',       [RelatorioController::class, 'custasPendentes'])->name('custas');
-    Route::get('/aniversarios', [RelatorioController::class, 'aniversarios'])->name('aniversarios');
-    
-
+    // ── Geral (todos os perfis autenticados) ───────────────────
+    Route::middleware('perfil:geral')->group(function () {
+        Route::get('/', fn() => view('dashboard'))->name('dashboard');
+        Route::get('/agenda',     fn() => view('agenda'))->name('agenda');
+        Route::get('/prazos',     fn() => view('prazos'))->name('prazos');
+        Route::get('/audiencias', fn() => view('audiencias'))->name('audiencias');
+        Route::get('/minha-conta', fn() => view('minha-conta'))->name('minha-conta');
+        Route::post('/minha-conta', [AuthController::class, 'trocarSenha'])->name('minha-conta.salvar');
     });
 
-    // Portal TJSP
-    Route::get('/tjsp', fn() => view('tjsp'))->name('tjsp');
+    // ── Processos ───────────────────────────────────────────────
+    Route::middleware('perfil:processos')->group(function () {
+        Route::get('/processos',             fn() => view('processos'))->name('processos');
+        Route::get('/processos/novo',        fn() => view('processo-form'))->name('processos.novo');
+        Route::get('/processos/{id}/editar', fn($id) => view('processo-form', ['id' => $id]))->name('processos.editar');
+        Route::get('/processos/{id}',        [ProcessoController::class, 'show'])->name('processos.show');
+        Route::get('/processos/{id}/andamentos', [ProcessoController::class, 'andamentos'])->name('processos.andamentos');
+        Route::get('/processos/{id}/custas',     [ProcessoController::class, 'custas'])->name('processos.custas');
+    });
 
-    // Assistente
-    Route::get('/assistente', fn() => view('assistente'))->name('assistente');
+    // ── Pessoas ─────────────────────────────────────────────────
+    Route::middleware('perfil:pessoas')->group(function () {
+        Route::get('/pessoas',         fn() => view('pessoas'))->name('pessoas');
+        Route::get('/correspondentes', fn() => view('correspondentes'))->name('correspondentes');
+    });
 
-    //Honorários
-    Route::get('/honorarios', fn() => view('honorarios'))->name('honorarios');
+    // ── Documentos & Minutas ────────────────────────────────────
+    Route::middleware('perfil:documentos')->group(function () {
+        Route::get('/documentos',        fn() => view('documentos'))->name('documentos');
+        Route::get('/minutas',           fn() => view('minutas'))->name('minutas');
+        Route::get('/assinatura-digital', fn() => view('assinatura-digital'))->name('assinatura-digital');
+    });
 
-    //Documentos
-    Route::get('/documentos', fn() => view('documentos'))->name('documentos');
+    // ── Financeiro ──────────────────────────────────────────────
+    Route::middleware('perfil:financeiro')->group(function () {
+        Route::get('/financeiro',             fn() => view('financeiro'))->name('financeiro');
+        Route::get('/financeiro-consolidado', fn() => view('financeiro-consolidado'))->name('financeiro.consolidado');
+        Route::get('/honorarios',             fn() => view('honorarios'))->name('honorarios');
+        Route::get('/inadimplencia',          fn() => view('inadimplencia'))->name('inadimplencia');
+    });
 
-    // Usuários (somente admin via VerificarPerfil middleware)
-    Route::get('/usuarios', fn() => view('usuarios'))->name('usuarios')->middleware('perfil:usuarios');
+    // ── Relatórios ──────────────────────────────────────────────
+    Route::middleware('perfil:relatorios')->prefix('relatorios')->name('relatorios.')->group(function () {
+        Route::get('/',                   [RelatorioController::class, 'index'])->name('index');
+        Route::get('/por-fase',           [RelatorioController::class, 'processosPorFase'])->name('por-fase');
+        Route::get('/por-advogado',       [RelatorioController::class, 'processosPorAdvogado'])->name('por-advogado');
+        Route::get('/por-risco',          [RelatorioController::class, 'processosPorRisco'])->name('por-risco');
+        Route::get('/agenda',             [RelatorioController::class, 'agendaPeriodo'])->name('agenda');
+        Route::get('/custas',             [RelatorioController::class, 'custasPendentes'])->name('custas');
+        Route::get('/aniversarios',       [RelatorioController::class, 'aniversarios'])->name('aniversarios');
+        Route::get('/andamentos-cliente', [RelatorioController::class, 'andamentosPorCliente'])->name('andamentos-cliente');
+        Route::get('/honorarios-aberto',  [RelatorioController::class, 'honorariosEmAberto'])->name('honorarios-aberto');
+        Route::get('/financeiro-periodo', [RelatorioController::class, 'financeiroPorPeriodo'])->name('financeiro-periodo');
+        Route::get('/sem-andamento',         [RelatorioController::class, 'processosSemAndamento'])->name('sem-andamento');
+        Route::get('/produtividade-pdf',     [RelatorioController::class, 'produtividadeAdvogado'])->name('produtividade-pdf');
+    });
 
-    // Publicações AASP
-    Route::get('/aasp-publicacoes', fn() => view('aasp-publicacoes'))->name('aasp-publicacoes')->middleware('perfil:aasp-publicacoes');
+    // ── Analytics & Produtividade ────────────────────────────────
+    Route::middleware('perfil:relatorios')->group(function () {
+        Route::get('/analytics',     fn() => view('analytics'))->name('analytics');
+        Route::get('/produtividade', fn() => view('produtividade'))->name('produtividade');
+    });
+
+    // ── Ferramentas ─────────────────────────────────────────────
+    Route::middleware('perfil:ferramentas')->group(function () {
+        Route::get('/tjsp',         fn() => view('tjsp'))->name('tjsp');
+        Route::get('/assistente',   fn() => view('assistente'))->name('assistente');
+        Route::get('/aasp-publicacoes', fn() => view('aasp-publicacoes'))->name('aasp-publicacoes');
+        Route::get('/calculadora',  fn() => view('calculadora'))->name('calculadora');
+    });
+
+    // ── Administração (admin only) ──────────────────────────────
+    Route::middleware('perfil:admin')->group(function () {
+        Route::get('/tabelas',  fn() => view('tabelas'))->name('tabelas');
+        Route::get('/indices',  fn() => view('indices'))->name('indices');
+        Route::get('/auditoria', fn() => view('auditoria'))->name('auditoria');
+        Route::get('/usuarios', fn() => view('usuarios'))->name('usuarios');
+        Route::get('/admin/portal-acesso',       fn() => view('portal-acesso'))->name('admin.portal-acesso');
+        Route::get('/admin/portal-mensagens',    fn() => view('portal-mensagens'))->name('admin.portal-mensagens');
+        Route::get('/admin/notificacoes-whatsapp', fn() => view('notificacoes-whatsapp'))->name('admin.notificacoes-whatsapp');
+    });
 
 });
+
+
+// ─── Webhooks (sem auth/csrf) ──────────────────────────────────
+Route::post('/webhooks/clicksign', [AssinaturaWebhookController::class, 'handle'])
+    ->name('webhooks.clicksign')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 
 Route::prefix('portal')->name('portal.')->group(function () {

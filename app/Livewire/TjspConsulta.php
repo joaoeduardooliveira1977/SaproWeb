@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Services\TribunalService;
 use Livewire\Component;
 use App\Models\Processo;
 use App\Models\Pessoa;
@@ -10,7 +11,9 @@ use App\Jobs\VerificarAndamentosTjsp;
 
 class TjspConsulta extends Component
 {
-    public ?int $verificacaoId = null;
+    public ?int    $verificacaoId  = null;
+    public string  $erroMensagem   = '';
+    public bool    $consultando    = false;
 
     // Filtros
     public string $filtroCliente    = '';
@@ -21,26 +24,59 @@ class TjspConsulta extends Component
 
     public function iniciarVerificacao(): void
     {
-        TjspVerificacao::where('status', 'rodando')->update(['status' => 'erro']);
+        $this->erroMensagem = '';
+        $this->consultando  = true;
 
-        // Montar IDs dos processos filtrados
-        $processoIds = $this->queryProcessos()->pluck('id')->toArray();
+        try {
+            // Reset qualquer verificação travada (pendente OU rodando)
+            TjspVerificacao::whereIn('status', ['pendente', 'rodando'])
+                ->update(['status' => 'erro', 'concluido_em' => now()]);
 
-        if (empty($processoIds)) {
-            return;
+            $processos = $this->queryProcessos();
+
+            if ($processos->isEmpty()) {
+                $this->erroMensagem = 'Nenhum processo encontrado com os filtros selecionados.';
+                return;
+            }
+
+            // Pré-valida: ao menos um processo deve ter número CNJ reconhecível
+            $service = new TribunalService();
+            $semTribunal = $processos->filter(
+                fn($p) => $service->detectarTribunal($p->numero) === null
+            );
+
+            if ($semTribunal->count() === $processos->count()) {
+                $this->erroMensagem =
+                    'Nenhum processo selecionado possui número CNJ reconhecível pelo DATAJUD. ' .
+                    'Verifique se os números estão no formato correto (ex: 0001234-56.2023.8.26.0001).';
+                return;
+            }
+
+            if ($semTribunal->isNotEmpty()) {
+                // Avisa sobre os não reconhecidos mas continua com os válidos
+                $processos = $processos->diff($semTribunal);
+            }
+
+            $processoIds = $processos->pluck('id')->toArray();
+
+            $verificacao = TjspVerificacao::create([
+                'status'      => 'pendente',
+                'total'       => count($processoIds),
+                'processado'  => 0,
+                'iniciado_em' => now(),
+                'filtros'     => json_encode($processoIds),
+            ]);
+
+            $this->verificacaoId = $verificacao->id;
+
+            VerificarAndamentosTjsp::dispatch($verificacao->id, $processoIds);
+
+        } catch (\Throwable $e) {
+            $this->erroMensagem = 'Erro ao iniciar a verificação: ' . $e->getMessage();
+            $this->verificacaoId = null;
+        } finally {
+            $this->consultando = false;
         }
-
-        $verificacao = TjspVerificacao::create([
-            'status'      => 'pendente',
-            'total'       => count($processoIds),
-            'processado'  => 0,
-            'iniciado_em' => now(),
-            'filtros'     => json_encode($processoIds),
-        ]);
-
-        $this->verificacaoId = $verificacao->id;
-
-        VerificarAndamentosTjsp::dispatch($verificacao->id, $processoIds);
     }
 
     private function queryProcessos()

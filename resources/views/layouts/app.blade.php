@@ -2,8 +2,20 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Sistema Jurídico') — Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>@yield('title', 'Sistema Jurídico') — SAPRO</title>
+
+    {{-- PWA --}}
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a3a5c">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SAPRO">
+    <link rel="apple-touch-icon" href="/icons/icon.svg">
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
     @livewireStyles
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,7 +50,22 @@
         .sidebar-sub { font-size: 10px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: 1.5px; }
 
         .nav-group { padding: 12px 0 4px; }
-        .nav-group-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: 1.5px; padding: 0 18px; margin-bottom: 4px; }
+        .nav-group-label {
+            font-size: 10px; font-weight: 700; color: rgba(255,255,255,.35); text-transform: uppercase;
+            letter-spacing: 1.5px; padding: 0 18px; margin-bottom: 4px;
+            display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; user-select: none; transition: color .15s;
+        }
+        .nav-group-label:hover { color: rgba(255,255,255,.6); }
+        .nav-group-label .chevron {
+            font-size: 10px; transition: transform .25s ease; display: inline-block;
+        }
+        .nav-group-label.collapsed .chevron { transform: rotate(-90deg); }
+        .nav-group-items {
+            overflow: hidden; transition: max-height .28s ease, opacity .2s ease;
+            max-height: 500px; opacity: 1;
+        }
+        .nav-group-items.collapsed { max-height: 0; opacity: 0; }
         .nav-item {
             display: flex; align-items: center; gap: 10px; padding: 9px 18px;
             font-size: 13.5px; color: rgba(255,255,255,.75); cursor: pointer;
@@ -61,9 +88,9 @@
         .hamburger { display: none; background: none; border: none; cursor: pointer; font-size: 22px; color: var(--primary); padding: 4px 8px; }
 
         /* ── Main ── */
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .topbar { height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-        .topbar-title { font-size: 16px; font-weight: 600; color: var(--primary); flex: 1; }
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .topbar { height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); overflow: visible; position: relative; z-index: 100; }
+        .topbar-title { font-size: 16px; font-weight: 600; color: var(--primary); flex-shrink: 0; }
         .topbar-user { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
         .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
         .content { flex: 1; overflow: auto; padding: 24px; }
@@ -137,6 +164,12 @@
         .pagination a, .pagination span { padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; color: var(--primary); border: 1px solid var(--border); }
         .pagination span[aria-current] { background: var(--primary); color: #fff; border-color: var(--primary); }
 
+        /* ── PWA / Safe area ── */
+        @supports (padding: env(safe-area-inset-bottom)) {
+            .sidebar { padding-bottom: env(safe-area-inset-bottom); }
+            .content { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+        }
+
         /* ── Utilities ── */
         .text-primary { color: var(--primary-light); font-weight: 600; }
         .mb-4 { margin-bottom: 16px; }
@@ -195,114 +228,167 @@
         @endphp
 
         {{-- ── GERAL ── --}}
-        <div class="nav-group">
-            <div class="nav-group-label">Geral</div>
-            <a href="{{ route('dashboard') }}" class="nav-item {{ $rota === 'dashboard' ? 'active' : '' }}">
-                <span class="nav-icon">🏠</span> Dashboard
-            </a>
-            @if($canAgenda)
-            <a href="{{ route('agenda') }}" class="nav-item {{ $rota === 'agenda' ? 'active' : '' }}">
-                <span class="nav-icon">📅</span> Agenda
-            </a>
-            <a href="{{ route('prazos') }}" class="nav-item {{ $rota === 'prazos' ? 'active' : '' }}">
-                <span class="nav-icon">⏳</span> Prazos
-            </a>
-            @endif
+        <div class="nav-group" data-group="geral">
+            <div class="nav-group-label" onclick="toggleGroup('geral')">
+                Geral <span class="chevron">▾</span>
+            </div>
+            <div class="nav-group-items" id="group-geral">
+                <a href="{{ route('dashboard') }}" class="nav-item {{ $rota === 'dashboard' ? 'active' : '' }}">
+                    <span class="nav-icon">🏠</span> Dashboard
+                </a>
+                @if($isAdvogado || $isAdmin)
+                <a href="{{ route('analytics') }}" class="nav-item {{ $rota === 'analytics' ? 'active' : '' }}">
+                    <span class="nav-icon">📊</span> Analytics
+                </a>
+                <a href="{{ route('produtividade') }}" class="nav-item {{ $rota === 'produtividade' ? 'active' : '' }}">
+                    <span class="nav-icon">👨‍⚖️</span> Produtividade
+                </a>
+                @endif
+                @if($canAgenda)
+                <a href="{{ route('agenda') }}" class="nav-item {{ $rota === 'agenda' ? 'active' : '' }}">
+                    <span class="nav-icon">📅</span> Agenda
+                </a>
+                <a href="{{ route('prazos') }}" class="nav-item {{ $rota === 'prazos' ? 'active' : '' }}">
+                    <span class="nav-icon">⏳</span> Prazos
+                </a>
+                <a href="{{ route('audiencias') }}" class="nav-item {{ $rota === 'audiencias' ? 'active' : '' }}">
+                    <span class="nav-icon">🗓️</span> Audiências
+                </a>
+                @endif
+            </div>
         </div>
 
         {{-- ── PROCESSOS ── --}}
         @if($canProc || $canPessoas || $canDocs)
-        <div class="nav-group">
-            <div class="nav-group-label">Processos</div>
-            @if($canProc)
-            <a href="{{ route('processos') }}" class="nav-item {{ str_contains($rota ?? '', 'processos') ? 'active' : '' }}">
-                <span class="nav-icon">⚖️</span> Processos
-            </a>
-            @endif
-            @if($canPessoas)
-            <a href="{{ route('pessoas') }}" class="nav-item {{ str_contains($rota ?? '', 'pessoas') ? 'active' : '' }}">
-                <span class="nav-icon">👥</span> Pessoas
-            </a>
-            @endif
-            @if($canDocs)
-            <a href="{{ route('documentos') }}" class="nav-item {{ request()->is('documentos*') ? 'active' : '' }}">
-                <span class="nav-icon">📁</span> Documentos
-            </a>
-            @endif
+        <div class="nav-group" data-group="processos">
+            <div class="nav-group-label" onclick="toggleGroup('processos')">
+                Processos <span class="chevron">▾</span>
+            </div>
+            <div class="nav-group-items" id="group-processos">
+                @if($canProc)
+                <a href="{{ route('processos') }}" class="nav-item {{ str_contains($rota ?? '', 'processos') ? 'active' : '' }}">
+                    <span class="nav-icon">⚖️</span> Processos
+                </a>
+                @endif
+                @if($canPessoas)
+                <a href="{{ route('pessoas') }}" class="nav-item {{ $rota === 'pessoas' ? 'active' : '' }}">
+                    <span class="nav-icon">👥</span> Pessoas
+                </a>
+                <a href="{{ route('correspondentes') }}" class="nav-item {{ request()->is('correspondentes*') ? 'active' : '' }}">
+                    <span class="nav-icon">🤝</span> Correspondentes
+                </a>
+                @endif
+                @if($canDocs)
+                <a href="{{ route('documentos') }}" class="nav-item {{ request()->is('documentos*') ? 'active' : '' }}">
+                    <span class="nav-icon">📁</span> Documentos
+                </a>
+                @endif
+                <a href="{{ route('minutas') }}" class="nav-item {{ $rota === 'minutas' ? 'active' : '' }}">
+                    <span class="nav-icon">📄</span> Minutas
+                </a>
+                <a href="{{ route('assinatura-digital') }}" class="nav-item {{ request()->is('assinatura-digital*') ? 'active' : '' }}">
+                    <span class="nav-icon">✍️</span> Assinatura Digital
+                </a>
+            </div>
         </div>
         @endif
 
         {{-- ── FINANCEIRO ── --}}
         @if($isFinanc)
-        <div class="nav-group">
-            <div class="nav-group-label">Financeiro</div>
-            <a href="{{ route('financeiro.consolidado') }}" class="nav-item {{ $rota === 'financeiro.consolidado' ? 'active' : '' }}">
-                <span class="nav-icon">💰</span> Visão Geral
-            </a>
-            <a href="{{ route('financeiro') }}" class="nav-item {{ $rota === 'financeiro' ? 'active' : '' }}">
-                <span class="nav-icon">💳</span> Por Processo
-            </a>
-            <a href="{{ route('honorarios') }}" class="nav-item {{ request()->is('honorarios*') ? 'active' : '' }}">
-                <span class="nav-icon">📋</span> Honorários
-            </a>
-            @if($isAdvogado || $isFinanc)
-            <a href="{{ route('relatorios.index') }}" class="nav-item {{ str_contains($rota ?? '', 'relatorios') ? 'active' : '' }}">
-                <span class="nav-icon">📊</span> Relatórios
-            </a>
-            @endif
+        <div class="nav-group" data-group="financeiro">
+            <div class="nav-group-label" onclick="toggleGroup('financeiro')">
+                Financeiro <span class="chevron">▾</span>
+            </div>
+            <div class="nav-group-items" id="group-financeiro">
+                <a href="{{ route('financeiro.consolidado') }}" class="nav-item {{ $rota === 'financeiro.consolidado' ? 'active' : '' }}">
+                    <span class="nav-icon">💰</span> Visão Geral
+                </a>
+                <a href="{{ route('financeiro') }}" class="nav-item {{ $rota === 'financeiro' ? 'active' : '' }}">
+                    <span class="nav-icon">💳</span> Por Processo
+                </a>
+                <a href="{{ route('honorarios') }}" class="nav-item {{ request()->is('honorarios*') ? 'active' : '' }}">
+                    <span class="nav-icon">📋</span> Honorários
+                </a>
+                <a href="{{ route('inadimplencia') }}" class="nav-item {{ request()->is('inadimplencia*') ? 'active' : '' }}">
+                    <span class="nav-icon">⚠️</span> Inadimplência
+                </a>
+                @if($isAdvogado || $isFinanc)
+                <a href="{{ route('relatorios.index') }}" class="nav-item {{ str_contains($rota ?? '', 'relatorios') ? 'active' : '' }}">
+                    <span class="nav-icon">📊</span> Relatórios
+                </a>
+                @endif
+            </div>
         </div>
         @endif
 
         {{-- ── FERRAMENTAS ── --}}
         @if($isAdvogado)
-        <div class="nav-group">
-            <div class="nav-group-label">Ferramentas</div>
-            <a href="{{ route('tjsp') }}" class="nav-item {{ $rota === 'tjsp' ? 'active' : '' }}">
-                <span class="nav-icon">🏛️</span> Consulta TJSP
-            </a>
-            <a href="{{ route('aasp-publicacoes') }}" class="nav-item {{ $rota === 'aasp-publicacoes' ? 'active' : '' }}">
-                <span class="nav-icon">📰</span> Publicações AASP
-            </a>
-            <a href="{{ route('assistente') }}" class="nav-item {{ request()->is('assistente*') ? 'active' : '' }}">
-                <span class="nav-icon">🤖</span> Assistente IA
-            </a>
-            @if(!$isFinanc)
-            <a href="{{ route('relatorios.index') }}" class="nav-item {{ str_contains($rota ?? '', 'relatorios') ? 'active' : '' }}">
-                <span class="nav-icon">📊</span> Relatórios
-            </a>
-            @endif
+        <div class="nav-group" data-group="ferramentas">
+            <div class="nav-group-label" onclick="toggleGroup('ferramentas')">
+                Ferramentas <span class="chevron">▾</span>
+            </div>
+            <div class="nav-group-items" id="group-ferramentas">
+                <a href="{{ route('calculadora') }}" class="nav-item {{ $rota === 'calculadora' ? 'active' : '' }}">
+                    <span class="nav-icon">🧮</span> Calculadora
+                </a>
+                <a href="{{ route('tjsp') }}" class="nav-item {{ $rota === 'tjsp' ? 'active' : '' }}">
+                    <span class="nav-icon">🏛️</span> Consulta Judicial
+                </a>
+                <a href="{{ route('aasp-publicacoes') }}" class="nav-item {{ $rota === 'aasp-publicacoes' ? 'active' : '' }}">
+                    <span class="nav-icon">📰</span> Publicações AASP
+                </a>
+                <a href="{{ route('assistente') }}" class="nav-item {{ request()->is('assistente*') ? 'active' : '' }}">
+                    <span class="nav-icon">🤖</span> Assistente IA
+                </a>
+                @if(!$isFinanc)
+                <a href="{{ route('relatorios.index') }}" class="nav-item {{ str_contains($rota ?? '', 'relatorios') ? 'active' : '' }}">
+                    <span class="nav-icon">📊</span> Relatórios
+                </a>
+                @endif
+            </div>
         </div>
         @endif
 
         {{-- ── PORTAL ── --}}
         @if($isAdmin)
-        <div class="nav-group">
-            <div class="nav-group-label">Portal Cliente</div>
-            <a href="{{ route('admin.portal-acesso') }}" class="nav-item {{ $rota === 'admin.portal-acesso' ? 'active' : '' }}">
-                <span class="nav-icon">🌐</span> Acessos
-            </a>
-            <a href="{{ route('admin.portal-mensagens') }}" class="nav-item {{ $rota === 'admin.portal-mensagens' ? 'active' : '' }}">
-                <span class="nav-icon">💬</span> Mensagens
-            </a>
+        <div class="nav-group" data-group="portal">
+            <div class="nav-group-label" onclick="toggleGroup('portal')">
+                Portal Cliente <span class="chevron">▾</span>
+            </div>
+            <div class="nav-group-items" id="group-portal">
+                <a href="{{ route('admin.portal-acesso') }}" class="nav-item {{ $rota === 'admin.portal-acesso' ? 'active' : '' }}">
+                    <span class="nav-icon">🌐</span> Acessos
+                </a>
+                <a href="{{ route('admin.portal-mensagens') }}" class="nav-item {{ $rota === 'admin.portal-mensagens' ? 'active' : '' }}">
+                    <span class="nav-icon">💬</span> Mensagens
+                </a>
+                <a href="{{ route('admin.notificacoes-whatsapp') }}" class="nav-item {{ request()->is('admin/notificacoes-whatsapp*') ? 'active' : '' }}">
+                    <span class="nav-icon">📲</span> WhatsApp/SMS
+                </a>
+            </div>
         </div>
         @endif
 
         {{-- ── ADMINISTRAÇÃO ── --}}
         @if($isAdmin)
-        <div class="nav-group">
-            <div class="nav-group-label">Administração</div>
-            <a href="{{ route('usuarios') }}" class="nav-item {{ $rota === 'usuarios' ? 'active' : '' }}">
-                <span class="nav-icon">👨‍💼</span> Usuários
-            </a>
-            <a href="{{ route('tabelas') }}" class="nav-item {{ $rota === 'tabelas' ? 'active' : '' }}">
-                <span class="nav-icon">🗂️</span> Tabelas
-            </a>
-            <a href="{{ route('indices') }}" class="nav-item {{ $rota === 'indices' ? 'active' : '' }}">
-                <span class="nav-icon">📈</span> Índices
-            </a>
-            <a href="{{ route('auditoria') }}" class="nav-item {{ $rota === 'auditoria' ? 'active' : '' }}">
-                <span class="nav-icon">🔍</span> Auditoria
-            </a>
+        <div class="nav-group" data-group="admin">
+            <div class="nav-group-label" onclick="toggleGroup('admin')">
+                Administração <span class="chevron">▾</span>
+            </div>
+            <div class="nav-group-items" id="group-admin">
+                <a href="{{ route('usuarios') }}" class="nav-item {{ $rota === 'usuarios' ? 'active' : '' }}">
+                    <span class="nav-icon">👨‍💼</span> Usuários
+                </a>
+                <a href="{{ route('tabelas') }}" class="nav-item {{ $rota === 'tabelas' ? 'active' : '' }}">
+                    <span class="nav-icon">🗂️</span> Tabelas
+                </a>
+                <a href="{{ route('indices') }}" class="nav-item {{ $rota === 'indices' ? 'active' : '' }}">
+                    <span class="nav-icon">📈</span> Índices
+                </a>
+                <a href="{{ route('auditoria') }}" class="nav-item {{ $rota === 'auditoria' ? 'active' : '' }}">
+                    <span class="nav-icon">🔍</span> Auditoria
+                </a>
+            </div>
         </div>
         @endif
 
@@ -336,7 +422,10 @@
     <div class="main">
         <div class="topbar">
             <button class="hamburger" onclick="toggleSidebar()">☰</button>
-            <span class="topbar-title">@yield('page-title', 'Dashboard')</span>
+            <span class="topbar-title" style="flex-shrink:0;">@yield('page-title', 'Dashboard')</span>
+            <div style="flex:1;display:flex;justify-content:center;padding:0 16px;max-width:440px;margin:0 auto;">
+                @livewire('busca-global')
+            </div>
             <div class="topbar-user">
                 @livewire('notificacoes-bell')
                 <div class="avatar">{{ strtoupper(substr(auth('usuarios')->user()?->nome ?? 'U', 0, 2)) }}</div>
@@ -358,6 +447,7 @@
 </div>
 
 <script>
+    // ── Sidebar mobile ──
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('sidebarOverlay').classList.toggle('active');
@@ -371,6 +461,58 @@
     }
     checkWidth();
     window.addEventListener('resize', checkWidth);
+
+    // ── Accordion ──
+    const STORAGE_KEY = 'navGroups';
+
+    function getState() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+    }
+    function saveState(state) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function toggleGroup(group) {
+        const items = document.getElementById('group-' + group);
+        const label = items?.previousElementSibling;
+        if (!items) return;
+        const isCollapsed = items.classList.toggle('collapsed');
+        label?.classList.toggle('collapsed', isCollapsed);
+        const state = getState();
+        state[group] = !isCollapsed; // true = open
+        saveState(state);
+    }
+
+    function initAccordion() {
+        const state   = getState();
+        const groups  = document.querySelectorAll('.nav-group[data-group]');
+
+        groups.forEach(g => {
+            const group = g.dataset.group;
+            const items = document.getElementById('group-' + group);
+            const label = items?.previousElementSibling;
+            if (!items) return;
+
+            // Abre apenas se tiver item ativo ou se o usuário abriu manualmente antes
+            const hasActive = items.querySelector('.nav-item.active');
+            const userOpened = Object.prototype.hasOwnProperty.call(state, group) && state[group] === true;
+            const shouldOpen = hasActive || userOpened;
+
+            if (!shouldOpen) {
+                items.classList.add('collapsed');
+                label?.classList.add('collapsed');
+            }
+        });
+    }
+
+    initAccordion();
+
+    // ── Service Worker (PWA) ──
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+    }
 </script>
 @livewireScripts
 </body>

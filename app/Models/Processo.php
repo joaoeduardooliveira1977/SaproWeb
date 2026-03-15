@@ -93,6 +93,11 @@ class Processo extends Model
         return $this->hasMany(Agenda::class, 'processo_id')->orderBy('data_hora');
     }
 
+    public function audiencias(): HasMany
+    {
+        return $this->hasMany(Audiencia::class, 'processo_id')->orderByDesc('data_hora');
+    }
+
     // ── Scopes ─────────────────────────────────────
     public function scopeAtivos($query)
     {

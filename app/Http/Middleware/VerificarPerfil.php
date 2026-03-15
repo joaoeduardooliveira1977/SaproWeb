@@ -12,26 +12,31 @@ class VerificarPerfil
         'admin' => '*', // acesso total
 
         'advogado' => [
-            'dashboard', 'processos', 'pessoas', 'agenda',
-            'andamentos', 'documentos', 'tjsp', 'relatorios',
-            'minha-conta', 'aasp-publicacoes',
+            'geral', 'processos', 'pessoas', 'documentos', 'minutas',
+            'financeiro', 'honorarios', 'relatorios',
+            'ferramentas', 'usuarios', 'aasp-publicacoes',
         ],
 
         'estagiario' => [
-            'dashboard', 'processos.ver', 'pessoas.ver',
-            'agenda.ver', 'andamentos.ver', 'documentos.ver',
-            'minha-conta',
+            'geral', 'processos', 'pessoas', 'documentos',
         ],
 
         'financeiro' => [
-            'dashboard', 'financeiro', 'honorarios',
-            'relatorios', 'minha-conta',
+            'geral', 'financeiro', 'honorarios', 'relatorios', 'pessoas',
         ],
 
         'recepcionista' => [
-            'dashboard', 'agenda', 'pessoas',
-            'processos.ver', 'minha-conta',
+            'geral', 'pessoas', 'processos',
         ],
+    ];
+
+    // Ações permitidas por perfil (para guards em Livewire)
+    const ACOES = [
+        'admin'       => '*',
+        'advogado'    => ['processos.editar', 'processos.arquivar', 'pessoas.editar', 'pessoas.desativar', 'prazos.editar', 'prazos.excluir', 'agenda.editar', 'agenda.excluir'],
+        'estagiario'  => ['processos.ver', 'pessoas.ver'],
+        'financeiro'  => ['financeiro.editar'],
+        'recepcionista'=> ['agenda.editar', 'pessoas.editar'],
     ];
 
     public function handle(Request $request, Closure $next, string $modulo = null)
@@ -64,10 +69,15 @@ class VerificarPerfil
             return $next($request);
         }
 
+        // Módulos exclusivos do admin
+        if ($modulo === 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Acesso restrito ao administrador.');
+        }
+
         $permissoes = self::PERMISSOES[$perfil] ?? [];
 
         // Verifica se tem permissão
-        if (in_array($modulo, $permissoes) || in_array($modulo . '.ver', $permissoes)) {
+        if (in_array($modulo, $permissoes)) {
             return $next($request);
         }
 

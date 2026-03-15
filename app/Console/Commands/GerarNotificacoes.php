@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\DiarioNotificacoes;
 use App\Models\Notificacao;
 use App\Models\Prazo;
 use App\Models\Usuario;
@@ -19,6 +20,7 @@ class GerarNotificacoes extends Command
     {
         $this->processarPrazos();
         $this->processarHonorarios();
+        $this->processarProcessosSemAndamento();
         $this->enviarEmailsResumo();
 
         $this->info('Notificações geradas com sucesso.');
@@ -133,135 +135,72 @@ class GerarNotificacoes extends Command
         }
     }
 
+    // ── Processos sem andamento há 30+ dias ─────────────────────
+
+    private function processarProcessosSemAndamento(): void
+    {
+        $processos = DB::select("
+            SELECT p.id, p.numero, pe.nome as cliente_nome,
+                   MAX(a.data) as ultimo_andamento
+            FROM processos p
+            LEFT JOIN pessoas pe ON pe.id = p.cliente_id
+            LEFT JOIN andamentos a ON a.processo_id = p.id
+            WHERE p.status = 'Ativo'
+            GROUP BY p.id, p.numero, pe.nome
+            HAVING MAX(a.data) < CURRENT_DATE - INTERVAL '30 days'
+               OR MAX(a.data) IS NULL
+        ");
+
+        foreach ($processos as $proc) {
+            if (Notificacao::jaExiste('processo_sem_andamento', 'processo', $proc->id)) {
+                continue;
+            }
+
+            $ultimo = $proc->ultimo_andamento
+                ? Carbon::parse($proc->ultimo_andamento)->format('d/m/Y')
+                : 'nenhum';
+
+            Notificacao::create([
+                'usuario_id'      => null,
+                'tipo'            => 'processo_sem_andamento',
+                'titulo'          => "📋 Processo sem andamento: {$proc->numero}",
+                'mensagem'        => "Cliente: {$proc->cliente_nome} — Último andamento: {$ultimo}",
+                'referencia_tipo' => 'processo',
+                'referencia_id'   => $proc->id,
+                'link'            => "/processos/{$proc->id}/andamentos",
+            ]);
+        }
+    }
+
     // ── E-mail resumo diário ─────────────────────────────────────
 
     private function enviarEmailsResumo(): void
     {
-        $usuarios = Usuario::where('ativo', true)
-            ->whereNotNull('email')
-            ->get();
-
-        $tiposLabel = [
-            'prazo_fatal'        => 'Prazo Fatal',
-            'prazo_vencendo'     => 'Prazo a Vencer',
-            'prazo_vencido'      => 'Prazo Vencido',
-            'honorario_atrasado' => 'Honorário em Atraso',
+        $ordemTipo = [
+            'prazo_fatal' => 0, 'prazo_vencido' => 1, 'prazo_vencendo' => 2,
+            'honorario_atrasado' => 3, 'processo_sem_andamento' => 4,
         ];
 
-        // Ordem de prioridade para exibição
-        $ordemTipo = ['prazo_fatal' => 0, 'prazo_vencido' => 1, 'prazo_vencendo' => 2, 'honorario_atrasado' => 3];
+        Usuario::where('ativo', true)
+            ->whereNotNull('email')
+            ->get()
+            ->each(function (Usuario $usuario) use ($ordemTipo) {
+                $notifs = Notificacao::paraUsuario($usuario->id)
+                    ->naoLidas()
+                    ->whereDate('created_at', today())
+                    ->get()
+                    ->sortBy(fn($n) => $ordemTipo[$n->tipo] ?? 99)
+                    ->values();
 
-        foreach ($usuarios as $usuario) {
-            $notifs = Notificacao::paraUsuario($usuario->id)
-                ->naoLidas()
-                ->whereDate('created_at', today())
-                ->get()
-                ->sortBy(fn($n) => $ordemTipo[$n->tipo] ?? 99)
-                ->values();
-
-            if ($notifs->isEmpty()) {
-                continue;
-            }
-
-            $dataFmt   = now()->format('d/m/Y');
-            $geradoEm  = now()->format('d/m/Y H:i');
-            $total     = $notifs->count();
-            $fatais    = $notifs->where('tipo', 'prazo_fatal')->count();
-            $vencidos  = $notifs->where('tipo', 'prazo_vencido')->count();
-            $vencendo  = $notifs->where('tipo', 'prazo_vencendo')->count();
-            $honAtras  = $notifs->where('tipo', 'honorario_atrasado')->count();
-
-            $corpo = "
-            <div style='font-family:Arial,Helvetica,sans-serif;max-width:680px;margin:0 auto;background:#f1f5f9;'>
-
-            <div style='background:#1a3a5c;padding:28px 36px 24px;border-radius:8px 8px 0 0;'>
-                <div style='color:#93c5fd;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;'>Sistema Jurídico SAPRO</div>
-                <div style='color:#fff;font-size:24px;font-weight:700;line-height:1.2;'>Notificações do dia &mdash; {$dataFmt}</div>
-                <div style='color:#93c5fd;font-size:13px;margin-top:6px;'>Olá, {$usuario->nome}</div>
-            </div>
-
-            <div style='background:#fff;border:1px solid #e2e8f0;border-top:none;padding:16px 36px;'>
-                <table width='100%' cellpadding='0' cellspacing='0'>
-                    <tr>";
-
-            $resumo = [];
-            if ($fatais)   $resumo[] = ['🚨', $fatais,   'Fatal(is)',  '#fce7f3', '#9d174d'];
-            if ($vencidos) $resumo[] = ['❌', $vencidos,  'Vencido(s)', '#fee2e2', '#991b1b'];
-            if ($vencendo) $resumo[] = ['⏳', $vencendo,  'A Vencer',   '#fef9c3', '#854d0e'];
-            if ($honAtras) $resumo[] = ['💸', $honAtras,  'Hon. Atraso','#ede9fe', '#5b21b6'];
-
-            $primeiro = true;
-            foreach ($resumo as $r) {
-                if (!$primeiro) {
-                    $corpo .= "<td style='width:1px;background:#e2e8f0;'></td>";
+                if ($notifs->isEmpty()) {
+                    return;
                 }
-                $corpo .= "
-                    <td style='text-align:center;padding:12px 8px;'>
-                        <div style='font-size:22px;line-height:1;margin-bottom:4px;'>{$r[0]}</div>
-                        <div style='font-size:26px;font-weight:700;color:{$r[4]};line-height:1;'>{$r[1]}</div>
-                        <div style='font-size:10px;color:#64748b;margin-top:4px;'>{$r[2]}</div>
-                    </td>";
-                $primeiro = false;
-            }
 
-            $corpo .= "
-                    </tr>
-                </table>
-            </div>
-
-            <div style='padding:20px 36px;'>";
-
-            // Agrupar por tipo
-            $grupos = $notifs->groupBy('tipo');
-            $grupoOrdem = ['prazo_fatal', 'prazo_vencido', 'prazo_vencendo', 'honorario_atrasado'];
-
-            foreach ($grupoOrdem as $tipo) {
-                if (!$grupos->has($tipo)) continue;
-
-                $itens     = $grupos[$tipo];
-                $label     = $tiposLabel[$tipo] ?? $tipo;
-                $primeira  = $itens->first();
-                $corFundo  = $primeira->cor();
-
-                $corpo .= "
-                <div style='background:{$corFundo};padding:10px 16px;border-radius:4px;margin-top:20px;margin-bottom:4px;'>
-                    <div style='font-size:14px;font-weight:700;color:#1e293b;'>{$primeira->icone()} {$label}</div>
-                    <div style='font-size:11px;color:#64748b;margin-top:2px;'>{$itens->count()} item(ns)</div>
-                </div>";
-
-                $seq   = 1;
-                $qtd   = $itens->count();
-                foreach ($itens as $n) {
-                    $corpo .= "
-                    <div style='background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:0 4px 4px 0;overflow:hidden;'>
-                        <div style='padding:10px 14px;'>
-                            <div style='font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px;'>{$n->titulo}</div>
-                            <div style='font-size:12px;color:#64748b;'>{$n->mensagem}</div>
-                        </div>
-                    </div>";
-                    if ($seq < $qtd) {
-                        $corpo .= "<div style='border-top:1px solid #e2e8f0;'></div>";
-                    }
-                    $seq++;
+                try {
+                    Mail::to($usuario->email)->send(new DiarioNotificacoes($usuario, $notifs));
+                } catch (\Exception) {
+                    // silencia falha individual
                 }
-            }
-
-            $corpo .= "
-            </div>
-            <div style='background:#e2e8f0;border:1px solid #cbd5e1;border-top:none;padding:14px 36px;border-radius:0 0 8px 8px;text-align:center;'>
-                <span style='font-size:11px;color:#64748b;'>Gerado pelo Sistema Jurídico SAPRO &nbsp;·&nbsp; {$geradoEm}</span>
-            </div>
-
-            </div>";
-
-            try {
-                Mail::html($corpo, function ($msg) use ($usuario, $dataFmt, $total) {
-                    $msg->to($usuario->email)
-                        ->subject("🔔 {$total} notificação(ões) — {$dataFmt}");
-                });
-            } catch (\Exception) {
-                // silencia falha de e-mail individual
-            }
-        }
+            });
     }
 }

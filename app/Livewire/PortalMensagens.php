@@ -2,9 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Mail\PortalNovaMensagem;
 use App\Models\Pessoa;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
 class PortalMensagens extends Component
@@ -42,6 +44,18 @@ class PortalMensagens extends Component
             'created_at'      => now(),
             'updated_at'      => now(),
         ]);
+
+        // Envia e-mail ao cliente se tiver e-mail cadastrado
+        $cliente = Pessoa::find($this->pessoaId);
+        if ($cliente?->email) {
+            $remetente = Auth::user()?->nome ?? Auth::user()?->login ?? 'Escritório';
+            try {
+                Mail::to($cliente->email)
+                    ->queue(new PortalNovaMensagem($cliente, $this->resposta, $remetente));
+            } catch (\Throwable) {
+                // Falha no e-mail não deve bloquear o envio da mensagem
+            }
+        }
 
         $this->resposta = '';
     }

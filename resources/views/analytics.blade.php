@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Analytics')
+@section('page-title', '📊 Analytics')
 @section('content')
-    @livewire('dashboard')
+    @livewire('analytics')
 @endsection

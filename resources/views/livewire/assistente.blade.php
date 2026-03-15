@@ -36,15 +36,22 @@
 
         {{-- Header --}}
         <div class="card" style="margin-bottom: 12px; padding: 16px 20px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 44px; height: 44px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px;">🤖</div>
-                <div>
-                    <div style="font-weight: 700; font-size: 16px; color: var(--primary);">Assistente Jurídico SAPRO</div>
-                    <div style="font-size: 12px; color: var(--success); display: flex; align-items: center; gap: 4px;">
-                        <span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block;"></span>
-                        Online — powered by Google Gemini
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px;">🤖</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 16px; color: var(--primary);">Assistente Jurídico SAPRO</div>
+                        <div style="font-size: 12px; color: var(--success); display: flex; align-items: center; gap: 4px;">
+                            <span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block;"></span>
+                            Online — powered by Google Gemini
+                        </div>
                     </div>
                 </div>
+                <button wire:click="limpar" class="btn btn-sm"
+                        style="background:var(--bg);border:1px solid var(--border);color:var(--muted);font-size:12px"
+                        title="Limpar conversa">
+                    🗑️ Limpar
+                </button>
             </div>
         </div>
 
@@ -56,7 +63,11 @@
                     <div style="display: flex; align-items: flex-start; gap: 10px;">
                         <div style="width: 34px; height: 34px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">🤖</div>
                         <div style="max-width: 75%;">
-                            <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 0 12px 12px 12px; padding: 12px 16px; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">{{ $msg['texto'] }}</div>
+                            <div class="chat-bot-msg" style="background: var(--bg); border: 1px solid var(--border); border-radius: 0 12px 12px 12px; padding: 12px 16px; font-size: 14px; line-height: 1.6;">{!! nl2br(preg_replace(
+                                ['/\*\*(.+?)\*\*/s', '/`([^`]+)`/', '/^- /m'],
+                                ['<strong>$1</strong>', '<code style="background:#f1f5f9;padding:1px 5px;border-radius:3px;font-family:monospace;font-size:12px">$1</code>', '• '],
+                                e($msg['texto'])
+                            )) !!}</div>
                             <div style="font-size: 11px; color: var(--muted); margin-top: 4px; padding-left: 4px;">{{ $msg['hora'] }}</div>
                         </div>
                     </div>
@@ -93,6 +104,9 @@
             <button wire:click="$set('pergunta', 'Quantos processos ativos temos?')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">📋 Processos ativos</button>
             <button wire:click="$set('pergunta', 'Quais clientes têm mais processos?')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">👥 Clientes</button>
             <button wire:click="$set('pergunta', 'Quais processos são de alto risco?')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">⚠️ Alto risco</button>
+            <button wire:click="$set('pergunta', 'Qual é o resumo financeiro do mês?')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">💰 Financeiro do mês</button>
+            <button wire:click="$set('pergunta', 'Quais clientes estão inadimplentes?')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">🔴 Inadimplência</button>
+            <button wire:click="$set('pergunta', 'Quais honorários vencem essa semana?')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">📆 Vencimentos</button>
         </div>
 
         {{-- Input --}}
@@ -182,11 +196,8 @@
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 transcript += event.results[i][0].transcript;
             }
-            // Atualiza o input com o texto reconhecido
-            const input = document.getElementById('input-pergunta');
-            input.value = transcript;
-            // Sincroniza com Livewire
-            input.dispatchEvent(new Event('input'));
+            // Atualiza o input visualmente
+            document.getElementById('input-pergunta').value = transcript;
         };
 
         recognition.onend = () => {
@@ -195,11 +206,11 @@
             document.getElementById('btn-mic').innerText = '🎤';
             document.getElementById('mic-status').style.display = 'none';
 
-            // Envia automaticamente se tiver texto
+            // Envia automaticamente via Livewire
             const input = document.getElementById('input-pergunta');
             if (input.value.trim()) {
                 setTimeout(() => {
-                    Livewire.dispatch('enviarPergunta');
+                    @this.set('pergunta', input.value.trim()).then(() => @this.enviar());
                 }, 300);
             }
         };

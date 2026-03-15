@@ -2,9 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Mail\PrazoLembrete;
 use App\Models\{Prazo, Processo, Usuario};
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\{Auth, Mail};
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -17,6 +19,9 @@ class Prazos extends Component
     public string $filtroProcesso    = '';
     public string $filtroResponsavel = '';
     public string $filtroTipo        = '';
+    public string $filtroBusca       = '';
+    public string $filtroDataIni     = '';
+    public string $filtroDataFim     = '';
 
     // ── Modal ────────────────────────────────────────────────────
     public bool   $modalAberto = false;
@@ -127,6 +132,7 @@ class Prazos extends Component
 
     public function salvar(): void
     {
+        abort_unless(Auth::user()->temAcao('prazos.editar'), 403, 'Sem permissão.');
         $this->validate();
 
         $dados = [
@@ -149,8 +155,9 @@ class Prazos extends Component
             session()->flash('sucesso', 'Prazo atualizado.');
         } else {
             $dados['status'] = 'aberto';
-            Prazo::create($dados);
+            $prazo = Prazo::create($dados);
             session()->flash('sucesso', 'Prazo cadastrado.');
+            $this->enviarLembreteSeNecessario($prazo);
         }
 
         $this->fecharModal();
@@ -186,11 +193,62 @@ class Prazos extends Component
 
     public function excluir(): void
     {
+        abort_unless(Auth::user()->temAcao('prazos.excluir'), 403, 'Sem permissão.');
         if ($this->confirmarExcluir) {
             Prazo::findOrFail($this->confirmarExcluir)->delete();
             $this->confirmarExcluir = null;
             session()->flash('sucesso', 'Prazo removido.');
         }
+    }
+
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $rows = $this->buildQuery()->get();
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputs($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Título','Tipo','Data Prazo','Dias Restantes','Status','Processo','Cliente','Responsável','Fatal'], ';');
+            foreach ($rows as $p) {
+                $dias = $p->diasRestantes();
+                $urg  = $p->urgencia();
+                $diasLabel = match(true) {
+                    $urg === 'cumprido' => 'Cumprido',
+                    $urg === 'perdido'  => 'Perdido',
+                    $urg === 'vencido'  => abs($dias).'d vencido',
+                    $dias === 0         => 'Vence hoje',
+                    default             => $dias.' dia(s)',
+                };
+                fputcsv($out, [
+                    $p->titulo,
+                    $p->tipo,
+                    $p->data_prazo->format('d/m/Y'),
+                    $diasLabel,
+                    $p->status,
+                    $p->processo?->numero ?? '',
+                    $p->processo?->cliente?->nome ?? '',
+                    $p->responsavel?->nome ?? '',
+                    $p->prazo_fatal ? 'Sim' : 'Não',
+                ], ';');
+            }
+            fclose($out);
+        }, 'prazos-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    public function exportarPdf(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $prazos = $this->buildQuery()->get();
+
+        $pdf = Pdf::loadView('pdf.prazos-lista', [
+            'prazos'       => $prazos,
+            'filtroStatus' => $this->filtroStatus,
+            'gerado_em'    => now()->format('d/m/Y H:i'),
+        ])->setPaper('a4', 'landscape');
+
+        return response()->streamDownload(
+            fn() => print($pdf->output()),
+            'prazos-' . now()->format('Ymd') . '.pdf'
+        );
     }
 
     // ── Helpers ──────────────────────────────────────────────────
@@ -207,9 +265,31 @@ class Prazos extends Component
         $this->resetErrorBag();
     }
 
-    // ── Render ───────────────────────────────────────────────────
+    // ── Email imediato ao criar prazo próximo ────────────────────
 
-    public function render(): \Illuminate\View\View
+    private function enviarLembreteSeNecessario(Prazo $prazo): void
+    {
+        if (! $prazo->responsavel_id) return;
+
+        $dias = $prazo->diasRestantes();
+
+        // Só envia se vence em até 15 dias ou já vencido
+        if ($dias > 15) return;
+
+        $responsavel = Usuario::find($prazo->responsavel_id);
+        if (! $responsavel?->email) return;
+
+        try {
+            $prazo->load(['processo.cliente']);
+            Mail::to($responsavel->email)->send(new PrazoLembrete($prazo, $responsavel));
+        } catch (\Exception) {
+            // silencia falha de envio
+        }
+    }
+
+    // ── Query builder reutilizável ────────────────────────────────
+
+    private function buildQuery(): \Illuminate\Database\Eloquent\Builder
     {
         $q = Prazo::with(['processo.cliente', 'responsavel'])
             ->orderByRaw("CASE status WHEN 'aberto' THEN 0 WHEN 'perdido' THEN 1 WHEN 'cumprido' THEN 2 END")
@@ -218,20 +298,33 @@ class Prazos extends Component
         if ($this->filtroStatus !== 'todos') {
             $q->where('status', $this->filtroStatus);
         }
-
         if ($this->filtroProcesso) {
             $q->where('processo_id', $this->filtroProcesso);
         }
-
         if ($this->filtroResponsavel) {
             $q->where('responsavel_id', $this->filtroResponsavel);
         }
-
         if ($this->filtroTipo) {
             $q->where('tipo', $this->filtroTipo);
         }
+        if ($this->filtroBusca) {
+            $q->where('titulo', 'ILIKE', '%' . $this->filtroBusca . '%');
+        }
+        if ($this->filtroDataIni) {
+            $q->whereDate('data_prazo', '>=', $this->filtroDataIni);
+        }
+        if ($this->filtroDataFim) {
+            $q->whereDate('data_prazo', '<=', $this->filtroDataFim);
+        }
 
-        $prazos      = $q->paginate(25);
+        return $q;
+    }
+
+    // ── Render ───────────────────────────────────────────────────
+
+    public function render(): \Illuminate\View\View
+    {
+        $prazos      = $this->buildQuery()->paginate(25);
         $processos   = Processo::where('status', 'Ativo')->orderBy('numero')->get();
         $usuarios    = Usuario::where('ativo', true)->orderBy('nome')->get();
 

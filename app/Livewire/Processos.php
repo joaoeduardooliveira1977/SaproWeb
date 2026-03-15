@@ -33,12 +33,9 @@ class Processos extends Component
 
     public function arquivar(): void
     {
-        $processo = Processo::findOrFail($this->processoParaExcluir);
+        abort_unless(Auth::user()->temAcao('processos.arquivar'), 403, 'Sem permissão.');
 
-        if (!Auth::user()->isAdvogado()) {
-            session()->flash('erro', 'Sem permissão.');
-            return;
-        }
+        $processo = Processo::findOrFail($this->processoParaExcluir);
 
         $processo->update(['status' => 'Arquivado']);
         Auth::user()->registrarAuditoria('Arquivou processo', 'processos', $processo->id);
@@ -52,6 +49,37 @@ class Processos extends Component
     {
         $this->confirmandoExclusao  = false;
         $this->processoParaExcluir  = null;
+    }
+
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $rows = Processo::with(['cliente', 'advogado', 'fase', 'risco'])
+            ->when($this->busca,    fn($q) => $q->busca($this->busca))
+            ->when($this->status,   fn($q) => $q->where('status', $this->status))
+            ->when($this->fase_id,  fn($q) => $q->where('fase_id', $this->fase_id))
+            ->when($this->risco_id, fn($q) => $q->where('risco_id', $this->risco_id))
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputs($out, "\xEF\xBB\xBF"); // BOM UTF-8 para Excel
+            fputcsv($out, ['Número','Cliente','Parte Contrária','Advogado','Fase','Risco','Status','Valor Causa','Data Distribuição'], ';');
+            foreach ($rows as $p) {
+                fputcsv($out, [
+                    $p->numero,
+                    $p->cliente?->nome ?? '',
+                    $p->parteContraria?->nome ?? ($p->parte_contraria ?? ''),
+                    $p->advogado?->nome ?? '',
+                    $p->fase?->descricao ?? '',
+                    $p->risco?->descricao ?? '',
+                    $p->status,
+                    $p->valor_causa ? number_format($p->valor_causa, 2, ',', '.') : '',
+                    $p->data_distribuicao?->format('d/m/Y') ?? '',
+                ], ';');
+            }
+            fclose($out);
+        }, 'processos-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     public function render()

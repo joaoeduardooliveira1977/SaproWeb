@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Processo, Andamento, Custa};
+use App\Models\{Processo, Andamento, Custa, Prazo};
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,9 +15,24 @@ class ProcessoController extends Controller
             'cliente', 'advogado', 'juiz',
             'tipoAcao', 'tipoProcesso', 'fase',
             'assunto', 'risco', 'secretaria', 'reparticao',
+            'agenda', 'andamentos',
+            'audiencias.juiz', 'audiencias.advogado',
         ])->findOrFail($id);
 
-        return view('processo-show', compact('processo'));
+        $prazos = Prazo::with('responsavel')
+            ->where('processo_id', $id)
+            ->orderBy('data_prazo')
+            ->get();
+
+        $documentos = DB::select("
+            SELECT d.id, d.titulo, d.tipo, d.data_documento, d.arquivo,
+                   d.arquivo_original, d.tamanho, d.portal_visivel, d.created_at
+            FROM documentos d
+            WHERE d.processo_id = ?
+            ORDER BY d.created_at DESC
+        ", [$id]);
+
+        return view('processo-show', compact('processo', 'prazos', 'documentos'));
     }
 
     public function andamentos(int $id)
