@@ -342,12 +342,43 @@
         [data-theme="dark"] .toast-warning { background: #451a03; color: #fed7aa; border-color: #92400e; }
         [data-theme="dark"] .toast-info    { background: #1e3a8a; color: #bfdbfe; border-color: #1d4ed8; }
         @media (max-width: 480px) { #toast-container { top: 12px; right: 12px; width: calc(100vw - 24px); } }
+
+        /* ── Confirm Modal ── */
+        #confirmModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.5); z-index: 9997;
+            align-items: center; justify-content: center; padding: 16px;
+        }
+        #confirmModal .confirm-box {
+            background: var(--white); border-radius: 14px; padding: 32px 28px;
+            width: 100%; max-width: 400px; text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,.3);
+            animation: toastIn .2s ease;
+        }
+        #confirmModal .confirm-icon { font-size: 40px; margin-bottom: 14px; }
+        #confirmModal .confirm-msg  { font-size: 14px; line-height: 1.6; color: var(--text); margin-bottom: 28px; white-space: pre-line; }
+        #confirmModal .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+        #confirmModal .confirm-btns button { min-width: 110px; }
+        @media print { #confirmModal { display: none !important; } }
     </style>
 </head>
 <body>
 <div class="layout">
 
     <div id="toast-container"></div>
+
+    {{-- Confirm Modal --}}
+    <div id="confirmModal">
+        <div class="confirm-box">
+            <div class="confirm-icon">⚠️</div>
+            <p class="confirm-msg" id="confirmMsg"></p>
+            <div class="confirm-btns">
+                <button id="confirmCancel" class="btn btn-secondary">Cancelar</button>
+                <button id="confirmOk"     class="btn btn-danger">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <nav class="sidebar" id="sidebar">
@@ -696,6 +727,40 @@
         const t = document.documentElement.getAttribute('data-theme') || 'light';
         const btn = document.getElementById('themeToggle');
         if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    }());
+
+    // ── Custom Confirm Modal (substitui wire:confirm nativo) ──
+    (function () {
+        const modal     = document.getElementById('confirmModal');
+        const msgEl     = document.getElementById('confirmMsg');
+        const btnOk     = document.getElementById('confirmOk');
+        const btnCancel = document.getElementById('confirmCancel');
+        let _resolve = null;
+
+        function close(result) {
+            modal.style.display = 'none';
+            if (_resolve) { _resolve(result); _resolve = null; }
+        }
+
+        btnOk.addEventListener('click',     () => close(true));
+        btnCancel.addEventListener('click', () => close(false));
+        modal.addEventListener('click', e => { if (e.target === modal) close(false); });
+        document.addEventListener('keydown', e => {
+            if (modal.style.display !== 'flex') return;
+            if (e.key === 'Escape') { e.preventDefault(); close(false); }
+            if (e.key === 'Enter')  { e.preventDefault(); close(true);  }
+        });
+
+        // Livewire 3 faz `await window.confirm(msg)`, então uma Promise funciona
+        window.confirm = function (message) {
+            msgEl.textContent = message;
+            const isDelete = /exclu|remov|apag|delet/i.test(message);
+            btnOk.textContent  = isDelete ? 'Excluir' : 'Confirmar';
+            btnOk.className    = 'btn ' + (isDelete ? 'btn-danger' : 'btn-primary');
+            modal.style.display = 'flex';
+            setTimeout(() => btnCancel.focus(), 50); // foco no "Cancelar" por segurança
+            return new Promise(r => { _resolve = r; });
+        };
     }());
 
     // ── Keyboard Shortcuts ──
