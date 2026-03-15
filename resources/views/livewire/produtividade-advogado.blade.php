@@ -33,7 +33,7 @@
         @endforeach
 
         @if($periodo === 'custom')
-        <div style="display:flex;gap:8px;align-items:center;margin-left:8px;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:8px;">
             <input wire:model.live="dataIni" type="date"
                 style="padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;">
             <span style="color:var(--muted);font-size:12px;">até</span>
@@ -45,7 +45,7 @@
 </div>
 
 {{-- KPIs consolidados --}}
-<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px;">
+<div class="stat-grid">
     @php
         $kpis = [
             ['icon'=>'⚖️',  'val'=> $totais['processos_ativos'],                          'label'=>'Processos Ativos',  'cor'=>'#1a3a5c'],
@@ -99,7 +99,7 @@
         </div>
 
         {{-- Métricas --}}
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-bottom:1px solid var(--border);">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:0;border-bottom:1px solid var(--border);">
             @php
                 $metricas = [
                     ['icon'=>'📁', 'val'=>$adv->processos_total,                                      'label'=>'Total Processos', 'cor'=>'#475569'],

@@ -20,7 +20,7 @@
 </div>
 @endif
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+<div class="form-grid" style="align-items:start;">
 
 {{-- ── FORMULÁRIO ── --}}
 <div class="card">
@@ -40,30 +40,26 @@
     <div style="display:flex;flex-direction:column;gap:14px;">
 
         {{-- Valor e processo --}}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div>
-                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">VALOR ORIGINAL (R$) *</label>
-                <input wire:model="valorOriginal" type="text" placeholder="0,00"
-                    style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:14px;font-weight:600;margin-top:4px;">
+        <div class="form-grid">
+            <div class="form-field">
+                <label class="lbl">Valor Original (R$) *</label>
+                <input wire:model="valorOriginal" type="text" placeholder="0,00" style="font-weight:600;">
             </div>
-            <div>
-                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">PROCESSO (referência)</label>
-                <input wire:model="processoRef" type="text" placeholder="Opcional"
-                    style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;margin-top:4px;">
+            <div class="form-field">
+                <label class="lbl">Processo (referência)</label>
+                <input wire:model="processoRef" type="text" placeholder="Opcional">
             </div>
         </div>
 
         {{-- Datas --}}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div>
-                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">DATA INICIAL *</label>
-                <input wire:model="dataInicio" type="date"
-                    style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;margin-top:4px;">
+        <div class="form-grid">
+            <div class="form-field">
+                <label class="lbl">Data Inicial *</label>
+                <input wire:model="dataInicio" type="date">
             </div>
-            <div>
-                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">DATA FINAL *</label>
-                <input wire:model="dataFim" type="date"
-                    style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;margin-top:4px;">
+            <div class="form-field">
+                <label class="lbl">Data Final *</label>
+                <input wire:model="dataFim" type="date">
             </div>
         </div>
 
@@ -108,7 +104,7 @@
 
         {{-- Multa e Honorários --}}
         <div style="border-top:1px solid var(--border);padding-top:14px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-grid">
                 <div>
                     <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">MULTA (%)</label>
                     <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
@@ -272,27 +268,27 @@
             <span style="font-size:18px;color:var(--muted);">{{ $mostrarDetalhes ? '▲' : '▼' }}</span>
         </div>
         @if($mostrarDetalhes)
-        <div style="overflow-x:auto;">
-            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <div class="table-wrap">
+            <table>
                 <thead>
-                    <tr style="background:var(--primary);color:#fff;">
-                        <th style="padding:8px 12px;text-align:left;">Mês</th>
-                        <th style="padding:8px 12px;text-align:right;">% do mês</th>
-                        <th style="padding:8px 12px;text-align:right;">Fator acumulado</th>
-                        <th style="padding:8px 12px;text-align:right;">Valor atualizado</th>
+                    <tr>
+                        <th>Mês</th>
+                        <th style="text-align:right;">% do mês</th>
+                        <th class="hide-sm" style="text-align:right;">Fator acumulado</th>
+                        <th style="text-align:right;">Valor atualizado</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($detalhes as $d)
-                    <tr style="border-bottom:1px solid var(--border);">
-                        <td style="padding:7px 12px;font-weight:600;">{{ $d['mes'] }}</td>
-                        <td style="padding:7px 12px;text-align:right;color:{{ $d['percentual'] >= 0 ? '#16a34a' : '#dc2626' }};">
+                    <tr>
+                        <td style="font-weight:600;">{{ $d['mes'] }}</td>
+                        <td style="text-align:right;color:{{ $d['percentual'] >= 0 ? '#16a34a' : '#dc2626' }};">
                             {{ number_format($d['percentual'], 4, ',', '.') }}%
                         </td>
-                        <td style="padding:7px 12px;text-align:right;color:var(--muted);">
+                        <td class="hide-sm" style="text-align:right;color:var(--muted);">
                             {{ number_format($d['fator_acum'], 6, ',', '.') }}
                         </td>
-                        <td style="padding:7px 12px;text-align:right;font-weight:600;">
+                        <td style="text-align:right;font-weight:600;">
                             R$ {{ number_format($resultado['valor_original'] * $d['fator_acum'], 2, ',', '.') }}
                         </td>
                     </tr>
