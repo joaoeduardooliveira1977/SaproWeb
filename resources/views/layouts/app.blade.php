@@ -827,7 +827,8 @@
             if (e.key === '?' && !inTextField()) {
                 toast(
                     '<strong>Atalhos de teclado</strong><br>' +
-                    '<code style="font-size:11px">/</code> Busca global &nbsp;|&nbsp; ' +
+                    '<code style="font-size:11px">Ctrl+K</code> Busca global &nbsp;|&nbsp; ' +
+                    '<code style="font-size:11px">/</code> Focar busca &nbsp;|&nbsp; ' +
                     '<code style="font-size:11px">Esc</code> Fechar modal &nbsp;|&nbsp; ' +
                     '<code style="font-size:11px">Alt+N</code> Novo registro',
                     'info', 6000

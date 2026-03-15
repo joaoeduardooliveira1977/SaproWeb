@@ -15,6 +15,10 @@
             onfocus="this.style.borderColor='#2563a8';this.style.background='#fff'"
             onblur="this.style.borderColor='var(--border)';this.style.background='#f8fafc'"
         >
+        <span wire:loading wire:target="query"
+            style="position:absolute;right:32px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);">
+            ⏳
+        </span>
         @if($aberto)
         <button wire:click="fechar"
             style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;
