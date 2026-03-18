@@ -341,7 +341,7 @@
                 style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
         </div>
 
-        {{-- Footer --}}
+        {{--- Footer --}}
         <div class="modal-footer" style="margin-top:16px;">
             <button wire:click="fecharModal" class="btn btn-outline">Cancelar</button>
             <button wire:click="salvar" class="btn btn-primary" style="display:flex;align-items:center;gap:6px;">
