@@ -16,6 +16,12 @@ class Inadimplencia extends Component
     public string $filtroStatus   = '';  // atrasado | em_cobranca | inadimplente
     public string $filtroOrdem    = 'dias_desc';
 
+    protected $queryString = [
+        'filtroCliente' => ['except' => ''],
+        'filtroStatus'  => ['except' => ''],
+        'filtroOrdem'   => ['except' => 'dias_desc'],
+    ];
+
     // ── Modal registrar contato ───────────────────────────────
     public bool   $modalContato   = false;
     public ?int   $parcelaIdContato = null;

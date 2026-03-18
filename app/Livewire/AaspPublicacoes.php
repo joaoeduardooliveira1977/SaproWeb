@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\AaspAdvogado;
 use App\Models\AaspConfig;
 use App\Models\AaspPublicacao;
+use App\Models\Processo;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -132,11 +133,22 @@ class AaspPublicacoes extends Component
                             $jornal = $jornalRaw ?? $pub['nomeJornal'] ?? $pub['Jornal'] ?? '';
                         }
 
+                        $numProcessoPub = $pub['numeroUnicoProcesso'] ?? $pub['numeroProcesso'] ?? $pub['numero_processo'] ?? $pub['NumeroProcesso'] ?? '';
+
+                        // Tenta vincular automaticamente ao processo cadastrado
+                        $processoVinculado = null;
+                        if ($numProcessoPub) {
+                            $processoVinculado = Processo::where('numero', $numProcessoPub)
+                                ->orWhere('numero', preg_replace('/[^0-9]/', '', $numProcessoPub))
+                                ->value('id');
+                        }
+
                         AaspPublicacao::create([
                             'codigo_aasp'       => $adv->codigo_aasp,
+                            'processo_id'       => $processoVinculado,
                             'data'              => $dataPubl,
                             'jornal'            => $jornal,
-                            'numero_processo'   => $pub['numeroUnicoProcesso'] ?? $pub['numeroProcesso'] ?? $pub['numero_processo'] ?? $pub['NumeroProcesso'] ?? '',
+                            'numero_processo'   => $numProcessoPub,
                             'titulo'            => $pub['titulo'] ?? $pub['Titulo'] ?? '',
                             'texto'             => $pub['textoPublicacao'] ?? $pub['texto'] ?? $pub['conteudo'] ?? $pub['Texto'] ?? '',
                             'numero_publicacao' => $numPub,

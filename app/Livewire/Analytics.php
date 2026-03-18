@@ -112,12 +112,51 @@ class Analytics extends Component
             'Vencido' => $prazosAbertos->filter(fn($p) => $p->urgencia() === 'vencido')->count(),
         ];
 
+        // ── Desempenho ────────────────────────────────────────────
+        // Processos encerrados: taxa de conclusão e tempo médio
+        $encerrados = DB::table('processos')
+            ->whereIn('status', ['Encerrado', 'Arquivado'])
+            ->selectRaw("COUNT(*) as total, AVG(EXTRACT(DAY FROM (updated_at - data_distribuicao))) as media_dias")
+            ->first();
+
+        $totalProcessos = DB::table('processos')->count();
+        $taxaConclusao  = $totalProcessos > 0
+            ? round(($encerrados->total / $totalProcessos) * 100, 1)
+            : 0;
+        $tempoMedioMeses = $encerrados->media_dias
+            ? round($encerrados->media_dias / 30, 1)
+            : null;
+
+        // Receita por advogado (últimos 12 meses)
+        $receitaPorAdvogado = DB::table('recebimentos as r')
+            ->join('processos as p', 'p.id', '=', 'r.processo_id')
+            ->join('processo_advogado as pa', 'pa.processo_id', '=', 'p.id')
+            ->join('pessoas as pe', 'pe.id', '=', 'pa.advogado_id')
+            ->where('r.recebido', true)
+            ->where('r.data_recebimento', '>=', now()->subMonths(12)->startOfMonth())
+            ->selectRaw('pe.nome, SUM(r.valor) as total')
+            ->groupBy('pe.nome')
+            ->orderByDesc('total')
+            ->limit(8)
+            ->get();
+
+        // Top clientes por processos ativos
+        $topClientes = DB::table('processos as p')
+            ->join('pessoas as pe', 'pe.id', '=', 'p.cliente_id')
+            ->where('p.status', 'Ativo')
+            ->selectRaw('pe.nome, COUNT(*) as total')
+            ->groupBy('pe.nome')
+            ->orderByDesc('total')
+            ->limit(8)
+            ->get();
+
         return view('livewire.analytics', compact(
             'kpis',
             'porStatus', 'porFase', 'porRisco',
             'labelsFinanceiro', 'dadosRecebimentos', 'dadosPagamentos',
             'labelsAndamentos', 'dadosAndamentos', 'dadosHoras',
-            'prazosUrgencia'
+            'prazosUrgencia',
+            'taxaConclusao', 'tempoMedioMeses', 'receitaPorAdvogado', 'topClientes'
         ));
     }
 }

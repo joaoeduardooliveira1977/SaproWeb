@@ -18,6 +18,7 @@
 
     @livewireStyles
     <style>
+        :root { --primary: #1a3a5c; --primary-light: #2563a8; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; color: #334155; min-height: 100vh; }
 

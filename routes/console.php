@@ -18,3 +18,9 @@ Schedule::command('notificacoes:whatsapp --tipo=cobranca')->dailyAt('08:00');
 
 // Atualiza índices monetários (IPCA, IGPM, SELIC, TR) todo dia 15 às 6h
 Schedule::command('indices:atualizar')->monthlyOn(15, '06:00');
+
+// Verifica novos andamentos no DataJud para todos os processos ativos (dias úteis, 6h)
+Schedule::command('datajud:verificar')->weekdays()->dailyAt('06:00');
+
+// Busca publicações AASP do dia automaticamente (dias úteis, 8h30)
+Schedule::command('aasp:buscar')->weekdays()->dailyAt('08:30');

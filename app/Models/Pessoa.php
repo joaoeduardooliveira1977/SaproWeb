@@ -13,7 +13,7 @@ class Pessoa extends Model
         'nome', 'cpf_cnpj', 'rg', 'data_nascimento',
         'telefone', 'celular', 'email',
         'logradouro', 'cidade', 'estado', 'cep',
-        'oab', 'observacoes', 'ativo',
+        'oab', 'observacoes', 'ativo', 'administradora_id',
     ];
 
     protected $casts = [
@@ -71,6 +71,11 @@ class Pessoa extends Model
     public function usuario(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Usuario::class, 'pessoa_id');
+    }
+
+    public function administradora(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Administradora::class);
     }
 
     // ── Scopes ─────────────────────────────────────

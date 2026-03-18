@@ -19,6 +19,13 @@ class Correspondentes extends Component
     public string $filtroTipo      = '';
     public string $filtroAdvogado  = '';
 
+    protected $queryString = [
+        'filtroBusca'    => ['except' => ''],
+        'filtroStatus'   => ['except' => ''],
+        'filtroTipo'     => ['except' => ''],
+        'filtroAdvogado' => ['except' => ''],
+    ];
+
     // ── Modal principal ───────────────────────────────────────
     public bool  $modalAberto     = false;
     public ?int  $correspondente_id = null;

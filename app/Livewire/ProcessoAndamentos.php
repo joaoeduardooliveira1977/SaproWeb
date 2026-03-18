@@ -27,6 +27,12 @@ class ProcessoAndamentos extends Component
     // Confirmação de exclusão
     public ?int $excluindoId = null;
 
+    // Sugestão de prazo automático
+    public bool   $sugestaoAutoPrazo   = false;
+    public string $sugestaoDescricao   = '';
+    public string $sugestaoData        = '';
+    public string $sugestaoTitulo      = '';
+
     public bool $mostrarFormulario = false;
     public bool $embed             = false;
 
@@ -89,6 +95,7 @@ class ProcessoAndamentos extends Component
         // Envia e-mail ao cliente somente em novos andamentos
         if (! $this->editandoId) {
             $this->notificarClientePorEmail($this->data, $this->descricao);
+            $this->detectarSugestaoPrazo($this->descricao, $this->data);
         }
 
         $this->resetForm();
@@ -242,6 +249,41 @@ class ProcessoAndamentos extends Component
                 $uploadedBy,
             ]
         );
+    }
+
+    public function descartarSugestaoPrazo(): void
+    {
+        $this->sugestaoAutoPrazo = false;
+        $this->sugestaoDescricao = '';
+        $this->sugestaoData      = '';
+        $this->sugestaoTitulo    = '';
+    }
+
+    private function detectarSugestaoPrazo(string $descricao, string $data): void
+    {
+        $lower = mb_strtolower($descricao);
+        $keywords = [
+            'intimação'   => ['titulo' => 'Resposta à Intimação', 'dias' => 15, 'tipo' => 'uteis'],
+            'intimacao'   => ['titulo' => 'Resposta à Intimação', 'dias' => 15, 'tipo' => 'uteis'],
+            'citação'     => ['titulo' => 'Contestação / Prazo de Resposta', 'dias' => 15, 'tipo' => 'uteis'],
+            'citacao'     => ['titulo' => 'Contestação / Prazo de Resposta', 'dias' => 15, 'tipo' => 'uteis'],
+            'notificação' => ['titulo' => 'Resposta à Notificação', 'dias' => 10, 'tipo' => 'corridos'],
+            'notificacao' => ['titulo' => 'Resposta à Notificação', 'dias' => 10, 'tipo' => 'corridos'],
+            'despacho'    => ['titulo' => 'Cumprimento de Despacho', 'dias' => 5, 'tipo' => 'uteis'],
+            'recurso'     => ['titulo' => 'Interposição de Recurso', 'dias' => 15, 'tipo' => 'uteis'],
+        ];
+
+        foreach ($keywords as $kw => $cfg) {
+            if (str_contains($lower, $kw)) {
+                $dataSugerida = \App\Models\Prazo::calcularData($data, $cfg['dias'], $cfg['tipo']);
+                $this->sugestaoAutoPrazo = true;
+                $this->sugestaoTitulo    = $cfg['titulo'];
+                $this->sugestaoData      = $dataSugerida->format('d/m/Y');
+                $this->sugestaoDescricao = "Prazo sugerido: {$cfg['dias']} dias {$cfg['tipo']} a partir de " .
+                    \Carbon\Carbon::parse($data)->format('d/m/Y');
+                break;
+            }
+        }
     }
 
     private function resetForm(): void

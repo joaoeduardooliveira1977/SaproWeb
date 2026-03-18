@@ -23,6 +23,16 @@ class Prazos extends Component
     public string $filtroDataIni     = '';
     public string $filtroDataFim     = '';
 
+    protected $queryString = [
+        'filtroStatus'      => ['except' => 'aberto'],
+        'filtroProcesso'    => ['except' => ''],
+        'filtroResponsavel' => ['except' => ''],
+        'filtroTipo'        => ['except' => ''],
+        'filtroBusca'       => ['except' => ''],
+        'filtroDataIni'     => ['except' => ''],
+        'filtroDataFim'     => ['except' => ''],
+    ];
+
     // ── Modal ────────────────────────────────────────────────────
     public bool   $modalAberto = false;
     public ?int   $prazoid     = null;

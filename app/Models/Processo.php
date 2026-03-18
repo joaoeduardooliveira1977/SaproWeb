@@ -3,21 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany};
 
 class Processo extends Model
 {
     protected $table = 'processos';
 
     protected $fillable = [
-        'numero', 'data_distribuicao', 'cliente_id', 'parte_contraria',
-        'advogado_id', 'juiz_id', 'tipo_acao_id', 'tipo_processo_id',
-        'fase_id', 'assunto_id', 'risco_id', 'secretaria_id', 'reparticao_id',
-        'vara', 'valor_causa', 'valor_risco', 'observacoes', 'status', 'criado_por',
+        'numero', 'data_distribuicao', 'extrajudicial', 'cliente_id', 'parte_contraria',
+        'parte_contraria_id', 'autor_reu', 'unidade', 'advogado_id', 'juiz_id',
+        'tipo_acao_id', 'tipo_processo_id', 'fase_id', 'assunto_id', 'risco_id',
+        'secretaria_id', 'reparticao_id', 'vara', 'valor_causa', 'valor_risco',
+        'observacoes', 'status', 'criado_por',
     ];
 
     protected $casts = [
         'data_distribuicao' => 'date',
+        'extrajudicial'     => 'boolean',
         'valor_causa'       => 'decimal:2',
         'valor_risco'       => 'decimal:2',
     ];
@@ -28,9 +30,19 @@ class Processo extends Model
         return $this->belongsTo(Pessoa::class, 'cliente_id');
     }
 
+    public function parteContraria(): BelongsTo
+    {
+        return $this->belongsTo(Pessoa::class, 'parte_contraria_id');
+    }
+
     public function advogado(): BelongsTo
     {
         return $this->belongsTo(Pessoa::class, 'advogado_id');
+    }
+
+    public function advogados(): BelongsToMany
+    {
+        return $this->belongsToMany(Pessoa::class, 'processo_advogado', 'processo_id', 'advogado_id');
     }
 
     public function juiz(): BelongsTo

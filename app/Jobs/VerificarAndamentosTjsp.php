@@ -7,6 +7,7 @@ use App\Models\Andamento;
 use App\Models\TjspVerificacao;
 use App\Services\PrazoAutoService;
 use App\Services\TribunalService;
+use App\Services\WhatsAppSmsService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -147,6 +148,11 @@ class VerificarAndamentosTjsp implements ShouldQueue
                 'concluido_em'     => now(),
             ]);
 
+            // ── Alertas WhatsApp/SMS para advogados com novos andamentos ──
+            if (!empty($novosAndamentos)) {
+                $this->enviarAlertasWhatsapp($novosAndamentos);
+            }
+
         } catch (\Throwable $e) {
             Log::error('VerificarAndamentosTjsp: erro fatal no job', [
                 'verificacao_id' => $this->verificacaoId,
@@ -169,5 +175,57 @@ class VerificarAndamentosTjsp implements ShouldQueue
     {
         TjspVerificacao::where('id', $this->verificacaoId)
             ->update(['status' => 'erro']);
+    }
+
+    private function enviarAlertasWhatsapp(array $novosAndamentos): void
+    {
+        try {
+            $svc = new WhatsAppSmsService();
+            if (! $svc->configurado()) return;
+
+            // Agrupa por advogado responsável
+            $porAdvogado = [];
+            foreach ($novosAndamentos as $item) {
+                $processo = Processo::with('advogado')->where('numero', $item['numero'])->first();
+                if (! $processo) continue;
+
+                $adv      = $processo->advogado;
+                $telefone = $adv?->celular ?: $adv?->telefone;
+                if (! $telefone) continue;
+
+                $porAdvogado[$telefone] ??= ['nome' => $adv->nome, 'processos' => []];
+                $porAdvogado[$telefone]['processos'][] = [
+                    'numero'     => $item['numero'],
+                    'cliente'    => $item['cliente'],
+                    'andamentos' => $item['andamentos'],
+                ];
+            }
+
+            foreach ($porAdvogado as $telefone => $dados) {
+                $linhas = ["📋 *SAPRO — Novos andamentos detectados*\n"];
+                foreach ($dados['processos'] as $p) {
+                    $linhas[] = "⚖️ *{$p['numero']}* ({$p['cliente']})";
+                    foreach (array_slice($p['andamentos'], 0, 3) as $a) {
+                        $data  = \Carbon\Carbon::parse($a['data'])->format('d/m/Y');
+                        $desc  = mb_strimwidth($a['descricao'], 0, 100, '…');
+                        $linhas[] = "  • {$data}: {$desc}";
+                    }
+                    if (count($p['andamentos']) > 3) {
+                        $linhas[] = '  _...e mais ' . (count($p['andamentos']) - 3) . ' andamento(s)_';
+                    }
+                }
+                $linhas[] = "\nAcesse o SAPRO para detalhes.";
+
+                $svc->enviar(
+                    telefone:         $telefone,
+                    mensagem:         implode("\n", $linhas),
+                    destinatarioNome: $dados['nome'],
+                    tipo:             'andamento',
+                    canal:            config('services.twilio.canal_padrao', 'whatsapp'),
+                );
+            }
+        } catch (\Throwable $e) {
+            Log::warning('VerificarAndamentosTjsp: falha ao enviar alertas WhatsApp: ' . $e->getMessage());
+        }
     }
 }

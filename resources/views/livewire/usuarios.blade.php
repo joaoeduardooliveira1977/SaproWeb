@@ -4,28 +4,28 @@
 <div class="stat-grid">
     <div class="card" style="border-left:4px solid var(--primary);text-align:center;">
         <div style="margin-bottom:8px;display:flex;justify-content:center;">
-            <svg width="22" height="22" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            <svg aria-hidden="true" width="22" height="22" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
         </div>
         <div style="font-size:28px;font-weight:800;color:var(--primary);">{{ $totais->total }}</div>
         <div style="font-size:12px;color:var(--muted);">Total de Usuários</div>
     </div>
     <div class="card" style="border-left:4px solid var(--success);text-align:center;">
         <div style="margin-bottom:8px;display:flex;justify-content:center;">
-            <svg width="22" height="22" fill="none" stroke="var(--success)" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+            <svg aria-hidden="true" width="22" height="22" fill="none" stroke="var(--success)" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
         </div>
         <div style="font-size:28px;font-weight:800;color:var(--success);">{{ $totais->ativos }}</div>
         <div style="font-size:12px;color:var(--muted);">Ativos</div>
     </div>
     <div class="card" style="border-left:4px solid var(--accent);text-align:center;">
         <div style="margin-bottom:8px;display:flex;justify-content:center;">
-            <svg width="22" height="22" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <svg aria-hidden="true" width="22" height="22" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
         <div style="font-size:28px;font-weight:800;color:var(--accent);">{{ $totais->advogados }}</div>
         <div style="font-size:12px;color:var(--muted);">Advogados</div>
     </div>
     <div class="card" style="border-left:4px solid var(--danger);text-align:center;">
         <div style="margin-bottom:8px;display:flex;justify-content:center;">
-            <svg width="22" height="22" fill="none" stroke="var(--danger)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg aria-hidden="true" width="22" height="22" fill="none" stroke="var(--danger)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
         <div style="font-size:28px;font-weight:800;color:var(--danger);">{{ $totais->admins }}</div>
         <div style="font-size:12px;color:var(--muted);">Administradores</div>
@@ -37,7 +37,7 @@
     <div class="filter-bar">
         <div style="position:relative;flex:1;min-width:200px;">
             <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             </span>
             <input wire:model.live="busca" type="text" placeholder="Buscar por nome ou login..." style="padding-left:34px;width:100%;">
         </div>
@@ -109,21 +109,25 @@
                         <div class="btn-actions" style="justify-content:center;">
                             <button wire:click="editarUsuario({{ $u->id }})" title="Editar"
                                 style="width:30px;height:30px;border:none;border-radius:6px;background:#eff6ff;color:#2563a8;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
-                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
                             @if($u->id !== auth()->id())
                             <button wire:click="excluir({{ $u->id }})"
                                 wire:confirm="Excluir usuário {{ $u->nome ?? $u->login }}?"
                                 title="Excluir"
                                 style="width:30px;height:30px;border:none;border-radius:6px;background:#fef2f2;color:#dc2626;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
-                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                                <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
                             </button>
                             @endif
                         </div>
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" style="padding:32px;text-align:center;color:var(--muted);">Nenhum usuário encontrado.</td></tr>
+                <tr><td colspan="7"><div class="empty-state">
+                    <div class="empty-state-icon"><svg aria-hidden="true" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+                    <div class="empty-state-title">Nenhum usuário encontrado</div>
+                    <div class="empty-state-sub">Crie um usuário para que ele possa acessar o sistema.</div>
+                </div></td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -133,7 +137,7 @@
 {{-- Quadro de Permissões --}}
 <div class="card" style="margin-top:20px;">
     <div style="font-size:14px;font-weight:700;color:var(--primary);margin-bottom:16px;display:flex;align-items:center;gap:8px;">
-        <svg width="16" height="16" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <svg aria-hidden="true" width="16" height="16" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
         Quadro de Permissões por Perfil
     </div>
     <div class="table-wrap">
@@ -164,9 +168,9 @@
                     ['nome'=>'Usuários',     'admin'=>'full', 'advogado'=>'none','estagiario'=>'none','financeiro'=>'none','recepcionista'=>'none'],
                 ];
                 $permIcon = fn($v) => match($v) {
-                    'full' => '<svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
-                    'view' => '<svg width="16" height="16" fill="none" stroke="#2563a8" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
-                    default => '<svg width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+                    'full' => '<svg aria-hidden="true" width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+                    'view' => '<svg aria-hidden="true" width="16" height="16" fill="none" stroke="#2563a8" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+                    default => '<svg aria-hidden="true" width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
                 };
                 @endphp
                 @foreach($modulos as $m)
@@ -183,9 +187,9 @@
         </table>
     </div>
     <div style="font-size:11px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Acesso total</span>
-        <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="16" height="16" fill="none" stroke="#2563a8" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Somente visualização</span>
-        <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg> Sem acesso</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;"><svg aria-hidden="true" width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Acesso total</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;"><svg aria-hidden="true" width="16" height="16" fill="none" stroke="#2563a8" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Somente visualização</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;"><svg aria-hidden="true" width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg> Sem acesso</span>
     </div>
 </div>
 
@@ -195,8 +199,8 @@
 <div class="modal" style="max-width:520px;">
     <div class="modal-header">
         <span class="modal-title">{{ $usuarioId ? 'Editar' : 'Novo' }} Usuário</span>
-        <button wire:click="$set('modal',false)" class="modal-close" style="display:inline-flex;align-items:center;justify-content:center;">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <button wire:click="$set('modal',false)" class="modal-close" style="display:inline-flex;align-items:center;justify-content:center;" aria-label="Fechar">
+            <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
     </div>
     <div class="form-grid">
@@ -247,7 +251,7 @@
     <div class="modal-footer">
         <button wire:click="$set('modal',false)" class="btn btn-secondary">Cancelar</button>
         <button wire:click="salvar" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar
+            <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar
         </button>
     </div>
 </div>

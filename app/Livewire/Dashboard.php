@@ -3,14 +3,17 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\{Processo, Pessoa, Agenda, Prazo, Recebimento};
+use App\Models\{Processo, Pessoa, Agenda, Prazo, Recebimento, Procuracao};
 
 class Dashboard extends Component
 {
-    public array $stats          = [];
-    public array $agendaHoje     = [];
-    public array $processos      = [];
-    public array $prazosProximos = [];
+    public array $stats             = [];
+    public array $agendaHoje        = [];
+    public array $processos         = [];
+    public array $prazosProximos    = [];
+    public array $processosParados  = [];
+    public int   $procuracoesVencendo = 0;
+    public int   $procuracoesVencidas = 0;
 
     public function placeholder(): \Illuminate\View\View
     {
@@ -35,6 +38,11 @@ class Dashboard extends Component
                                         ->count(),
             'recebimentos_pendentes'=> Recebimento::where('recebido', false)->sum('valor'),
             'clientes'              => Pessoa::ativos()->doTipo('Cliente')->count(),
+            'processos_parados'     => Processo::where('status', 'Ativo')
+                                        ->whereNotExists(fn($q) => $q->from('andamentos')
+                                            ->whereColumn('andamentos.processo_id', 'processos.id')
+                                            ->where('andamentos.created_at', '>=', now()->subDays(30)))
+                                        ->count(),
         ];
 
         $this->agendaHoje = Agenda::with('processo')
@@ -65,6 +73,30 @@ class Dashboard extends Component
                 'risco_cor' => $p->risco?->cor_hex ?? '#64748b',
             ])
             ->toArray();
+
+        $this->processosParados = Processo::with(['cliente', 'fase'])
+            ->where('status', 'Ativo')
+            ->whereNotExists(fn($q) => $q->from('andamentos')
+                ->whereColumn('andamentos.processo_id', 'processos.id')
+                ->where('andamentos.created_at', '>=', now()->subDays(30)))
+            ->orderBy('updated_at')
+            ->take(8)
+            ->get()
+            ->map(fn($p) => [
+                'id'      => $p->id,
+                'numero'  => $p->numero,
+                'cliente' => $p->cliente?->nome ?? '—',
+                'fase'    => $p->fase?->descricao,
+                'dias'    => (int) now()->diffInDays($p->updated_at),
+            ])
+            ->toArray();
+
+        // Procurações
+        $this->procuracoesVencidas  = Procuracao::where('ativa', true)
+            ->whereNotNull('data_validade')->where('data_validade', '<', today())->count();
+        $this->procuracoesVencendo  = Procuracao::where('ativa', true)
+            ->whereNotNull('data_validade')
+            ->whereBetween('data_validade', [today(), today()->addDays(30)])->count();
 
         $this->prazosProximos = Prazo::with('processo')
             ->where('status', 'aberto')

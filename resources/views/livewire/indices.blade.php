@@ -5,7 +5,7 @@
   <div class="card" style="margin-bottom:16px">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
       <div>
-        <div style="font-weight:700;font-size:15px;color:var(--primary)"><div style="display:flex;align-items:center;gap:8px;"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Índices Monetários</div></div>
+        <div style="font-weight:700;font-size:15px;color:var(--primary)"><div style="display:flex;align-items:center;gap:8px;"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Índices Monetários</div></div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px">
           IPCA, IGP-M, SELIC e TR — importados via API do Banco Central do Brasil (SGS/BACEN).
         </div>
@@ -20,7 +20,7 @@
         </select>
         <button wire:click="atualizarTodos" wire:loading.attr="disabled" wire:target="atualizarTodos"
                 class="btn btn-primary btn-sm">
-          <span wire:loading.remove wire:target="atualizarTodos" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg> Atualizar agora</span>
+          <span wire:loading.remove wire:target="atualizarTodos" style="display:inline-flex;align-items:center;gap:6px;"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg> Atualizar agora</span>
           <span wire:loading wire:target="atualizarTodos">Buscando BACEN...</span>
         </button>
       </div>
@@ -30,15 +30,15 @@
   {{-- Cards de status por índice --}}
   @if($resumo->isEmpty())
     <div class="card" style="text-align:center;padding:48px">
-      <div style="margin-bottom:12px"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
+      <div style="margin-bottom:12px"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
       <div style="font-weight:600;color:var(--text)">Nenhum índice importado ainda</div>
       <div style="color:var(--muted);font-size:13px;margin-top:8px;margin-bottom:20px">
         Clique em <strong>Atualizar agora</strong> para importar IPCA, IGP-M, SELIC e TR desde 2000.
       </div>
       <button wire:click="atualizarTodos" wire:loading.attr="disabled"
               class="btn btn-primary">
-        <span wire:loading.remove wire:target="atualizarTodos" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg> Importar índices</span>
-        <span wire:loading wire:target="atualizarTodos" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Importando (pode levar 1–2 min)...</span>
+        <span wire:loading.remove wire:target="atualizarTodos" style="display:inline-flex;align-items:center;gap:6px;"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg> Importar índices</span>
+        <span wire:loading wire:target="atualizarTodos" style="display:inline-flex;align-items:center;gap:6px;"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Importando (pode levar 1–2 min)...</span>
       </button>
     </div>
   @else
@@ -50,7 +50,7 @@
       @foreach($resumo as $r)
         @php $cor = $corSigla[$r->sigla] ?? '#64748b'; @endphp
         <div class="stat-card" style="border-left-color:{{ $cor }}">
-          <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
+          <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
           <div style="font-size:11px;font-weight:700;color:{{ $cor }};text-transform:uppercase;letter-spacing:.5px">{{ $r->sigla }}</div>
           <div style="font-size:11px;color:var(--muted);margin:2px 0 8px">{{ $r->nome }}</div>
           <div style="font-size:20px;font-weight:800;color:var(--text)">{{ $r->total_meses }} <span style="font-size:12px;font-weight:400;color:var(--muted)">meses</span></div>
@@ -68,7 +68,7 @@
     {{-- Últimos 12 meses --}}
     <div class="card">
       <div style="padding:14px 16px;font-weight:600;font-size:14px;color:var(--primary);border-bottom:1px solid var(--border)">
-        <div style="display:flex;align-items:center;gap:8px;"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Últimos 12 meses</div>
+        <div style="display:flex;align-items:center;gap:8px;"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Últimos 12 meses</div>
       </div>
       <div class="table-wrap" style="margin:0">
         <table>

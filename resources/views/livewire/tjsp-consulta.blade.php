@@ -3,7 +3,7 @@
 
     {{-- Cabeçalho --}}
     <div style="margin-bottom:24px;">
-        <h2 style="font-size:20px; font-weight:700; color:#1a3a5c;display:flex;align-items:center;gap:8px;"><svg width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="1.5" viewBox="0 0 24 24"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg> Consulta Judicial</h2>
+        <h2 style="font-size:20px; font-weight:700; color:var(--primary);display:flex;align-items:center;gap:8px;"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="1.5" viewBox="0 0 24 24"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg> Consulta Judicial</h2>
             <p style="font-size:13px; color:#64748b; margin-top:4px;">Verifique novos andamentos via DATAJUD/CNJ — tribunal detectado automaticamente pelo número do processo</p>
     </div>
 
@@ -11,7 +11,7 @@
     {{-- Filtros --}}
     <div class="card" style="margin-bottom:20px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <strong style="font-size:14px;color:#1a3a5c;display:inline-flex;align-items:center;gap:6px;"><svg width="16" height="16" fill="none" stroke="#1a3a5c" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Filtros</strong>
+            <strong style="font-size:14px;color:var(--primary);display:inline-flex;align-items:center;gap:6px;"><svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Filtros</strong>
             <button wire:click="limparFiltros" class="btn btn-sm btn-secondary-outline">
                 Limpar filtros
             </button>
@@ -70,12 +70,12 @@
             style="padding:12px 24px; background:{{ $bloqueado ? '#94a3b8' : '#16a34a' }}; color:white; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:{{ $bloqueado ? 'not-allowed' : 'pointer' }};display:inline-flex;align-items:center;gap:8px;">
             <span wire:loading.remove wire:target="iniciarVerificacao" style="display:inline-flex;align-items:center;gap:8px;">
                 @if($verificacao?->emAndamento())
-                    <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Verificando...
+                    <svg aria-hidden="true" width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Verificando...
                 @else
-                    <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Verificar Atualizações
+                    <svg aria-hidden="true" width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Verificar Atualizações
                 @endif
             </span>
-            <span wire:loading wire:target="iniciarVerificacao" style="display:inline-flex;align-items:center;gap:8px;"><svg width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Iniciando...</span>
+            <span wire:loading wire:target="iniciarVerificacao" style="display:inline-flex;align-items:center;gap:8px;"><svg aria-hidden="true" width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Iniciando...</span>
         </button>
     </div>
 
@@ -88,7 +88,7 @@
         {{-- Cabeçalho progresso --}}
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
             <span style="font-size:14px;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:8px;">
-                <svg width="16" height="16" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Consultando processos no DATAJUD/CNJ...
+                <svg aria-hidden="true" width="16" height="16" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Consultando processos no DATAJUD/CNJ...
             </span>
             <span style="font-size:16px;font-weight:800;color:var(--primary)">{{ $verificacao->porcentagem() }}%</span>
         </div>
@@ -102,7 +102,7 @@
         <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin-bottom:12px">
             <span>{{ $verificacao->processado }} / {{ $verificacao->total }} processos</span>
             @if($verificacao->novos_total > 0)
-            <span style="color:var(--success);font-weight:700;display:inline-flex;align-items:center;gap:5px;"><svg width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> {{ $verificacao->novos_total }} andamento(s) novo(s) encontrado(s)</span>
+            <span style="color:var(--success);font-weight:700;display:inline-flex;align-items:center;gap:5px;"><svg aria-hidden="true" width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> {{ $verificacao->novos_total }} andamento(s) novo(s) encontrado(s)</span>
             @endif
         </div>
 
@@ -111,11 +111,11 @@
         @php
             $linhas = array_reverse(array_slice($verificacao->log_linhas, -15)); // últimas 15, mais recentes no topo
             $icones = [
-                'consultando' => '<svg width="12" height="12" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
-                'ok'          => '<svg width="12" height="12" fill="none" stroke="var(--success)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
-                'sem_novos'   => '<svg width="12" height="12" fill="none" stroke="var(--muted)" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
-                'erro'        => '<svg width="12" height="12" fill="none" stroke="var(--danger)" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-                'ignorado'    => '<svg width="12" height="12" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>',
+                'consultando' => '<svg aria-hidden="true" width="12" height="12" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+                'ok'          => '<svg aria-hidden="true" width="12" height="12" fill="none" stroke="var(--success)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+                'sem_novos'   => '<svg aria-hidden="true" width="12" height="12" fill="none" stroke="var(--muted)" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+                'erro'        => '<svg aria-hidden="true" width="12" height="12" fill="none" stroke="var(--danger)" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+                'ignorado'    => '<svg aria-hidden="true" width="12" height="12" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>',
             ];
             $cores  = ['consultando'=>'var(--primary)','ok'=>'var(--success)','sem_novos'=>'var(--muted)','erro'=>'var(--danger)','ignorado'=>'var(--muted)'];
         @endphp
@@ -155,12 +155,12 @@
         @if(count($verificacao->novos_andamentos ?? []) > 0)
         <div style="background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
             <strong style="color:#16a34a;font-size:15px;display:inline-flex;align-items:center;gap:6px;">
-                <svg width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> {{ count($verificacao->novos_andamentos) }} processo(s) com andamentos novos!
+                <svg aria-hidden="true" width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> {{ count($verificacao->novos_andamentos) }} processo(s) com andamentos novos!
             </strong>
             @if(($verificacao->prazos_criados ?? 0) > 0)
             <a href="{{ route('prazos') }}"
                style="display:inline-flex;align-items:center;gap:6px;background:#1a3a5c;color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;">
-                <svg width="14" height="14" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> {{ $verificacao->prazos_criados }} prazo(s) criado(s) automaticamente →
+                <svg aria-hidden="true" width="14" height="14" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> {{ $verificacao->prazos_criados }} prazo(s) criado(s) automaticamente →
             </a>
             @endif
         </div>
@@ -169,7 +169,7 @@
         <div class="card" style="margin-bottom:16px;overflow:hidden;border-left:4px solid #16a34a;padding:0;">
             <div style="padding:14px 20px; background:#f0fdf4; display:flex; justify-content:space-between; align-items:center;">
                 <div>
-                    <span style="font-size:14px; font-weight:700; color:#1a3a5c;">{{ $item['numero'] }}</span>
+                    <span style="font-size:14px; font-weight:700; color:var(--primary);">{{ $item['numero'] }}</span>
                     <span style="font-size:13px; color:#64748b; margin-left:12px;">{{ $item['cliente'] }}</span>
                     @if(!empty($item['tribunal']))
                     <span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:600; margin-left:8px;">
@@ -196,8 +196,8 @@
 
         @else
         <div class="card" style="text-align:center;padding:60px 24px;">
-            <div style="margin-bottom:12px;display:flex;justify-content:center;"><svg width="48" height="48" fill="none" stroke="var(--success)" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <p style="font-size:16px;font-weight:600;color:#1a3a5c;">Nenhum andamento novo encontrado!</p>
+            <div style="margin-bottom:12px;display:flex;justify-content:center;"><svg aria-hidden="true" width="48" height="48" fill="none" stroke="var(--success)" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p style="font-size:16px;font-weight:600;color:var(--primary);">Nenhum andamento novo encontrado!</p>
             <p style="font-size:13px;color:#64748b;margin-top:4px;">Todos os processos selecionados estão atualizados.</p>
         </div>
         @endif
@@ -207,8 +207,8 @@
     {{-- Estado inicial --}}
     @if(!$verificacao || $verificacao->status === 'erro')
     <div class="card" style="text-align:center;padding:60px 24px;">
-        <div style="margin-bottom:16px;display:flex;justify-content:center;"><svg width="48" height="48" fill="none" stroke="var(--muted)" stroke-width="1.5" viewBox="0 0 24 24"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
-        <p style="font-size:16px; font-weight:600; color:#1a3a5c;">Clique em "Verificar Atualizações"</p>
+        <div style="margin-bottom:16px;display:flex;justify-content:center;"><svg aria-hidden="true" width="48" height="48" fill="none" stroke="var(--muted)" stroke-width="1.5" viewBox="0 0 24 24"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
+        <p style="font-size:16px; font-weight:600; color:var(--primary);">Clique em "Verificar Atualizações"</p>
         <p style="font-size:13px; color:#64748b; margin-top:6px;">
             Use os filtros acima para selecionar quais processos consultar<br>
             e o sistema mostrará apenas os que tiveram novos andamentos.

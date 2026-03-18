@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @php use Illuminate\Support\Facades\Storage; @endphp
 @section('page-title', 'Processo ' . $processo->numero)
+@section('breadcrumb')<a href="{{ route('processos') }}">Processos</a> <span class="sep">›</span> <span class="current">{{ $processo->numero }}</span>@endsection
 
 @section('content')
 <div>
@@ -9,7 +10,7 @@
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
         <div>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                <h2 style="font-size:20px;font-weight:700;color:#1a3a5c;">&#9878; {{ $processo->numero }}</h2>
+                <h2 style="font-size:20px;font-weight:700;color:var(--primary);">&#9878; {{ $processo->numero }}</h2>
                 <span style="padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;
                     background:{{ $processo->status === 'Ativo' ? '#dcfce7' : '#f1f5f9' }};
                     color:{{ $processo->status === 'Ativo' ? '#16a34a' : '#64748b' }};">
@@ -31,10 +32,10 @@
         <div class="card-actions">
             @if($processo->tjsp_ultima_consulta)
                 <span style="font-size:11px;color:var(--muted)">
-                    🏛️ DATAJUD: {{ \Carbon\Carbon::parse($processo->tjsp_ultima_consulta)->format('d/m/Y H:i') }}
+                    <span style="display:inline-flex;align-items:center;gap:4px;"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg> DATAJUD: {{ \Carbon\Carbon::parse($processo->tjsp_ultima_consulta)->format('d/m/Y H:i') }}</span>
                 </span>
             @endif
-            <a href="{{ route('tjsp') }}" class="btn btn-secondary btn-sm" title="Consultar andamentos no DATAJUD">🔄 DATAJUD</a>
+            <a href="{{ route('tjsp') }}" class="btn btn-secondary btn-sm" title="Consultar andamentos no DATAJUD" style="display:inline-flex;align-items:center;gap:5px;"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg> DATAJUD</a>
             <a href="{{ route('processos.editar', $processo->id) }}" class="btn btn-primary btn-sm">Editar</a>
             <a href="{{ route('processos') }}" class="btn btn-secondary btn-sm">&larr; Voltar</a>
         </div>
@@ -59,6 +60,7 @@
             'minutas'         => 'Minutas',
             'historico_fases' => 'Histórico de Fases',
             'apontamentos'    => 'Horas',
+            'timeline'        => 'Timeline',
         ];
         @endphp
         @foreach($abas as $key => $label)
@@ -127,6 +129,40 @@
                 </div>
             </div>
         </div>
+
+        {{-- Rentabilidade --}}
+        <div class="card" style="margin-top:16px;">
+            <div class="card-header">
+                <span class="card-title" style="display:flex;align-items:center;gap:7px;">
+                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Rentabilidade
+                </span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;">
+                <div style="background:#f0fdf4;padding:10px;border-radius:8px;text-align:center;">
+                    <div style="font-size:10px;color:#64748b;margin-bottom:2px;text-transform:uppercase;font-weight:600;">Recebido</div>
+                    <div style="font-size:14px;font-weight:700;color:#16a34a;">R$ {{ number_format($rentabilidade['recebido'],2,',','.') }}</div>
+                </div>
+                <div style="background:#fff7ed;padding:10px;border-radius:8px;text-align:center;">
+                    <div style="font-size:10px;color:#64748b;margin-bottom:2px;text-transform:uppercase;font-weight:600;">A Receber</div>
+                    <div style="font-size:14px;font-weight:700;color:#d97706;">R$ {{ number_format($rentabilidade['pendente'],2,',','.') }}</div>
+                </div>
+                <div style="background:#f1f5f9;padding:10px;border-radius:8px;text-align:center;">
+                    <div style="font-size:10px;color:#64748b;margin-bottom:2px;text-transform:uppercase;font-weight:600;">Horas</div>
+                    <div style="font-size:14px;font-weight:700;color:#475569;">{{ number_format($rentabilidade['horas'],1,',','.') }}h</div>
+                </div>
+                <div style="background:#fef2f2;padding:10px;border-radius:8px;text-align:center;">
+                    <div style="font-size:10px;color:#64748b;margin-bottom:2px;text-transform:uppercase;font-weight:600;">Custo (apontamentos)</div>
+                    <div style="font-size:14px;font-weight:700;color:#dc2626;">R$ {{ number_format($rentabilidade['custo_estimado'],2,',','.') }}</div>
+                </div>
+                <div style="background:{{ $rentabilidade['saldo'] >= 0 ? '#f0fdf4' : '#fef2f2' }};padding:10px;border-radius:8px;text-align:center;">
+                    <div style="font-size:10px;color:#64748b;margin-bottom:2px;text-transform:uppercase;font-weight:600;">Saldo</div>
+                    <div style="font-size:14px;font-weight:700;color:{{ $rentabilidade['saldo'] >= 0 ? '#16a34a' : '#dc2626' }};">
+                        R$ {{ number_format($rentabilidade['saldo'],2,',','.') }}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- ── ABA: ANDAMENTOS ── --}}
@@ -138,11 +174,15 @@
     <div id="tab-audiencias" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-header">
-                <span class="card-title">⚖️ Audiências</span>
+                <span class="card-title" style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Audiências</span>
                 <a href="{{ route('audiencias') }}" class="btn btn-secondary btn-sm">Ver Todas</a>
             </div>
             @if($processo->audiencias->isEmpty())
-                <p style="color:var(--muted);font-size:13px;text-align:center;padding:30px 0;">Nenhuma audiência cadastrada.</p>
+                <div class="empty-state">
+                    <div class="empty-state-icon"><svg aria-hidden="true" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                    <div class="empty-state-title">Nenhuma audiência</div>
+                    <div class="empty-state-sub">Cadastre audiências em <a href="{{ route('audiencias') }}" style="color:var(--primary-light)">Audiências</a>.</div>
+                </div>
             @else
             <div style="display:flex;flex-direction:column;gap:10px;">
                 @foreach($processo->audiencias->sortByDesc('data_hora') as $aud)
@@ -239,7 +279,11 @@
                 <a href="{{ route('agenda') }}" class="btn btn-secondary btn-sm">Ver Agenda Completa</a>
             </div>
             @if($processo->agenda->isEmpty())
-                <p style="color:var(--muted);font-size:13px;text-align:center;padding:30px 0;">Nenhum compromisso na agenda.</p>
+                <div class="empty-state">
+                    <div class="empty-state-icon"><svg aria-hidden="true" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                    <div class="empty-state-title">Nenhum compromisso</div>
+                    <div class="empty-state-sub">Compromissos vinculados a este processo aparecerão aqui.</div>
+                </div>
             @else
             <div class="table-wrap">
                 <table>
@@ -280,7 +324,11 @@
                 <a href="{{ route('prazos') }}" class="btn btn-secondary btn-sm">Ver Todos os Prazos</a>
             </div>
             @if($prazos->isEmpty())
-                <p style="color:var(--muted);font-size:13px;text-align:center;padding:30px 0;">Nenhum prazo cadastrado.</p>
+                <div class="empty-state">
+                    <div class="empty-state-icon"><svg aria-hidden="true" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                    <div class="empty-state-title">Nenhum prazo</div>
+                    <div class="empty-state-sub">Cadastre prazos em <a href="{{ route('prazos') }}" style="color:var(--primary-light)">Controle de Prazos</a>.</div>
+                </div>
             @else
             @php
             $urgCor = [
@@ -343,7 +391,7 @@
     <div id="tab-checklist" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-header">
-                <span class="card-title">✅ Checklist de Tarefas</span>
+                <span class="card-title" style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Checklist de Tarefas</span>
             </div>
             @livewire('processo-checklist', ['processoId' => $processo->id])
         </div>
@@ -353,7 +401,7 @@
     <div id="tab-minutas" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-header">
-                <span class="card-title">📄 Gerar Minuta</span>
+                <span class="card-title" style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Gerar Minuta</span>
                 <a href="{{ route('minutas') }}" class="btn btn-secondary btn-sm" target="_blank">Gerenciar Templates</a>
             </div>
             @livewire('processo-minuta', ['processoId' => $processo->id])
@@ -364,7 +412,7 @@
     <div id="tab-historico_fases" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-header">
-                <span class="card-title">📋 Histórico de Fases</span>
+                <span class="card-title" style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg> Histórico de Fases</span>
             </div>
             @livewire('processo-historico-fases', ['processoId' => $processo->id])
         </div>
@@ -374,9 +422,76 @@
     <div id="tab-apontamentos" class="tab-content" style="display:none;">
         <div class="card">
             <div class="card-header">
-                <span class="card-title">⏱️ Apontamento de Horas</span>
+                <span class="card-title" style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Apontamento de Horas</span>
             </div>
             @livewire('processo-apontamentos', ['processoId' => $processo->id])
+        </div>
+    </div>
+
+    {{-- ── ABA: TIMELINE ── --}}
+    <div id="tab-timeline" class="tab-content" style="display:none;">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title" style="display:flex;align-items:center;gap:7px;">
+                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Timeline do Processo
+                </span>
+                <span style="font-size:11px;color:var(--muted);">{{ $timeline->count() }} eventos</span>
+            </div>
+            @if($timeline->isEmpty())
+                <div class="empty-state">
+                    <div class="empty-state-icon"><svg aria-hidden="true" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/></svg></div>
+                    <div class="empty-state-title">Sem eventos</div>
+                    <div class="empty-state-sub">Andamentos, prazos e audiências aparecerão aqui.</div>
+                </div>
+            @else
+            @php
+            $tipoIcon = [
+                'andamento' => '<svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+                'prazo'     => '<svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+                'agenda'    => '<svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+                'audiencia' => '<svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 9l9-6 9 6M3 9h18"/></svg>',
+            ];
+            $tipoLabel = ['andamento'=>'Andamento','prazo'=>'Prazo','agenda'=>'Agenda','audiencia'=>'Audiência'];
+            $lastDate  = null;
+            @endphp
+            <div style="position:relative;padding-left:32px;">
+                <div style="position:absolute;left:15px;top:0;bottom:0;width:2px;background:var(--border);"></div>
+                @foreach($timeline as $ev)
+                @php
+                $evDate = is_string($ev['data']) ? \Carbon\Carbon::parse($ev['data']) : $ev['data'];
+                $showDate = $lastDate === null || ! $evDate->isSameDay($lastDate);
+                $lastDate = $evDate;
+                @endphp
+                @if($showDate)
+                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 8px -32px;padding-left:32px;position:relative;">
+                    <div style="position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--border);"></div>
+                    {{ $evDate->translatedFormat('d \d\e F \d\e Y') }}
+                </div>
+                @endif
+                <div style="position:relative;margin-bottom:10px;">
+                    <div style="position:absolute;left:-23px;top:10px;width:10px;height:10px;border-radius:50%;background:{{ $ev['cor'] }};border:2px solid #fff;box-shadow:0 0 0 1px {{ $ev['cor'] }};"></div>
+                    <div style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 14px;border-left:3px solid {{ $ev['cor'] }};">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span style="color:{{ $ev['cor'] }}">{!! $tipoIcon[$ev['tipo']] ?? '' !!}</span>
+                                <span style="font-size:13px;font-weight:600;color:#1e293b;">{{ $ev['titulo'] }}</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:10px;font-weight:700;background:{{ $ev['cor'] }}22;color:{{ $ev['cor'] }};padding:2px 8px;border-radius:20px;">
+                                    {{ $tipoLabel[$ev['tipo']] ?? $ev['tipo'] }}
+                                </span>
+                                <span style="font-size:11px;color:var(--muted);">{{ $evDate->format('H:i') !== '00:00' ? $evDate->format('H:i') : '' }}</span>
+                            </div>
+                        </div>
+                        @if($ev['sub'])
+                        <div style="font-size:11px;color:var(--muted);margin-top:3px;">{{ $ev['sub'] }}</div>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
         </div>
     </div>
 
@@ -388,7 +503,11 @@
                 <a href="{{ route('documentos') }}" class="btn btn-secondary btn-sm">Gerenciar Documentos</a>
             </div>
             @if(empty($documentos))
-                <p style="color:var(--muted);font-size:13px;text-align:center;padding:30px 0;">Nenhum documento vinculado a este processo.</p>
+                <div class="empty-state">
+                    <div class="empty-state-icon"><svg aria-hidden="true" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></div>
+                    <div class="empty-state-title">Nenhum documento</div>
+                    <div class="empty-state-sub">Faça upload de documentos em <a href="{{ route('documentos') }}" style="color:var(--primary-light)">Documentos</a>.</div>
+                </div>
             @else
             @php
             $tipoLabel = [

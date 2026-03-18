@@ -46,72 +46,81 @@ class MercadoFinanceiro extends Component
 
     // ── APIs ──────────────────────────────────────────────────────
 
-    private function buscarMoedas(): array
-    {
-        try {
-            $res = Http::timeout(8)->get('https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,BTC-BRL');
-            if (!$res->ok()) return [];
-            $json = $res->json();
-        } catch (\Throwable) {
-            return [];
-        }
+   
+private function buscarMoedas(): array
+{
+    try {
+        $hoje  = now()->format('m-d-Y');
+        $ontem = now()->subDays(2)->format('m-d-Y');
+
+        $buscar = function ($moeda) use ($hoje, $ontem) {
+            $res = Http::timeout(8)->get(
+                "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/" .
+                "CotacaoMoedaPeriodo(moeda=@moeda,dataInicial=@di,dataFinalCotacao=@df)" .
+                "?@moeda='{$moeda}'&@di='{$ontem}'&@df='{$hoje}'" .
+                "&\$top=1&\$orderby=dataHoraCotacao%20desc&\$format=json"
+            );
+            return $res->json('value.0') ?? [];
+        };
+
+        $usd = $buscar('USD');
+        $eur = $buscar('EUR');
+        $gbp = $buscar('GBP');
 
         return [
             [
                 'sigla'    => 'USD',
                 'nome'     => 'Dólar',
                 'icone'    => '🇺🇸',
-                'bid'      => (float) ($json['USDBRL']['bid']       ?? 0),
-                'variacao' => (float) ($json['USDBRL']['pctChange'] ?? 0),
-                'max'      => (float) ($json['USDBRL']['high']      ?? 0),
-                'min'      => (float) ($json['USDBRL']['low']       ?? 0),
+                'bid'      => (float) ($usd['cotacaoVenda']   ?? 0),
+                'variacao' => 0,
+                'max'      => (float) ($usd['cotacaoVenda']   ?? 0),
+                'min'      => (float) ($usd['cotacaoCompra']  ?? 0),
             ],
             [
                 'sigla'    => 'EUR',
                 'nome'     => 'Euro',
                 'icone'    => '🇪🇺',
-                'bid'      => (float) ($json['EURBRL']['bid']       ?? 0),
-                'variacao' => (float) ($json['EURBRL']['pctChange'] ?? 0),
-                'max'      => (float) ($json['EURBRL']['high']      ?? 0),
-                'min'      => (float) ($json['EURBRL']['low']       ?? 0),
+                'bid'      => (float) ($eur['cotacaoVenda']   ?? 0),
+                'variacao' => 0,
+                'max'      => (float) ($eur['cotacaoVenda']   ?? 0),
+                'min'      => (float) ($eur['cotacaoCompra']  ?? 0),
             ],
             [
-                'sigla'    => 'BTC',
-                'nome'     => 'Bitcoin',
-                'icone'    => '₿',
-                'bid'      => (float) ($json['BTCBRL']['bid']       ?? 0),
-                'variacao' => (float) ($json['BTCBRL']['pctChange'] ?? 0),
-                'max'      => (float) ($json['BTCBRL']['high']      ?? 0),
-                'min'      => (float) ($json['BTCBRL']['low']       ?? 0),
+                'sigla'    => 'GBP',
+                'nome'     => 'Libra',
+                'icone'    => '🇬🇧',
+                'bid'      => (float) ($gbp['cotacaoVenda']   ?? 0),
+                'variacao' => 0,
+                'max'      => (float) ($gbp['cotacaoVenda']   ?? 0),
+                'min'      => (float) ($gbp['cotacaoCompra']  ?? 0),
             ],
         ];
+    } catch (\Throwable) {
+        return [];
     }
+}
 
-    private function buscarBovespa(): array
+
+
+private function buscarBovespa(): array
     {
-        try {
-            $res = Http::timeout(8)
-                ->withHeaders(['User-Agent' => 'Mozilla/5.0'])
-                ->get('https://query1.finance.yahoo.com/v8/finance/chart/%5EBVSP');
-            if (!$res->ok()) return [];
-            $meta = $res->json('chart.result.0.meta') ?? [];
-        } catch (\Throwable) {
-            return [];
-        }
+        $res = Http::timeout(8)->get('https://brapi.dev/api/quote/%5EBVSP');
 
-        if (empty($meta['regularMarketPrice'])) return [];
+        if (!$res->ok()) return [];
 
-        $preco    = (float) $meta['regularMarketPrice'];
-        $anterior = (float) ($meta['previousClose'] ?? $meta['chartPreviousClose'] ?? $preco);
-        $variacao = $anterior > 0 ? round(($preco - $anterior) / $anterior * 100, 2) : 0;
+        $q = $res->json('results.0') ?? [];
 
         return [
-            'valor'    => $preco,
-            'variacao' => $variacao,
-            'max'      => (float) ($meta['regularMarketDayHigh'] ?? 0),
-            'min'      => (float) ($meta['regularMarketDayLow']  ?? 0),
+            'valor'    => (float) ($q['regularMarketPrice']            ?? 0),
+            'variacao' => (float) ($q['regularMarketChangePercent']    ?? 0),
+            'max'      => (float) ($q['regularMarketDayHigh']          ?? 0),
+            'min'      => (float) ($q['regularMarketDayLow']           ?? 0),
         ];
     }
+
+
+
 
     public function render()
     {

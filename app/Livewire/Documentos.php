@@ -19,6 +19,14 @@ class Documentos extends Component
     public string $filtroDataIni = '';
     public string $filtroDataFim = '';
 
+    protected $queryString = [
+        'busca'          => ['except' => ''],
+        'filtroTipo'     => ['except' => ''],
+        'filtroVinculo'  => ['except' => ''],
+        'filtroDataIni'  => ['except' => ''],
+        'filtroDataFim'  => ['except' => ''],
+    ];
+
     // Ordenação
     public string $ordenarPor  = 'created_at';
     public string $ordenarDir  = 'DESC';
@@ -41,6 +49,15 @@ class Documentos extends Component
     public string $descricao = '';
     public string $data_documento = '';
     public $arquivo = null;
+
+    // Upload em lote
+    public bool   $modalLote      = false;
+    public array  $arquivosLote   = [];
+    public string $loteTipo       = 'peticao';
+    public string $loteProcessoId = '';
+    public string $loteClienteId  = '';
+    public string $loteData       = '';
+    public array  $loteResultados = []; // ['nome', 'ok', 'msg']
 
     // Dados auxiliares
     public array $processos = [];
@@ -84,6 +101,73 @@ class Documentos extends Component
         $this->tipo = 'peticao';
         $this->data_documento = now()->format('Y-m-d');
         $this->modalDocumento = true;
+    }
+
+    public function abrirLote(): void
+    {
+        $this->reset(['arquivosLote','loteProcessoId','loteClienteId','loteResultados']);
+        $this->loteTipo = 'peticao';
+        $this->loteData = now()->format('Y-m-d');
+        $this->modalLote = true;
+    }
+
+    public function fecharLote(): void
+    {
+        $this->modalLote    = false;
+        $this->loteResultados = [];
+        $this->reset(['arquivosLote']);
+    }
+
+    public function salvarLote(): void
+    {
+        $this->validate([
+            'arquivosLote'   => 'required|array|min:1',
+            'arquivosLote.*' => 'file|max:20480',
+            'loteTipo'       => 'required',
+        ], [], [
+            'arquivosLote'   => 'arquivos',
+            'arquivosLote.*' => 'arquivo',
+        ]);
+
+        $this->loteResultados = [];
+        $salvos = 0;
+
+        foreach ($this->arquivosLote as $arq) {
+            try {
+                $nomeOriginal = $arq->getClientOriginalName();
+                $tituloArq    = pathinfo($nomeOriginal, PATHINFO_FILENAME);
+
+                $caminho = $arq->store('documentos', 'public');
+
+                DB::insert(
+                    "INSERT INTO documentos (processo_id, cliente_id, tipo, titulo, data_documento, arquivo, arquivo_original, mime_type, tamanho, uploaded_by, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+                    [
+                        $this->loteProcessoId ?: null,
+                        $this->loteClienteId  ?: null,
+                        $this->loteTipo,
+                        $tituloArq,
+                        $this->loteData ?: null,
+                        $caminho,
+                        $nomeOriginal,
+                        $arq->getMimeType(),
+                        $arq->getSize(),
+                        auth()->user()->nome ?? 'Sistema',
+                    ]
+                );
+
+                $this->loteResultados[] = ['nome' => $nomeOriginal, 'ok' => true,  'msg' => 'Salvo'];
+                $salvos++;
+            } catch (\Throwable $e) {
+                $this->loteResultados[] = ['nome' => $arq->getClientOriginalName(), 'ok' => false, 'msg' => $e->getMessage()];
+            }
+        }
+
+        $this->reset(['arquivosLote']);
+
+        if ($salvos > 0) {
+            $this->dispatch('toast', message: "{$salvos} documento(s) enviado(s)!", type: 'success');
+        }
     }
 
     public function editarDocumento(int $id): void

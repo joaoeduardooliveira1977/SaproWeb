@@ -4,37 +4,37 @@
 <div class="stat-grid">
 
     <div class="stat-card" style="border-left-color:#16a34a;">
-        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
         <div class="stat-val" style="color:#16a34a;">R$ {{ number_format($kpis['aReceber'],2,',','.') }}</div>
         <div class="stat-label">A receber (em aberto)</div>
     </div>
 
     <div class="stat-card" style="border-left-color:#2563a8;">
-        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="stat-val" style="color:#2563a8;">R$ {{ number_format($kpis['recebidoMes'],2,',','.') }}</div>
         <div class="stat-label">Recebido este mês</div>
     </div>
 
     <div class="stat-card" style="border-left-color:#dc2626;">
-        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
         <div class="stat-val" style="color:#dc2626;">R$ {{ number_format($kpis['aPagar'],2,',','.') }}</div>
         <div class="stat-label">A pagar (em aberto)</div>
     </div>
 
     <div class="stat-card" style="border-left-color:#d97706;">
-        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
         <div class="stat-val" style="color:#d97706;">R$ {{ number_format($kpis['pagoMes'],2,',','.') }}</div>
         <div class="stat-label">Pago este mês</div>
     </div>
 
     <div class="stat-card" style="border-left-color:#7c3aed;">
-        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <div class="stat-val" style="color:#7c3aed;">R$ {{ number_format($kpis['honAtrasado'],2,',','.') }}</div>
         <div class="stat-label">Honorários em atraso</div>
     </div>
 
     <div class="stat-card" style="border-left-color:#0891b2;">
-        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
         <div class="stat-val" style="color:#0891b2;">R$ {{ number_format($kpis['honPendente'],2,',','.') }}</div>
         <div class="stat-label">Honorários a vencer</div>
     </div>
@@ -72,7 +72,7 @@
     @endif
     <button wire:click="exportarCsv" wire:loading.attr="disabled"
         class="btn btn-sm btn-secondary-outline" style="margin-left:auto;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;">
-        <span wire:loading.remove wire:target="exportarCsv" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar CSV</span>
+        <span wire:loading.remove wire:target="exportarCsv" style="display:inline-flex;align-items:center;gap:6px;"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar CSV</span>
         <span wire:loading wire:target="exportarCsv">Gerando…</span>
     </button>
 </div>
@@ -146,7 +146,7 @@
 {{-- Gráfico --}}
 <div class="card" style="margin-bottom:16px;">
     <div class="card-header">
-        <span class="card-title"><div style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg> Fluxo de Caixa — Últimos {{ $periodoFluxo }} meses</div></span>
+        <span class="card-title"><div style="display:inline-flex;align-items:center;gap:6px;"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg> Fluxo de Caixa — Últimos {{ $periodoFluxo }} meses</div></span>
         <div style="display:flex;gap:4px;">
             @foreach([3 => '3m', 6 => '6m', 12 => '12m'] as $val => $label)
             <button wire:click="$set('periodoFluxo', {{ $val }})"
@@ -357,7 +357,7 @@
                         <button wire:click="marcarRecebido({{ $row->id }})"
                             wire:confirm="Marcar como recebido hoje?"
                             class="btn btn-sm btn-success" style="font-size:11px;padding:3px 8px;display:inline-flex;align-items:center;gap:4px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Recebido
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Recebido
                         </button>
                         @endif
                     </td>
@@ -413,7 +413,7 @@
                 <tr>
                     <td style="white-space:nowrap;{{ $vencido ? 'color:#dc2626;font-weight:600;' : '' }}">
                         {{ $row->data_vencimento ? \Carbon\Carbon::parse($row->data_vencimento)->format('d/m/Y') : '—' }}
-                        @if($vencido) <span style="font-size:10px;vertical-align:middle;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> @endif
+                        @if($vencido) <span style="font-size:10px;vertical-align:middle;"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> @endif
                     </td>
                     <td class="hide-sm" style="font-family:monospace;font-size:11px;">{{ $row->processo_numero ?? '—' }}</td>
                     <td>{{ $row->cliente_nome ?? '—' }}</td>
@@ -436,7 +436,7 @@
                         <button wire:click="marcarPago({{ $row->id }})"
                             wire:confirm="Marcar como pago hoje?"
                             class="btn btn-sm" style="font-size:11px;padding:3px 8px;background:#fef9c3;color:#854d0e;border:1px solid #fde68a;display:inline-flex;align-items:center;gap:4px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Pago
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Pago
                         </button>
                         @endif
                     </td>

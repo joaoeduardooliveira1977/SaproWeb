@@ -6,8 +6,9 @@
     {{-- ── Lista de clientes ── --}}
     <div class="card" style="margin:0;display:flex;flex-direction:column;overflow:hidden;">
         <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:13px;font-weight:700;color:var(--primary);">
-                💬 Clientes
+            <span style="font-size:13px;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:6px;">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Clientes
                 @if($totalNaoLidas > 0)
                     <span style="background:#dc2626;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;margin-left:4px;">{{ $totalNaoLidas }}</span>
                 @endif
@@ -97,7 +98,9 @@
         @else
         <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;">
             <div style="text-align:center;">
-                <div style="font-size:40px;margin-bottom:12px;">💬</div>
+                <div style="margin-bottom:12px;display:flex;justify-content:center;">
+                    <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
                 Selecione um cliente para ver a conversa.
             </div>
         </div>

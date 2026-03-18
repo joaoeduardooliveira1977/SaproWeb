@@ -5,7 +5,10 @@
 
   {{-- Cabeçalho --}}
   <div class="card" style="margin-bottom:20px">
-    <div style="font-weight:700;font-size:15px;color:var(--primary)">📊 Relatórios em PDF</div>
+    <div style="font-weight:700;font-size:15px;color:var(--primary);display:flex;align-items:center;gap:8px;">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Relatórios em PDF
+    </div>
     <div style="font-size:12px;color:var(--muted);margin-top:2px">
       Selecione os filtros e clique em <strong>Gerar PDF</strong> — o arquivo abrirá em nova aba.
     </div>
@@ -15,7 +18,9 @@
 
     {{-- 1. Processos por Fase --}}
     <div class="card">
-      <div style="font-size:24px;margin-bottom:8px">🔄</div>
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg>
+      </div>
       <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Processos por Fase</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Lista todos os processos agrupados por fase processual.</div>
       <form method="GET" action="{{ route('relatorios.por-fase') }}" target="_blank">
@@ -27,13 +32,18 @@
             <option value="Todos">Todos</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">📄 Gerar PDF</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 
     {{-- 2. Processos por Advogado --}}
     <div class="card">
-      <div style="font-size:24px;margin-bottom:8px">👨‍⚖️</div>
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
       <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Processos por Advogado</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Lista os processos de cada advogado do escritório.</div>
       <form method="GET" action="{{ route('relatorios.por-advogado') }}" target="_blank">
@@ -45,13 +55,18 @@
             <option value="Todos">Todos</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">📄 Gerar PDF</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 
     {{-- 3. Processos por Risco --}}
     <div class="card">
-      <div style="font-size:24px;margin-bottom:8px">⚠️</div>
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fef2f2;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
       <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Processos por Risco</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Lista os processos agrupados pelo grau de risco.</div>
       <form method="GET" action="{{ route('relatorios.por-risco') }}" target="_blank">
@@ -63,13 +78,18 @@
             <option value="Todos">Todos</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">📄 Gerar PDF</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 
     {{-- 4. Agenda do Período --}}
     <div class="card">
-      <div style="font-size:24px;margin-bottom:8px">📅</div>
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fffbeb;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
       <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Agenda do Período</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Todos os compromissos em um intervalo de datas.</div>
       <form method="GET" action="{{ route('relatorios.agenda') }}" target="_blank">
@@ -85,13 +105,18 @@
               >
           </div>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">📄 Gerar PDF</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 
     {{-- 5. Custas Pendentes --}}
     <div class="card">
-      <div style="font-size:24px;margin-bottom:8px">💰</div>
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f0fdf4;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
       <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Custas Pendentes</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Custas ainda não pagas no período selecionado.</div>
       <form method="GET" action="{{ route('relatorios.custas') }}" target="_blank">
@@ -107,13 +132,18 @@
               >
           </div>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">📄 Gerar PDF</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 
     {{-- 6. Aniversários de Clientes --}}
     <div class="card">
-      <div style="font-size:24px;margin-bottom:8px">🎂</div>
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fdf4ff;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M12 3v4"/></svg>
+      </div>
       <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Aniversários de Clientes</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Clientes que fazem aniversário no mês selecionado.</div>
       <form method="GET" action="{{ route('relatorios.aniversarios') }}" target="_blank">
@@ -126,13 +156,18 @@
             @endforeach
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">📄 Gerar PDF</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 
     {{-- 7. Andamentos por Cliente --}}
     <div class="card">
-      <div style="font-size:24px;margin-bottom:8px">📋</div>
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      </div>
       <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Andamentos por Cliente</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Histórico de andamentos por processo, filtrado por cliente e período.</div>
       <form method="GET" action="{{ route('relatorios.andamentos-cliente') }}" target="_blank">
@@ -165,13 +200,18 @@
             <option value="extrajudiciais">Somente Extrajudiciais</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">📄 Gerar PDF</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 
     {{-- 8. Honorários em Aberto --}}
     <div class="card">
-      <div style="font-size:24px;margin-bottom:8px">💼</div>
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      </div>
       <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Honorários em Aberto</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Parcelas pendentes e atrasadas de honorários por cliente.</div>
       <form method="GET" action="{{ route('relatorios.honorarios-aberto') }}" target="_blank">
@@ -192,13 +232,18 @@
             <option value="atrasado">Somente Atrasados</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">📄 Gerar PDF</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 
     {{-- 9. Financeiro por Período --}}
     <div class="card">
-      <div style="font-size:24px;margin-bottom:8px">📈</div>
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f0fdf4;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      </div>
       <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Financeiro por Período</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Receitas e despesas com totais e saldo no período.</div>
       <form method="GET" action="{{ route('relatorios.financeiro-periodo') }}" target="_blank">
@@ -214,13 +259,18 @@
               >
           </div>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">📄 Gerar PDF</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 
     {{-- 10. Processos sem Andamento --}}
     <div class="card">
-      <div style="font-size:24px;margin-bottom:8px">😴</div>
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f8fafc;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
+      </div>
       <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Processos sem Andamento</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Processos que não tiveram andamentos registrados no período.</div>
       <form method="GET" action="{{ route('relatorios.sem-andamento') }}" target="_blank">
@@ -241,13 +291,18 @@
             <option value="Todos">Todos</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">📄 Gerar PDF</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 
     {{-- 11. Produtividade por Advogado --}}
     <div class="card">
-      <div style="font-size:24px;margin-bottom:8px">🏆</div>
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fffbeb;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+      </div>
       <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Produtividade por Advogado</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Processos, horas, apontamentos e taxa de cumprimento de prazos por advogado.</div>
       <form method="GET" action="{{ route('relatorios.produtividade-pdf') }}" target="_blank">
@@ -263,7 +318,10 @@
               >
           </div>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">📄 Gerar PDF</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 

@@ -22,6 +22,15 @@ class Audiencias extends Component
     public string $filtroDataIni  = '';
     public string $filtroDataFim  = '';
 
+    protected $queryString = [
+        'filtroStatus'   => ['except' => ''],
+        'filtroTipo'     => ['except' => ''],
+        'filtroProcesso' => ['except' => ''],
+        'filtroBusca'    => ['except' => ''],
+        'filtroDataIni'  => ['except' => ''],
+        'filtroDataFim'  => ['except' => ''],
+    ];
+
     // ── Modal ────────────────────────────────────────────────
     public bool  $modalAberto   = false;
     public ?int  $audienciaId   = null;

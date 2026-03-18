@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Login — SaproWeb</title>
+    <title>Login — Web</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1a3a5c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SAPRO">
+    <meta name="apple-mobile-web-app-title" content="JURÍDICO">
     <link rel="apple-touch-icon" href="/icons/icon.svg">
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -24,7 +24,7 @@
             width: 360px; box-shadow: 0 24px 64px rgba(0,0,0,.35);
         }
         .login-logo { text-align: center; margin-bottom: 28px; }
-        .login-logo .ico { font-size: 40px; margin-bottom: 6px; }
+        .login-logo .ico { display: flex; justify-content: center; color: #1a3a5c; margin-bottom: 6px; }
         h1 { font-size: 28px; font-weight: 700; color: #1a3a5c; letter-spacing: -.5px; }
         .sub { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px; }
         .field { margin-bottom: 16px; }
@@ -41,8 +41,8 @@
 <body>
 <div class="login-box">
     <div class="login-logo">
-        <div class="ico">⚖️</div>
-        <h1>SAPRO</h1>
+        <div class="ico" style="display:flex;justify-content:center;"><svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg></div>
+        <h1>JURÍDICO</h1>
         <p class="sub">Sistema de Acompanhamento de Processos</p>
     </div>
 
@@ -66,7 +66,7 @@
         <button type="submit" class="btn">Entrar no Sistema</button>
     </form>
 
-    <p class="footer-txt">SaproWeb — versão 1.0</p>
+    <p class="footer-txt">JurídicoWeb — versão 1.0</p>
 </div>
 <script>
     if ('serviceWorker' in navigator) {

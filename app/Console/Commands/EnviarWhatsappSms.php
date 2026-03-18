@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\NotificacaoConfig;
 use App\Services\WhatsAppSmsService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -56,8 +57,15 @@ class EnviarWhatsappSms extends Command
     {
         $enviados = 0;
 
-        // Dias de antecedência para notificar
-        foreach ([1, 3, 7] as $dias) {
+        $cfgFatal   = NotificacaoConfig::para('prazo_fatal');
+        $cfgNormal  = NotificacaoConfig::para('prazo_vencendo');
+
+        // Coleta todos os dias únicos das duas configs
+        $diasFatal  = $cfgFatal->ativo  ? $cfgFatal->antecedencias  : [];
+        $diasNormal = $cfgNormal->ativo ? $cfgNormal->antecedencias : [];
+        $todosDias  = array_unique(array_merge($diasFatal, $diasNormal));
+
+        foreach ($todosDias as $dias) {
             $data   = today()->addDays($dias);
             $prazos = DB::select("
                 SELECT pz.id, pz.titulo, pz.data_prazo, pz.prazo_fatal,
@@ -76,11 +84,13 @@ class EnviarWhatsappSms extends Command
             ", [$data->format('Y-m-d')]);
 
             foreach ($prazos as $prazo) {
-                $tipo = $prazo->prazo_fatal ? 'prazo_fatal' : 'prazo_vencendo';
+                $tipo  = $prazo->prazo_fatal ? 'prazo_fatal' : 'prazo_vencendo';
+                $cfg   = $prazo->prazo_fatal ? $cfgFatal : $cfgNormal;
 
-                if ($this->svc->jaEnviado($tipo, 'prazo', $prazo->id)) {
-                    continue;
-                }
+                // Respeita config de ativo e antecedências
+                if (! $cfg->ativo || ! in_array($dias, $cfg->antecedencias)) continue;
+
+                if ($this->svc->jaEnviado($tipo, 'prazo', $prazo->id)) continue;
 
                 $diasLabel = $dias === 1 ? 'AMANHÃ' : "em {$dias} dias";
                 $emoji     = $prazo->prazo_fatal ? '🚨' : '⏳';
@@ -97,12 +107,13 @@ class EnviarWhatsappSms extends Command
                 }
 
                 $enviados += $this->enviar(
-                    telefone:       $prazo->responsavel_celular,
-                    mensagem:       $msg,
-                    nome:           $prazo->responsavel_nome,
-                    tipo:           $tipo,
-                    refTipo:        'prazo',
-                    refId:          $prazo->id
+                    telefone: $prazo->responsavel_celular,
+                    mensagem: $msg,
+                    nome:     $prazo->responsavel_nome,
+                    tipo:     $tipo,
+                    refTipo:  'prazo',
+                    refId:    $prazo->id,
+                    canal:    $cfg->canal,
                 );
             }
         }
@@ -115,8 +126,12 @@ class EnviarWhatsappSms extends Command
     private function notificarCobrancas(): int
     {
         $enviados = 0;
+        $cfg = NotificacaoConfig::para('cobranca');
 
-        // Parcelas atrasadas há 3, 7 ou 15 dias (primeiro aviso de cada)
+        if (! $cfg->ativo) return 0;
+
+        $diasIn = implode(',', array_map('intval', $cfg->antecedencias));
+
         $parcelas = DB::select("
             SELECT hp.id, hp.numero_parcela, hp.valor, hp.vencimento,
                    cl.nome as cliente_nome, cl.celular as cliente_celular,
@@ -127,7 +142,7 @@ class EnviarWhatsappSms extends Command
             WHERE hp.status = 'atrasado'
               AND cl.celular IS NOT NULL
               AND cl.celular <> ''
-              AND (CURRENT_DATE - hp.vencimento) IN (3, 7, 15)
+              AND (CURRENT_DATE - hp.vencimento) IN ({$diasIn})
         ");
 
         foreach ($parcelas as $parcela) {
@@ -149,7 +164,8 @@ class EnviarWhatsappSms extends Command
                 nome:     $parcela->cliente_nome,
                 tipo:     'cobranca',
                 refTipo:  'honorario_parcela',
-                refId:    $parcela->id
+                refId:    $parcela->id,
+                canal:    $cfg->canal,
             );
         }
 
@@ -161,7 +177,13 @@ class EnviarWhatsappSms extends Command
     private function notificarAudiencias(): int
     {
         $enviados = 0;
-        $amanha   = today()->addDay();
+        $cfg      = NotificacaoConfig::para('audiencia');
+
+        if (! $cfg->ativo) return 0;
+
+        // Usa o menor valor de antecedência configurado (padrão 1)
+        $diasAntecedencia = min($cfg->antecedencias ?: [1]);
+        $amanha           = today()->addDays($diasAntecedencia);
 
         $audiencias = DB::select("
             SELECT au.id, au.tipo, au.data_hora, au.local, au.sala,
@@ -211,7 +233,8 @@ class EnviarWhatsappSms extends Command
                 nome:     $aud->advogado_nome,
                 tipo:     'audiencia',
                 refTipo:  'audiencia',
-                refId:    $aud->id
+                refId:    $aud->id,
+                canal:    $cfg->canal,
             );
         }
 
@@ -226,20 +249,22 @@ class EnviarWhatsappSms extends Command
         string $nome,
         string $tipo,
         string $refTipo,
-        int    $refId
+        int    $refId,
+        string $canal = 'whatsapp',
     ): int {
         if ($this->dryRun) {
-            $this->line("  [DRY-RUN] {$tipo} → {$nome} ({$telefone})");
+            $this->line("  [DRY-RUN] {$tipo} ({$canal}) → {$nome} ({$telefone})");
             return 1;
         }
 
         $ok = $this->svc->enviar(
-            telefone:       $telefone,
-            mensagem:       $mensagem,
+            telefone:         $telefone,
+            mensagem:         $mensagem,
             destinatarioNome: $nome,
-            tipo:           $tipo,
-            referenciaTipo: $refTipo,
-            referenciaId:   $refId
+            tipo:             $tipo,
+            canal:            $canal,
+            referenciaTipo:   $refTipo,
+            referenciaId:     $refId,
         );
 
         if ($ok) {

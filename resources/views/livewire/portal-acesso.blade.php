@@ -2,17 +2,17 @@
     {{-- Header --}}
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
         <div>
-            <h2 style="font-size:20px; font-weight:700; color:#1a3a5c;">🌐 Portal do Cliente</h2>
+            <h2 style="font-size:20px; font-weight:700; color:var(--primary);display:flex;align-items:center;gap:8px;"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Portal do Cliente</h2>
             <p style="font-size:13px; color:#64748b; margin-top:4px;">Gerencie o acesso dos clientes ao portal</p>
         </div>
         <a href="{{ route('portal.login') }}" target="_blank" style="font-size:13px; color:#2563a8; text-decoration:none;">
-            🔗 Abrir portal →
+            <span style="display:inline-flex;align-items:center;gap:4px;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Abrir portal</span>
         </a>
     </div>
 
     {{-- Busca --}}
     <div style="margin-bottom:20px;">
-        <input wire:model.live="busca" type="text" placeholder="🔍 Buscar cliente..."
+        <input wire:model.live="busca" type="text" placeholder="Buscar cliente..."
             style="width:100%; max-width:400px; padding:10px 16px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:14px; outline:none;">
     </div>
 
@@ -49,7 +49,7 @@
                         <div style="display:flex; gap:8px; justify-content:center;">
                             <button wire:click="abrirDefinirSenha({{ $pessoa->id }})"
                                 style="padding:5px 12px; background:#2563a8; color:white; border:none; border-radius:6px; font-size:12px; cursor:pointer;">
-                                🔑 Senha
+                                <span style="display:inline-flex;align-items:center;gap:4px;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Senha</span>
                             </button>
                             @if($pessoa->portal_ativo)
                             <button wire:click="desativar({{ $pessoa->id }})"
@@ -81,7 +81,7 @@
     @if($pessoaId)
     <div style="position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:50;">
         <div style="background:white; border-radius:16px; padding:32px; width:100%; max-width:400px;">
-            <h3 style="font-size:16px; font-weight:600; color:#1a3a5c; margin-bottom:20px;">🔑 Definir Senha do Portal</h3>
+            <h3 style="font-size:16px; font-weight:600; color:var(--primary); margin-bottom:20px;display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Definir Senha do Portal</h3>
 
             <div style="margin-bottom:16px;">
                 <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Nova senha</label>

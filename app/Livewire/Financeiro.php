@@ -254,6 +254,65 @@ class Financeiro extends Component
         $this->resetErrorBag();
     }
 
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $processoId = $this->processoId;
+        $aba        = $this->aba;
+
+        return response()->streamDownload(function () use ($processoId, $aba) {
+            $out = fopen('php://output', 'w');
+            fputs($out, "\xEF\xBB\xBF");
+
+            match ($aba) {
+                'pagamentos' => (function () use ($out, $processoId) {
+                    fputcsv($out, ['Data','Descrição','Valor','Valor Pago','Vencimento','Pagamento','Fornecedor','Pago'], ';');
+                    Pagamento::with('fornecedor')->where('processo_id', $processoId)
+                        ->orderByDesc('data')->each(function ($p) use ($out) {
+                            fputcsv($out, [
+                                $p->data->format('d/m/Y'),
+                                $p->descricao,
+                                number_format($p->valor, 2, ',', '.'),
+                                number_format($p->valor_pago, 2, ',', '.'),
+                                $p->data_vencimento?->format('d/m/Y') ?? '',
+                                $p->data_pagamento?->format('d/m/Y') ?? '',
+                                $p->fornecedor?->nome ?? '',
+                                $p->pago ? 'Sim' : 'Não',
+                            ], ';');
+                        });
+                })(),
+                'recebimentos' => (function () use ($out, $processoId) {
+                    fputcsv($out, ['Data','Descrição','Valor','Valor Recebido','Recebimento','Origem','Recebido'], ';');
+                    Recebimento::with('origem')->where('processo_id', $processoId)
+                        ->orderByDesc('data')->each(function ($r) use ($out) {
+                            fputcsv($out, [
+                                $r->data->format('d/m/Y'),
+                                $r->descricao ?? '',
+                                number_format($r->valor, 2, ',', '.'),
+                                number_format($r->valor_recebido, 2, ',', '.'),
+                                $r->data_recebimento?->format('d/m/Y') ?? '',
+                                $r->origem?->descricao ?? '',
+                                $r->recebido ? 'Sim' : 'Não',
+                            ], ';');
+                        });
+                })(),
+                'apontamentos' => (function () use ($out, $processoId) {
+                    fputcsv($out, ['Data','Descrição','Horas','Valor','Advogado'], ';');
+                    Apontamento::with('advogado')->where('processo_id', $processoId)
+                        ->orderByDesc('data')->each(function ($a) use ($out) {
+                            fputcsv($out, [
+                                $a->data->format('d/m/Y'),
+                                $a->descricao,
+                                number_format($a->horas, 2, ',', '.'),
+                                number_format($a->valor, 2, ',', '.'),
+                                $a->advogado?->nome ?? '',
+                            ], ';');
+                        });
+                })(),
+            };
+            fclose($out);
+        }, "financeiro-{$aba}-".now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function render()
     {
         $processo = Processo::findOrFail($this->processoId);

@@ -44,6 +44,7 @@ Route::middleware('auth:usuarios')->group(function () {
     Route::middleware('perfil:pessoas')->group(function () {
         Route::get('/pessoas',         fn() => view('pessoas'))->name('pessoas');
         Route::get('/correspondentes', fn() => view('correspondentes'))->name('correspondentes');
+        Route::get('/procuracoes',     fn() => view('procuracoes'))->name('procuracoes');
     });
 
     // ── Documentos & Minutas ────────────────────────────────────
@@ -89,12 +90,16 @@ Route::middleware('auth:usuarios')->group(function () {
         Route::get('/assistente',   fn() => view('assistente'))->name('assistente');
         Route::get('/aasp-publicacoes', fn() => view('aasp-publicacoes'))->name('aasp-publicacoes');
         Route::get('/calculadora',  fn() => view('calculadora'))->name('calculadora');
+        Route::get('/monitoramento', fn() => view('monitoramento'))->name('monitoramento');
+        Route::get('/conciliacao-bancaria', fn() => view('conciliacao-bancaria'))->name('conciliacao-bancaria');
+        Route::get('/crm', fn() => view('crm'))->name('crm');
     });
 
     // ── Administração (admin only) ──────────────────────────────
     Route::middleware('perfil:admin')->group(function () {
-        Route::get('/tabelas',  fn() => view('tabelas'))->name('tabelas');
-        Route::get('/indices',  fn() => view('indices'))->name('indices');
+        Route::get('/tabelas',         fn() => view('tabelas'))->name('tabelas');
+        Route::get('/administradoras', fn() => view('administradoras'))->name('administradoras');
+        Route::get('/indices',         fn() => view('indices'))->name('indices');
         Route::get('/auditoria', fn() => view('auditoria'))->name('auditoria');
         Route::get('/usuarios', fn() => view('usuarios'))->name('usuarios');
         Route::get('/admin/portal-acesso',       fn() => view('portal-acesso'))->name('admin.portal-acesso');

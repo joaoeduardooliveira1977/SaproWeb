@@ -16,6 +16,12 @@ class Honorarios extends Component
     public string $filtroStatus = '';
     public string $filtroTipo = '';
 
+    protected $queryString = [
+        'busca'        => ['except' => ''],
+        'filtroStatus' => ['except' => ''],
+        'filtroTipo'   => ['except' => ''],
+    ];
+
     // Modal honorário
     public bool $modalHonorario = false;
     public bool $modalParcelas = false;

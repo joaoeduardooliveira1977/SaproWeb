@@ -13,7 +13,12 @@ class FinanceiroConsolidado extends Component
 
     public string $aba          = 'visao-geral';
     public string $filtroMes    = '';
-    public string $filtroStatus = 'pendente'; // pendente | todos
+    public string $filtroStatus = 'pendente';
+
+    protected $queryString = [
+        'filtroMes'    => ['except' => ''],
+        'filtroStatus' => ['except' => 'pendente'],
+    ]; // pendente | todos
     public int    $periodoFluxo = 6;           // 3 | 6 | 12 meses
 
     public function placeholder(): \Illuminate\View\View

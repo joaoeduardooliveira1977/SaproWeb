@@ -16,24 +16,24 @@
 {{-- ══ KPIs ══ --}}
 <div class="stat-grid">
     <div class="stat-card" style="border-left-color:var(--primary);">
-        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg></div>
+        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg></div>
         <div class="stat-val">{{ $kpis['processos_ativos'] }}</div>
         <div class="stat-label">Processos Ativos</div>
     </div>
     <div class="stat-card" style="border-left-color:#16a34a;">
-        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
         <div class="stat-val" style="color:#16a34a;font-size:20px;">
             R$ {{ number_format($kpis['receita_mes'], 0, ',', '.') }}
         </div>
         <div class="stat-label">Receita este Mês</div>
     </div>
     <div class="stat-card" style="border-left-color:#2563a8;">
-        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div class="stat-val" style="color:#2563a8;">{{ number_format($kpis['horas_mes'], 1, ',', '.') }}h</div>
         <div class="stat-label">Horas este Mês</div>
     </div>
     <div class="stat-card" style="border-left-color:#9d174d;">
-        <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <div class="stat-val" style="color:#9d174d;">{{ $kpis['prazos_fatais'] }}</div>
         <div class="stat-label">Prazos Fatais em Aberto</div>
     </div>
@@ -83,6 +83,47 @@
     </div>
 </div>
 
+{{-- ══ Desempenho ══ --}}
+<div style="margin-bottom:16px;">
+    <div style="font-size:14px;font-weight:700;color:var(--primary);margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Relatório de Desempenho
+    </div>
+    <div class="analytics-grid-3" style="margin-bottom:12px;">
+        <div class="chart-card" style="text-align:center;">
+            <div class="chart-title">Taxa de Conclusão</div>
+            <div style="font-size:36px;font-weight:800;color:{{ $taxaConclusao >= 50 ? '#16a34a' : '#d97706' }};">{{ $taxaConclusao }}%</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">processos encerrados / total</div>
+        </div>
+        <div class="chart-card" style="text-align:center;">
+            <div class="chart-title">Duração Média</div>
+            @if($tempoMedioMeses)
+            <div style="font-size:36px;font-weight:800;color:#2563a8;">{{ $tempoMedioMeses }}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">meses por processo (encerrados)</div>
+            @else
+            <div style="font-size:20px;color:var(--muted);padding:12px 0;">— sem dados —</div>
+            @endif
+        </div>
+        <div class="chart-card">
+            <div class="chart-title">Top Clientes (processos ativos)</div>
+            @foreach($topClientes as $c)
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px;">
+                <span style="color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">{{ $c->nome }}</span>
+                <span style="font-weight:700;color:var(--primary);flex-shrink:0;margin-left:8px;">{{ $c->total }}</span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-title">Receita por Advogado — últimos 12 meses (R$)</div>
+        @if($receitaPorAdvogado->isEmpty())
+        <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0;">Sem dados de receita por advogado.</p>
+        @else
+        <div wire:ignore><canvas id="chartAdvogados" height="80"></canvas></div>
+        @endif
+    </div>
+</div>
+
 {{-- ══ Script de inicialização ══ --}}
 <script>
 (function () {
@@ -97,6 +138,7 @@
     const ANDAMENTOS = @json($dadosAndamentos);
     const HORAS      = @json($dadosHoras);
     const PRAZO_URG  = @json($prazosUrgencia);
+    const ADV_DATA   = @json($receitaPorAdvogado);
 
     const PALETTE = ['#1a3a5c','#2563a8','#16a34a','#d97706','#dc2626','#7c3aed','#0891b2','#9d174d','#475569','#ca8a04'];
 
@@ -209,6 +251,34 @@
                 }
             }
         });
+
+        // ── Receita por advogado (horizontal bar) ──────────────
+        const elAdv = document.getElementById('chartAdvogados');
+        if (elAdv && ADV_DATA.length > 0) {
+            new Chart(elAdv, {
+                type: 'bar',
+                data: {
+                    labels: ADV_DATA.map(a => a.nome),
+                    datasets: [{
+                        data: ADV_DATA.map(a => parseFloat(a.total)),
+                        backgroundColor: ADV_DATA.map((_, i) => PALETTE[i % PALETTE.length]),
+                        borderRadius: 4,
+                        barThickness: 20,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => ' R$ ' + ctx.raw.toLocaleString('pt-BR', {minimumFractionDigits:2}) } }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } },
+                        y: { grid: { display: false }, ticks: { font: { size: 12 } } }
+                    }
+                }
+            });
+        }
 
         // ── Fases (horizontal bar) ──────────────────────────────
         new Chart(document.getElementById('chartFases'), {

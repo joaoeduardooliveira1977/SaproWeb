@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Pessoa;
+use App\Models\{Pessoa, Administradora};
 use Illuminate\Support\Facades\{Auth, DB};
 
 class Pessoas extends Component
@@ -13,6 +13,11 @@ class Pessoas extends Component
 
     public string $busca = '';
     public string $tipo  = '';
+
+    protected $queryString = [
+        'busca' => ['except' => ''],
+        'tipo'  => ['except' => ''],
+    ];
 
     // Formulário (modal)
     public bool   $modalAberto = false;
@@ -31,6 +36,7 @@ class Pessoas extends Component
     public string $oab              = '';
     public string $observacoes      = '';
     public array  $tipos_selecionados = [];
+    public ?int   $administradoraId = null;
 
     public const TIPOS = ['Cliente', 'Advogado', 'Juiz', 'Parte Contrária', 'Usuário'];
 
@@ -75,6 +81,7 @@ class Pessoas extends Component
             $this->oab             = $p->oab ?? '';
             $this->observacoes     = $p->observacoes ?? '';
             $this->tipos_selecionados = $p->listaTipos();
+            $this->administradoraId = $p->administradora_id;
         }
     }
 
@@ -101,8 +108,9 @@ class Pessoas extends Component
             'cidade'         => $this->cidade ?: null,
             'estado'         => $this->estado ?: null,
             'cep'            => $this->cep ?: null,
-            'oab'            => $this->oab ?: null,
-            'observacoes'    => $this->observacoes ?: null,
+            'oab'             => $this->oab ?: null,
+            'observacoes'     => $this->observacoes ?: null,
+            'administradora_id' => $this->administradoraId ?: null,
         ];
 
         if ($this->pessoaId) {
@@ -138,6 +146,7 @@ class Pessoas extends Component
         $this->logradouro = $this->cidade = $this->estado = $this->cep = '';
         $this->oab = $this->observacoes = '';
         $this->tipos_selecionados = [];
+        $this->administradoraId = null;
         $this->resetErrorBag();
     }
 
@@ -190,10 +199,13 @@ class Pessoas extends Component
             ->groupBy('pessoa_id')
             ->map(fn($g) => $g->pluck('tipo')->toArray());
 
+        $administradoras = Administradora::ativas()->orderBy('nome')->get();
+
         return view('livewire.pessoas', [
-            'pessoas'       => $pessoas,
-            'tiposPorPessoa'=> $tiposPorPessoa,
+            'pessoas'          => $pessoas,
+            'tiposPorPessoa'   => $tiposPorPessoa,
             'tiposDisponiveis' => self::TIPOS,
+            'administradoras'  => $administradoras,
         ]);
     }
 }

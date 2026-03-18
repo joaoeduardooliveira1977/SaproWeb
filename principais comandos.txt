@@ -34,6 +34,27 @@ Mail::raw('Teste SAPRO', function($m) { $m->to('joaoeduardooliveira1977@gmail.co
 
 
 
+xxxxxxxxxxxxx
+caminho no servdor
+cd /var/www/saproweb
+
+
+Rodar o Git apos usar o gitdesktop
+cd /var/www/saproweb
+git pull origin main
+
+
+
+
+Agora sempre que fizer push pelo GitHub Desktop, basta rodar no servidor:
+bash/var/www/saproweb/deploy.sh
+
+
+Ou de qualquer diretório:
+bashbash /var/www/saproweb/deploy.sh
+
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -320,7 +341,7 @@ No SAPRO, configurar o agendamento automático do módulo AASP Publicações:
 type C:\projetos\saproweb-base\database\migrations\2024_01_01_000040_create_prazos_table.php
 
 
-
+type C:\projetos\saproweb-base\database\migrations\2024_01_03_000015_create_administradoras_table.php
 
 
 Class "App\Models\Documento" not found 
