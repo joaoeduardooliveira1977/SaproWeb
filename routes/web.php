@@ -9,26 +9,35 @@ use App\Http\Controllers\RelatorioController;
 use App\Livewire\Portal\PortalLogin;
 use App\Livewire\Portal\PortalDashboard;
 use App\Livewire\PortalAcesso;
+use App\Http\Controllers\IAController;
 
 
 
 // ─── Login / Logout ────────────────────────────
-Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
+	Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
+	Route::post('/login', [AuthController::class, 'login']);
+	Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
+	
+
 
 // ─── Área Autenticada ──────────────────────────
-Route::middleware('auth:usuarios')->group(function () {
+	Route::middleware('auth:usuarios')->group(function () {
 
     // ── Geral (todos os perfis autenticados) ───────────────────
-    Route::middleware('perfil:geral')->group(function () {
+    	Route::middleware('perfil:geral')->group(function () {
         Route::get('/', fn() => view('dashboard'))->name('dashboard');
         Route::get('/agenda',     fn() => view('agenda'))->name('agenda');
         Route::get('/prazos',     fn() => view('prazos'))->name('prazos');
         Route::get('/audiencias', fn() => view('audiencias'))->name('audiencias');
         Route::get('/minha-conta', fn() => view('minha-conta'))->name('minha-conta');
         Route::post('/minha-conta', [AuthController::class, 'trocarSenha'])->name('minha-conta.salvar');
+        Route::get('/processos-hub',   fn() => view('hubs.processos'))->name('processos.hub');
     });
+
+    // ── Hubs de seção ──────────────────────────────────────────
+    Route::middleware('perfil:financeiro')->get('/financeiro-hub',   fn() => view('hubs.financeiro'))->name('financeiro.hub');
+    Route::middleware('perfil:ferramentas')->get('/ferramentas-hub', fn() => view('hubs.ferramentas'))->name('ferramentas.hub');
+    Route::middleware('perfil:admin')->get('/admin-hub',             fn() => view('hubs.admin'))->name('admin.hub');
 
     // ── Processos ───────────────────────────────────────────────
     Route::middleware('perfil:processos')->group(function () {
@@ -38,6 +47,7 @@ Route::middleware('auth:usuarios')->group(function () {
         Route::get('/processos/{id}',        [ProcessoController::class, 'show'])->name('processos.show');
         Route::get('/processos/{id}/andamentos', [ProcessoController::class, 'andamentos'])->name('processos.andamentos');
         Route::get('/processos/{id}/custas',     [ProcessoController::class, 'custas'])->name('processos.custas');
+	Route::get('/processos/{id}/resumo-ia', [ProcessoController::class, 'gerarResumo']);
     });
 
     // ── Pessoas ─────────────────────────────────────────────────
@@ -111,15 +121,19 @@ Route::middleware('auth:usuarios')->group(function () {
 
 
 // ─── Webhooks (sem auth/csrf) ──────────────────────────────────
-Route::post('/webhooks/clicksign', [AssinaturaWebhookController::class, 'handle'])
-    ->name('webhooks.clicksign')
-    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+	Route::post('/webhooks/clicksign', [AssinaturaWebhookController::class, 'handle'])
+    	->name('webhooks.clicksign')
+    	->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 
-Route::prefix('portal')->name('portal.')->group(function () {
-    Route::get('/login',     PortalLogin::class)->name('login');
-    Route::get('/dashboard', PortalDashboard::class)->name('dashboard');
+	Route::prefix('portal')->name('portal.')->group(function () {
+    	Route::get('/login',     PortalLogin::class)->name('login');
+   	 Route::get('/dashboard', PortalDashboard::class)->name('dashboard');
 
+
+	
+// ─── Webhooks (IA) ──────────────────────────────────
+	Route::get('/ia-teste', [IAController::class, 'teste']);
 
 
 

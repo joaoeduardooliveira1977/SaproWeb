@@ -14,6 +14,9 @@ class Pessoas extends Component
     public string $busca = '';
     public string $tipo  = '';
 
+    public string  $perguntaIA = '';
+    public ?string $respostaIA = null;
+
     protected $queryString = [
         'busca' => ['except' => ''],
         'tipo'  => ['except' => ''],
@@ -138,6 +141,57 @@ class Pessoas extends Component
         $this->dispatch('toast', message: "Pessoa \"{$pessoa->nome}\" desativada.", type: 'success');
     }
 
+    public function perguntarIA(): void
+    {
+        if (empty(trim($this->perguntaIA))) return;
+
+        $total     = Pessoa::ativos()->count();
+        $clientes  = Pessoa::ativos()->doTipo('Cliente')->count();
+        $advogados = Pessoa::ativos()->doTipo('Advogado')->count();
+        $juizes    = Pessoa::ativos()->doTipo('Juiz')->count();
+        $partes    = Pessoa::ativos()->doTipo('Parte Contrária')->count();
+
+        $contexto = "Você é um assistente jurídico do sistema SAPRO. Responda de forma objetiva em português.
+
+Dados do cadastro de pessoas:
+- Total de pessoas ativas: {$total}
+- Clientes: {$clientes}
+- Advogados: {$advogados}
+- Juízes: {$juizes}
+- Partes Contrárias: {$partes}
+
+Pergunta: {$this->perguntaIA}
+
+Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tipo=Valor ou FILTRO:busca=texto";
+
+        $resposta = app(\App\Services\GeminiService::class)->gerar($contexto, 300);
+
+        if ($resposta === null) {
+            $this->respostaIA = 'IA temporariamente indisponível.';
+            return;
+        }
+
+        if (str_contains($resposta, 'FILTRO:')) {
+            preg_match('/FILTRO:(\w+)=(.+)/', $resposta, $matches);
+            if (count($matches) === 3) {
+                $campo = trim($matches[1]);
+                $valor = trim($matches[2]);
+                if ($campo === 'busca') $this->busca = $valor;
+                if ($campo === 'tipo')  $this->tipo  = $valor;
+                $this->resetPage();
+                $resposta = trim(preg_replace('/FILTRO:\w+=.+/', '', $resposta));
+            }
+        }
+
+        $this->respostaIA = $resposta;
+    }
+
+    public function limparIA(): void
+    {
+        $this->perguntaIA = '';
+        $this->respostaIA = null;
+    }
+
     private function limparFormulario(): void
     {
         $this->pessoaId = null;
@@ -201,11 +255,28 @@ class Pessoas extends Component
 
         $administradoras = Administradora::ativas()->orderBy('nome')->get();
 
+        // Métricas
+        $totalPessoas  = Pessoa::ativos()->count();
+        $totalClientes = Pessoa::ativos()->doTipo('Cliente')->count();
+        $totalAdvogados= Pessoa::ativos()->doTipo('Advogado')->count();
+        $totalPartes   = Pessoa::ativos()->doTipo('Parte Contrária')->count();
+
+        // Contagem por tipo para os filtros
+        $tipoCounts = [];
+        foreach (self::TIPOS as $t) {
+            $tipoCounts[$t] = Pessoa::ativos()->doTipo($t)->count();
+        }
+
         return view('livewire.pessoas', [
             'pessoas'          => $pessoas,
             'tiposPorPessoa'   => $tiposPorPessoa,
             'tiposDisponiveis' => self::TIPOS,
             'administradoras'  => $administradoras,
+            'totalPessoas'     => $totalPessoas,
+            'totalClientes'    => $totalClientes,
+            'totalAdvogados'   => $totalAdvogados,
+            'totalPartes'      => $totalPartes,
+            'tipoCounts'       => $tipoCounts,
         ]);
     }
 }

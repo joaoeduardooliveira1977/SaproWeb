@@ -22,122 +22,474 @@
     .dias-perdido  { background:#1e293b;color:#fff; }
 </style>
 
-{{-- ══ KPIs ══ --}}
-<div class="stat-grid">
-    <div class="stat-card" style="border-left-color:var(--primary);">
-        <div class="stat-icon">
-            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <div class="stat-val">{{ $totalAbertos }}</div>
-        <div class="stat-label">Prazos em aberto</div>
-    </div>
-    <div class="stat-card" style="border-left-color:#ca8a04;">
-        <div class="stat-icon">
-            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </div>
-        <div class="stat-val" style="color:#ca8a04;">{{ $vencendoHoje }}</div>
-        <div class="stat-label">Vencem hoje</div>
-    </div>
-    <div class="stat-card" style="border-left-color:#dc2626;">
-        <div class="stat-icon">
-            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        </div>
-        <div class="stat-val" style="color:#dc2626;">{{ $vencidos }}</div>
-        <div class="stat-label">Vencidos (não cumpridos)</div>
-    </div>
-    <div class="stat-card" style="border-left-color:#9d174d;">
-        <div class="stat-icon">
-            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9d174d" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div class="stat-val" style="color:#9d174d;">{{ $fatais }}</div>
-        <div class="stat-label">Prazos fatais (próx. 5 dias)</div>
+<style>
+    .prazos-grid {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+    .prazos-metricas {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .prazos-metric-card {
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        cursor: pointer;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .prazos-metric-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 2px 8px rgba(37,99,200,.08);
+    }
+    .prazos-metric-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .prazos-metric-num {
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 2px;
+    }
+    .prazos-metric-lbl {
+        font-size: 11px;
+        color: var(--muted);
+        font-weight: 500;
+    }
+    .prazos-filtros {
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        position: sticky;
+        top: 20px;
+    }
+    .prazos-filtros-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin: 0 0 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+    }
+    .prazos-filtros-section {
+        margin-bottom: 16px;
+    }
+    .prazos-filtros-section-lbl {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .prazos-toggle-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        text-align: left;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1.5px solid transparent;
+        background: none;
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--text);
+        transition: background .12s, border-color .12s;
+        margin-bottom: 3px;
+    }
+    .prazos-toggle-btn:hover { background: var(--surface); }
+    .prazos-toggle-btn.active {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        color: #1e40af;
+        font-weight: 600;
+    }
+    .prazos-toggle-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .prazos-toggle-count {
+        margin-left: auto;
+        font-size: 11px;
+        background: #f1f5f9;
+        color: var(--muted);
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    .prazos-input {
+        width: 100%;
+        padding: 8px 10px 8px 34px;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        font-size: 13px;
+        background: var(--white);
+        color: var(--text);
+        box-sizing: border-box;
+    }
+    .prazos-select {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        font-size: 13px;
+        background: var(--white);
+        color: var(--text);
+        box-sizing: border-box;
+    }
+    .prazos-date-input {
+        width: 100%;
+        padding: 7px 10px;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        font-size: 12px;
+        background: var(--white);
+        color: var(--text);
+        box-sizing: border-box;
+        margin-bottom: 6px;
+    }
+    .ia-bar {
+        background: linear-gradient(135deg, #0f2540 0%, #1a3a5c 100%);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .ia-bar-label {
+        color: #93c5fd;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .ia-bar-input {
+        flex: 1;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1.5px solid rgba(147,197,253,.25);
+        background: rgba(255,255,255,.08);
+        color: #fff;
+        font-size: 13px;
+        outline: none;
+    }
+    .ia-bar-input::placeholder { color: rgba(255,255,255,.4); }
+    .ia-bar-input:focus { border-color: rgba(147,197,253,.6); }
+    .ia-bar-btn {
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1.5px solid rgba(147,197,253,.3);
+        background: rgba(255,255,255,.1);
+        color: #bfdbfe;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background .15s;
+    }
+    .ia-bar-btn:hover { background: rgba(255,255,255,.18); }
+    .ia-resposta {
+        background: #f0f9ff;
+        border: 1.5px solid #bae6fd;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 13px;
+        color: #0c4a6e;
+        line-height: 1.6;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    @media (max-width: 768px) {
+        .prazos-grid { grid-template-columns: 1fr; }
+        .prazos-metricas { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+
+{{-- ══ Voltar ══ --}}
+<a href="{{ route('processos.hub') }}"
+   style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:8px;"
+   onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="15 18 9 12 15 6"/>
+    </svg>
+    Voltar
+</a>
+
+{{-- ══ Cabeçalho ══ --}}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    
+
+{{--<div>
+        <h1 style="font-size:20px;font-weight:800;margin:0;">Prazos</h1>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px;">Gestão e controle de prazos processuais</div>
+    	</div> 
+--}}
+
+
+
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-sm btn-secondary-outline"
+                wire:click="exportarPdf" wire:loading.attr="disabled" title="Exportar PDF">
+            <span wire:loading.remove wire:target="exportarPdf" style="display:flex;align-items:center;gap:5px;">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+                PDF
+            </span>
+            <span wire:loading wire:target="exportarPdf">Gerando…</span>
+        </button>
+        <button class="btn btn-sm btn-secondary-outline"
+                wire:click="exportarCsv" wire:loading.attr="disabled" title="Exportar CSV">
+            <span wire:loading.remove wire:target="exportarCsv" style="display:flex;align-items:center;gap:5px;">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                CSV
+            </span>
+            <span wire:loading wire:target="exportarCsv">Gerando…</span>
+        </button>
+        <button class="btn btn-primary btn-sm" wire:click="abrirModal()" style="display:flex;align-items:center;gap:6px;">
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo Prazo
+        </button>
     </div>
 </div>
 
-{{-- ══ Filtros + botão novo ══ --}}
-<div class="card" style="padding:16px;margin-bottom:16px;">
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+{{-- ══ Analista IA ══ --}}
+<div class="ia-bar">
+    <div class="ia-bar-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2">
+            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+        </svg>
+        Analista IA
+    </div>
+    <input type="text"
+           class="ia-bar-input"
+           wire:model="perguntaIA"
+           wire:keydown.enter="perguntarIA"
+           placeholder="Ex: Quais prazos fatais vencem esta semana?">
+    <button class="ia-bar-btn" wire:click="perguntarIA" wire:loading.attr="disabled">
+        <span wire:loading.remove wire:target="perguntarIA">Perguntar</span>
+        <span wire:loading wire:target="perguntarIA">Consultando…</span>
+    </button>
+    @if($respostaIA)
+    <button class="ia-bar-btn" wire:click="limparIA" title="Limpar resposta"
+            style="padding:8px 10px;border-color:rgba(239,68,68,.3);color:#fca5a5;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+    </button>
+    @endif
+</div>
 
-        {{-- Busca com ícone --}}
-        <div style="flex:1;min-width:200px;position:relative;">
-            <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
-                style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input type="text" wire:model.live.debounce.300ms="filtroBusca"
-                   placeholder="Buscar por título…"
-                   style="width:100%;padding:8px 10px 8px 34px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
+@if($respostaIA)
+<div class="ia-resposta">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" style="flex-shrink:0;margin-top:1px;">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+    </svg>
+    <span>{{ $respostaIA }}</span>
+</div>
+@endif
+
+{{-- ══ Grid principal ══ --}}
+<div class="prazos-grid">
+
+    {{-- ── Coluna esquerda: Filtros ── --}}
+    <div class="prazos-filtros">
+        <div class="prazos-filtros-title">Filtros</div>
+
+        {{-- Busca --}}
+        <div class="prazos-filtros-section">
+            <div style="position:relative;">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
+                    style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" wire:model.live.debounce.300ms="filtroBusca"
+                       placeholder="Buscar por título…"
+                       class="prazos-input">
+            </div>
         </div>
 
-        <select wire:model.live="filtroStatus"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:130px;">
-            <option value="aberto">Em aberto</option>
-            <option value="cumprido">Cumpridos</option>
-            <option value="perdido">Perdidos</option>
-            <option value="todos">Todos</option>
-        </select>
-
-        <select wire:model.live="filtroTipo"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:130px;">
-            <option value="">Todos os tipos</option>
-            @foreach(['Prazo','Prazo Fatal','Audiência','Diligência','Recurso'] as $t)
-                <option value="{{ $t }}">{{ $t }}</option>
+        {{-- Status --}}
+        <div class="prazos-filtros-section">
+            <span class="prazos-filtros-section-lbl">Status</span>
+            @php
+            $statusOpts = [
+                'aberto'   => ['label'=>'Em aberto',  'cor'=>'#16a34a'],
+                'cumprido' => ['label'=>'Cumpridos',  'cor'=>'#64748b'],
+                'perdido'  => ['label'=>'Perdidos',   'cor'=>'#991b1b'],
+                'todos'    => ['label'=>'Todos',      'cor'=>'#94a3b8'],
+            ];
+            @endphp
+            @foreach($statusOpts as $val => $opt)
+            <button class="prazos-toggle-btn {{ $filtroStatus === $val ? 'active' : '' }}"
+                    wire:click="$set('filtroStatus', '{{ $val }}')">
+                <span class="prazos-toggle-dot" style="background:{{ $opt['cor'] }};"></span>
+                {{ $opt['label'] }}
+            </button>
             @endforeach
-        </select>
+        </div>
 
-        <select wire:model.live="filtroResponsavel"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:140px;">
-            <option value="">Todos os responsáveis</option>
-            @foreach($usuarios as $u)
-                <option value="{{ $u->id }}">{{ $u->nome }}</option>
+        {{-- Tipo --}}
+        <div class="prazos-filtros-section">
+            <span class="prazos-filtros-section-lbl">Tipo</span>
+            <button class="prazos-toggle-btn {{ $filtroTipo === '' ? 'active' : '' }}"
+                    wire:click="$set('filtroTipo', '')">
+                <span class="prazos-toggle-dot" style="background:#94a3b8;"></span>
+                Todos
+            </button>
+            @php
+            $tipoOpts = [
+                'Prazo'       => '#2563eb',
+                'Prazo Fatal' => '#9d174d',
+                'Audiência'   => '#d97706',
+                'Diligência'  => '#7c3aed',
+                'Recurso'     => '#0891b2',
+            ];
+            @endphp
+            @foreach($tipoOpts as $tipo => $cor)
+            <button class="prazos-toggle-btn {{ $filtroTipo === $tipo ? 'active' : '' }}"
+                    wire:click="$set('filtroTipo', '{{ $tipo }}')">
+                <span class="prazos-toggle-dot" style="background:{{ $cor }};"></span>
+                {{ $tipo }}
+                <span class="prazos-toggle-count">{{ $tipoCounts[$tipo] ?? 0 }}</span>
+            </button>
             @endforeach
-        </select>
+        </div>
 
-        <select wire:model.live="filtroProcesso"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:150px;">
-            <option value="">Todos os processos</option>
-            @foreach($processos as $p)
-                <option value="{{ $p->id }}">{{ $p->numero }} — {{ $p->cliente?->nome ?? '—' }}</option>
-            @endforeach
-        </select>
+        {{-- Responsável --}}
+        <div class="prazos-filtros-section">
+            <span class="prazos-filtros-section-lbl">Responsável</span>
+            <select wire:model.live="filtroResponsavel" class="prazos-select">
+                <option value="">Todos</option>
+                @foreach($usuarios as $u)
+                    <option value="{{ $u->id }}">{{ $u->nome }}</option>
+                @endforeach
+            </select>
+        </div>
 
-        <input type="date" wire:model.live="filtroDataIni" title="Prazo a partir de"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
-        <input type="date" wire:model.live="filtroDataFim" title="Prazo até"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
+        {{-- Processo --}}
+        <div class="prazos-filtros-section">
+            <span class="prazos-filtros-section-lbl">Processo</span>
+            <select wire:model.live="filtroProcesso" class="prazos-select">
+                <option value="">Todos</option>
+                @foreach($processos as $p)
+                    <option value="{{ $p->id }}">{{ $p->numero }} — {{ $p->cliente?->nome ?? '—' }}</option>
+                @endforeach
+            </select>
+        </div>
 
-        @if($filtroBusca || $filtroTipo || $filtroResponsavel || $filtroProcesso || $filtroDataIni || $filtroDataFim)
-        <button wire:click="$set('filtroBusca',''); $set('filtroTipo',''); $set('filtroResponsavel',''); $set('filtroProcesso',''); $set('filtroDataIni',''); $set('filtroDataFim','')"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:none;color:var(--muted);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;">
+        {{-- Período --}}
+        <div class="prazos-filtros-section">
+            <span class="prazos-filtros-section-lbl">Período</span>
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px;">De</label>
+            <input type="date" wire:model.live="filtroDataIni" class="prazos-date-input">
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px;">Até</label>
+            <input type="date" wire:model.live="filtroDataFim" class="prazos-date-input">
+        </div>
+
+        {{-- Limpar --}}
+        @if($filtroBusca || $filtroTipo || $filtroResponsavel || $filtroProcesso || $filtroDataIni || $filtroDataFim || $filtroStatus !== 'aberto')
+        <button wire:click="$set('filtroBusca',''); $set('filtroTipo',''); $set('filtroResponsavel',''); $set('filtroProcesso',''); $set('filtroDataIni',''); $set('filtroDataFim',''); $set('filtroStatus','aberto')"
+            style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;">
             <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Limpar
+            Limpar filtros
         </button>
         @endif
-
-        <div style="display:flex;gap:6px;margin-left:auto;">
-            <button class="btn btn-sm btn-secondary-outline"
-                    wire:click="exportarPdf" wire:loading.attr="disabled" title="Exportar PDF">
-                <span wire:loading.remove wire:target="exportarPdf" style="display:flex;align-items:center;gap:5px;">
-                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-                    PDF
-                </span>
-                <span wire:loading wire:target="exportarPdf">Gerando…</span>
-            </button>
-            <button class="btn btn-sm btn-secondary-outline"
-                    wire:click="exportarCsv" wire:loading.attr="disabled" title="Exportar CSV">
-                <span wire:loading.remove wire:target="exportarCsv" style="display:flex;align-items:center;gap:5px;">
-                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    CSV
-                </span>
-                <span wire:loading wire:target="exportarCsv">Gerando…</span>
-            </button>
-            <button class="btn btn-primary btn-sm" wire:click="abrirModal()" style="display:flex;align-items:center;gap:6px;">
-                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Novo Prazo
-            </button>
-        </div>
     </div>
-</div>
+
+    {{-- ── Coluna direita ── --}}
+    <div>
+
+        {{-- Métricas --}}
+        <div class="prazos-metricas">
+
+            {{-- Prazos em Aberto --}}
+            <div class="prazos-metric-card" wire:click="$set('filtroStatus','aberto')" title="Filtrar: Em aberto">
+                <div class="prazos-metric-icon" style="background:#eff6ff;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="prazos-metric-num" style="color:#2563eb;">{{ $totalAbertos }}</div>
+                    <div class="prazos-metric-lbl">Prazos em aberto</div>
+                </div>
+            </div>
+
+            {{-- Vencem Hoje --}}
+            <div class="prazos-metric-card" title="Vencem hoje">
+                <div class="prazos-metric-icon" style="background:#fefce8;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="prazos-metric-num" style="color:#ca8a04;">{{ $vencendoHoje }}</div>
+                    <div class="prazos-metric-lbl">Vencem hoje</div>
+                </div>
+            </div>
+
+            {{-- Vencidos --}}
+            <div class="prazos-metric-card" title="Vencidos não cumpridos">
+                <div class="prazos-metric-icon" style="background:#fef2f2;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="prazos-metric-num" style="color:#dc2626;">{{ $vencidos }}</div>
+                    <div class="prazos-metric-lbl">Vencidos (não cumpridos)</div>
+                </div>
+            </div>
+
+            {{-- Prazos Fatais --}}
+            <div class="prazos-metric-card" wire:click="$set('filtroTipo','Prazo Fatal')" title="Filtrar: Prazo Fatal">
+                <div class="prazos-metric-icon" style="background:#fdf2f8;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9d174d" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="prazos-metric-num" style="color:#9d174d;">{{ $fatais }}</div>
+                    <div class="prazos-metric-lbl">Prazos fatais (próx. 5 dias)</div>
+                </div>
+            </div>
+
+        </div>
+        {{-- /métricas --}}
 
 {{-- ══ Lista ══ --}}
 <div class="card" style="padding:0;overflow:hidden;">
@@ -286,7 +638,12 @@
             </div>
         </div>
     @endif
+
+    </div>
+    {{-- /coluna direita --}}
+
 </div>
+{{-- /grid --}}
 
 {{-- ══ Confirmação de exclusão ══ --}}
 @if($confirmarExcluir)

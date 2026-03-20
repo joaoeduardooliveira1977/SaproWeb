@@ -1,215 +1,363 @@
 <div>
+<style>
+@media (max-width: 768px) {
+    .docs-grid    { grid-template-columns: 1fr !important; }
+    .metricas-docs{ grid-template-columns: 1fr 1fr !important; }
+    .filtros-docs { position: static !important; }
+}
+@media (max-width: 480px) {
+    .metricas-docs { grid-template-columns: 1fr !important; }
+}
+</style>
 
-{{-- Cards Resumo --}}
-<div class="stat-grid">
-    {{-- Total --}}
-    <button wire:click="$set('filtroTipo', '')"
-        style="text-align:center;border-left:4px solid var(--primary);background:var(--white);border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;border-top:none;border-right:none;border-bottom:none;transition:box-shadow .15s,transform .1s;{{ $filtroTipo === '' ? 'box-shadow:0 0 0 2px var(--primary);' : '' }}"
-        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'"
-        onmouseout="this.style.transform='';this.style.boxShadow='{{ $filtroTipo === '' ? '0 0 0 2px var(--primary)' : '0 1px 3px rgba(0,0,0,.08)' }}'">
-        <div style="margin-bottom:8px;display:flex;justify-content:center;">
-            <svg aria-hidden="true" width="24" height="24" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
-        </div>
-        <div style="font-size:24px;font-weight:700;color:var(--primary);">{{ $resumo->total }}</div>
-        <div style="font-size:12px;color:var(--muted);">Total de documentos</div>
-        <div style="font-size:11px;color:var(--muted);">
-            {{ $resumo->total_tamanho ? number_format($resumo->total_tamanho/1024/1024, 1) . ' MB' : '0 MB' }}
-        </div>
-    </button>
-
-    {{-- Petições --}}
-    <button wire:click="$set('filtroTipo', 'peticao')"
-        style="text-align:center;border-left:4px solid #7c3aed;background:var(--white);border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;border-top:none;border-right:none;border-bottom:none;transition:box-shadow .15s,transform .1s;{{ $filtroTipo === 'peticao' ? 'box-shadow:0 0 0 2px #7c3aed;' : '' }}"
-        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'"
-        onmouseout="this.style.transform='';this.style.boxShadow='{{ $filtroTipo === 'peticao' ? '0 0 0 2px #7c3aed' : '0 1px 3px rgba(0,0,0,.08)' }}'">
-        <div style="margin-bottom:8px;display:flex;justify-content:center;">
-            <svg aria-hidden="true" width="24" height="24" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        </div>
-        <div style="font-size:24px;font-weight:700;color:#7c3aed;">{{ $resumo->peticoes }}</div>
-        <div style="font-size:12px;color:var(--muted);">Petições</div>
-        @if($filtroTipo === 'peticao')
-        <div style="font-size:10px;color:#7c3aed;font-weight:600;margin-top:4px;">● filtrando</div>
-        @endif
-    </button>
-
-    {{-- Contratos --}}
-    <button wire:click="$set('filtroTipo', 'contrato')"
-        style="text-align:center;border-left:4px solid var(--accent);background:var(--white);border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;border-top:none;border-right:none;border-bottom:none;transition:box-shadow .15s,transform .1s;{{ $filtroTipo === 'contrato' ? 'box-shadow:0 0 0 2px var(--accent);' : '' }}"
-        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'"
-        onmouseout="this.style.transform='';this.style.boxShadow='{{ $filtroTipo === 'contrato' ? '0 0 0 2px var(--accent)' : '0 1px 3px rgba(0,0,0,.08)' }}'">
-        <div style="margin-bottom:8px;display:flex;justify-content:center;">
-            <svg aria-hidden="true" width="24" height="24" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </div>
-        <div style="font-size:24px;font-weight:700;color:var(--accent);">{{ $resumo->contratos }}</div>
-        <div style="font-size:12px;color:var(--muted);">Contratos</div>
-        @if($filtroTipo === 'contrato')
-        <div style="font-size:10px;color:var(--accent);font-weight:600;margin-top:4px;">● filtrando</div>
-        @endif
-    </button>
-
-    {{-- Sentenças --}}
-    <button wire:click="$set('filtroTipo', 'sentenca')"
-        style="text-align:center;border-left:4px solid var(--success);background:var(--white);border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;border-top:none;border-right:none;border-bottom:none;transition:box-shadow .15s,transform .1s;{{ $filtroTipo === 'sentenca' ? 'box-shadow:0 0 0 2px var(--success);' : '' }}"
-        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'"
-        onmouseout="this.style.transform='';this.style.boxShadow='{{ $filtroTipo === 'sentenca' ? '0 0 0 2px var(--success)' : '0 1px 3px rgba(0,0,0,.08)' }}'">
-        <div style="margin-bottom:8px;display:flex;justify-content:center;">
-            <svg aria-hidden="true" width="24" height="24" fill="none" stroke="var(--success)" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><path d="M3 6l9-3 9 3"/><path d="M3 18l4-8 4 8"/><path d="M13 18l4-8 4 8"/><line x1="2" y1="18" x2="9" y2="18"/><line x1="15" y1="18" x2="22" y2="18"/></svg>
-        </div>
-        <div style="font-size:24px;font-weight:700;color:var(--success);">{{ $resumo->sentencas }}</div>
-        <div style="font-size:12px;color:var(--muted);">Sentenças</div>
-        @if($filtroTipo === 'sentenca')
-        <div style="font-size:10px;color:var(--success);font-weight:600;margin-top:4px;">● filtrando</div>
-        @endif
-    </button>
-</div>
-
-{{-- Filtros --}}
-<div class="card" style="margin-bottom:16px;">
-    <div class="filter-bar">
-        <div style="position:relative;flex:1;min-width:200px;">
-            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;">
-                <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+{{-- Cabecalho --}}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div>
+        <a href="{{ route('processos.hub') }}"
+           style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:6px;"
+           onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Voltar
+        </a>
+        <h2 style="font-size:20px;font-weight:700;color:var(--text);margin:0;">Documentos</h2>
+        <p style="font-size:13px;color:var(--muted);margin:2px 0 0;">
+            {{ $resumo->total }} documento{{ $resumo->total != 1 ? 's' : '' }} cadastrado{{ $resumo->total != 1 ? 's' : '' }}
+            @if($resumo->total_tamanho)
+            &mdash; {{ number_format($resumo->total_tamanho/1024/1024, 1) }} MB no total
+            @endif
+        </p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button wire:click="exportarCsv" class="btn btn-sm btn-secondary-outline" wire:loading.attr="disabled" title="Exportar CSV">
+            <span wire:loading.remove wire:target="exportarCsv" style="display:inline-flex;align-items:center;gap:4px;">
+                <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                CSV
             </span>
-            <input wire:model.live.debounce.300ms="busca" type="text" placeholder="Buscar por título, cliente ou processo..." style="padding-left:34px;width:100%;">
-        </div>
-        <select wire:model.live="filtroTipo">
-            <option value="">Todos os tipos</option>
-            <option value="peticao">Petição</option>
-            <option value="contrato">Contrato</option>
-            <option value="procuracao">Procuração</option>
-            <option value="laudo">Laudo/Perícia</option>
-            <option value="documento_cliente">Doc. Cliente</option>
-            <option value="sentenca">Sentença/Decisão</option>
-            <option value="outro">Outro</option>
-        </select>
-        <select wire:model.live="filtroVinculo">
-            <option value="">Todos</option>
-            <option value="processo">Por processo</option>
-            <option value="cliente">Por cliente</option>
-        </select>
-        <input wire:model.live="filtroDataIni" type="date" title="Data início">
-        <input wire:model.live="filtroDataFim" type="date" title="Data fim">
-        <button wire:click="exportarCsv" class="btn btn-secondary-outline btn-sm" title="Exportar CSV" wire:loading.attr="disabled" style="flex-shrink:0">
-            <span wire:loading.remove wire:target="exportarCsv" style="display:inline-flex;align-items:center;gap:4px;"><svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> CSV</span>
             <span wire:loading wire:target="exportarCsv">...</span>
         </button>
-        <button wire:click="abrirLote" class="btn btn-secondary-outline btn-sm" style="flex-shrink:0;display:inline-flex;align-items:center;gap:4px;">
+        <button wire:click="abrirLote" class="btn btn-sm btn-secondary-outline" style="display:inline-flex;align-items:center;gap:5px;">
             <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Lote
         </button>
-        <button wire:click="novoDocumento" class="btn btn-primary btn-sm" style="flex-shrink:0">+ Novo</button>
+        <button wire:click="novoDocumento" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:5px;">
+            <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo
+        </button>
     </div>
 </div>
 
-{{-- Lista de documentos --}}
-<div class="card">
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
-        <thead>
-            @php
-                $thStyle = 'padding:10px 12px;text-align:left;cursor:pointer;user-select:none;white-space:nowrap;font-size:11px;text-transform:uppercase;letter-spacing:.5px;';
-                $arrow = fn($col) => $ordenarPor === $col ? ($ordenarDir === 'ASC' ? ' ▲' : ' ▼') : '';
-            @endphp
-            <tr style="background:var(--primary);color:#fff;">
-                <th style="{{ $thStyle }}">Tipo</th>
-                <th wire:click="ordenar('titulo')" style="{{ $thStyle }}">Título{{ $arrow('titulo') }}</th>
-                <th style="{{ $thStyle }}">Cliente</th>
-                <th style="{{ $thStyle }}">Processo</th>
-                <th wire:click="ordenar('data_documento')" style="{{ $thStyle }}text-align:center;">Data{{ $arrow('data_documento') }}</th>
-                <th style="{{ $thStyle }}text-align:center;">Arquivo</th>
-                <th wire:click="ordenar('tamanho')" style="{{ $thStyle }}text-align:center;">Tamanho{{ $arrow('tamanho') }}</th>
-                <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Portal</th>
-                <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($documentos as $doc)
-            @php
-                $tipos = [
-                    'peticao'          => ['label'=>'Petição',     'color'=>'#7c3aed'],
-                    'contrato'         => ['label'=>'Contrato',    'color'=>'#d97706'],
-                    'procuracao'       => ['label'=>'Procuração',  'color'=>'#2563a8'],
-                    'laudo'            => ['label'=>'Laudo',       'color'=>'#0891b2'],
-                    'documento_cliente'=> ['label'=>'Doc. Cliente','color'=>'#64748b'],
-                    'sentenca'         => ['label'=>'Sentença',    'color'=>'#16a34a'],
-                    'outro'            => ['label'=>'Outro',       'color'=>'#94a3b8'],
-                ];
-                $t = $tipos[$doc->tipo] ?? $tipos['outro'];
-                $ext = strtolower(pathinfo($doc->arquivo_original ?? '', PATHINFO_EXTENSION));
-                $iconeArq = match($ext) {
-                    'pdf'              => '<span style="background:#fee2e2;color:#dc2626;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">PDF</span>',
-                    'doc','docx'       => '<span style="background:#eff6ff;color:#2563a8;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">DOC</span>',
-                    'xls','xlsx'       => '<span style="background:#f0fdf4;color:#16a34a;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">XLS</span>',
-                    'jpg','jpeg','png' => '<span style="background:#fdf4ff;color:#7c3aed;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">IMG</span>',
-                    default            => '<span style="background:#f1f5f9;color:#64748b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ARQ</span>',
-                };
-                $tamanhoFormatado = $doc->tamanho
-                    ? ($doc->tamanho > 1048576
-                        ? number_format($doc->tamanho/1048576,1).' MB'
-                        : number_format($doc->tamanho/1024,0).' KB')
-                    : '—';
-                $podePreview = $doc->arquivo && in_array($ext, ['pdf','jpg','jpeg','png','gif','webp']);
-            @endphp
-            <tr style="border-bottom:1px solid var(--border);"
-                onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
-                <td style="padding:10px 12px;">
-                    <span style="background:{{ $t['color'] }}20;color:{{ $t['color'] }};padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;">
-                        {{ $t['label'] }}
-                    </span>
-                </td>
-                <td style="padding:10px 12px;font-weight:600;">{{ $doc->titulo }}</td>
-                <td style="padding:10px 12px;color:var(--muted);">{{ $doc->cliente_nome ?? '—' }}</td>
-                <td style="padding:10px 12px;color:var(--muted);font-size:12px;">{{ $doc->processo_numero ?? '—' }}</td>
-                <td style="padding:10px 12px;text-align:center;color:var(--muted);">
-                    {{ $doc->data_documento ? \Carbon\Carbon::parse($doc->data_documento)->format('d/m/Y') : '—' }}
-                </td>
-                <td style="padding:10px 12px;text-align:center;">
-                    {!! $iconeArq !!}
-                </td>
-                <td style="padding:10px 12px;text-align:center;color:var(--muted);font-size:12px;">{{ $tamanhoFormatado }}</td>
-                <td style="padding:10px 12px;text-align:center;">
-                    <button wire:click="togglePortalVisivel({{ $doc->id }})" title="{{ $doc->portal_visivel ? 'Visível no portal — clique para ocultar' : 'Oculto no portal — clique para exibir' }}"
-                        style="width:30px;height:30px;border:none;border-radius:6px;background:{{ $doc->portal_visivel ? '#eff6ff' : '#f1f5f9' }};color:{{ $doc->portal_visivel ? '#2563a8' : '#94a3b8' }};cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
-                        <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-                    </button>
-                </td>
-                <td style="padding:10px 12px;text-align:center;">
-                    <div style="display:flex;gap:6px;justify-content:center;">
-                        @if($podePreview)
-                        <button wire:click="abrirPreview({{ $doc->id }})" title="Visualizar"
-                            style="width:30px;height:30px;border:none;border-radius:6px;background:#f1f5f9;color:#64748b;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
-                            <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        </button>
-                        @elseif($doc->arquivo)
-                        <button wire:click="downloadUrl({{ $doc->id }})" title="Download"
-                            style="width:30px;height:30px;border:none;border-radius:6px;background:#f5f3ff;color:#7c3aed;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
-                            <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        </button>
-                        @endif
-                        <button wire:click="editarDocumento({{ $doc->id }})" title="Editar"
-                            style="width:30px;height:30px;border:none;border-radius:6px;background:#eff6ff;color:#2563a8;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
-                            <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        </button>
-                        <button wire:click="excluirDocumento({{ $doc->id }})"
-                            wire:confirm="Excluir este documento?" title="Excluir"
-                            style="width:30px;height:30px;border:none;border-radius:6px;background:#fef2f2;color:#dc2626;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
-                            <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="9" style="padding:40px;text-align:center;color:var(--muted);">
-                    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-                        <svg aria-hidden="true" width="32" height="32" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
-                        <span>Nenhum documento cadastrado. Clique em "+ Novo Documento" para começar.</span>
-                    </div>
-                </td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+{{-- Analista IA --}}
+<div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);border-radius:12px;padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
+    <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+            <path d="M18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/>
+        </svg>
+    </div>
+    <input wire:model="perguntaIA" wire:keydown.enter="perguntarIA" type="text"
+        placeholder="Pergunte sobre os documentos... Ex: quantas peticoes temos, documentos do mes passado, contratos"
+        style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 16px;color:#fff;font-size:13px;outline:none;"
+        onfocus="this.style.borderColor='rgba(147,197,253,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.2)'">
+    <button wire:click="perguntarIA" wire:loading.attr="disabled" wire:target="perguntarIA"
+        style="background:#2563a8;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:background .15s;"
+        onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563a8'">
+        <span wire:loading.remove wire:target="perguntarIA" style="display:flex;align-items:center;gap:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+            Analisar
+        </span>
+        <span wire:loading wire:target="perguntarIA">Analisando...</span>
+    </button>
 </div>
+
+@if($respostaIA)
+<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#1e40af;display:flex;gap:10px;align-items:flex-start;">
+    <div style="flex-shrink:0;width:28px;height:28px;background:#dbeafe;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+    </div>
+    <div style="flex:1;">
+        <div style="font-weight:700;margin-bottom:4px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#1d4ed8;">Analista IA</div>
+        <div style="line-height:1.6;">{{ $respostaIA }}</div>
+    </div>
+    <button wire:click="limparIA" style="background:none;border:none;color:#93c5fd;cursor:pointer;font-size:18px;line-height:1;padding:0 4px;flex-shrink:0;" title="Fechar">&times;</button>
+</div>
+@endif
+
+{{-- Grid principal --}}
+<div class="docs-grid" style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;">
+
+    {{-- COLUNA ESQUERDA: Filtros --}}
+    <div class="filtros-docs" style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;position:sticky;top:20px;">
+
+        {{-- Busca --}}
+        <div style="margin-bottom:20px;">
+            <div style="position:relative;">
+                <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
+                    style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input wire:model.live.debounce.300ms="busca" type="text"
+                    placeholder="Titulo, cliente, processo..."
+                    style="width:100%;box-sizing:border-box;padding:9px 10px 9px 34px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
+            </div>
+        </div>
+
+        {{-- Tipo de Documento --}}
+        <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Tipo de Documento</div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+                @php
+                $tipoFiltros = [
+                    ''                  => ['Todos',        'var(--primary)', $resumo->total],
+                    'peticao'           => ['Peticao',      '#7c3aed',        $resumo->peticoes],
+                    'contrato'          => ['Contrato',     '#d97706',        $resumo->contratos],
+                    'procuracao'        => ['Procuracao',   '#2563a8',        $resumo->procuracoes],
+                    'laudo'             => ['Laudo',        '#0891b2',        $resumo->laudos],
+                    'documento_cliente' => ['Doc. Cliente', '#64748b',        $resumo->docs_cliente],
+                    'sentenca'          => ['Sentenca',     '#16a34a',        $resumo->sentencas],
+                    'outro'             => ['Outro',        '#94a3b8',        $resumo->outros],
+                ];
+                @endphp
+                @foreach($tipoFiltros as $val => [$label, $cor, $cnt])
+                @php $sel = $filtroTipo === $val; @endphp
+                <button wire:click="$set('filtroTipo', '{{ $val }}')"
+                    style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;width:100%;transition:all .15s;border:1.5px solid {{ $sel ? $cor.'88' : 'transparent' }};background:{{ $sel ? $cor.'18' : 'transparent' }};color:{{ $sel ? $cor : 'var(--text)' }};"
+                    onmouseover="if(!{{ $sel ? 'true' : 'false' }}) this.style.background='var(--bg)'" onmouseout="if(!{{ $sel ? 'true' : 'false' }}) this.style.background='transparent'">
+                    <span style="display:flex;align-items:center;gap:7px;font-weight:{{ $sel ? '600' : '400' }};">
+                        @if($val !== '')
+                        <span style="width:8px;height:8px;border-radius:50%;background:{{ $cor }};flex-shrink:0;display:inline-block;"></span>
+                        @endif
+                        {{ $label }}
+                    </span>
+                    @if($cnt > 0)
+                    <span style="font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;background:{{ $sel ? $cor.'22' : '#f1f5f9' }};color:{{ $sel ? $cor : 'var(--muted)' }};">{{ $cnt }}</span>
+                    @endif
+                </button>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Vinculo --}}
+        <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Vinculo</div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+                @foreach(['' => 'Todos', 'processo' => 'Por Processo', 'cliente' => 'Por Cliente'] as $val => $label)
+                @php $sel = $filtroVinculo === $val; @endphp
+                <button wire:click="$set('filtroVinculo', '{{ $val }}')"
+                    style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;width:100%;transition:all .15s;border:1.5px solid {{ $sel ? 'var(--primary)' : 'transparent' }};background:{{ $sel ? '#eff6ff' : 'transparent' }};color:{{ $sel ? 'var(--primary)' : 'var(--text)' }};font-weight:{{ $sel ? '600' : '400' }};"
+                    onmouseover="if(!{{ $sel ? 'true' : 'false' }}) this.style.background='var(--bg)'" onmouseout="if(!{{ $sel ? 'true' : 'false' }}) this.style.background='transparent'">
+                    {{ $label }}
+                </button>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Periodo --}}
+        <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Periodo</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <div>
+                    <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px;">De</label>
+                    <input wire:model.live="filtroDataIni" type="date"
+                        style="width:100%;box-sizing:border-box;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
+                </div>
+                <div>
+                    <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px;">Ate</label>
+                    <input wire:model.live="filtroDataFim" type="date"
+                        style="width:100%;box-sizing:border-box;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
+                </div>
+            </div>
+        </div>
+
+        {{-- Limpar --}}
+        @if($busca || $filtroTipo || $filtroVinculo || $filtroDataIni || $filtroDataFim)
+        <button wire:click="$set('busca',''); $set('filtroTipo',''); $set('filtroVinculo',''); $set('filtroDataIni',''); $set('filtroDataFim','')"
+            style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;background:none;color:var(--muted);cursor:pointer;">
+            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Limpar filtros
+        </button>
+        @endif
+    </div>
+
+    {{-- COLUNA DIREITA: Metricas + Tabela --}}
+    <div>
+
+        {{-- Metricas --}}
+        <div class="metricas-docs" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+
+            {{-- Total --}}
+            <button wire:click="$set('filtroTipo', '')"
+                style="background:var(--white);border:1.5px solid {{ $filtroTipo === '' ? 'var(--primary)' : 'var(--border)' }};border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;transition:border-color .15s;">
+                <div style="width:40px;height:40px;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:var(--text);line-height:1.1;">{{ number_format($resumo->total) }}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">documentos</div>
+                </div>
+            </button>
+
+            {{-- Peticoes --}}
+            <button wire:click="$set('filtroTipo', 'peticao')"
+                style="background:var(--white);border:1.5px solid {{ $filtroTipo === 'peticao' ? '#7c3aed' : 'var(--border)' }};border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;transition:border-color .15s;">
+                <div style="width:40px;height:40px;border-radius:9px;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#7c3aed;line-height:1.1;">{{ number_format($resumo->peticoes) }}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">peticoes</div>
+                </div>
+            </button>
+
+            {{-- Contratos --}}
+            <button wire:click="$set('filtroTipo', 'contrato')"
+                style="background:var(--white);border:1.5px solid {{ $filtroTipo === 'contrato' ? '#d97706' : 'var(--border)' }};border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;transition:border-color .15s;">
+                <div style="width:40px;height:40px;border-radius:9px;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                        <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#d97706;line-height:1.1;">{{ number_format($resumo->contratos) }}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">contratos</div>
+                </div>
+            </button>
+
+            {{-- Sentencas --}}
+            <button wire:click="$set('filtroTipo', 'sentenca')"
+                style="background:var(--white);border:1.5px solid {{ $filtroTipo === 'sentenca' ? '#16a34a' : 'var(--border)' }};border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;transition:border-color .15s;">
+                <div style="width:40px;height:40px;border-radius:9px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="3" x2="12" y2="21"/><path d="M3 6l9-3 9 3"/>
+                        <path d="M3 18l4-8 4 8"/><path d="M13 18l4-8 4 8"/>
+                        <line x1="2" y1="18" x2="9" y2="18"/><line x1="15" y1="18" x2="22" y2="18"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#16a34a;line-height:1.1;">{{ number_format($resumo->sentencas) }}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">sentencas</div>
+                </div>
+            </button>
+
+        </div>
+
+        {{-- Tabela --}}
+        <div class="card">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                    @php
+                        $thStyle = 'padding:10px 12px;text-align:left;cursor:pointer;user-select:none;white-space:nowrap;font-size:11px;text-transform:uppercase;letter-spacing:.5px;';
+                        $arrow = fn($col) => $ordenarPor === $col ? ($ordenarDir === 'ASC' ? ' ▲' : ' ▼') : '';
+                    @endphp
+                    <tr style="background:var(--primary);color:#fff;">
+                        <th style="{{ $thStyle }}">Tipo</th>
+                        <th wire:click="ordenar('titulo')" style="{{ $thStyle }}">Titulo{{ $arrow('titulo') }}</th>
+                        <th style="{{ $thStyle }}">Cliente</th>
+                        <th style="{{ $thStyle }}">Processo</th>
+                        <th wire:click="ordenar('data_documento')" style="{{ $thStyle }}text-align:center;">Data{{ $arrow('data_documento') }}</th>
+                        <th style="{{ $thStyle }}text-align:center;">Arquivo</th>
+                        <th wire:click="ordenar('tamanho')" style="{{ $thStyle }}text-align:center;">Tamanho{{ $arrow('tamanho') }}</th>
+                        <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Portal</th>
+                        <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Acoes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($documentos as $doc)
+                    @php
+                        $tipos = [
+                            'peticao'          => ['label'=>'Peticao',     'color'=>'#7c3aed'],
+                            'contrato'         => ['label'=>'Contrato',    'color'=>'#d97706'],
+                            'procuracao'       => ['label'=>'Procuracao',  'color'=>'#2563a8'],
+                            'laudo'            => ['label'=>'Laudo',       'color'=>'#0891b2'],
+                            'documento_cliente'=> ['label'=>'Doc. Cliente','color'=>'#64748b'],
+                            'sentenca'         => ['label'=>'Sentenca',    'color'=>'#16a34a'],
+                            'outro'            => ['label'=>'Outro',       'color'=>'#94a3b8'],
+                        ];
+                        $t = $tipos[$doc->tipo] ?? $tipos['outro'];
+                        $ext = strtolower(pathinfo($doc->arquivo_original ?? '', PATHINFO_EXTENSION));
+                        $iconeArq = match($ext) {
+                            'pdf'              => '<span style="background:#fee2e2;color:#dc2626;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">PDF</span>',
+                            'doc','docx'       => '<span style="background:#eff6ff;color:#2563a8;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">DOC</span>',
+                            'xls','xlsx'       => '<span style="background:#f0fdf4;color:#16a34a;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">XLS</span>',
+                            'jpg','jpeg','png' => '<span style="background:#fdf4ff;color:#7c3aed;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">IMG</span>',
+                            default            => '<span style="background:#f1f5f9;color:#64748b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ARQ</span>',
+                        };
+                        $tamanhoFormatado = $doc->tamanho
+                            ? ($doc->tamanho > 1048576
+                                ? number_format($doc->tamanho/1048576,1).' MB'
+                                : number_format($doc->tamanho/1024,0).' KB')
+                            : '—';
+                        $podePreview = $doc->arquivo && in_array($ext, ['pdf','jpg','jpeg','png','gif','webp']);
+                    @endphp
+                    <tr style="border-bottom:1px solid var(--border);"
+                        onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+                        <td style="padding:10px 12px;">
+                            <span style="background:{{ $t['color'] }}20;color:{{ $t['color'] }};padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;">
+                                {{ $t['label'] }}
+                            </span>
+                        </td>
+                        <td style="padding:10px 12px;font-weight:600;">{{ $doc->titulo }}</td>
+                        <td style="padding:10px 12px;color:var(--muted);">{{ $doc->cliente_nome ?? '—' }}</td>
+                        <td style="padding:10px 12px;color:var(--muted);font-size:12px;">{{ $doc->processo_numero ?? '—' }}</td>
+                        <td style="padding:10px 12px;text-align:center;color:var(--muted);">
+                            {{ $doc->data_documento ? \Carbon\Carbon::parse($doc->data_documento)->format('d/m/Y') : '—' }}
+                        </td>
+                        <td style="padding:10px 12px;text-align:center;">{!! $iconeArq !!}</td>
+                        <td style="padding:10px 12px;text-align:center;color:var(--muted);font-size:12px;">{{ $tamanhoFormatado }}</td>
+                        <td style="padding:10px 12px;text-align:center;">
+                            <button wire:click="togglePortalVisivel({{ $doc->id }})"
+                                title="{{ $doc->portal_visivel ? 'Visivel — clique para ocultar' : 'Oculto — clique para exibir' }}"
+                                style="width:30px;height:30px;border:none;border-radius:6px;background:{{ $doc->portal_visivel ? '#eff6ff' : '#f1f5f9' }};color:{{ $doc->portal_visivel ? '#2563a8' : '#94a3b8' }};cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
+                                <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                            </button>
+                        </td>
+                        <td style="padding:10px 12px;text-align:center;">
+                            <div style="display:flex;gap:6px;justify-content:center;">
+                                @if($podePreview)
+                                <button wire:click="abrirPreview({{ $doc->id }})" title="Visualizar"
+                                    style="width:30px;height:30px;border:none;border-radius:6px;background:#f1f5f9;color:#64748b;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
+                                    <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                                @elseif($doc->arquivo)
+                                <button wire:click="downloadUrl({{ $doc->id }})" title="Download"
+                                    style="width:30px;height:30px;border:none;border-radius:6px;background:#f5f3ff;color:#7c3aed;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
+                                    <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                </button>
+                                @endif
+                                <button wire:click="editarDocumento({{ $doc->id }})" title="Editar"
+                                    style="width:30px;height:30px;border:none;border-radius:6px;background:#eff6ff;color:#2563a8;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
+                                    <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                </button>
+                                <button wire:click="excluirDocumento({{ $doc->id }})"
+                                    wire:confirm="Excluir este documento?" title="Excluir"
+                                    style="width:30px;height:30px;border:none;border-radius:6px;background:#fef2f2;color:#dc2626;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
+                                    <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="9" style="padding:40px;text-align:center;color:var(--muted);">
+                            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <svg aria-hidden="true" width="32" height="32" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                                <span>Nenhum documento encontrado.</span>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+    </div>{{-- /coluna direita --}}
+</div>{{-- /grid --}}
+
 
 {{-- Modal Documento --}}
 @if($modalDocumento)
@@ -496,5 +644,7 @@
         });
     });
 </script>
+
+</div>
 
 </div>

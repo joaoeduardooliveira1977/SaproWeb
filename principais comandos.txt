@@ -348,6 +348,11 @@ Class "App\Models\Documento" not found
 
 
 
+php artisan migrate --path=database/migrations/2026_03_18_225203_add_tenant_id_to_users.php
+
+
+ grep -r "extrajudicial" database/migrations
+
 
 
 

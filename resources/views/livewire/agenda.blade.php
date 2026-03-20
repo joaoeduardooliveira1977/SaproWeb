@@ -1,74 +1,256 @@
 <div>
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title" style="display:flex;align-items:center;gap:8px;">
-                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                Agenda
+<style>
+@media (max-width: 768px) {
+    .agenda-grid  { grid-template-columns: 1fr !important; }
+    .metricas-ag  { grid-template-columns: 1fr 1fr !important; }
+    .filtros-ag   { position: static !important; }
+}
+@media (max-width: 480px) {
+    .metricas-ag  { grid-template-columns: 1fr !important; }
+}
+</style>
+
+{{-- Cabecalho --}}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div>
+        <a href="{{ route('processos.hub') }}"
+           style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:6px;"
+           onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Voltar
+        </a>
+        <h2 style="font-size:20px;font-weight:700;color:var(--text);margin:0;">Agenda</h2>
+        <p style="font-size:13px;color:var(--muted);margin:2px 0 0;">{{ $eventos->total() }} evento{{ $eventos->total() !== 1 ? 's' : '' }} encontrado{{ $eventos->total() !== 1 ? 's' : '' }}</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        {{-- Toggle Vista --}}
+        <div style="display:flex;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;">
+            <button wire:click="{{ $vistaCalendario ? 'toggleVista' : '' }}"
+                style="padding:5px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;background:{{ !$vistaCalendario ? 'var(--primary)' : 'transparent' }};color:{{ !$vistaCalendario ? '#fff' : 'var(--muted)' }};">
+                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Lista
+            </button>
+            <button wire:click="{{ !$vistaCalendario ? 'toggleVista' : '' }}"
+                style="padding:5px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;background:{{ $vistaCalendario ? 'var(--primary)' : 'transparent' }};color:{{ $vistaCalendario ? '#fff' : 'var(--muted)' }};">
+                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Cal.
+            </button>
+        </div>
+        <button wire:click="exportarCsv" wire:loading.attr="disabled" class="btn btn-sm btn-secondary-outline" title="Exportar CSV">
+            <span wire:loading.remove wire:target="exportarCsv" style="display:flex;align-items:center;gap:5px;">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                CSV
             </span>
-            <div class="card-actions">
-                {{-- Toggle vista --}}
-                <div style="display:flex;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;">
-                    <button wire:click="{{ $vistaCalendario ? 'toggleVista' : '' }}"
-                        style="padding:5px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;
-                               background:{{ !$vistaCalendario ? 'var(--primary)' : 'transparent' }};
-                               color:{{ !$vistaCalendario ? '#fff' : 'var(--muted)' }};">
-                        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                        Lista
-                    </button>
-                    <button wire:click="{{ !$vistaCalendario ? 'toggleVista' : '' }}"
-                        style="padding:5px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;
-                               background:{{ $vistaCalendario ? 'var(--primary)' : 'transparent' }};
-                               color:{{ $vistaCalendario ? '#fff' : 'var(--muted)' }};">
-                        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        Cal.
-                    </button>
-                </div>
-                <button wire:click="exportarCsv" wire:loading.attr="disabled"
-                    class="btn btn-sm btn-secondary-outline hide-xs" title="Exportar CSV">
-                    <span wire:loading.remove wire:target="exportarCsv" style="display:flex;align-items:center;gap:5px;">
-                        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        CSV
+            <span wire:loading wire:target="exportarCsv">Gerando...</span>
+        </button>
+        <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo
+        </button>
+    </div>
+</div>
+
+{{-- Analista IA --}}
+<div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);border-radius:12px;padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
+    <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+            <path d="M18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/>
+        </svg>
+    </div>
+    <input wire:model="perguntaIA" wire:keydown.enter="perguntarIA" type="text"
+        placeholder="Pergunte sobre a agenda... Ex: quantos eventos urgentes, prazos desta semana, audiencias de amanha"
+        style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 16px;color:#fff;font-size:13px;outline:none;"
+        onfocus="this.style.borderColor='rgba(147,197,253,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.2)'">
+    <button wire:click="perguntarIA" wire:loading.attr="disabled" wire:target="perguntarIA"
+        style="background:#2563a8;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:background .15s;"
+        onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563a8'">
+        <span wire:loading.remove wire:target="perguntarIA" style="display:flex;align-items:center;gap:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+            Analisar
+        </span>
+        <span wire:loading wire:target="perguntarIA">Analisando...</span>
+    </button>
+</div>
+
+@if($respostaIA)
+<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#1e40af;display:flex;gap:10px;align-items:flex-start;">
+    <div style="flex-shrink:0;width:28px;height:28px;background:#dbeafe;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+    </div>
+    <div style="flex:1;">
+        <div style="font-weight:700;margin-bottom:4px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#1d4ed8;">Analista IA</div>
+        <div style="line-height:1.6;">{{ $respostaIA }}</div>
+    </div>
+    <button wire:click="limparIA" style="background:none;border:none;color:#93c5fd;cursor:pointer;font-size:18px;line-height:1;padding:0 4px;flex-shrink:0;" title="Fechar">&times;</button>
+</div>
+@endif
+
+{{-- Grid principal --}}
+<div class="agenda-grid" style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start;">
+
+    {{-- COLUNA ESQUERDA: Filtros --}}
+    <div class="filtros-ag" style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;position:sticky;top:20px;">
+
+        {{-- Tipo de Evento --}}
+        <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Tipo de Evento</div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+                @php
+                $tiposFiltro = [
+                    ''          => ['Todos',     'var(--primary)', array_sum($tipoCounts)],
+                    'Audiencia' => ['Audiencia', '#d97706',        $tipoCounts['Audiência']  ?? 0],
+                    'Prazo'     => ['Prazo',     '#dc2626',        $tipoCounts['Prazo']       ?? 0],
+                    'Reuniao'   => ['Reuniao',   '#7c3aed',        $tipoCounts['Reunião']     ?? 0],
+                    'Consulta'  => ['Consulta',  '#0891b2',        $tipoCounts['Consulta']    ?? 0],
+                    'Despacho'  => ['Despacho',  '#16a34a',        $tipoCounts['Despacho']    ?? 0],
+                    'Outros'    => ['Outros',    '#2563a8',        $tipoCounts['Outros']      ?? 0],
+                ];
+                // Mapeamento dos valores reais para o filtro tipo (que usa strings com acento)
+                $tipoValores = [
+                    ''          => '',
+                    'Audiencia' => 'Audiência',
+                    'Prazo'     => 'Prazo',
+                    'Reuniao'   => 'Reunião',
+                    'Consulta'  => 'Consulta',
+                    'Despacho'  => 'Despacho',
+                    'Outros'    => 'Outros',
+                ];
+                @endphp
+                @foreach($tiposFiltro as $key => [$label, $cor, $cnt])
+                @php
+                    $valorReal = $tipoValores[$key];
+                    $sel = $tipo === $valorReal;
+                @endphp
+                <button wire:click="$set('tipo', '{{ $valorReal }}')"
+                    style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;width:100%;transition:all .15s;border:1.5px solid {{ $sel ? $cor.'88' : 'transparent' }};background:{{ $sel ? $cor.'18' : 'transparent' }};color:{{ $sel ? $cor : 'var(--text)' }};">
+                    <span style="display:flex;align-items:center;gap:7px;font-weight:{{ $sel ? '600' : '400' }};">
+                        @if($key !== '')
+                        <span style="width:8px;height:8px;border-radius:50%;background:{{ $cor }};flex-shrink:0;display:inline-block;"></span>
+                        @endif
+                        {{ $label }}
                     </span>
-                    <span wire:loading wire:target="exportarCsv">Gerando…</span>
+                    @if($cnt > 0 || $key === '')
+                    <span style="font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;background:{{ $sel ? $cor.'22' : '#f1f5f9' }};color:{{ $sel ? $cor : 'var(--muted)' }};">{{ $cnt }}</span>
+                    @endif
                 </button>
-                <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
-                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Novo
-                </button>
+                @endforeach
             </div>
         </div>
 
-        {{-- Filtros --}}
-        <div class="filter-bar" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);">
-            @if(!$vistaCalendario)
-            <input type="date" wire:model.live="data_ini"
-                style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
-            <input type="date" wire:model.live="data_fim"
-                style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
-            @endif
-            <select wire:model.live="tipo"
-                style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:130px;">
-                <option value="">Todos os tipos</option>
-                @foreach(['Audiência','Prazo','Reunião','Consulta','Despacho','Outros'] as $t)
-                    <option value="{{ $t }}">{{ $t }}</option>
-                @endforeach
-            </select>
+        {{-- Periodo (so na lista) --}}
+        @if(!$vistaCalendario)
+        <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Periodo</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <div>
+                    <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px;">De</label>
+                    <input wire:model.live="data_ini" type="date"
+                        style="width:100%;box-sizing:border-box;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
+                </div>
+                <div>
+                    <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px;">Ate</label>
+                    <input wire:model.live="data_fim" type="date"
+                        style="width:100%;box-sizing:border-box;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- Responsavel --}}
+        <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Responsavel</div>
             <select wire:model.live="responsavel_id"
-                style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:130px;">
-                <option value="">Todos os resp.</option>
+                style="width:100%;box-sizing:border-box;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
+                <option value="">Todos</option>
                 @foreach($responsaveis as $r)
                     <option value="{{ $r->id }}">{{ $r->nome }}</option>
                 @endforeach
             </select>
-            <label style="display:flex;align-items:center;gap:6px;font-size:13px;flex-shrink:0;">
-                <input type="checkbox" wire:model.live="so_pendentes" style="width:auto"> Só pendentes
+        </div>
+
+        {{-- Situacao --}}
+        <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Situacao</div>
+            <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;border:1.5px solid {{ $so_pendentes ? '#2563a8' : 'var(--border)' }};background:{{ $so_pendentes ? '#eff6ff' : 'transparent' }};color:{{ $so_pendentes ? '#1d4ed8' : 'var(--text)' }};">
+                <input type="checkbox" wire:model.live="so_pendentes" style="width:14px;height:14px;accent-color:#2563a8;margin:0;cursor:pointer;">
+                <span style="font-weight:{{ $so_pendentes ? '600' : '400' }};">So pendentes</span>
             </label>
         </div>
 
-        {{-- ══════════════════════════════════════════════════════ --}}
-        {{-- VISTA: CALENDÁRIO                                      --}}
-        {{-- ══════════════════════════════════════════════════════ --}}
-        @if($vistaCalendario)
+        {{-- Limpar --}}
+        @if($tipo || $responsavel_id || !$so_pendentes || $data_ini !== today()->format('Y-m-d') || $data_fim !== today()->addDays(30)->format('Y-m-d'))
+        <button wire:click="$set('tipo',''); $set('responsavel_id',''); $set('so_pendentes', true); $set('data_ini', '{{ today()->format('Y-m-d') }}'); $set('data_fim', '{{ today()->addDays(30)->format('Y-m-d') }}')"
+            style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;background:none;color:var(--muted);cursor:pointer;">
+            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Limpar filtros
+        </button>
+        @endif
+    </div>
+
+    {{-- COLUNA DIREITA --}}
+    <div>
+
+        {{-- Metricas --}}
+        <div class="metricas-ag" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+
+            {{-- Hoje --}}
+            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#2563eb;line-height:1.1;">{{ $metricas['hoje'] }}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">eventos hoje</div>
+                </div>
+            </div>
+
+            {{-- Proximos 7 dias --}}
+            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:9px;background:#fefce8;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#ca8a04;line-height:1.1;">{{ $metricas['semana'] }}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">proximos 7 dias</div>
+                </div>
+            </div>
+
+            {{-- Urgentes --}}
+            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:9px;background:#fff1f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#dc2626;line-height:1.1;">{{ $metricas['urgentes'] }}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">urgentes</div>
+                </div>
+            </div>
+
+            {{-- Atrasados --}}
+            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:9px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#ea580c;line-height:1.1;">{{ $metricas['atrasados'] }}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">em atraso</div>
+                </div>
+            </div>
+
+        </div>
+
+        {{-- Conteudo: Calendario + Lista --}}
+        <div class="card">
+@if($vistaCalendario)
         @php
             $meses = [1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',5=>'Maio',6=>'Junho',
                       7=>'Julho',8=>'Agosto',9=>'Setembro',10=>'Outubro',11=>'Novembro',12=>'Dezembro'];
@@ -296,8 +478,12 @@
         @endif
 
     </div>{{-- /card --}}
+        </div>{{-- /card conteudo --}}
 
-    {{-- ── Modal ── --}}
+    </div>{{-- /coluna direita --}}
+</div>{{-- /grid --}}
+
+{{-- ── Modal ── --}}
     @if($modalAberto)
     <div class="modal-backdrop" wire:click.self="fecharModal">
         <div class="modal" style="max-width:520px">
@@ -397,4 +583,6 @@
         </div>
     </div>
     @endif
+</div>
+
 </div>

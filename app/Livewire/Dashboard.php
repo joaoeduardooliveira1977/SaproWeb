@@ -3,15 +3,20 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Models\{Processo, Pessoa, Agenda, Prazo, Recebimento, Procuracao};
 
 class Dashboard extends Component
 {
-    public array $stats             = [];
-    public array $agendaHoje        = [];
-    public array $processos         = [];
-    public array $prazosProximos    = [];
-    public array $processosParados  = [];
+    public array $stats              = [];
+    public array $agendaHoje         = [];
+    public array $processos          = [];
+    public array $prazosProximos     = [];
+    public array $processosParados   = [];
+    public array $processosPorFase   = [];
+    public array $ultimasAtividades  = [];
+    public array $receitaMensal      = [];
     public int   $procuracoesVencendo = 0;
     public int   $procuracoesVencidas = 0;
 
@@ -80,7 +85,7 @@ class Dashboard extends Component
                 ->whereColumn('andamentos.processo_id', 'processos.id')
                 ->where('andamentos.created_at', '>=', now()->subDays(30)))
             ->orderBy('updated_at')
-            ->take(8)
+            ->take(5)
             ->get()
             ->map(fn($p) => [
                 'id'      => $p->id,
@@ -98,11 +103,63 @@ class Dashboard extends Component
             ->whereNotNull('data_validade')
             ->whereBetween('data_validade', [today(), today()->addDays(30)])->count();
 
+        // Processos por Fase (barras horizontais)
+        $this->processosPorFase = DB::table('processos')
+            ->join('fases', 'fases.id', '=', 'processos.fase_id')
+            ->where('processos.status', 'Ativo')
+            ->whereNotNull('processos.fase_id')
+            ->selectRaw('fases.descricao as fase, COUNT(*) as total')
+            ->groupBy('fases.id', 'fases.descricao')
+            ->orderByDesc('total')
+            ->limit(6)
+            ->get()
+            ->map(fn($f) => ['fase' => $f->fase, 'total' => (int) $f->total])
+            ->toArray();
+
+        // Últimas atividades (andamentos recentes)
+        $this->ultimasAtividades = DB::table('andamentos')
+            ->join('processos', 'processos.id', '=', 'andamentos.processo_id')
+            ->join('pessoas as clientes', 'clientes.id', '=', 'processos.cliente_id')
+            ->leftJoin('usuarios', 'usuarios.id', '=', 'andamentos.usuario_id')
+            ->leftJoin('pessoas as upes', 'upes.id', '=', 'usuarios.pessoa_id')
+            ->select(
+                'andamentos.descricao',
+                'andamentos.created_at',
+                'processos.numero',
+                'processos.id as processo_id',
+                'clientes.nome as cliente_nome',
+                'upes.nome as usuario_nome'
+            )
+            ->orderByDesc('andamentos.created_at')
+            ->limit(5)
+            ->get()
+            ->map(fn($a) => [
+                'descricao'   => Str::limit($a->descricao, 80),
+                'numero'      => $a->numero,
+                'processo_id' => $a->processo_id,
+                'cliente'     => $a->cliente_nome,
+                'usuario'     => $a->usuario_nome ?? 'Sistema',
+                'quando'      => \Carbon\Carbon::parse($a->created_at)->diffForHumans(),
+            ])
+            ->toArray();
+
+        // Receita mensal (últimos 6 meses)
+        $this->receitaMensal = collect(range(5, 0))->map(function ($i) {
+            $mes = now()->subMonths($i);
+            return [
+                'mes'   => $mes->locale('pt_BR')->isoFormat('MMM'),
+                'valor' => (float) Recebimento::where('recebido', true)
+                    ->whereYear('data_recebimento', $mes->year)
+                    ->whereMonth('data_recebimento', $mes->month)
+                    ->sum('valor'),
+            ];
+        })->toArray();
+
         $this->prazosProximos = Prazo::with('processo')
             ->where('status', 'aberto')
             ->where('data_prazo', '<=', today()->addDays(15))
             ->orderBy('data_prazo')
-            ->take(8)
+            ->take(5)
             ->get()
             ->map(fn($p) => [
                 'titulo'   => $p->titulo,

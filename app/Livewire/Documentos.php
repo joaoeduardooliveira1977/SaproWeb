@@ -19,6 +19,10 @@ class Documentos extends Component
     public string $filtroDataIni = '';
     public string $filtroDataFim = '';
 
+    // IA
+    public string  $perguntaIA = '';
+    public ?string $respostaIA = null;
+
     protected $queryString = [
         'busca'          => ['except' => ''],
         'filtroTipo'     => ['except' => ''],
@@ -326,6 +330,70 @@ class Documentos extends Component
         $this->dispatch('toast', message: 'Documento excluído.', type: 'success');
     }
 
+    public function perguntarIA(): void
+    {
+        if (empty(trim($this->perguntaIA))) return;
+
+        $resumo = DB::selectOne("
+            SELECT COUNT(*) as total,
+                SUM(tamanho) as total_tamanho,
+                SUM(CASE WHEN tipo='peticao' THEN 1 ELSE 0 END) as peticoes,
+                SUM(CASE WHEN tipo='contrato' THEN 1 ELSE 0 END) as contratos,
+                SUM(CASE WHEN tipo='sentenca' THEN 1 ELSE 0 END) as sentencas,
+                SUM(CASE WHEN tipo='procuracao' THEN 1 ELSE 0 END) as procuracoes,
+                SUM(CASE WHEN tipo='documento_cliente' THEN 1 ELSE 0 END) as docs_cliente,
+                SUM(CASE WHEN portal_visivel = true THEN 1 ELSE 0 END) as portal_visiveis
+            FROM documentos
+        ");
+
+        $tamanhoTotal = $resumo->total_tamanho
+            ? number_format($resumo->total_tamanho / 1024 / 1024, 1) . ' MB'
+            : '0 MB';
+
+        $contexto = "Você é um assistente jurídico do sistema SAPRO. Responda de forma objetiva em português.
+
+Dados do arquivo de documentos:
+- Total de documentos: {$resumo->total}
+- Tamanho total: {$tamanhoTotal}
+- Petições: {$resumo->peticoes}
+- Contratos: {$resumo->contratos}
+- Sentenças: {$resumo->sentencas}
+- Procurações: {$resumo->procuracoes}
+- Docs. Cliente: {$resumo->docs_cliente}
+- Visíveis no portal: {$resumo->portal_visiveis}
+
+Pergunta: {$this->perguntaIA}
+
+Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tipo=valor ou FILTRO:busca=texto ou FILTRO:vinculo=processo|cliente";
+
+        $resposta = app(\App\Services\GeminiService::class)->gerar($contexto, 300);
+
+        if ($resposta === null) {
+            $this->respostaIA = 'IA temporariamente indisponível.';
+            return;
+        }
+
+        if (str_contains($resposta, 'FILTRO:')) {
+            preg_match('/FILTRO:(\w+)=(.+)/', $resposta, $matches);
+            if (count($matches) === 3) {
+                $campo = trim($matches[1]);
+                $valor = trim($matches[2]);
+                if ($campo === 'busca')   $this->busca        = $valor;
+                if ($campo === 'tipo')    $this->filtroTipo   = $valor;
+                if ($campo === 'vinculo') $this->filtroVinculo = $valor;
+                $resposta = trim(preg_replace('/FILTRO:\w+=.+/', '', $resposta));
+            }
+        }
+
+        $this->respostaIA = $resposta;
+    }
+
+    public function limparIA(): void
+    {
+        $this->perguntaIA = '';
+        $this->respostaIA = null;
+    }
+
     public function downloadUrl(int $id): void
     {
         $doc = DB::selectOne("SELECT arquivo FROM documentos WHERE id = ?", [$id]);
@@ -372,7 +440,10 @@ class Documentos extends Component
                 SUM(CASE WHEN tipo='peticao' THEN 1 ELSE 0 END) as peticoes,
                 SUM(CASE WHEN tipo='contrato' THEN 1 ELSE 0 END) as contratos,
                 SUM(CASE WHEN tipo='sentenca' THEN 1 ELSE 0 END) as sentencas,
-                SUM(CASE WHEN tipo='documento_cliente' THEN 1 ELSE 0 END) as docs_cliente
+                SUM(CASE WHEN tipo='procuracao' THEN 1 ELSE 0 END) as procuracoes,
+                SUM(CASE WHEN tipo='laudo' THEN 1 ELSE 0 END) as laudos,
+                SUM(CASE WHEN tipo='documento_cliente' THEN 1 ELSE 0 END) as docs_cliente,
+                SUM(CASE WHEN tipo='outro' THEN 1 ELSE 0 END) as outros
             FROM documentos
         ");
 

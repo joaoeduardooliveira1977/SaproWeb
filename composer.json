@@ -8,7 +8,8 @@
         "laravel/sanctum": "^4.0",
         "livewire/livewire": "^3.0",
         "laravel/tinker": "^2.9",
-        "barryvdh/laravel-dompdf": "^3.1"
+        "barryvdh/laravel-dompdf": "^3.1",
+        "openai-php/client": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -47,5 +48,10 @@
         ]
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
 }

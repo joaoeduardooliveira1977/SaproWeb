@@ -31,6 +31,10 @@ return [
         ],
     ],
 
+    'gemini' => [
+    'key' => env('GEMINI_API_KEY'),
+	],
+
     'clicksign' => [
         'token'   => env('CLICKSIGN_ACCESS_TOKEN', ''),
         'sandbox' => env('CLICKSIGN_SANDBOX', true),

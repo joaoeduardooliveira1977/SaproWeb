@@ -4,10 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany};
+use App\Models\Traits\BelongsToTenant;
+
 
 class Processo extends Model
 {
-    protected $table = 'processos';
+    
+	use BelongsToTenant;
+    
+	protected $table = 'processos';
 
     protected $fillable = [
         'numero', 'data_distribuicao', 'extrajudicial', 'cliente_id', 'parte_contraria',
@@ -15,6 +20,7 @@ class Processo extends Model
         'tipo_acao_id', 'tipo_processo_id', 'fase_id', 'assunto_id', 'risco_id',
         'secretaria_id', 'reparticao_id', 'vara', 'valor_causa', 'valor_risco',
         'observacoes', 'status', 'criado_por',
+        'analise_ia', 'analise_ia_em',
     ];
 
     protected $casts = [
@@ -22,6 +28,7 @@ class Processo extends Model
         'extrajudicial'     => 'boolean',
         'valor_causa'       => 'decimal:2',
         'valor_risco'       => 'decimal:2',
+        'analise_ia_em'     => 'datetime',
     ];
 
     // ── Relacionamentos ────────────────────────────

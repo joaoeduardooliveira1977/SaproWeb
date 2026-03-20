@@ -11,6 +11,16 @@
         <div class="card-actions">
             <a href="{{ route('processos.show', $processo->id) }}" class="btn btn-secondary btn-sm">&larr; Voltar</a>
             @if(!$mostrarFormulario)
+            <button wire:click="sugerirProximoPasso" wire:loading.attr="disabled"
+                style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s;"
+                onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                <svg wire:loading.remove wire:target="sugerirProximoPasso" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+                </svg>
+                <svg wire:loading wire:target="sugerirProximoPasso" style="animation:spin .7s linear infinite;" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <span wire:loading.remove wire:target="sugerirProximoPasso">✨ Próximo Passo</span>
+                <span wire:loading wire:target="sugerirProximoPasso">Analisando...</span>
+            </button>
             <button wire:click="novoAndamento" class="btn btn-primary btn-sm">+ Novo Andamento</button>
             @endif
         </div>
@@ -18,10 +28,58 @@
     @else
     {{-- Botao inline quando embutido --}}
     @if(!$mostrarFormulario)
-    <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;">
+        <button wire:click="sugerirProximoPasso" wire:loading.attr="disabled"
+            style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s;"
+            onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+            <svg wire:loading.remove wire:target="sugerirProximoPasso" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+            </svg>
+            <svg wire:loading wire:target="sugerirProximoPasso" style="animation:spin .7s linear infinite;" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <span wire:loading.remove wire:target="sugerirProximoPasso">✨ Próximo Passo</span>
+            <span wire:loading wire:target="sugerirProximoPasso">Analisando...</span>
+        </button>
         <button wire:click="novoAndamento" class="btn btn-primary btn-sm">+ Novo Andamento</button>
     </div>
     @endif
+    @endif
+
+    {{-- ── Sugestão IA de Próximo Passo ── --}}
+    @if($mostrarSugestaoIA && $sugestaoIA)
+    <div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);border-radius:12px;padding:20px;margin-bottom:16px;color:#fff;position:relative;">
+        <button wire:click="fecharSugestaoIA"
+            style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.1);border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;color:#93c5fd;display:flex;align-items:center;justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+                </svg>
+            </div>
+            <div>
+                <div style="font-size:14px;font-weight:700;color:#fff;">Sugestão de Próximo Passo — IA</div>
+                <div style="font-size:11px;color:#93c5fd;">Baseado no histórico de andamentos do processo</div>
+            </div>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border-radius:8px;padding:14px 16px;font-size:13px;color:#e2e8f0;line-height:1.7;white-space:pre-line;">{{ $sugestaoIA }}</div>
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+            <button wire:click="novoAndamento"
+                style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#2563a8;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Registrar Andamento
+            </button>
+            <a href="{{ route('prazos') }}"
+                style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#93c5fd;font-size:12px;font-weight:600;text-decoration:none;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Criar Prazo
+            </a>
+            <button wire:click="fecharSugestaoIA"
+                style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#94a3b8;font-size:12px;cursor:pointer;">
+                Dispensar
+            </button>
+        </div>
+    </div>
     @endif
 
     {{-- Sugestão de prazo automático --}}

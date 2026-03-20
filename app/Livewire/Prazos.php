@@ -50,6 +50,10 @@ class Prazos extends Component
     public string $responsavel_id = '';
     public string $observacoes    = '';
 
+    // ── IA ───────────────────────────────────────────────────────
+    public string  $perguntaIA = '';
+    public ?string $respostaIA = null;
+
     // ── Confirmação exclusão ─────────────────────────────────────
     public ?int $confirmarExcluir = null;
 
@@ -297,6 +301,76 @@ class Prazos extends Component
         }
     }
 
+    // ── IA ────────────────────────────────────────────────────────
+
+    public function perguntarIA(): void
+    {
+        if (empty(trim($this->perguntaIA))) return;
+
+        $totalAbertos  = Prazo::where('status', 'aberto')->count();
+        $vencendoHoje  = Prazo::where('status', 'aberto')->whereDate('data_prazo', today())->count();
+        $vencidos      = Prazo::where('status', 'aberto')->whereDate('data_prazo', '<', today())->count();
+        $fatais        = Prazo::where('status', 'aberto')->where('prazo_fatal', true)
+                            ->whereDate('data_prazo', '>=', today())
+                            ->whereDate('data_prazo', '<=', today()->addDays(5))
+                            ->count();
+        $semana        = Prazo::where('status', 'aberto')
+                            ->whereBetween('data_prazo', [today(), today()->addDays(7)])
+                            ->count();
+
+        $proximosPrazos = Prazo::where('status', 'aberto')
+            ->where('data_prazo', '>=', today())
+            ->orderBy('data_prazo')
+            ->with(['processo', 'responsavel'])
+            ->take(5)
+            ->get()
+            ->map(fn($p) => '- '.$p->titulo.' (vence '.$p->data_prazo->format('d/m/Y').')'.($p->prazo_fatal ? ' [FATAL]' : ''))
+            ->join("\n");
+
+        $contexto = "Você é um assistente jurídico do sistema SAPRO. Responda de forma objetiva em português.
+
+Dados dos prazos:
+- Total em aberto: {$totalAbertos}
+- Vencem hoje: {$vencendoHoje}
+- Vencidos não cumpridos: {$vencidos}
+- Prazos fatais próximos (5 dias): {$fatais}
+- Vencem nos próximos 7 dias: {$semana}
+- Próximos prazos:
+{$proximosPrazos}
+
+Pergunta: {$this->perguntaIA}
+
+Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:status=aberto|cumprido|perdido ou FILTRO:tipo=Prazo Fatal ou FILTRO:busca=texto";
+
+        $resposta = app(\App\Services\GeminiService::class)->gerar($contexto, 300);
+
+        if ($resposta === null) {
+            $this->respostaIA = 'IA temporariamente indisponível.';
+            return;
+        }
+
+        if (str_contains($resposta, 'FILTRO:')) {
+            preg_match('/FILTRO:(\w+)=(.+)/', $resposta, $matches);
+            if (count($matches) === 3) {
+                $campo = trim($matches[1]);
+                $valor = trim($matches[2]);
+                if ($campo === 'status') $this->filtroStatus = $valor;
+                if ($campo === 'tipo')   $this->filtroTipo   = $valor;
+                if ($campo === 'busca')  $this->filtroBusca  = $valor;
+                $this->resetPage();
+                $resposta = trim(preg_replace('/FILTRO:\w+=.+/', '', $resposta));
+            }
+        }
+
+        $this->respostaIA = $resposta;
+    }
+
+    public function limparIA(): void
+    {
+        $this->perguntaIA = '';
+        $this->respostaIA = null;
+    }
+
     // ── Query builder reutilizável ────────────────────────────────
 
     private function buildQuery(): \Illuminate\Database\Eloquent\Builder
@@ -347,9 +421,16 @@ class Prazos extends Component
                               ->whereDate('data_prazo', '<=', today()->addDays(5))
                               ->count();
 
+        // Contagem por tipo (abertos)
+        $tipoCounts = [];
+        foreach (['Prazo', 'Prazo Fatal', 'Audiência', 'Diligência', 'Recurso'] as $t) {
+            $tipoCounts[$t] = Prazo::where('status', 'aberto')->where('tipo', $t)->count();
+        }
+
         return view('livewire.prazos', compact(
             'prazos', 'processos', 'usuarios',
-            'totalAbertos', 'vencendoHoje', 'vencidos', 'fatais'
+            'totalAbertos', 'vencendoHoje', 'vencidos', 'fatais',
+            'tipoCounts'
         ));
     }
 }

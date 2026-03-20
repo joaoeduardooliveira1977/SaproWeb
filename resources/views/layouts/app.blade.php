@@ -485,212 +485,80 @@
             $isAdmin    = $perfil === 'admin';
             $isAdvogado = in_array($perfil, ['admin','advogado']);
             $isFinanc   = in_array($perfil, ['admin','financeiro']);
+
+            // Detecta o grupo ativo para destacar o item de menu
+            $hubAtivo = '';
+            $rotasProcessos  = ['processos','processos.novo','processos.editar','processos.show','pessoas','correspondentes','procuracoes','documentos','minutas','assinatura-digital','audiencias','prazos','agenda','processos.hub'];
+            $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','financeiro.hub'];
+            $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','ferramentas.hub'];
+            $rotasAdmin      = ['usuarios','tabelas','administradoras','indices','auditoria','admin.portal-acesso','admin.portal-mensagens','admin.notificacoes-whatsapp','admin.hub'];
+            if (in_array($rota, $rotasProcessos))   $hubAtivo = 'processos';
+            if (in_array($rota, $rotasFinanceiro))  $hubAtivo = 'financeiro';
+            if (in_array($rota, $rotasFerramentas)) $hubAtivo = 'ferramentas';
+            if (in_array($rota, $rotasAdmin))       $hubAtivo = 'admin';
+
+            // Variáveis de permissão ainda usadas no topbar / quick-add
             $canProc    = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
             $canPessoas = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
             $canAgenda  = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
             $canDocs    = in_array($perfil, ['admin','advogado','estagiario']);
         @endphp
 
-        {{-- ── GERAL ── --}}
-        <div class="nav-group" data-group="geral">
-            <div class="nav-group-label" onclick="toggleGroup('geral')">
-                Geral <span class="chevron">▾</span>
-            </div>
-            <div class="nav-group-items" id="group-geral">
-                <a href="{{ route('dashboard') }}" class="nav-item {{ $rota === 'dashboard' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Dashboard
-                </a>
-                @if($isAdvogado || $isAdmin)
-                <a href="{{ route('analytics') }}" class="nav-item {{ $rota === 'analytics' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span> Analytics
-                </a>
-                <a href="{{ route('produtividade') }}" class="nav-item {{ $rota === 'produtividade' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Produtividade
-                </a>
-                @endif
-                @if($canAgenda)
-                <a href="{{ route('agenda') }}" class="nav-item {{ $rota === 'agenda' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Agenda
-                </a>
-                <a href="{{ route('prazos') }}" class="nav-item {{ $rota === 'prazos' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> Prazos
-                </a>
-                <a href="{{ route('audiencias') }}" class="nav-item {{ $rota === 'audiencias' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Audiências
-                </a>
-                @endif
-            </div>
-        </div>
-
-{{-- ── CRM ── 
-        @if($isAdvogado)
-        <div class="nav-group" data-group="crm">
-            <div class="nav-group-label" onclick="toggleGroup('crm')">
-                Comercial <span class="chevron">▾</span>
-            </div>
-            <div class="nav-group-items" id="group-crm">
-                <a href="{{ route('crm') }}" class="nav-item {{ $rota === 'crm' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span> Pipeline / CRM
-                </a>
-            </div>
-        </div>
-        @endif
-
---}}
-
-
-        {{-- ── PROCESSOS ── --}}
-        @if($canProc || $canPessoas || $canDocs)
-        <div class="nav-group" data-group="processos">
-            <div class="nav-group-label" onclick="toggleGroup('processos')">
-                Processos <span class="chevron">▾</span>
-            </div>
-            <div class="nav-group-items" id="group-processos">
-                @if($canProc)
-                <a href="{{ route('processos') }}" class="nav-item {{ str_contains($rota ?? '', 'processos') ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg></span> Processos
-                </a>
-                @endif
-                @if($canPessoas)
-                <a href="{{ route('pessoas') }}" class="nav-item {{ $rota === 'pessoas' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span> Pessoas
-                </a>
-                <a href="{{ route('correspondentes') }}" class="nav-item {{ request()->is('correspondentes*') ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span> Correspondentes
-                </a>
-                <a href="{{ route('procuracoes') }}" class="nav-item {{ request()->is('procuracoes*') ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Procurações
-                </a>
-                @endif
-                @if($canDocs)
-                <a href="{{ route('documentos') }}" class="nav-item {{ request()->is('documentos*') ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span> Documentos
-                </a>
-                @endif
-                <a href="{{ route('minutas') }}" class="nav-item {{ $rota === 'minutas' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Minutas
-                </a>
-                <a href="{{ route('assinatura-digital') }}" class="nav-item {{ request()->is('assinatura-digital*') ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> Assinatura Digital
-                </a>
-            </div>
-        </div>
-        @endif
-
-        {{-- ── FINANCEIRO ── --}}
-        @if($isFinanc)
-        <div class="nav-group" data-group="financeiro">
-            <div class="nav-group-label" onclick="toggleGroup('financeiro')">
-                Financeiro <span class="chevron">▾</span>
-            </div>
-            <div class="nav-group-items" id="group-financeiro">
-                <a href="{{ route('financeiro.consolidado') }}" class="nav-item {{ $rota === 'financeiro.consolidado' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span> Visão Geral
-                </a>
-                <a href="{{ route('financeiro') }}" class="nav-item {{ $rota === 'financeiro' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg></span> Por Processo
-                </a>
-                <a href="{{ route('honorarios') }}" class="nav-item {{ request()->is('honorarios*') ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span> Honorários
-                </a>
-                <a href="{{ route('conciliacao-bancaria') }}" class="nav-item {{ $rota === 'conciliacao-bancaria' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><polyline points="7 15 10 18 14 13"/></svg></span> Conciliação Bancária
-                </a>
-                <a href="{{ route('inadimplencia') }}" class="nav-item {{ request()->is('inadimplencia*') ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> Inadimplência
-                </a>
-                @if($isAdvogado || $isFinanc)
-                <a href="{{ route('relatorios.index') }}" class="nav-item {{ str_contains($rota ?? '', 'relatorios') ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span> Relatórios
-                </a>
-                @endif
-            </div>
-        </div>
-        @endif
-
-        {{-- ── FERRAMENTAS ── --}}
-        @if($isAdvogado)
-        <div class="nav-group" data-group="ferramentas">
-            <div class="nav-group-label" onclick="toggleGroup('ferramentas')">
-                Ferramentas <span class="chevron">▾</span>
-            </div>
-            <div class="nav-group-items" id="group-ferramentas">
-                <a href="{{ route('calculadora') }}" class="nav-item {{ $rota === 'calculadora' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="12" y1="10" x2="14" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="12" y1="14" x2="14" y2="14"/><line x1="16" y1="14" x2="16" y2="18"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="12" y1="18" x2="14" y2="18"/></svg></span> Calculadora
-                </a>
-                <a href="{{ route('tjsp') }}" class="nav-item {{ $rota === 'tjsp' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="10"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span> Consulta Judicial
-                </a>
-                <a href="{{ route('aasp-publicacoes') }}" class="nav-item {{ $rota === 'aasp-publicacoes' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Publicações AASP
-                </a>
-                <a href="{{ route('monitoramento') }}" class="nav-item {{ $rota === 'monitoramento' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span> Monitoramento
-                </a>
-                <a href="{{ route('assistente') }}" class="nav-item {{ request()->is('assistente*') ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 8h10M7 12h10M7 16h10"/></svg></span> Assistente IA
-                </a>
-                @if(!$isFinanc)
-                <a href="{{ route('relatorios.index') }}" class="nav-item {{ str_contains($rota ?? '', 'relatorios') ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span> Relatórios
-                </a>
-                @endif
-            </div>
-        </div>
-        @endif
-
-        {{-- ── PORTAL ── --}}
-        @if($isAdmin)
-        <div class="nav-group" data-group="portal">
-            <div class="nav-group-label" onclick="toggleGroup('portal')">
-                Portal Cliente <span class="chevron">▾</span>
-            </div>
-            <div class="nav-group-items" id="group-portal">
-                <a href="{{ route('admin.portal-acesso') }}" class="nav-item {{ $rota === 'admin.portal-acesso' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></span> Acessos
-                </a>
-                <a href="{{ route('admin.portal-mensagens') }}" class="nav-item {{ $rota === 'admin.portal-mensagens' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span> Mensagens
-                </a>
-                <a href="{{ route('admin.notificacoes-whatsapp') }}" class="nav-item {{ request()->is('admin/notificacoes-whatsapp*') ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span> WhatsApp/SMS
-                </a>
-            </div>
-        </div>
-        @endif
-
-        {{-- ── ADMINISTRAÇÃO ── --}}
-        @if($isAdmin)
-        <div class="nav-group" data-group="admin">
-            <div class="nav-group-label" onclick="toggleGroup('admin')">
-                Administração <span class="chevron">▾</span>
-            </div>
-            <div class="nav-group-items" id="group-admin">
-                <a href="{{ route('usuarios') }}" class="nav-item {{ $rota === 'usuarios' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Usuários
-                </a>
-                <a href="{{ route('tabelas') }}" class="nav-item {{ $rota === 'tabelas' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> Tabelas
-                </a>
-                <a href="{{ route('administradoras') }}" class="nav-item {{ $rota === 'administradoras' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Administradoras
-                </a>
-                <a href="{{ route('indices') }}" class="nav-item {{ $rota === 'indices' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Índices
-                </a>
-                <a href="{{ route('auditoria') }}" class="nav-item {{ $rota === 'auditoria' ? 'active' : '' }}">
-                    <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span> Auditoria
-                </a>
-            </div>
-        </div>
-        @endif
-
-        {{-- ── CONTA ── --}}
-        <div class="nav-group">
-            <a href="{{ route('minha-conta') }}" class="nav-item {{ $rota === 'minha-conta' ? 'active' : '' }}">
-                <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Minha Conta
+        {{-- Dashboard --}}
+        <div style="padding:10px 0 4px;">
+            <a href="{{ route('dashboard') }}" class="nav-item {{ $rota === 'dashboard' ? 'active' : '' }}" style="font-size:14px;font-weight:600;">
+                <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+                Dashboard
             </a>
         </div>
+
+        <div style="height:1px;background:rgba(255,255,255,.08);margin:2px 18px 8px;"></div>
+
+        {{-- Processos --}}
+        <a href="{{ route('processos.hub') }}"
+           class="nav-item {{ $hubAtivo === 'processos' ? 'active' : '' }}"
+           style="font-size:14px;font-weight:600;padding:10px 18px;">
+            <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg></span>
+            Processos
+        </a>
+
+        {{-- Financeiro --}}
+        @if($isFinanc)
+        <a href="{{ route('financeiro.hub') }}"
+           class="nav-item {{ $hubAtivo === 'financeiro' ? 'active' : '' }}"
+           style="font-size:14px;font-weight:600;padding:10px 18px;">
+            <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg></span>
+            Financeiro
+        </a>
+        @endif
+
+        {{-- Ferramentas --}}
+        @if($isAdvogado)
+        <a href="{{ route('ferramentas.hub') }}"
+           class="nav-item {{ $hubAtivo === 'ferramentas' ? 'active' : '' }}"
+           style="font-size:14px;font-weight:600;padding:10px 18px;">
+            <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></span>
+            Ferramentas
+        </a>
+        @endif
+
+        {{-- Administração --}}
+        @if($isAdmin)
+        <a href="{{ route('admin.hub') }}"
+           class="nav-item {{ $hubAtivo === 'admin' ? 'active' : '' }}"
+           style="font-size:14px;font-weight:600;padding:10px 18px;">
+            <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>
+            Administração
+        </a>
+        @endif
+
+        <div style="height:1px;background:rgba(255,255,255,.08);margin:8px 18px 6px;"></div>
+
+        {{-- Minha Conta --}}
+        <a href="{{ route('minha-conta') }}" class="nav-item {{ $rota === 'minha-conta' ? 'active' : '' }}" style="font-size:13px;">
+            <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            Minha Conta
+        </a>
 
         <div class="sidebar-footer">
             {{ auth('usuarios')->user()?->nome ?? 'Usuário' }}<br>
@@ -717,12 +585,20 @@
             <button class="hamburger" onclick="toggleSidebar()" aria-label="Abrir menu" style="display:inline-flex;align-items:center;justify-content:center;"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
             <span class="topbar-title" style="flex-shrink:0;">@yield('page-title', 'Dashboard')</span>
             @if($canProc)
-            <div class="quick-add" id="quickAdd">
-                <button class="quick-add-btn" onclick="toggleQuickAdd(event)" aria-label="Criar novo item" title="Ações rápidas">
+            
+	<div class="quick-add" id="quickAdd">
+                
+
+{{--
+		<button class="quick-add-btn" onclick="toggleQuickAdd(event)" aria-label="Criar novo item" title="Ações rápidas">
                     <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     <span class="qa-label">Novo</span>
                     <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
+
+
+--}}
+
                 <div class="quick-add-menu" id="quickAddMenu">
                     @if($canProc)
                     <a href="{{ route('processos') }}" class="quick-add-item">

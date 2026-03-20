@@ -35,6 +35,11 @@ class ProcessoForm extends Component
     // Conflito de interesses
     public array   $conflitos = [];
 
+    // Sugestão de risco por IA
+    public string  $sugestaoRisco      = '';
+    public bool    $mostrarSugestaoRisco = false;
+    public bool    $gerandoRisco        = false;
+
     // Parte Contrária — autocomplete
     public ?int    $parteContrariaId         = null;
     public string  $parteContrariaBusca      = '';
@@ -142,6 +147,50 @@ class ProcessoForm extends Component
         $this->parteContrariaBusca      = '';
         $this->parteContrariaSugestoes  = [];
         $this->conflitos                = [];
+    }
+
+    // ── Sugestão de Risco por IA ─────────────────
+
+    public function sugerirRisco(): void
+    {
+        if ($this->gerandoRisco) return;
+
+        $this->gerandoRisco        = true;
+        $this->sugestaoRisco       = '';
+        $this->mostrarSugestaoRisco = false;
+
+        $tipoAcao = $this->tipo_acao_id
+            ? \App\Models\TipoAcao::find($this->tipo_acao_id)?->descricao
+            : null;
+        $fase = $this->fase_id
+            ? \App\Models\Fase::find($this->fase_id)?->descricao
+            : null;
+
+        if (!$tipoAcao && !$fase && empty($this->valor_causa)) {
+            $this->sugestaoRisco       = 'Preencha ao menos Tipo de Ação, Fase ou Valor da Causa para sugerir o risco.';
+            $this->gerandoRisco        = false;
+            $this->mostrarSugestaoRisco = true;
+            return;
+        }
+
+        $dados = implode(' | ', array_filter([
+            $tipoAcao             ? "Tipo de Ação: {$tipoAcao}"         : null,
+            $fase                 ? "Fase: {$fase}"                      : null,
+            $this->valor_causa    ? "Valor da Causa: R$ {$this->valor_causa}" : null,
+            $this->observacoes    ? "Observações: {$this->observacoes}"  : null,
+        ]));
+
+        $prompt = "Você é um advogado experiente no direito brasileiro. "
+            . "Com base nos dados do processo abaixo, classifique o grau de risco como Baixo, Médio ou Alto "
+            . "e forneça uma justificativa de no máximo 2 linhas. "
+            . "Responda exatamente neste formato: RISCO: [nível] — [justificativa breve]. "
+            . "Dados: {$dados}";
+
+        $result = app(\App\Services\GeminiService::class)->gerar($prompt, 200);
+
+        $this->sugestaoRisco       = $result ?? 'IA temporariamente indisponível. Tente novamente.';
+        $this->gerandoRisco        = false;
+        $this->mostrarSugestaoRisco = true;
     }
 
     // ── Conflito de Interesses ────────────────────

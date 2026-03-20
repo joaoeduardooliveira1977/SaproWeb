@@ -33,6 +33,11 @@ class ProcessoAndamentos extends Component
     public string $sugestaoData        = '';
     public string $sugestaoTitulo      = '';
 
+    // Sugestão IA de próximo passo
+    public ?string $sugestaoIA        = null;
+    public bool    $carregandoIA      = false;
+    public bool    $mostrarSugestaoIA = false;
+
     public bool $mostrarFormulario = false;
     public bool $embed             = false;
 
@@ -101,6 +106,11 @@ class ProcessoAndamentos extends Component
         $this->resetForm();
         $this->mostrarFormulario = false;
         $this->dispatch('toast', message: 'Andamento salvo com sucesso!', type: 'success');
+
+        // Sugerir próximo passo automaticamente após novo andamento
+        if (!$this->editandoId) {
+            $this->sugerirProximoPasso();
+        }
     }
 
     // ── Upload para andamento já existente ────────────────────────────
@@ -249,6 +259,69 @@ class ProcessoAndamentos extends Component
                 $uploadedBy,
             ]
         );
+    }
+
+    public function sugerirProximoPasso(): void
+    {
+        if ($this->carregandoIA) return;
+        $this->carregandoIA      = true;
+        $this->sugestaoIA        = null;
+        $this->mostrarSugestaoIA = false;
+
+        $historico = Andamento::where('processo_id', $this->processoId)
+            ->orderBy('data', 'desc')
+            ->take(10)
+            ->get()
+            ->map(fn($a) => '- ' . $a->data->format('d/m/Y') . ': ' . $a->descricao)
+            ->join("\n");
+
+        $processo   = $this->processo;
+        $tipoAcao   = $processo->tipoAcao?->descricao ?? 'não informado';
+        $fase       = $processo->fase?->descricao ?? 'não informada';
+        $risco      = $processo->risco?->descricao ?? 'não informado';
+        $cliente    = $processo->cliente?->nome ?? 'não informado';
+        $parteContr = $processo->parte_contraria ?? 'não informada';
+
+        if (empty($historico)) {
+            $this->sugestaoIA        = 'Nenhum andamento cadastrado ainda. Adicione o primeiro andamento para receber sugestões de próximos passos.';
+            $this->carregandoIA      = false;
+            $this->mostrarSugestaoIA = true;
+            return;
+        }
+
+        $prompt = "Você é um advogado experiente no direito brasileiro, especialista em direito condominial e cível.
+
+Analise o histórico de andamentos do processo abaixo e sugira o próximo passo jurídico mais adequado.
+
+DADOS DO PROCESSO:
+- Tipo de Ação: {$tipoAcao}
+- Fase atual: {$fase}
+- Grau de Risco: {$risco}
+- Cliente: {$cliente}
+- Parte Contrária: {$parteContr}
+
+HISTÓRICO DE ANDAMENTOS (mais recentes primeiro):
+{$historico}
+
+Responda em formato estruturado com:
+1. PRÓXIMO PASSO: (ação recomendada em 1 linha)
+2. JUSTIFICATIVA: (explicação em 2-3 linhas)
+3. PRAZO SUGERIDO: (se houver prazo legal, informe em dias úteis ou corridos)
+4. ATENÇÃO: (alertas importantes, se houver)
+
+Seja objetivo e use linguagem jurídica profissional.";
+
+        $resultado = app(\App\Services\GeminiService::class)->gerar($prompt, 500);
+
+        $this->sugestaoIA        = $resultado ?? 'IA temporariamente indisponível. Tente novamente em instantes.';
+        $this->carregandoIA      = false;
+        $this->mostrarSugestaoIA = true;
+    }
+
+    public function fecharSugestaoIA(): void
+    {
+        $this->mostrarSugestaoIA = false;
+        $this->sugestaoIA        = null;
     }
 
     public function descartarSugestaoPrazo(): void

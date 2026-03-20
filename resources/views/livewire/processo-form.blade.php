@@ -1,7 +1,7 @@
 <div>
 
 {{-- ── Cabeçalho ── --}}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
     <div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
             <a href="{{ route('processos') }}"
@@ -21,6 +21,21 @@
                 Novo Processo
             @endif
         </h2>
+        {{-- Indicador de completude --}}
+        @php
+        $totalCampos = 4;
+        $camposOk = (int)($cliente_id > 0) + (int)(!empty($numero)) + (int)(count($advogados_selecionados) > 0) + (int)($fase_id > 0);
+        $pct = round(($camposOk / $totalCampos) * 100);
+        @endphp
+        <div style="margin-top:8px;min-width:220px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;">
+                <span>Campos essenciais</span>
+                <span style="font-weight:700;color:{{ $pct === 100 ? '#16a34a' : 'var(--muted)' }};">{{ $pct }}%</span>
+            </div>
+            <div style="height:4px;background:var(--border);border-radius:4px;overflow:hidden;">
+                <div style="height:100%;width:{{ $pct }}%;background:{{ $pct === 100 ? '#16a34a' : 'var(--primary)' }};border-radius:4px;transition:width .3s;"></div>
+            </div>
+        </div>
     </div>
     <div style="display:flex;gap:8px;">
         <a href="{{ route('processos') }}" class="btn btn-outline btn-sm" style="display:flex;align-items:center;gap:5px;">
@@ -35,6 +50,38 @@
             <span wire:loading wire:target="salvar">Salvando…</span>
         </button>
     </div>
+</div>
+
+{{-- ── Barra de progresso / etapas ── --}}
+<div style="display:flex;margin-bottom:20px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:14px 20px;align-items:center;">
+    @php
+    $etapas = [
+        ['id'=>'identificacao', 'label'=>'Identificação'],
+        ['id'=>'classificacao', 'label'=>'Classificação'],
+        ['id'=>'localizacao',   'label'=>'Localização'],
+        ['id'=>'financeiro',    'label'=>'Financeiro'],
+    ];
+    $etapaCores = [
+        'identificacao' => ['bg'=>'var(--primary)', 'light'=>'#eff6ff'],
+        'classificacao' => ['bg'=>'#7c3aed',        'light'=>'#f5f3ff'],
+        'localizacao'   => ['bg'=>'#16a34a',        'light'=>'#f0fdf4'],
+        'financeiro'    => ['bg'=>'#d97706',        'light'=>'#fffbeb'],
+    ];
+    @endphp
+    @foreach($etapas as $i => $etapa)
+    @php $cor = $etapaCores[$etapa['id']]; @endphp
+    <div style="display:flex;align-items:center;flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:{{ $cor['bg'] }};color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                {{ $i + 1 }}
+            </div>
+            <span style="font-size:12px;font-weight:600;color:{{ $cor['bg'] }};">{{ $etapa['label'] }}</span>
+        </div>
+        @if($i < count($etapas) - 1)
+        <div style="flex:1;height:2px;background:var(--border);margin:0 12px;"></div>
+        @endif
+    </div>
+    @endforeach
 </div>
 
 {{-- ── Alerta de Conflito de Interesses ── --}}
@@ -60,13 +107,13 @@ $disJ = $extrajudicial && empty($numero);
 $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
 @endphp
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+<div style="display:grid;grid-template-columns:1fr 1fr 260px;gap:16px;">
 
     {{-- ── Coluna esquerda ── --}}
     <div style="display:flex;flex-direction:column;gap:16px;">
 
         {{-- ═══ IDENTIFICAÇÃO ═══ --}}
-        <div class="card">
+        <div class="card" style="border-top:3px solid var(--primary);">
             <div style="{{ $sec }}">
                 <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 Identificação
@@ -76,7 +123,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
 
                 {{-- 01 Cliente — Autocomplete --}}
                 <div class="form-field">
-                    <label class="lbl">Cliente *</label>
+                    <label class="lbl">Cliente <span style="color:var(--danger);">*</span></label>
                     <div style="position:relative;" x-data x-on:click.outside="$wire.set('clienteSugestoes', [])">
                         @if($cliente_id)
                         {{-- Cliente selecionado --}}
@@ -123,7 +170,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
 
                 {{-- Número CNJ --}}
                 <div class="form-field">
-                    <label class="lbl">Número do Processo *</label>
+                    <label class="lbl">Número do Processo <span style="color:var(--danger);">*</span></label>
                     <input wire:model.live.debounce.400ms="numero" type="text"
                         placeholder="0000000-00.0000.8.26.0001"
                         style="{{ $inp }}border-color:{{ $numeroValido ? 'var(--success)' : 'var(--border)' }};">
@@ -154,7 +201,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                     </div>
                     <div style="padding-bottom:2px;">
                         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:9px 12px;border:1.5px solid {{ $extrajudicial ? 'var(--warning)' : 'var(--border)' }};border-radius:8px;font-size:13px;background:{{ $extrajudicial ? '#fffbeb' : 'var(--white)' }};white-space:nowrap;">
-                            <input wire:model.live="extrajudicial" type="checkbox" id="extrajudicial"
+                            <input wire:model="extrajudicial" wire:change="$refresh" type="checkbox" id="extrajudicial"
                                 style="width:15px;height:15px;cursor:pointer;accent-color:var(--warning);margin:0;flex-shrink:0;">
                             Extrajudicial
                         </label>
@@ -180,7 +227,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                     </div>
                     <div class="form-field">
                         <label class="lbl">Unidade</label>
-                        <input wire:model="unidade" type="text" placeholder="Ex: Apto 42" style="{{ $inp }}">
+                        <input wire:model="unidade" type="text" placeholder="Ex: 001" style="{{ $inp }}">
                     </div>
                 </div>
 
@@ -224,14 +271,14 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
         </div>
 
         {{-- ═══ LOCALIZAÇÃO ═══ --}}
-        <div class="card">
+        <div class="card" style="border-top:3px solid #16a34a;">
             <div style="{{ $sec }}">
                 <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 Localização
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 
-                {{-- Repartição/Fórum primeiro --}}
+                {{-- Repartição/Fórum --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Repartição / Fórum</label>
                     <select wire:model="reparticao_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
@@ -242,7 +289,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                     </select>
                 </div>
 
-                {{-- Vara depois --}}
+                {{-- Vara --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Vara</label>
                     <input wire:model="vara" type="text" style="{{ $inp }}" placeholder="Ex: 3ª Vara Cível"
@@ -275,19 +322,20 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
         </div>
 
     </div>
+    {{-- /coluna esquerda --}}
 
-    {{-- ── Coluna direita ── --}}
+    {{-- ── Coluna central ── --}}
     <div style="display:flex;flex-direction:column;gap:16px;">
 
         {{-- ═══ CLASSIFICAÇÃO ═══ --}}
-        <div class="card">
+        <div class="card" style="border-top:3px solid #7c3aed;">
             <div style="{{ $sec }}">
                 <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                 Classificação
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 
-                {{-- 03 Advogados — múltipla seleção --}}
+                {{-- Advogados — múltipla seleção --}}
                 <div class="form-field" style="grid-column:1/-1;">
                     <label class="lbl">Advogado(s) Responsável(is)</label>
                     @if($advogados->isEmpty())
@@ -336,11 +384,55 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                             <option value="{{ $r->id }}">{{ $r->descricao }}</option>
                         @endforeach
                     </select>
+                    {{-- Botão sugestão IA --}}
+                    <button type="button" wire:click="sugerirRisco" wire:loading.attr="disabled"
+                        style="margin-top:6px;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;color:#1d4ed8;font-size:11px;font-weight:600;cursor:pointer;transition:background .15s;"
+                        onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                        <svg wire:loading.remove wire:target="sugerirRisco" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/>
+                        </svg>
+                        <svg wire:loading wire:target="sugerirRisco" style="animation:spin .7s linear infinite;" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                        <span wire:loading.remove wire:target="sugerirRisco">Sugerir por IA</span>
+                        <span wire:loading wire:target="sugerirRisco">Consultando...</span>
+                    </button>
+                    @if($mostrarSugestaoRisco && $sugestaoRisco)
+                    <div style="margin-top:6px;padding:8px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:7px;font-size:12px;color:#1e40af;line-height:1.5;">
+                        <div style="display:flex;align-items:flex-start;gap:6px;">
+                            <svg style="flex-shrink:0;margin-top:1px;" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+                            </svg>
+                            <span>{{ $sugestaoRisco }}</span>
+                        </div>
+                    </div>
+                    @endif
                 </div>
 
-                {{-- Tipo de Ação --}}
+                {{-- Tipo de Ação com atalhos rápidos --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Tipo de Ação</label>
+                    {{-- Atalhos rápidos --}}
+                    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;">
+                        @php
+                        $acaoRapida = [
+                            'Cobrança de Condomínio',
+                            'Despejo por Falta de Pagamento',
+                            'Ação de Cobrança',
+                            'Execução de Título',
+                        ];
+                        @endphp
+                        @foreach($acaoRapida as $acao)
+                        @php $acaoId = \App\Models\TipoAcao::where('descricao', 'ilike', "%{$acao}%")->value('id'); @endphp
+                        @if($acaoId)
+                        <button type="button" wire:click="$set('tipo_acao_id', {{ $acaoId }})"
+                            style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;
+                                   border:1.5px solid {{ $tipo_acao_id == $acaoId ? 'var(--primary)' : 'var(--border)' }};
+                                   background:{{ $tipo_acao_id == $acaoId ? '#eff6ff' : 'var(--white)' }};
+                                   color:{{ $tipo_acao_id == $acaoId ? 'var(--primary)' : 'var(--muted)' }};">
+                            {{ $acao }}
+                        </button>
+                        @endif
+                        @endforeach
+                    </div>
                     <select wire:model="tipo_acao_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
                         <option value="">— Selecione —</option>
                         @foreach($tiposAcao as $t)
@@ -386,7 +478,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
         </div>
 
         {{-- ═══ FINANCEIRO ═══ --}}
-        <div class="card">
+        <div class="card" style="border-top:3px solid #d97706;">
             <div style="{{ $sec }}">
                 <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 Financeiro
@@ -422,7 +514,97 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
         </div>
 
     </div>
+    {{-- /coluna central --}}
+
+    {{-- ── Coluna resumo ── --}}
+    <div style="position:sticky;top:20px;display:flex;flex-direction:column;gap:12px;">
+
+        {{-- Card Resumo --}}
+        <div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);border-radius:12px;padding:20px;color:#fff;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#93c5fd;margin-bottom:16px;display:flex;align-items:center;gap:6px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Resumo do Processo
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                <div>
+                    <div style="font-size:10px;color:#93c5fd;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px;">Cliente</div>
+                    <div style="font-size:13px;font-weight:600;">{{ $clienteNome ?: '—' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:10px;color:#93c5fd;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px;">Número</div>
+                    <div style="font-size:12px;font-family:monospace;word-break:break-all;">{{ $numero ?: '—' }}</div>
+                </div>
+                @if(count($advogados_selecionados) > 0)
+                <div>
+                    <div style="font-size:10px;color:#93c5fd;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px;">Advogados</div>
+                    <div style="font-size:12px;">{{ count($advogados_selecionados) }} selecionado(s)</div>
+                </div>
+                @endif
+                @if($parteContrariaBusca)
+                <div>
+                    <div style="font-size:10px;color:#93c5fd;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px;">Parte Contrária</div>
+                    <div style="font-size:12px;">{{ $parteContrariaBusca }}</div>
+                </div>
+                @endif
+                @if($extrajudicial)
+                <div style="background:rgba(255,193,7,.15);border:1px solid rgba(255,193,7,.3);border-radius:6px;padding:6px 10px;font-size:11px;color:#fbbf24;font-weight:600;display:flex;align-items:center;gap:5px;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Extrajudicial
+                </div>
+                @endif
+                @if($valor_causa)
+                <div>
+                    <div style="font-size:10px;color:#93c5fd;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px;">Valor da Causa</div>
+                    <div style="font-size:14px;font-weight:700;color:#34d399;">R$ {{ $valor_causa }}</div>
+                </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Dicas contextuais --}}
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:14px;">
+            <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                Dicas
+            </div>
+            <div style="font-size:11px;color:#3730a3;line-height:1.8;">
+                @if(!$cliente_id)
+                <span style="display:block;">• Digite pelo menos 2 letras para buscar o cliente</span>
+                @endif
+                @if(!$numero)
+                <span style="display:block;">• O número CNJ é necessário para Consulta Judicial automática</span>
+                @endif
+                @if($extrajudicial && empty($numero))
+                <span style="display:block;">• Preencha o número para reativar os campos judiciais</span>
+                @endif
+                @if($cliente_id && $numero)
+                <span style="display:block;">• Use "Sugerir por IA" para classificar o risco automaticamente</span>
+                @endif
+                @if($cliente_id && $numero && count($advogados_selecionados) > 0 && $fase_id)
+                <span style="display:block;color:#16a34a;font-weight:700;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-right:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+                    Campos essenciais preenchidos!
+                </span>
+                @endif
+            </div>
+        </div>
+
+        {{-- Botão salvar fixo --}}
+        <button wire:click="salvar" wire:loading.attr="disabled"
+            class="btn btn-primary"
+            style="width:100%;justify-content:center;padding:12px;display:flex;align-items:center;gap:6px;">
+            <span wire:loading.remove wire:target="salvar" style="display:flex;align-items:center;gap:6px;justify-content:center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Salvar Processo
+            </span>
+            <span wire:loading wire:target="salvar">Salvando…</span>
+        </button>
+
+    </div>
+    {{-- /coluna resumo --}}
+
 </div>
+{{-- /grid --}}
 
 {{-- ── Barra de ações (rodapé) ── --}}
 <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;padding:16px;background:var(--white);border:1px solid var(--border);border-radius:10px;">
@@ -438,5 +620,14 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
         <span wire:loading wire:target="salvar">Salvando…</span>
     </button>
 </div>
+
+@push('styles')
+<style>
+@media (max-width: 1024px) {
+    .processo-form-grid { grid-template-columns: 1fr !important; }
+    .processo-form-resumo { display: none !important; }
+}
+</style>
+@endpush
 
 </div>

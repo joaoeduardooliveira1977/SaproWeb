@@ -19,6 +19,10 @@ class Agenda extends Component
     public bool   $so_pendentes  = true;
     public string $responsavel_id = '';
 
+    // IA
+    public string  $perguntaIA = '';
+    public ?string $respostaIA = null;
+
     // Vista
     public bool $vistaCalendario = false;
     public int  $mesCalendario;
@@ -169,6 +173,67 @@ class Agenda extends Component
         $this->dispatch('toast', message: 'Evento salvo!', type: 'success');
     }
 
+    public function perguntarIA(): void
+    {
+        if (empty(trim($this->perguntaIA))) return;
+
+        $hoje      = AgendaModel::whereDate('data_hora', today())->where('concluido', false)->count();
+        $semana    = AgendaModel::whereBetween('data_hora', [today(), today()->addDays(7)])->where('concluido', false)->count();
+        $urgentes  = AgendaModel::where('urgente', true)->where('concluido', false)->count();
+        $atrasados = AgendaModel::where('data_hora', '<', now())->where('concluido', false)->count();
+        $total     = AgendaModel::where('concluido', false)->count();
+
+        $proximosEventos = AgendaModel::where('concluido', false)
+            ->where('data_hora', '>=', now())
+            ->orderBy('data_hora')
+            ->take(5)
+            ->get()
+            ->map(fn($e) => '- ' . $e->titulo . ' (' . $e->data_hora->format('d/m H:i') . ') [' . $e->tipo . ']')
+            ->join("\n");
+
+        $contexto = "Você é um assistente jurídico do sistema SAPRO. Responda de forma objetiva em português.
+
+Dados da agenda:
+- Total de eventos pendentes: {$total}
+- Eventos hoje: {$hoje}
+- Próximos 7 dias: {$semana}
+- Eventos urgentes: {$urgentes}
+- Eventos em atraso: {$atrasados}
+- Próximos eventos:
+{$proximosEventos}
+
+Pergunta: {$this->perguntaIA}
+
+Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tipo=Valor ou FILTRO:pendentes=1";
+
+        $resposta = app(\App\Services\GeminiService::class)->gerar($contexto, 300);
+
+        if ($resposta === null) {
+            $this->respostaIA = 'IA temporariamente indisponível.';
+            return;
+        }
+
+        if (str_contains($resposta, 'FILTRO:')) {
+            preg_match('/FILTRO:(\w+)=(.+)/', $resposta, $matches);
+            if (count($matches) === 3) {
+                $campo = trim($matches[1]);
+                $valor = trim($matches[2]);
+                if ($campo === 'tipo')     $this->tipo        = $valor;
+                if ($campo === 'pendentes') $this->so_pendentes = true;
+                $this->resetPage();
+                $resposta = trim(preg_replace('/FILTRO:\w+=.+/', '', $resposta));
+            }
+        }
+
+        $this->respostaIA = $resposta;
+    }
+
+    public function limparIA(): void
+    {
+        $this->perguntaIA = '';
+        $this->respostaIA = null;
+    }
+
     public function concluir(int $id): void
     {
         AgendaModel::findOrFail($id)->update(['concluido' => true]);
@@ -212,12 +277,28 @@ class Agenda extends Component
             ->select('u.id', 'p.nome')
             ->get();
 
+        // Métricas
+        $metricas = [
+            'hoje'      => AgendaModel::whereDate('data_hora', today())->where('concluido', false)->count(),
+            'semana'    => AgendaModel::whereBetween('data_hora', [today(), today()->addDays(7)])->where('concluido', false)->count(),
+            'urgentes'  => AgendaModel::where('urgente', true)->where('concluido', false)->count(),
+            'atrasados' => AgendaModel::where('data_hora', '<', now())->where('concluido', false)->count(),
+        ];
+
+        // Contagem por tipo (pendentes)
+        $tipoCounts = [];
+        foreach (['Audiência', 'Prazo', 'Reunião', 'Consulta', 'Despacho', 'Outros'] as $t) {
+            $tipoCounts[$t] = AgendaModel::where('tipo', $t)->where('concluido', false)->count();
+        }
+
         return view('livewire.agenda', [
             'eventos'      => $eventos,
             'eventosMes'   => $eventosMes,
             'inicioMes'    => $inicioMes,
             'processos'    => Processo::where('status', 'Ativo')->orderBy('numero')->get(),
             'responsaveis' => $responsaveis,
+            'metricas'     => $metricas,
+            'tipoCounts'   => $tipoCounts,
         ]);
     }
 }

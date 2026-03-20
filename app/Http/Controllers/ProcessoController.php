@@ -6,10 +6,37 @@ use App\Models\{Processo, Andamento, Custa, Prazo};
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use OpenAI;
+
 
 class ProcessoController extends Controller
 {
-    public function show(int $id)
+    
+
+
+// ── IA gerar resumo ───────────────────────────────────────────
+
+	public function gerarResumo($id)
+{
+    $processo = Processo::findOrFail($id);
+
+    // ⚠️ SIMULAÇÃO SEM OPENAI
+    $resumoFake = "Resumo automático:\n\n"
+        . "Processo: {$processo->nome}\n"
+        . "Status: {$processo->status}\n\n"
+        . "Este processo trata de {$processo->descricao}. "
+        . "Recomenda-se análise detalhada dos documentos e acompanhamento dos prazos.";
+
+    return response()->json([
+        'resumo' => $resumoFake
+    ]);
+}
+
+
+
+// ──  ───────────────────────────────────────────
+
+	public function show(int $id)
     {
         $processo = Processo::with([
             'cliente', 'advogado', 'juiz',

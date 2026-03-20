@@ -18,6 +18,9 @@ class Processos extends Component
     public bool    $confirmandoExclusao = false;
     public ?int    $processoParaExcluir = null;
 
+    public string  $perguntaIA = '';
+    public ?string $respostaIA = null;
+
     protected $queryString = ['busca', 'status', 'fase_id', 'risco_id'];
 
     public function updatingBusca():   void { $this->resetPage(); }
@@ -49,6 +52,94 @@ class Processos extends Component
     {
         $this->confirmandoExclusao  = false;
         $this->processoParaExcluir  = null;
+    }
+
+    public function perguntarIA(): void
+    {
+        if (empty(trim($this->perguntaIA))) return;
+
+        $totalAtivos     = Processo::where('status', 'Ativo')->count();
+        $totalArquivados = Processo::where('status', 'Arquivado')->count();
+        $riscoAlto       = Processo::where('status', 'Ativo')
+            ->whereHas('risco', fn($q) => $q->where('descricao', 'ilike', '%alto%'))
+            ->count();
+        $valorTotal = number_format(
+            (float) Processo::where('status', 'Ativo')->sum('valor_causa'),
+            2, ',', '.'
+        );
+
+        // Fases com contagem (Fase não tem relação inversa, usar pluck)
+        $faseCounts = Processo::where('status', 'Ativo')
+            ->whereNotNull('fase_id')
+            ->selectRaw('fase_id, count(*) as total')
+            ->groupBy('fase_id')
+            ->pluck('total', 'fase_id');
+        $porFase = Fase::orderBy('ordem')->get()
+            ->filter(fn($f) => ($faseCounts[$f->id] ?? 0) > 0)
+            ->map(fn($f) => $f->descricao . ': ' . $faseCounts[$f->id])
+            ->join(', ');
+
+        // Top advogados (relacionamento correto: processosComoAdvogado)
+        $porAdvogado = \App\Models\Pessoa::whereHas(
+                'processosComoAdvogado', fn($q) => $q->where('status', 'Ativo')
+            )
+            ->withCount(['processosComoAdvogado' => fn($q) => $q->where('status', 'Ativo')])
+            ->orderByDesc('processos_como_advogado_count')
+            ->take(5)->get()
+            ->map(fn($a) => $a->nome . ': ' . $a->processos_como_advogado_count)
+            ->join(', ');
+
+        $contexto = "Você é um analista jurídico do sistema SAPRO. Responda de forma objetiva e direta em português.
+
+Dados atuais do escritório:
+- Total processos ativos: {$totalAtivos}
+- Total arquivados: {$totalArquivados}
+- Processos risco alto: {$riscoAlto}
+- Valor total em causa: R\$ {$valorTotal}
+- Por fase: {$porFase}
+- Top advogados por processos: {$porAdvogado}
+
+Pergunta do usuário: {$this->perguntaIA}
+
+Responda em 1-3 frases objetivas. Se a pergunta pedir para filtrar ou mostrar algo específico, além de responder, termine com: FILTRO:campo=valor (ex: FILTRO:risco=Alto ou FILTRO:fase=Recursal ou FILTRO:busca=nome)";
+
+        $resposta = app(\App\Services\GeminiService::class)->gerar($contexto, 300);
+
+        if ($resposta === null) {
+            $this->respostaIA = 'IA temporariamente indisponível. Tente novamente em instantes.';
+            return;
+        }
+
+        // Verificar se a IA sugeriu um filtro
+        if (str_contains($resposta, 'FILTRO:')) {
+            preg_match('/FILTRO:(\w+)=(.+)/', $resposta, $matches);
+            if (count($matches) === 3) {
+                $campo = trim($matches[1]);
+                $valor = trim($matches[2]);
+
+                if ($campo === 'busca')  $this->busca    = $valor;
+                if ($campo === 'status') $this->status   = $valor;
+                if ($campo === 'fase') {
+                    $fase = Fase::where('descricao', 'ilike', "%{$valor}%")->first();
+                    if ($fase) $this->fase_id = (string) $fase->id;
+                }
+                if ($campo === 'risco') {
+                    $risco = GrauRisco::where('descricao', 'ilike', "%{$valor}%")->first();
+                    if ($risco) $this->risco_id = (string) $risco->id;
+                }
+
+                $this->resetPage();
+                $resposta = trim(preg_replace('/FILTRO:\w+=.+/', '', $resposta));
+            }
+        }
+
+        $this->respostaIA = $resposta;
+    }
+
+    public function limparIA(): void
+    {
+        $this->perguntaIA = '';
+        $this->respostaIA = null;
     }
 
     public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
@@ -92,10 +183,39 @@ class Processos extends Component
             ->orderByDesc('created_at')
             ->paginate(15);
 
+        // Métricas
+        $totalAtivos = Processo::where('status', 'Ativo')->count();
+        $valorTotal  = Processo::where('status', 'Ativo')->sum('valor_causa');
+        $riscoAlto   = Processo::where('status', 'Ativo')
+            ->whereHas('risco', fn($q) => $q->where('descricao', 'ilike', '%alto%'))
+            ->count();
+        $parados = Processo::where('status', 'Ativo')
+            ->whereDoesntHave('andamentos', fn($q) => $q->where('data', '>=', now()->subDays(30)))
+            ->count();
+
+        // Contagens por fase e risco (apenas processos ativos)
+        $faseCounts  = Processo::where('status', 'Ativo')
+            ->whereNotNull('fase_id')
+            ->selectRaw('fase_id, count(*) as total')
+            ->groupBy('fase_id')
+            ->pluck('total', 'fase_id');
+
+        $riscoCounts = Processo::where('status', 'Ativo')
+            ->whereNotNull('risco_id')
+            ->selectRaw('risco_id, count(*) as total')
+            ->groupBy('risco_id')
+            ->pluck('total', 'risco_id');
+
         return view('livewire.processos', [
-            'processos' => $processos,
-            'fases'     => Fase::orderBy('ordem')->get(),
-            'riscos'    => GrauRisco::all(),
+            'processos'   => $processos,
+            'fases'       => Fase::orderBy('ordem')->get(),
+            'riscos'      => GrauRisco::all(),
+            'totalAtivos' => $totalAtivos,
+            'valorTotal'  => (float) $valorTotal,
+            'riscoAlto'   => $riscoAlto,
+            'parados'     => $parados,
+            'faseCounts'  => $faseCounts,
+            'riscoCounts' => $riscoCounts,
         ]);
     }
 }
