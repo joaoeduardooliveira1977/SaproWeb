@@ -7,8 +7,17 @@
     $ultimaConsulta            = \App\Models\TjspVerificacao::where('status', 'concluido')->latest()->first();
     $totalAndamentosHoje       = (int) \App\Models\TjspVerificacao::where('status', 'concluido')
                                     ->whereDate('concluido_em', today())->sum('novos_total');
-    $publicacoesNaoLidas       = (int) \Illuminate\Support\Facades\DB::table('aasp_publicacoes')
-                                    ->whereNull('processo_id')->count();
+    
+	$publicacoesNaoLidas = 0;
+	try {
+    		$publicacoesNaoLidas = (int) \Illuminate\Support\Facades\DB::table('aasp_publicacoes')
+        	->whereNull('processo_id')->count();
+		} catch (\Exception $e) {
+    		$publicacoesNaoLidas = 0;
+	}
+
+
+
     $totalProcessosMonitorados = \App\Models\Processo::where('status', 'Ativo')
                                     ->whereNotNull('numero')->count();
 @endphp
