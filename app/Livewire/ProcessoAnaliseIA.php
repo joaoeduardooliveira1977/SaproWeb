@@ -84,6 +84,12 @@ PROMPT;
 
         $result = app(GeminiService::class)->gerar($prompt, 1500);
 
+        if ($result === '__IA_BLOQUEADA__') {
+            $this->erro    = 'IA disponível nos planos Starter e Pro. Faça upgrade para acessar este recurso.';
+            $this->gerando = false;
+            return;
+        }
+
         if ($result === null) {
             $this->erro    = 'IA temporariamente indisponível. Tente novamente em instantes.';
             $this->gerando = false;

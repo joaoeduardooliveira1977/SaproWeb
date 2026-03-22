@@ -17,6 +17,13 @@ class Pessoas extends Component
     public string  $perguntaIA = '';
     public ?string $respostaIA = null;
 
+    // Perfil IA
+    public bool    $modalPerfilIA    = false;
+    public ?int    $perfilPessoaId   = null;
+    public ?string $perfilPessoaNome = null;
+    public ?string $perfilIA         = null;
+    public bool    $gerandoPerfil    = false;
+
     protected $queryString = [
         'busca' => ['except' => ''],
         'tipo'  => ['except' => ''],
@@ -166,6 +173,11 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
 
         $resposta = app(\App\Services\GeminiService::class)->gerar($contexto, 300);
 
+        if ($resposta === '__IA_BLOQUEADA__') {
+            $this->respostaIA = 'IA disponível nos planos Starter e Pro. Faça upgrade para acessar este recurso.';
+            return;
+        }
+
         if ($resposta === null) {
             $this->respostaIA = 'IA temporariamente indisponível.';
             return;
@@ -190,6 +202,112 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
     {
         $this->perguntaIA = '';
         $this->respostaIA = null;
+    }
+
+    public function gerarPerfilIA(int $id): void
+    {
+        if ($this->gerandoPerfil) return;
+
+        $this->gerandoPerfil    = true;
+        $this->perfilIA         = null;
+        $this->perfilPessoaId   = $id;
+        $this->modalPerfilIA    = true;
+
+        $pessoa = Pessoa::findOrFail($id);
+        $this->perfilPessoaNome = $pessoa->nome;
+
+        // Buscar dados do cliente
+        $processos = DB::table('processos as p')
+            ->leftJoin('fases as f', 'f.id', '=', 'p.fase_id')
+            ->leftJoin('graus_risco as r', 'r.id', '=', 'p.risco_id')
+            ->where('p.cliente_id', $id)
+            ->select('p.numero', 'p.status', 'p.valor_causa', 'f.descricao as fase', 'r.descricao as risco', 'p.created_at')
+            ->get();
+
+        $totalProcessos  = $processos->count();
+        $processosAtivos = $processos->where('status', 'Ativo')->count();
+        $processosArquiv = $processos->where('status', 'Arquivado')->count();
+        $valorTotal      = $processos->sum('valor_causa');
+        $riscoAlto       = $processos->filter(fn($p) => str_contains(strtolower($p->risco ?? ''), 'alto'))->count();
+
+        $recebimentos = DB::table('recebimentos')
+            ->join('processos', 'processos.id', '=', 'recebimentos.processo_id')
+            ->where('processos.cliente_id', $id)
+            ->select('recebimentos.valor', 'recebimentos.recebido', 'recebimentos.data')
+            ->get();
+
+        $totalReceber  = $recebimentos->where('recebido', false)->sum('valor');
+        $totalRecebido = $recebimentos->where('recebido', true)->sum('valor');
+        $inadimplente  = $recebimentos->where('recebido', false)
+                            ->filter(fn($r) => $r->data && $r->data < today()->toDateString())
+                            ->count();
+
+        $tempoRelacionamento = $pessoa->created_at
+            ? \Carbon\Carbon::parse($pessoa->created_at)->diffForHumans(null, true)
+            : 'não informado';
+
+        $listaProcessos = $processos->take(5)->map(fn($p) =>
+            "- {$p->numero} ({$p->status}) | Fase: {$p->fase} | Risco: {$p->risco} | Valor: R$ " .
+            number_format($p->valor_causa ?? 0, 2, ',', '.')
+        )->join("\n");
+
+        if ($totalProcessos === 0) {
+            $this->perfilIA      = "Nenhum processo cadastrado para este cliente ainda.";
+            $this->gerandoPerfil = false;
+            return;
+        }
+
+        $prompt = "Você é um assistente jurídico do sistema SAPRO. Gere um perfil completo e objetivo deste cliente.
+
+DADOS DO CLIENTE:
+- Nome: {$pessoa->nome}
+- CPF/CNPJ: " . ($pessoa->cpf_cnpj ?? 'não informado') . "
+- Cidade: " . ($pessoa->cidade ?? 'não informada') . "
+- Tempo de relacionamento: {$tempoRelacionamento}
+- Email: " . ($pessoa->email ?? 'não informado') . "
+
+DADOS PROCESSUAIS:
+- Total de processos: {$totalProcessos}
+- Processos ativos: {$processosAtivos}
+- Processos arquivados: {$processosArquiv}
+- Processos com risco alto: {$riscoAlto}
+- Valor total em causa: R$ " . number_format($valorTotal, 2, ',', '.') . "
+
+DADOS FINANCEIROS:
+- Total a receber: R$ " . number_format($totalReceber, 2, ',', '.') . "
+- Total já recebido: R$ " . number_format($totalRecebido, 2, ',', '.') . "
+- Parcelas em atraso: {$inadimplente}
+
+PROCESSOS RECENTES:
+{$listaProcessos}
+
+Gere um perfil estruturado com:
+1. PERFIL: (resumo do cliente em 2 linhas)
+2. HISTÓRICO PROCESSUAL: (análise dos processos em 2-3 linhas)
+3. SITUAÇÃO FINANCEIRA: (análise financeira em 1-2 linhas)
+4. ALERTAS: (pontos de atenção importantes, se houver)
+5. RECOMENDAÇÃO: (próxima ação sugerida em 1 linha)
+
+Use linguagem profissional e objetiva.";
+
+        $resultado = app(\App\Services\GeminiService::class)->gerar($prompt, 600);
+
+        if ($resultado === '__IA_BLOQUEADA__') {
+            $this->perfilIA      = 'IA disponível nos planos Starter e Pro. Faça upgrade para acessar este recurso.';
+            $this->gerandoPerfil = false;
+            return;
+        }
+
+        $this->perfilIA      = $resultado ?? 'IA temporariamente indisponível.';
+        $this->gerandoPerfil = false;
+    }
+
+    public function fecharPerfilIA(): void
+    {
+        $this->modalPerfilIA    = false;
+        $this->perfilIA         = null;
+        $this->perfilPessoaId   = null;
+        $this->perfilPessoaNome = null;
     }
 
     private function limparFormulario(): void

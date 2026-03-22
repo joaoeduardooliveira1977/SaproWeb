@@ -41,6 +41,7 @@
 </div>
 
 {{-- ── Analista IA ── --}}
+@if(tenant_pode('ia'))
 <div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);border-radius:12px;padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
     <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -67,6 +68,12 @@
         <span wire:loading wire:target="perguntarIA">Analisando...</span>
     </button>
 </div>
+@else
+<div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:8px;color:#94a3b8;font-size:12px;cursor:not-allowed;margin-bottom:12px;"
+    title="IA disponível nos planos Starter e Pro">
+    🔒 IA — Upgrade necessário
+</div>
+@endif
 
 @if($respostaIA)
 <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#1e40af;display:flex;gap:10px;align-items:flex-start;">

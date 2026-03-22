@@ -2,8 +2,10 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Traits\BelongsToTenant;
 
 class Andamento extends Model {
+    use BelongsToTenant;
     protected $table = "andamentos";
     protected $fillable = ["processo_id", "data", "descricao", "usuario_id"];
     protected $casts = ["data" => "date"];

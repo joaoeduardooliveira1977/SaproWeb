@@ -63,6 +63,12 @@ class ResumoIA extends Component
 
         $result = app(GeminiService::class)->gerar($prompt, 350);
 
+        if ($result === '__IA_BLOQUEADA__') {
+            $this->resumo  = 'IA disponível nos planos Starter e Pro. Faça upgrade para acessar este recurso.';
+            $this->gerando = false;
+            return;
+        }
+
         if ($result === null) {
             $this->erro    = 'IA temporariamente indisponível.';
             $this->gerando = false;

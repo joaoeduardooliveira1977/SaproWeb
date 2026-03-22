@@ -20,26 +20,33 @@
                 </div>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
-                @if($analise)
-                <button wire:click="gerarAnalise" wire:loading.attr="disabled"
-                    style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:7px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s;"
-                    onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">
-                    <svg wire:loading.remove wire:target="gerarAnalise" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                    <svg wire:loading wire:target="gerarAnalise" style="animation:iapin .7s linear infinite;" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                    <span wire:loading.remove wire:target="gerarAnalise">Atualizar</span>
-                    <span wire:loading wire:target="gerarAnalise">Aguarde...</span>
-                </button>
+                @if(tenant_pode('ia'))
+                    @if($analise)
+                    <button wire:click="gerarAnalise" wire:loading.attr="disabled"
+                        style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:7px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s;"
+                        onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">
+                        <svg wire:loading.remove wire:target="gerarAnalise" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                        <svg wire:loading wire:target="gerarAnalise" style="animation:iapin .7s linear infinite;" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                        <span wire:loading.remove wire:target="gerarAnalise">Atualizar</span>
+                        <span wire:loading wire:target="gerarAnalise">Aguarde...</span>
+                    </button>
+                    @else
+                    <button wire:click="gerarAnalise" wire:loading.attr="disabled"
+                        style="display:inline-flex;align-items:center;gap:6px;padding:7px 18px;background:#fff;border:none;border-radius:7px;color:#1e40af;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s;"
+                        wire:loading.class="opacity-50">
+                        <svg wire:loading.remove wire:target="gerarAnalise" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+                        </svg>
+                        <svg wire:loading wire:target="gerarAnalise" style="animation:iapin .7s linear infinite;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                        <span wire:loading.remove wire:target="gerarAnalise">Gerar Análise</span>
+                        <span wire:loading wire:target="gerarAnalise">Analisando...</span>
+                    </button>
+                    @endif
                 @else
-                <button wire:click="gerarAnalise" wire:loading.attr="disabled"
-                    style="display:inline-flex;align-items:center;gap:6px;padding:7px 18px;background:#fff;border:none;border-radius:7px;color:#1e40af;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s;"
-                    wire:loading.class="opacity-50">
-                    <svg wire:loading.remove wire:target="gerarAnalise" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
-                    </svg>
-                    <svg wire:loading wire:target="gerarAnalise" style="animation:iapin .7s linear infinite;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                    <span wire:loading.remove wire:target="gerarAnalise">Gerar Análise</span>
-                    <span wire:loading wire:target="gerarAnalise">Analisando...</span>
-                </button>
+                <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:8px;color:#94a3b8;font-size:12px;cursor:not-allowed;"
+                    title="IA disponível nos planos Starter e Pro">
+                    🔒 IA — Upgrade necessário
+                </div>
                 @endif
             </div>
         </div>

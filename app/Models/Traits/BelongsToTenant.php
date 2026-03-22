@@ -7,20 +7,21 @@ use Illuminate\Support\Facades\Auth;
 
 trait BelongsToTenant
 {
-    protected static function bootBelongsToTenant()
+    protected static function bootBelongsToTenant(): void
     {
-        // 🔒 FILTRO AUTOMÁTICO
+        // Filtro automático por tenant
         static::addGlobalScope('tenant', function (Builder $builder) {
-            if (Auth::check() && !is_null(Auth::user()->tenant_id)) {
-    	$builder->where('tenant_id', Auth::user()->tenant_id);
-	}
+            $tenantId = tenant_id() ?? (Auth::check() ? Auth::user()->tenant_id : null);
+            if ($tenantId) {
+                $builder->where(static::getModel()->getTable() . '.tenant_id', $tenantId);
+            }
         });
 
-        // 🧠 AUTO PREENCHER tenant_id
+        // Auto preencher tenant_id ao criar
         static::creating(function ($model) {
-            if (Auth::check() && !is_null(Auth::user()->tenant_id)) {
-    	$builder->where('tenant_id', Auth::user()->tenant_id);
-	}
+            if (empty($model->tenant_id)) {
+                $model->tenant_id = tenant_id() ?? (Auth::check() ? Auth::user()->tenant_id : null);
+            }
         });
     }
 }

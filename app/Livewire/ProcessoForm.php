@@ -280,6 +280,16 @@ class ProcessoForm extends Component
 
     public function salvar(): void
     {
+        // Verificar limite de processos
+        $tenant = tenant();
+        if ($tenant && !$this->processoId && $tenant->atingiuLimiteProcessos()) {
+            $this->dispatch('toast',
+                message: 'Limite de processos atingido! Faça upgrade do seu plano.',
+                type: 'error'
+            );
+            return;
+        }
+
         $this->validate([
             'numero'     => 'required|string|max:50',
             'cliente_id' => 'required|integer',

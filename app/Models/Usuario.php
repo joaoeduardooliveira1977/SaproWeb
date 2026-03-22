@@ -14,7 +14,7 @@ class Usuario extends Authenticatable
 
     // Laravel espera 'password' para autenticação automática
     protected $fillable = [
-        'pessoa_id', 'nome', 'login', 'email', 'password', 'perfil', 'telefone', 'ativo', 'ultimo_acesso',
+        'tenant_id', 'pessoa_id', 'nome', 'login', 'email', 'password', 'perfil', 'telefone', 'ativo', 'ultimo_acesso',
     ];
 
     protected $hidden = ['password', 'remember_token'];

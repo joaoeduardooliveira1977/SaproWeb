@@ -5,9 +5,12 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Traits\BelongsToTenant;
 
 class Prazo extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'prazos';
 
     protected $fillable = [

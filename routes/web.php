@@ -17,7 +17,26 @@ use App\Http\Controllers\IAController;
 	Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
 	Route::post('/login', [AuthController::class, 'login']);
 	Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
-	
+
+// ─── Super Admin ───────────────────────────────
+	Route::prefix('super-admin')->name('super-admin.')->middleware(['auth:usuarios', 'super_admin'])->group(function () {
+		Route::get('/',                   [\App\Http\Controllers\SuperAdminController::class, 'index'])->name('index');
+		Route::get('/voltar',             [\App\Http\Controllers\SuperAdminController::class, 'voltarSuperAdmin'])->name('voltar');
+		Route::get('/{id}',               [\App\Http\Controllers\SuperAdminController::class, 'show'])->name('show');
+		Route::post('/{id}/plano',        [\App\Http\Controllers\SuperAdminController::class, 'atualizarPlano'])->name('plano');
+		Route::post('/{id}/toggle',       [\App\Http\Controllers\SuperAdminController::class, 'toggleAtivo'])->name('toggle');
+		Route::get('/{id}/login',         [\App\Http\Controllers\SuperAdminController::class, 'loginComoTenant'])->name('login-tenant');
+		Route::delete('/{id}',            [\App\Http\Controllers\SuperAdminController::class, 'excluir'])->name('excluir');
+	});
+
+// ─── Planos ────────────────────────────────────
+	Route::get('/planos', function() {
+    	return view('planos');
+	})->name('tenant.planos');
+
+// ─── Registro ──────────────────────────────────
+	Route::get('/registro',  [\App\Http\Controllers\RegistroController::class, 'index'])->name('registro');
+	Route::post('/registro', [\App\Http\Controllers\RegistroController::class, 'store'])->name('registro.store');
 
 
 // ─── Área Autenticada ──────────────────────────

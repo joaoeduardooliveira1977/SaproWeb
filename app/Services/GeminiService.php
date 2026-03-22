@@ -13,11 +13,38 @@ class GeminiService
 
     public function __construct()
     {
-        $this->apiKey = config('services.gemini.key', '');
+        // Prioridade: 1) chave do tenant, 2) chave global do .env
+        $tenantKey = null;
+
+        try {
+            $tenant = tenant();
+            if ($tenant && !empty($tenant->gemini_api_key)) {
+                $tenantKey = $tenant->gemini_api_key;
+            }
+        } catch (\Exception) {
+            // Sem tenant no contexto (jobs, schedule)
+        }
+
+        $this->apiKey = $tenantKey ?? config('services.gemini.key', '');
     }
 
     public function gerar(string $prompt, int $maxTokens = 1024): ?string
     {
+        // Verificar se tenant tem IA habilitada
+        try {
+            $tenant = tenant();
+            if ($tenant && !$tenant->ia_habilitada) {
+                Log::channel('gemini')->warning('IA não habilitada para este tenant', [
+                    'tenant_id'   => $tenant->id,
+                    'tenant_nome' => $tenant->nome,
+                    'plano'       => $tenant->plano,
+                ]);
+                return '__IA_BLOQUEADA__';
+            }
+        } catch (\Exception) {
+            // Contexto sem tenant (jobs) — permite usar
+        }
+
         if (empty($this->apiKey)) {
             Log::channel('gemini')->warning('Gemini API key não configurada (GEMINI_API_KEY)');
             return null;

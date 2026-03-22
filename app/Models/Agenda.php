@@ -2,8 +2,10 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Traits\BelongsToTenant;
 
 class Agenda extends Model {
+    use BelongsToTenant;
     protected $table = "agenda";
     protected $fillable = ["titulo","data_hora","local","tipo","urgente","processo_id","responsavel_id","concluido","observacoes"];
     protected $casts = ["data_hora"=>"datetime","urgente"=>"boolean","concluido"=>"boolean"];

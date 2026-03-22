@@ -453,6 +453,7 @@
     </style>
 </head>
 <body>
+<x-limite-plano />
 <div id="lw-bar"></div>
 <div class="layout">
 
@@ -480,11 +481,11 @@
         </div>
 
         @php
-            $rota       = request()->route()->getName();
-            $perfil     = auth('usuarios')->user()?->perfil ?? 'estagiario';
-            $isAdmin    = $perfil === 'admin';
-            $isAdvogado = in_array($perfil, ['admin','advogado']);
-            $isFinanc   = in_array($perfil, ['admin','financeiro']);
+            	$rota       = request()->route()->getName();
+            	$perfil     = auth('usuarios')->user()?->perfil ?? 'estagiario';
+            	$isAdmin    = in_array($perfil, ['admin', 'administrador', 'super_admin']);
+		$isAdvogado = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado']);
+		$isFinanc   = in_array($perfil, ['admin', 'administrador', 'super_admin', 'financeiro']);
 
             // Detecta o grupo ativo para destacar o item de menu
             $hubAtivo = '';
@@ -498,10 +499,10 @@
             if (in_array($rota, $rotasAdmin))       $hubAtivo = 'admin';
 
             // Variáveis de permissão ainda usadas no topbar / quick-add
-            $canProc    = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
-            $canPessoas = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
-            $canAgenda  = in_array($perfil, ['admin','advogado','estagiario','recepcionista']);
-            $canDocs    = in_array($perfil, ['admin','advogado','estagiario']);
+           	$canProc    = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado', 'estagiario', 'recepcionista']);
+		$canPessoas = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado', 'estagiario', 'recepcionista']);
+		$canAgenda  = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado', 'estagiario', 'recepcionista']);
+		$canDocs    = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado', 'estagiario']);
         @endphp
 
         {{-- Dashboard --}}
@@ -563,8 +564,8 @@
         <div class="sidebar-footer">
             {{ auth('usuarios')->user()?->nome ?? 'Usuário' }}<br>
             @php
-                $perfilCores  = ['admin'=>'#dc2626','advogado'=>'#2563a8','estagiario'=>'#7c3aed','financeiro'=>'#16a34a','recepcionista'=>'#d97706'];
-                $perfilLabels = ['admin'=>'Administrador','advogado'=>'Advogado','estagiario'=>'Estagiário','financeiro'=>'Financeiro','recepcionista'=>'Recepcionista'];
+               	$perfilCores  = ['admin'=>'#dc2626', 'administrador'=>'#dc2626', 'super_admin'=>'#7c3aed', 'advogado'=>'#2563a8', 'estagiario'=>'#7c3aed', 'financeiro'=>'#16a34a', 'recepcionista'=>'#d97706'];
+		$perfilLabels = ['admin'=>'Administrador', 'administrador'=>'Administrador', 'super_admin'=>'Super Admin', 'advogado'=>'Advogado', 'estagiario'=>'Estagiário', 'financeiro'=>'Financeiro', 'recepcionista'=>'Recepcionista'];
                 $cor   = $perfilCores[$perfil]  ?? '#64748b';
                 $label = $perfilLabels[$perfil] ?? $perfil;
             @endphp

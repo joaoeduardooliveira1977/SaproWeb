@@ -8,6 +8,7 @@
 @media (max-width: 480px) {
     .metricas-grid { grid-template-columns: 1fr !important; }
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 
 {{-- Cabecalho --}}
@@ -302,6 +303,15 @@
                                         onmouseover="this.style.background='#fee2e2';this.style.color='#dc2626'" onmouseout="this.style.background='#f8fafc';this.style.color='#94a3b8'">
                                         <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                                     </button>
+                                    @if(in_array('Cliente', $tiposPorPessoa->get($p->id, [])))
+                                    <button wire:click="gerarPerfilIA({{ $p->id }})" title="Perfil IA"
+                                        style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#f5f3ff;color:#7c3aed;border:none;cursor:pointer;transition:background .15s;"
+                                        onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='#f5f3ff'">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+                                        </svg>
+                                    </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -353,6 +363,57 @@
 
     </div>{{-- /coluna direita --}}
 </div>{{-- /grid --}}
+
+{{-- Modal Perfil IA --}}
+@if($modalPerfilIA)
+<div class="modal-backdrop" wire:click.self="fecharPerfilIA">
+    <div class="modal" style="max-width:640px;max-height:90vh;overflow-y:auto;">
+        <div class="modal-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="modal-title">Perfil Inteligente — IA</div>
+                    <div style="font-size:12px;color:var(--muted);">{{ $perfilPessoaNome }}</div>
+                </div>
+            </div>
+            <button wire:click="fecharPerfilIA" class="modal-close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div style="padding:4px 0;">
+            @if($gerandoPerfil)
+            <div style="text-align:center;padding:40px;color:var(--muted);">
+                <svg style="animation:spin .7s linear infinite;margin:0 auto 12px;display:block;" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <div style="font-size:13px;">Gerando perfil inteligente...</div>
+            </div>
+            @elseif($perfilIA)
+            <div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);border-radius:10px;padding:18px;margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#93c5fd;margin-bottom:10px;">
+                    ✨ Análise gerada por IA
+                </div>
+                <div style="font-size:13px;color:#e2e8f0;line-height:1.8;white-space:pre-line;">{{ $perfilIA }}</div>
+            </div>
+            @endif
+        </div>
+
+        <div class="modal-footer">
+            @if(!$gerandoPerfil && $perfilIA)
+            <button wire:click="gerarPerfilIA({{ $perfilPessoaId }})"
+                style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:8px;color:#7c3aed;font-size:12px;font-weight:600;cursor:pointer;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M1 20l4.64-4.36A9 9 0 0020.49 15"/></svg>
+                Atualizar
+            </button>
+            @endif
+            <button wire:click="fecharPerfilIA" class="btn btn-outline">Fechar</button>
+        </div>
+    </div>
+</div>
+@endif
 
 {{-- ── Modal Cadastro ── --}}
 @if($modalAberto)

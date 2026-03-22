@@ -12,8 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'perfil' => \App\Http\Middleware\VerificarPerfil::class,
+            'perfil'      => \App\Http\Middleware\VerificarPerfil::class,
+            'tenant'      => \App\Http\Middleware\IdentificarTenant::class,
+            'super_admin' => \App\Http\Middleware\SuperAdmin::class,
         ]);
+        
+	 $middleware->web(append: [
+        \App\Http\Middleware\IdentificarTenant::class,
+	]);
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

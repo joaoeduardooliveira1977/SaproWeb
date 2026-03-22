@@ -66,6 +66,10 @@
         <button type="submit" class="btn">Entrar no Sistema</button>
     </form>
 
+    <div style="text-align:center;margin-top:16px;font-size:13px;color:#64748b;">
+        Não tem conta? <a href="{{ route('registro') }}" style="color:#2563a8;font-weight:600;">Criar conta grátis</a>
+    </div>
+
     <p class="footer-txt">JurídicoWeb — versão 1.0</p>
 </div>
 <script>

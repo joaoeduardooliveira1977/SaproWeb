@@ -48,7 +48,14 @@
             </div>
             {{-- Briefing IA --}}
             <div style="flex-shrink:0;">
-                @livewire('resumo-ia')
+                @if(tenant_pode('ia'))
+                    @livewire('resumo-ia')
+                @else
+                    <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:8px;color:#94a3b8;font-size:12px;cursor:not-allowed;"
+                        title="IA disponível nos planos Starter e Pro">
+                        🔒 IA — Upgrade necessário
+                    </div>
+                @endif
             </div>
         </div>
 

@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Andamento;
 use App\Models\Processo;
+use App\Services\TribunalService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -37,6 +38,12 @@ class ProcessoAndamentos extends Component
     public ?string $sugestaoIA        = null;
     public bool    $carregandoIA      = false;
     public bool    $mostrarSugestaoIA = false;
+
+    // Consulta DATAJUD individual
+    public bool    $consultandoDatajud       = false;
+    public ?string $resultadoDatajud         = null;
+    public bool    $mostrarResultadoDatajud  = false;
+    public int     $novosAndamentosDatajud   = 0;
 
     public bool $mostrarFormulario = false;
     public bool $embed             = false;
@@ -106,11 +113,6 @@ class ProcessoAndamentos extends Component
         $this->resetForm();
         $this->mostrarFormulario = false;
         $this->dispatch('toast', message: 'Andamento salvo com sucesso!', type: 'success');
-
-        // Sugerir próximo passo automaticamente após novo andamento
-        if (!$this->editandoId) {
-            $this->sugerirProximoPasso();
-        }
     }
 
     // ── Upload para andamento já existente ────────────────────────────
@@ -313,6 +315,13 @@ Seja objetivo e use linguagem jurídica profissional.";
 
         $resultado = app(\App\Services\GeminiService::class)->gerar($prompt, 500);
 
+        if ($resultado === '__IA_BLOQUEADA__') {
+            $this->sugestaoIA        = 'IA disponível nos planos Starter e Pro. Faça upgrade para acessar este recurso.';
+            $this->carregandoIA      = false;
+            $this->mostrarSugestaoIA = true;
+            return;
+        }
+
         $this->sugestaoIA        = $resultado ?? 'IA temporariamente indisponível. Tente novamente em instantes.';
         $this->carregandoIA      = false;
         $this->mostrarSugestaoIA = true;
@@ -322,6 +331,75 @@ Seja objetivo e use linguagem jurídica profissional.";
     {
         $this->mostrarSugestaoIA = false;
         $this->sugestaoIA        = null;
+    }
+
+    public function consultarDatajud(): void
+    {
+        if ($this->consultandoDatajud) return;
+        $this->consultandoDatajud      = true;
+        $this->resultadoDatajud        = null;
+        $this->mostrarResultadoDatajud = false;
+        $this->novosAndamentosDatajud  = 0;
+
+        try {
+            $service   = new TribunalService();
+            $resultado = $service->consultarProcesso($this->processo->numero);
+
+            if (!$resultado['sucesso']) {
+                $this->resultadoDatajud        = '❌ ' . ($resultado['erro'] ?? 'Processo não encontrado no DATAJUD.');
+                $this->mostrarResultadoDatajud = true;
+                return;
+            }
+
+            if (empty($resultado['andamentos'])) {
+                $this->resultadoDatajud        = '✅ Processo encontrado no DATAJUD, mas sem andamentos registrados.';
+                $this->mostrarResultadoDatajud = true;
+                return;
+            }
+
+            $novos = 0;
+            foreach ($resultado['andamentos'] as $a) {
+                if (!$a['data']) continue;
+
+                $existe = Andamento::where('processo_id', $this->processoId)
+                    ->whereDate('data', $a['data'])
+                    ->where('descricao', $a['descricao'])
+                    ->exists();
+
+                if (!$existe) {
+                    Andamento::create([
+                        'processo_id' => $this->processoId,
+                        'data'        => $a['data'],
+                        'descricao'   => $a['descricao'],
+                    ]);
+                    $novos++;
+                }
+            }
+
+            $this->processo->update(['tjsp_ultima_consulta' => now()]);
+            $this->novosAndamentosDatajud = $novos;
+
+            if ($novos > 0) {
+                $this->resultadoDatajud = "✅ {$novos} andamento(s) novo(s) importado(s) do DATAJUD!";
+                $this->dispatch('toast', message: "{$novos} andamento(s) novo(s) encontrado(s)!", type: 'success');
+            } else {
+                $this->resultadoDatajud = '✅ Processo já está atualizado — nenhum andamento novo encontrado.';
+            }
+
+            $this->mostrarResultadoDatajud = true;
+
+        } catch (\Throwable $e) {
+            $this->resultadoDatajud        = '❌ Erro ao consultar DATAJUD: ' . $e->getMessage();
+            $this->mostrarResultadoDatajud = true;
+        } finally {
+            $this->consultandoDatajud = false;
+        }
+    }
+
+    public function fecharResultadoDatajud(): void
+    {
+        $this->mostrarResultadoDatajud = false;
+        $this->resultadoDatajud        = null;
     }
 
     public function descartarSugestaoPrazo(): void

@@ -9,9 +9,18 @@ class VerificarPerfil
 {
     // Mapa de permissões por perfil e módulo
     const PERMISSOES = [
-        'admin' => '*', // acesso total
+	
+	'admin'         => '*',
+    	'administrador' => '*',  // ← adicionar esta linha
+    	'super_admin'   => '*',  // ← adicionar esta linha
+    	'advogado'      => [
+        'geral', 'processos', 'pessoas', 'documentos', 'minutas',
 
-        'advogado' => [
+	'admin' => '*', // acesso total
+
+        ],
+
+	'advogado' => [
             'geral', 'processos', 'pessoas', 'documentos', 'minutas',
             'financeiro', 'honorarios', 'relatorios',
             'ferramentas', 'usuarios', 'aasp-publicacoes',
@@ -76,7 +85,13 @@ class VerificarPerfil
 
         $permissoes = self::PERMISSOES[$perfil] ?? [];
 
-        // Verifica se tem permissão
+        // Se tem acesso total
+	if ($permissoes === '*') {
+    	return $next($request);
+	}
+
+
+	// Verifica se tem permissão
         if (in_array($modulo, $permissoes)) {
             return $next($request);
         }
@@ -86,6 +101,13 @@ class VerificarPerfil
             return response()->json(['message' => 'Sem permissão.'], 403);
         }
 
-        return redirect()->route('dashboard')->with('error', 'Você não tem permissão para acessar este módulo.');
+       
+	if (in_array($perfil, ['admin', 'administrador', 'super_admin'])) {
+    	return $next($request);
+	}
+
+
+ return redirect()->route('dashboard')->with('error', 'Você não tem permissão para acessar este módulo.');
     }
 }
+                                                                                                                                                                                                                                                                                                                                                                  

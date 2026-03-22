@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
+use App\Models\Traits\BelongsToTenant;
 
 class Procuracao extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'procuracoes';
 
     protected $fillable = [

@@ -174,6 +174,12 @@ Pergunta: {$this->perguntaIA}
 Responda em 1-3 frases objetivas.";
 
         $resposta = app(\App\Services\GeminiService::class)->gerar($contexto, 300);
+
+        if ($resposta === '__IA_BLOQUEADA__') {
+            $this->respostaIA = 'IA disponível nos planos Starter e Pro. Faça upgrade para acessar este recurso.';
+            return;
+        }
+
         $this->respostaIA = $resposta ?? 'IA temporariamente indisponível.';
     }
 
