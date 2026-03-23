@@ -323,6 +323,7 @@
             .grid-3 { grid-template-columns: 1fr; }
             .topbar-title { font-size: 14px; }
             .card { padding: 14px; }
+            h1, h2 { font-size: 18px !important; }
             .hide-xs { display: none !important; }
             .btn-action { width: 28px; height: 28px; font-size: 13px; }
             .stat-grid { grid-template-columns: 1fr 1fr; }

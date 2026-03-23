@@ -47,170 +47,124 @@
 </div>
 
 {{-- ── Layout principal ── --}}
-<div style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start;">
+<div>
 
-    {{-- ── Coluna esquerda — Filtros ── --}}
-    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;position:sticky;top:20px;">
+    {{-- ── Filtros horizontais ── --}}
+    <style>
+    @media (max-width: 768px) {
+        .tjsp-filtros-grid { grid-template-columns: 1fr 1fr !important; }
+    }
+    </style>
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px;">
 
-        {{-- Busca cliente --}}
-        <div style="margin-bottom:16px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Busca</div>
-            <div style="position:relative;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
-                    style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input wire:model.live.debounce.300ms="filtroCliente" type="text"
-                    placeholder="Buscar cliente..."
-                    style="width:100%;padding:9px 12px 9px 32px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);box-sizing:border-box;">
-            </div>
-        </div>
+        {{-- Linha 1: Cliente, Número, Status, Última Consulta, Verificar --}}
+        <div class="tjsp-filtros-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:12px;align-items:end;">
 
-        {{-- Número do Processo --}}
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Número do Processo</div>
-            <div style="position:relative;">
-                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
-                    style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input wire:model.live.debounce.300ms="filtroNumero" type="text"
-                    placeholder="Ex: 0001234-56.2023..."
-                    style="width:100%;padding:8px 10px 8px 34px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--text);box-sizing:border-box;">
+            {{-- Busca cliente --}}
+            <div>
+                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Cliente</label>
+                <input wire:model.live.debounce.300ms="filtroCliente" type="text" placeholder="Buscar cliente..."
+                    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
             </div>
-            @if($filtroNumero && $totalFiltrado === 1)
-            <div style="margin-top:6px;padding:6px 10px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;font-size:11px;color:#16a34a;font-weight:600;">
-                ✓ 1 processo encontrado
-            </div>
-            @elseif($filtroNumero && $totalFiltrado === 0)
-            <div style="margin-top:6px;padding:6px 10px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;font-size:11px;color:#dc2626;font-weight:600;">
-                ✗ Nenhum processo encontrado
-            </div>
-            @endif
-        </div>
 
-        {{-- Status --}}
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Status</div>
-            <div style="display:flex;flex-direction:column;gap:5px;">
-                @php
-                $statusOpts = [
-                    ['val'=>'Ativo',    'label'=>'Apenas Ativos',  'dot'=>'#16a34a'],
-                    ['val'=>'',         'label'=>'Todos',           'dot'=>'#64748b'],
-                    ['val'=>'Arquivado','label'=>'Arquivados',      'dot'=>'#dc2626'],
-                ];
-                @endphp
-                @foreach($statusOpts as $opt)
-                <button wire:click="$set('filtroStatus', '{{ $opt['val'] }}')"
-                    style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:8px;font-size:13px;border:none;cursor:pointer;text-align:left;
-                           background:{{ $filtroStatus === $opt['val'] ? '#eff6ff' : 'transparent' }};
-                           font-weight:{{ $filtroStatus === $opt['val'] ? '600' : '400' }};
-                           color:{{ $filtroStatus === $opt['val'] ? 'var(--primary)' : 'var(--text)' }};">
-                    <span style="width:8px;height:8px;border-radius:50%;background:{{ $opt['dot'] }};flex-shrink:0;"></span>
-                    {{ $opt['label'] }}
+            {{-- Número do processo --}}
+            <div>
+                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Número do Processo</label>
+                <input wire:model.live.debounce.300ms="filtroNumero" type="text" placeholder="Ex: 0001234-56.2023..."
+                    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+            </div>
+
+            {{-- Status --}}
+            <div>
+                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Status</label>
+                <select wire:model.live="filtroStatus"
+                    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);box-sizing:border-box;">
+                    <option value="Ativo">Apenas Ativos</option>
+                    <option value="">Todos</option>
+                    <option value="Arquivado">Arquivados</option>
+                </select>
+            </div>
+
+            {{-- Última Consulta --}}
+            <div>
+                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Última Consulta</label>
+                <select wire:model.live="filtroConsulta"
+                    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);box-sizing:border-box;">
+                    <option value="">Todos</option>
+                    <option value="nunca">Nunca consultados</option>
+                    <option value="semana">Não consultados esta semana</option>
+                    <option value="mes">Não consultados este mês</option>
+                </select>
+            </div>
+
+            {{-- Botão Verificar --}}
+            <div>
+                @php $bloqueado = $consultando || $verificacao?->emAndamento() || $totalFiltrado === 0; @endphp
+                <button wire:click="iniciarVerificacao"
+                    wire:loading.attr="disabled" wire:target="iniciarVerificacao"
+                    @if($bloqueado) disabled @endif
+                    style="width:100%;padding:8px 16px;background:{{ $bloqueado ? '#94a3b8' : 'linear-gradient(135deg,#16a34a,#15803d)' }};color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:{{ $bloqueado ? 'not-allowed' : 'pointer' }};white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:6px;">
+                    <span wire:loading.remove wire:target="iniciarVerificacao">
+                        @if($verificacao?->emAndamento())
+                            ⏳ Verificando...
+                        @else
+                            🔄 Verificar ({{ $totalFiltrado }})
+                        @endif
+                    </span>
+                    <span wire:loading wire:target="iniciarVerificacao">Iniciando...</span>
                 </button>
-                @endforeach
             </div>
         </div>
 
-        {{-- Fase --}}
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Fase</div>
-            <select wire:model.live="filtroFase"
-                style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);box-sizing:border-box;">
-                <option value="">Todas as fases</option>
-                @foreach($fases as $fase)
-                <option value="{{ $fase->descricao }}">{{ $fase->descricao }}</option>
-                @endforeach
-            </select>
-        </div>
+        {{-- Linha 2: Fase, Advogado, Período e Limpar --}}
+        <div class="tjsp-filtros-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:12px;margin-top:12px;align-items:end;">
 
-        {{-- Advogado --}}
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Advogado</div>
-            <select wire:model.live="filtroAdvogado"
-                style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);box-sizing:border-box;">
-                <option value="">Todos os advogados</option>
-                @foreach($advogados as $adv)
-                <option value="{{ $adv->nome }}">{{ $adv->nome }}</option>
-                @endforeach
-            </select>
-        </div>
+            {{-- Fase --}}
+            <div>
+                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Fase</label>
+                <select wire:model.live="filtroFase"
+                    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);box-sizing:border-box;">
+                    <option value="">Todas as fases</option>
+                    @foreach($fases as $fase)
+                    <option value="{{ $fase->descricao }}">{{ $fase->descricao }}</option>
+                    @endforeach
+                </select>
+            </div>
 
-        {{-- Última Consulta --}}
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Última Consulta</div>
-            <div style="display:flex;flex-direction:column;gap:5px;">
-                @php
-                $consultaOpts = [
-                    ['val'=>'',       'label'=>'Todos'],
-                    ['val'=>'nunca',  'label'=>'Nunca consultados'],
-                    ['val'=>'semana', 'label'=>'Não consultados esta semana'],
-                    ['val'=>'mes',    'label'=>'Não consultados este mês'],
-                ];
-                @endphp
-                @foreach($consultaOpts as $opt)
-                <button wire:click="$set('filtroConsulta', '{{ $opt['val'] }}')"
-                    style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:8px;font-size:13px;border:none;cursor:pointer;text-align:left;
-                           background:{{ $filtroConsulta === $opt['val'] ? '#eff6ff' : 'transparent' }};
-                           font-weight:{{ $filtroConsulta === $opt['val'] ? '600' : '400' }};
-                           color:{{ $filtroConsulta === $opt['val'] ? 'var(--primary)' : 'var(--text)' }};">
-                    {{ $opt['label'] }}
+            {{-- Advogado --}}
+            <div>
+                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Advogado</label>
+                <select wire:model.live="filtroAdvogado"
+                    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);box-sizing:border-box;">
+                    <option value="">Todos os advogados</option>
+                    @foreach($advogados as $adv)
+                    <option value="{{ $adv->nome }}">{{ $adv->nome }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Data De --}}
+            <div>
+                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Período — De</label>
+                <input wire:model.live="filtroDataIni" type="date"
+                    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);box-sizing:border-box;">
+            </div>
+
+            {{-- Data Até --}}
+            <div>
+                <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Período — Até</label>
+                <input wire:model.live="filtroDataFim" type="date"
+                    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);box-sizing:border-box;">
+            </div>
+
+            {{-- Limpar --}}
+            <div>
+                <button wire:click="limparFiltros"
+                    style="width:100%;padding:8px 16px;background:#f1f5f9;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:#475569;cursor:pointer;">
+                    Limpar
                 </button>
-                @endforeach
             </div>
         </div>
-
-        {{-- Período da Última Consulta --}}
-        <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px;margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Período da Última Consulta</div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-                <div>
-                    <label style="font-size:11px;color:var(--muted);margin-bottom:3px;display:block;">De</label>
-                    <input wire:model.live="filtroDataIni" type="date"
-                        style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--text);box-sizing:border-box;">
-                </div>
-                <div>
-                    <label style="font-size:11px;color:var(--muted);margin-bottom:3px;display:block;">Até</label>
-                    <input wire:model.live="filtroDataFim" type="date"
-                        style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--text);box-sizing:border-box;">
-                </div>
-            </div>
-        </div>
-
-        {{-- Contador de selecionados --}}
-        <div style="background:var(--primary);color:#fff;border-radius:8px;padding:12px;text-align:center;margin-bottom:12px;">
-            <div style="font-size:28px;font-weight:800;line-height:1;">{{ $totalFiltrado }}</div>
-            <div style="font-size:12px;opacity:.8;margin-top:4px;">processos selecionados</div>
-        </div>
-
-        {{-- Botão Verificar --}}
-        @php $bloqueado = $consultando || $verificacao?->emAndamento() || $totalFiltrado === 0; @endphp
-        <button wire:click="iniciarVerificacao"
-            wire:loading.attr="disabled" wire:target="iniciarVerificacao"
-            @if($bloqueado) disabled @endif
-            style="width:100%;padding:12px;background:{{ $bloqueado ? '#94a3b8' : 'linear-gradient(135deg,#16a34a,#15803d)' }};color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:{{ $bloqueado ? 'not-allowed' : 'pointer' }};display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;">
-            <span wire:loading.remove wire:target="iniciarVerificacao" style="display:inline-flex;align-items:center;gap:8px;">
-                @if($verificacao?->emAndamento())
-                    <svg width="15" height="15" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    Verificando...
-                @else
-                    <svg width="15" height="15" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-                    Verificar Atualizações
-                @endif
-            </span>
-            <span wire:loading wire:target="iniciarVerificacao" style="display:inline-flex;align-items:center;gap:8px;">
-                <svg style="animation:spin .7s linear infinite;" width="14" height="14" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                Iniciando...
-            </span>
-        </button>
-
-        {{-- Limpar --}}
-        <button wire:click="limparFiltros"
-            style="width:100%;padding:8px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--muted);cursor:pointer;font-weight:500;">
-            Limpar filtros
-        </button>
-
     </div>
     {{-- /filtros --}}
 

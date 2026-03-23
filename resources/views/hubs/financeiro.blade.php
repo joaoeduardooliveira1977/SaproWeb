@@ -189,7 +189,7 @@
     </div>
 
 {{-- Últimos Recebimentos + Inadimplência --}}
-<div class="hub-bottom" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+<div class="hub-bottom hub-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
 
     {{-- Últimos Recebimentos --}}
     <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;">
@@ -268,9 +268,9 @@
 
 <style>
 @media (max-width: 1024px) {
-    .hub-kpis    { grid-template-columns: repeat(2, 1fr) !important; }
-    .hub-modulos { grid-template-columns: repeat(2, 1fr) !important; }
-    .hub-bottom  { grid-template-columns: 1fr !important; }
+    .hub-kpis                { grid-template-columns: repeat(2, 1fr) !important; }
+    .hub-modulos             { grid-template-columns: repeat(2, 1fr) !important; }
+    .hub-bottom, .hub-grid-2 { grid-template-columns: 1fr !important; }
 }
 @media (max-width: 640px) {
     .hub-kpis    { grid-template-columns: 1fr 1fr !important; }

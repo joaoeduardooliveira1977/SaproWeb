@@ -18,7 +18,7 @@
 
     {{-- ── Card de Saudação + Ações Rápidas ── --}}
     <div style="background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;">
-        <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:16px;">
+        <div class="dash-saudacao" style="display:flex;align-items:flex-start;gap:16px;margin-bottom:16px;">
             {{-- Avatar IA --}}
             <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#1d4ed8,#7c3aed);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -47,7 +47,7 @@
                 </div>
             </div>
             {{-- Briefing IA --}}
-            <div style="flex-shrink:0;">
+            <div class="dash-briefing" style="flex-shrink:0;">
                 @if(tenant_pode('ia'))
                     @livewire('resumo-ia')
                 @else
@@ -60,7 +60,7 @@
         </div>
 
         {{-- Botões de Ação Rápida --}}
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        <div class="dash-acoes" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
             <a href="{{ route('processos.novo') }}"
                 style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:linear-gradient(135deg,#1d4ed8,#2563a8);color:#fff;border-radius:10px;text-decoration:none;font-size:13px;font-weight:600;transition:opacity .15s;"
                 onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
@@ -89,7 +89,7 @@
     </div>
 
     {{-- ── KPIs com fundo colorido ── --}}
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
+    <div class="dash-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
         @php
         $kpis = [
             [
@@ -141,7 +141,7 @@
     {{-- ── Linha: Prazos Urgentes + Últimas Atividades ── --}}
    
 
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;align-items:stretch;">
+    <div class="dash-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;align-items:stretch;">
 
         {{-- Prazos Próximos --}}
         <div class="card" style="height:100%;">
@@ -238,7 +238,7 @@
     {{-- /prazos + atividades + mercado --}}
 
     {{-- ── Linha: Agenda + Processos por Fase + Processos Parados ── --}}
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;align-items:stretch;">
+    <div class="dash-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;align-items:stretch;">
 
         {{-- Agenda Hoje --}}
         <div class="card" style="height:100%;">
@@ -365,3 +365,32 @@
     {{-- /agenda + fase + parados --}}
 
 </div>
+
+<style>
+@media (max-width: 768px) {
+    .dash-kpis   { grid-template-columns: 1fr 1fr !important; }
+    .dash-acoes  { grid-template-columns: 1fr 1fr !important; }
+    .dash-grid-3 { grid-template-columns: 1fr !important; }
+    .dash-grid-2 { grid-template-columns: 1fr !important; }
+
+    /* Card saudação empilha no mobile */
+    .dash-saudacao { flex-wrap: wrap !important; }
+    .dash-briefing { width: 100% !important; flex-shrink: unset !important; }
+    .dash-briefing > div { width: 100% !important; }
+
+    /* Topbar compacta */
+    .topbar-search { max-width: 160px !important; }
+
+    /* Tabelas com scroll */
+    .table-wrap { overflow-x: auto !important; }
+    table { min-width: 500px; }
+}
+
+@media (max-width: 480px) {
+    .dash-kpis  { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+    .dash-acoes { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+
+    /* KPI valores menores */
+    .dash-kpis div[style*="font-size:30px"] { font-size: 22px !important; }
+}
+</style>
