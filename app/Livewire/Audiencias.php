@@ -14,6 +14,10 @@ class Audiencias extends Component
 {
     use WithPagination;
 
+    // Embed
+    public bool $embed      = false;
+    public ?int $processoId = null;
+
     // ── Filtros ──────────────────────────────────────────────
     public string $filtroStatus   = '';
     public string $filtroTipo     = '';
@@ -66,6 +70,18 @@ class Audiencias extends Component
         ];
     }
 
+    public function mount(bool $embed = false, ?int $processoId = null): void
+    {
+        $this->embed      = $embed;
+        $this->processoId = $processoId;
+
+        if ($embed && $processoId) {
+            $this->filtroProcesso = (string) $processoId;
+        }
+
+        $this->data_hora = now()->addDays(7)->format('Y-m-d\TH:i');
+    }
+
     public function updatedFiltroStatus(): void  { $this->resetPage(); }
     public function updatedFiltroTipo(): void     { $this->resetPage(); }
     public function updatedFiltroProcesso(): void { $this->resetPage(); }
@@ -78,6 +94,10 @@ class Audiencias extends Component
         $this->resetForm();
         $this->audienciaId = $id;
         $this->modalAberto = true;
+
+        if (!$id && $this->embed && $this->processoId) {
+            $this->processo_id = (string) $this->processoId;
+        }
 
         if ($id) {
             $a = Audiencia::findOrFail($id);
@@ -230,6 +250,7 @@ class Audiencias extends Component
     public function render()
     {
         $audiencias = Audiencia::with(['processo.cliente', 'juiz', 'advogado'])
+            ->when($this->embed && $this->processoId, fn($q) => $q->where('processo_id', $this->processoId))
             ->when($this->filtroStatus,   fn($q) => $q->where('status', $this->filtroStatus))
             ->when($this->filtroTipo,     fn($q) => $q->where('tipo', $this->filtroTipo))
             ->when($this->filtroProcesso, fn($q) => $q->where('processo_id', $this->filtroProcesso))

@@ -12,6 +12,10 @@ class Agenda extends Component
 {
     use WithPagination;
 
+    // Embed
+    public bool $embed      = false;
+    public ?int $processoId = null;
+
     // Filtros lista
     public string $data_ini     = '';
     public string $data_fim     = '';
@@ -46,8 +50,10 @@ class Agenda extends Component
         'tipo_evento'=> 'required',
     ];
 
-    public function mount(): void
+    public function mount(bool $embed = false, ?int $processoId = null): void
     {
+        $this->embed           = $embed;
+        $this->processoId      = $processoId;
         $this->data_ini        = today()->format('Y-m-d');
         $this->data_fim        = today()->addDays(30)->format('Y-m-d');
         $this->mesCalendario   = (int) now()->format('m');
@@ -101,10 +107,13 @@ class Agenda extends Component
             $this->processo_id  = (string) ($ev->processo_id ?? '');
             $this->observacoes  = $ev->observacoes ?? '';
         } else {
-            $this->titulo = $this->local = $this->processo_id = $this->observacoes = '';
+            $this->titulo = $this->local = $this->observacoes = '';
             $this->tipo_evento = 'Outros';
             $this->urgente = false;
             $this->data_hora = ($data ? $data . 'T09:00' : now()->format('Y-m-d\TH:i'));
+            $this->processo_id = $this->embed && $this->processoId
+                ? (string) $this->processoId
+                : '';
         }
     }
 
@@ -251,9 +260,10 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
     {
         // ── Lista ──
         $eventos = AgendaModel::with(['processo', 'responsavel.pessoa'])
-            ->when($this->diaSelecionado, fn($q) => $q->whereDate('data_hora', $this->diaSelecionado))
-            ->when(!$this->diaSelecionado && $this->data_ini, fn($q) => $q->where('data_hora', '>=', $this->data_ini))
-            ->when(!$this->diaSelecionado && $this->data_fim, fn($q) => $q->where('data_hora', '<=', $this->data_fim . ' 23:59:59'))
+            ->when($this->embed && $this->processoId, fn($q) => $q->where('processo_id', $this->processoId))
+            ->when(!$this->embed && $this->diaSelecionado, fn($q) => $q->whereDate('data_hora', $this->diaSelecionado))
+            ->when(!$this->embed && !$this->diaSelecionado && $this->data_ini, fn($q) => $q->where('data_hora', '>=', $this->data_ini))
+            ->when(!$this->embed && !$this->diaSelecionado && $this->data_fim, fn($q) => $q->where('data_hora', '<=', $this->data_fim . ' 23:59:59'))
             ->when($this->tipo,           fn($q) => $q->where('tipo', $this->tipo))
             ->when($this->so_pendentes,   fn($q) => $q->where('concluido', false))
             ->when($this->responsavel_id, fn($q) => $q->where('responsavel_id', $this->responsavel_id))

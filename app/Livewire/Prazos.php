@@ -14,6 +14,10 @@ class Prazos extends Component
 {
     use WithPagination;
 
+    // Embed
+    public bool $embed      = false;
+    public ?int $processoId = null;
+
     // ── Filtros ──────────────────────────────────────────────────
     public string $filtroStatus      = 'aberto';
     public string $filtroProcesso    = '';
@@ -77,8 +81,15 @@ class Prazos extends Component
         'data_prazo.required' => 'Informe a data do prazo.',
     ];
 
-    public function mount(): void
+    public function mount(bool $embed = false, ?int $processoId = null): void
     {
+        $this->embed      = $embed;
+        $this->processoId = $processoId;
+
+        if ($embed && $processoId) {
+            $this->filtroProcesso = (string) $processoId;
+        }
+
         $this->data_inicio = today()->format('Y-m-d');
     }
 
@@ -116,6 +127,11 @@ class Prazos extends Component
     public function abrirModal(?int $id = null): void
     {
         $this->resetForm();
+
+        if ($this->embed && $this->processoId && !$id) {
+            $this->processo_id = (string) $this->processoId;
+        }
+
         $this->prazoid = $id;
         $this->modalAberto = true;
 

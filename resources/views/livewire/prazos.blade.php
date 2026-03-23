@@ -394,6 +394,7 @@
         </div>
 
         {{-- Processo --}}
+        @if(!$embed)
         <div class="prazos-filtros-section">
             <span class="prazos-filtros-section-lbl">Processo</span>
             <select wire:model.live="filtroProcesso" class="prazos-select">
@@ -403,6 +404,7 @@
                 @endforeach
             </select>
         </div>
+        @endif
 
         {{-- Período --}}
         <div class="prazos-filtros-section">
@@ -717,12 +719,17 @@
             {{-- Processo --}}
             <div class="form-field" style="grid-column:span 2;">
                 <label class="lbl">Processo</label>
-                <select wire:model="processo_id" style="{{ $inp }}">
-                    <option value="">— Nenhum —</option>
-                    @foreach($processos as $p)
-                        <option value="{{ $p->id }}">{{ $p->numero }} — {{ $p->cliente?->nome ?? '—' }}</option>
-                    @endforeach
-                </select>
+                @if($embed)
+                    <input type="hidden" wire:model="processo_id" value="{{ $processoId }}">
+                    <div style="font-size:13px;color:var(--muted);padding:8px 0;">Processo vinculado automaticamente ao processo atual.</div>
+                @else
+                    <select wire:model="processo_id" style="{{ $inp }}">
+                        <option value="">— Nenhum —</option>
+                        @foreach($processos as $p)
+                            <option value="{{ $p->id }}">{{ $p->numero }} — {{ $p->cliente?->nome ?? '—' }}</option>
+                        @endforeach
+                    </select>
+                @endif
             </div>
 
             {{-- Responsável --}}
