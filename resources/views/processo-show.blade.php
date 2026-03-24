@@ -165,7 +165,7 @@
         </div>
     </div>
 
-    @livewire('processo-analise-ia', ['processoId' => $processo->id])
+    @livewire(\App\Livewire\ProcessoAnaliseIA::class, ['processoId' => $processo->id])
 
     {{-- ── ABA: ANDAMENTOS ── --}}
     <div id="tab-andamentos" class="tab-content" style="display:none;">
