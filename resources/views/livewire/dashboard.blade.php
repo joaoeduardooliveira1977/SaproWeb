@@ -364,7 +364,8 @@
     </div>
     {{-- /agenda + fase + parados --}}
 
-</div>
+
+
 
 <style>
 @media (max-width: 768px) {
@@ -394,3 +395,7 @@
     .dash-kpis div[style*="font-size:30px"] { font-size: 22px !important; }
 }
 </style>
+
+
+</div>
+

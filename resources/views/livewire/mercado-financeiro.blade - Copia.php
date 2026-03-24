@@ -1,4 +1,15 @@
 <div wire:poll.600000ms="carregar">
+<style>
+  @keyframes mf-spin { to { transform: rotate(360deg); } }
+  @keyframes mf-pulse { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+  .mf-spin { animation: mf-spin .7s linear infinite; display:inline-block; }
+  .mf-live-dot {
+    display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:#22c55e; margin-right:5px; vertical-align:middle;
+    animation: mf-pulse 1.8s ease-in-out infinite;
+  }
+</style>
+
 <div class="card">
     <div class="card-header">
         <span class="card-title" style="display:flex;align-items:center;gap:7px;">
