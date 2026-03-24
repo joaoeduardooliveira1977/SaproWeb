@@ -12,8 +12,12 @@ trait BelongsToTenant
         // Filtro automático por tenant
         static::addGlobalScope('tenant', function (Builder $builder) {
             $tenantId = tenant_id() ?? (Auth::check() ? Auth::user()->tenant_id : null);
+
             if ($tenantId) {
-                $builder->where(static::getModel()->getTable() . '.tenant_id', $tenantId);
+                $builder->where(
+                    $builder->getModel()->getTable() . '.tenant_id',
+                    $tenantId
+                );
             }
         });
 

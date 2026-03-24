@@ -17,8 +17,10 @@ class Dashboard extends Component
     public array $processosPorFase   = [];
     public array $ultimasAtividades  = [];
     public array $receitaMensal      = [];
+    public array $riscosPrioritarios = [];
     public int   $procuracoesVencendo = 0;
     public int   $procuracoesVencidas = 0;
+
 
     public function placeholder(): \Illuminate\View\View
     {
@@ -170,6 +172,27 @@ class Dashboard extends Component
                 'dias'     => $p->diasRestantes(),
             ])
             ->toArray();
+
+
+	$this->riscosPrioritarios = Processo::with(['cliente', 'risco'])
+    		->where('status', 'Ativo')
+    		->whereNotNull('risco_id')
+    		->orderByDesc('risco_id')
+    		->take(5)
+    		->get()
+    		->map(fn($p) => [
+        		'numero'  => $p->numero,
+        		'cliente' => $p->cliente?->nome ?? 'Sem cliente',
+        		'risco'   => $p->risco?->descricao ?? 'Médio',
+    	])
+   ->toArray();
+
+
+
+
+
+
+
 
     }
 
