@@ -38,10 +38,6 @@
     ⚖ vs. {{ $processo->parte_contraria }}
 </p>
 @endif
-
-
-                @if($processo->tipoAcao) &nbsp;&middot;&nbsp; {{ $processo->tipoAcao->descricao }} @endif
-                @if($processo->vara) &nbsp;&middot;&nbsp; {{ $processo->vara }} @endif
             </p>
         </div>
         
