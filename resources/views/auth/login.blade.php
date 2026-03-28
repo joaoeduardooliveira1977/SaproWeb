@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — {{ config('app.name', 'Sistema Jurídico') }}</title>
+    <title>Login — SISTEMA JURÍDICO</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -279,7 +279,7 @@
 
             <div class="logo-wrap">
                 <div class="logo-icon">⚖️</div>
-                <h2>{{ config('app.name', 'JURÍDICO') }}</h2>
+                <h2>SISTEMA JURÍDICO</h2>
                 <p>Sistema de acompanhamento de processos com controle moderno e visão profissional.</p>
             </div>
 
@@ -322,7 +322,7 @@
                 Não tem conta? <a href="{{ route('registro') }}">Criar conta grátis</a>
             </div>
 
-            <div class="version">{{ config('app.name', 'JurídicoWeb') }} — versão 1.0</div>
+            <div class="version">SISTEMA JURÍDICO — versão 1.0</div>
         </div>
     </div>
 
