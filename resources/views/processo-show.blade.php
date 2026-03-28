@@ -28,15 +28,6 @@
                 @endif
             </div>
 
-
-
-
-
-
-
-            <p style="font-size:13px;color:#64748b;margin-top:4px;">
-
-
 <p style="font-size:13px;color:#64748b;margin-top:4px;">
     {{ $processo->cliente?->nome ?? '&mdash;' }}
     @if($processo->tipoAcao) &nbsp;&middot;&nbsp; {{ $processo->tipoAcao->descricao }} @endif
