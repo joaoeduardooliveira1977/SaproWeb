@@ -1,6 +1,7 @@
 <div>
 
 {{-- KPIs --}}
+@if(!$embed)
 <div class="stat-grid">
     @php
     $kpiDefs = [
@@ -19,6 +20,16 @@
     @endforeach
 </div>
 
+@endif
+
+@if($embed)
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+    <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nova Audiência
+    </button>
+</div>
+@else
 {{-- Filtros --}}
 <div class="card" style="padding:16px;margin-bottom:16px;">
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
@@ -82,6 +93,7 @@
         </div>
     </div>
 </div>
+@endif
 
 {{-- Tabela --}}
 <div class="card" style="padding:0;overflow:hidden;">

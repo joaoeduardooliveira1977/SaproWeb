@@ -1,9 +1,8 @@
 <div>
 <style>
 @media (max-width: 768px) {
-    .processos-grid { grid-template-columns: 1fr !important; }
-    .metricas-grid  { grid-template-columns: 1fr 1fr !important; }
-    .filtros-panel  { position: static !important; }
+    .metricas-grid { grid-template-columns: 1fr 1fr !important; }
+    .filtros-bar   { flex-wrap: wrap; }
 }
 @media (max-width: 480px) {
     .metricas-grid { grid-template-columns: 1fr !important; }
@@ -92,99 +91,112 @@
 </div>
 @endif
 
-{{-- ── Grid principal ── --}}
-<div class="processos-grid" style="display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;">
+{{-- ── Filtros horizontais ── --}}
+<div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;">
 
-    {{-- COLUNA ESQUERDA: Filtros --}}
-    <div class="filtros-panel" style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;position:sticky;top:20px;">
+    {{-- Linha 1 --}}
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:10px;">
 
         {{-- Busca --}}
-        <div style="margin-bottom:20px;">
+        <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Busca</label>
             <div style="position:relative;">
-                <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
-                    style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input type="text" wire:model.live.debounce.300ms="busca"
-                    placeholder="Buscar por n, cliente..."
-                    style="width:100%;box-sizing:border-box;padding:9px 10px 9px 34px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
+                <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input wire:model.live.debounce.300ms="busca" type="text"
+                    placeholder="Número, cliente, advogado..."
+                    style="width:100%;padding:8px 10px 8px 32px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;"
+                    onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
             </div>
         </div>
 
         {{-- Status --}}
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Status</div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                @foreach(['' => 'Todos', 'Ativo' => 'Ativo', 'Arquivado' => 'Arquivado', 'Encerrado' => 'Encerrado'] as $val => $label)
-                @php $ativo = $status === $val; @endphp
-                <button wire:click="$set('status', '{{ $val }}')"
-                    style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid {{ $ativo ? 'var(--primary)' : 'var(--border)' }};background:{{ $ativo ? 'var(--primary)' : 'var(--white)' }};color:{{ $ativo ? '#fff' : 'var(--text)' }};transition:all .15s;">
-                    {{ $label }}
-                </button>
-                @endforeach
-            </div>
+        <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Status</label>
+            <select wire:model.live="status"
+                style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;cursor:pointer;">
+                <option value="">Todos</option>
+                <option value="Ativo">Ativo</option>
+                <option value="Arquivado">Arquivado</option>
+                <option value="Encerrado">Encerrado</option>
+            </select>
         </div>
 
-        {{-- Fases --}}
-        @if($fases->count())
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Fase</div>
-            <div style="display:flex;flex-direction:column;gap:4px;">
+        {{-- Fase --}}
+        <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Fase</label>
+            <select wire:model.live="fase_id"
+                style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;cursor:pointer;">
+                <option value="">Todas as fases</option>
                 @foreach($fases as $f)
-                @php
-                    $cnt = $faseCounts[$f->id] ?? 0;
-                    $sel = $fase_id == $f->id;
-                @endphp
-                <button wire:click="$set('fase_id', '{{ $sel ? '' : $f->id }}')"
-                    style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px;cursor:pointer;border:1.5px solid {{ $sel ? '#bfdbfe' : 'transparent' }};background:{{ $sel ? '#eff6ff' : 'transparent' }};color:{{ $sel ? '#1d4ed8' : 'var(--text)' }};text-align:left;width:100%;transition:all .15s;">
-                    <span style="font-weight:{{ $sel ? '600' : '400' }};">{{ $f->descricao }}</span>
-                    @if($cnt > 0)
-                    <span style="font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;background:{{ $sel ? '#dbeafe' : '#f1f5f9' }};color:{{ $sel ? '#1d4ed8' : 'var(--muted)' }};">{{ $cnt }}</span>
-                    @endif
-                </button>
+                <option value="{{ $f->id }}">{{ $f->descricao }}</option>
                 @endforeach
-            </div>
+            </select>
         </div>
-        @endif
 
-        {{-- Riscos --}}
-        @if($riscos->count())
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Risco</div>
-            <div style="display:flex;flex-direction:column;gap:4px;">
+        {{-- Risco --}}
+        <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Risco</label>
+            <select wire:model.live="risco_id"
+                style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;cursor:pointer;">
+                <option value="">Todos</option>
                 @foreach($riscos as $r)
-                @php
-                    $cnt = $riscoCounts[$r->id] ?? 0;
-                    $sel = $risco_id == $r->id;
-                    $cor = $r->cor_hex ?? '#94a3b8';
-                @endphp
-                <button wire:click="$set('risco_id', '{{ $sel ? '' : $r->id }}')"
-                    style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px;cursor:pointer;border:1.5px solid {{ $sel ? $cor.'55' : 'transparent' }};background:{{ $sel ? $cor.'14' : 'transparent' }};color:var(--text);text-align:left;width:100%;transition:all .15s;">
-                    <span style="display:flex;align-items:center;gap:7px;font-weight:{{ $sel ? '600' : '400' }};">
-                        <span style="width:9px;height:9px;border-radius:50%;background:{{ $cor }};flex-shrink:0;display:inline-block;"></span>
-                        {{ $r->descricao }}
-                    </span>
-                    @if($cnt > 0)
-                    <span style="font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;background:{{ $cor }}22;color:{{ $cor }};">{{ $cnt }}</span>
-                    @endif
-                </button>
+                <option value="{{ $r->id }}">{{ $r->descricao }}</option>
                 @endforeach
-            </div>
+            </select>
         </div>
-        @endif
 
         {{-- Limpar --}}
-        @if($busca || $status || $fase_id || $risco_id)
-        <button wire:click="$set('busca',''); $set('status',''); $set('fase_id',''); $set('risco_id','')"
-            style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;background:none;color:var(--muted);cursor:pointer;">
-            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Limpar filtros
-        </button>
-        @endif
+        <div>
+            <label style="font-size:11px;font-weight:700;color:transparent;display:block;margin-bottom:6px;">.</label>
+            <button wire:click="$set('busca',''); $set('status',''); $set('fase_id',''); $set('risco_id','')"
+                style="width:100%;padding:8px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;font-weight:600;white-space:nowrap;transition:all .15s;"
+                onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
+                onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+                Limpar filtros
+            </button>
+        </div>
     </div>
 
-    {{-- COLUNA DIREITA: Metricas + Tabela --}}
-    <div>
+    {{-- Linha 2: chips de filtros ativos + contador --}}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--border);">
+
+        @if($status)
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;font-size:12px;font-weight:600;color:#1d4ed8;">
+            Status: {{ $status }}
+            <button wire:click="$set('status','')" style="background:none;border:none;cursor:pointer;color:#93c5fd;font-size:14px;line-height:1;padding:0;">&times;</button>
+        </span>
+        @endif
+
+        @if($fase_id)
+        @php $faseAtiva = $fases->firstWhere('id', $fase_id); @endphp
+        @if($faseAtiva)
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;font-size:12px;font-weight:600;color:#1d4ed8;">
+            Fase: {{ $faseAtiva->descricao }}
+            <button wire:click="$set('fase_id','')" style="background:none;border:none;cursor:pointer;color:#93c5fd;font-size:14px;line-height:1;padding:0;">&times;</button>
+        </span>
+        @endif
+        @endif
+
+        @if($risco_id)
+        @php $riscoAtivo = $riscos->firstWhere('id', $risco_id); @endphp
+        @if($riscoAtivo)
+        @php $corRisco = $riscoAtivo->cor_hex ?? '#94a3b8'; @endphp
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:{{ $corRisco }}18;border:1px solid {{ $corRisco }}44;border-radius:20px;font-size:12px;font-weight:600;color:{{ $corRisco }};">
+            Risco: {{ $riscoAtivo->descricao }}
+            <button wire:click="$set('risco_id','')" style="background:none;border:none;cursor:pointer;color:{{ $corRisco }};opacity:.6;font-size:14px;line-height:1;padding:0;">&times;</button>
+        </span>
+        @endif
+        @endif
+
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+            <strong style="color:var(--text);font-size:13px;">{{ $processos->total() }}</strong> processo(s)
+        </div>
+    </div>
+</div>
+
+{{-- ── Conteúdo ── --}}
+<div>
 
         {{-- Metricas --}}
         <div class="metricas-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
@@ -413,7 +425,6 @@
             </div>
         </div>
 
-    </div>
 </div>
 
 {{-- Modal confirmacao arquivar --}}

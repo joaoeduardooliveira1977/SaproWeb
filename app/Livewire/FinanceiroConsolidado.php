@@ -11,15 +11,16 @@ class FinanceiroConsolidado extends Component
 {
     use WithPagination;
 
-    public string $aba          = 'visao-geral';
+    public string $abaAtiva     = 'visao';
     public string $filtroMes    = '';
     public string $filtroStatus = 'pendente';
+    public int    $periodoFluxo = 6;           // meses: 3 | 6 | 12
 
     protected $queryString = [
+        'abaAtiva'     => ['except' => 'visao'],
         'filtroMes'    => ['except' => ''],
         'filtroStatus' => ['except' => 'pendente'],
-    ]; // pendente | todos
-    public int    $periodoFluxo = 6;           // 3 | 6 | 12 meses
+    ];
 
     public function placeholder(): \Illuminate\View\View
     {
@@ -31,53 +32,52 @@ class FinanceiroConsolidado extends Component
         $this->filtroMes = now()->format('Y-m');
     }
 
-    public function updatedAba(): void
+    public function updatedAbaAtiva(): void
     {
         $this->resetPage();
     }
 
-    // ── KPIs ────────────────────────────────────────────────────
+    // ── Métricas ────────────────────────────────────────────────
 
-    private function kpis(): array
+    private function metricas(): array
     {
-        $mesAtual    = now()->format('Y-m');
-        $inicioMes   = now()->startOfMonth()->format('Y-m-d');
-        $fimMes      = now()->endOfMonth()->format('Y-m-d');
+        $inicioMes = now()->startOfMonth()->format('Y-m-d');
+        $fimMes    = now()->endOfMonth()->format('Y-m-d');
 
-        $aReceber = DB::selectOne("
+        $a_receber = DB::selectOne("
             SELECT COALESCE(SUM(valor),0) AS total
             FROM recebimentos
             WHERE recebido = false
         ")->total;
 
-        $recebidoMes = DB::selectOne("
+        $recebido_mes = DB::selectOne("
             SELECT COALESCE(SUM(valor_recebido),0) AS total
             FROM recebimentos
             WHERE recebido = true
               AND data_recebimento BETWEEN ? AND ?
         ", [$inicioMes, $fimMes])->total;
 
-        $aPagar = DB::selectOne("
+        $a_pagar = DB::selectOne("
             SELECT COALESCE(SUM(valor),0) AS total
             FROM pagamentos
             WHERE pago = false
         ")->total;
 
-        $pagoMes = DB::selectOne("
+        $pago_mes = DB::selectOne("
             SELECT COALESCE(SUM(valor_pago),0) AS total
             FROM pagamentos
             WHERE pago = true
               AND data_pagamento BETWEEN ? AND ?
         ", [$inicioMes, $fimMes])->total;
 
-        $honAtrasado = DB::selectOne("
+        $honorarios_atrasados = DB::selectOne("
             SELECT COALESCE(SUM(valor),0) AS total
             FROM honorario_parcelas
             WHERE status IN ('atrasado','pendente')
               AND vencimento < CURRENT_DATE
         ")->total;
 
-        $honPendente = DB::selectOne("
+        $honorarios_vencer = DB::selectOne("
             SELECT COALESCE(SUM(valor),0) AS total
             FROM honorario_parcelas
             WHERE status = 'pendente'
@@ -85,10 +85,66 @@ class FinanceiroConsolidado extends Component
         ")->total;
 
         return compact(
-            'aReceber', 'recebidoMes',
-            'aPagar',   'pagoMes',
-            'honAtrasado', 'honPendente'
+            'a_receber', 'recebido_mes',
+            'a_pagar',   'pago_mes',
+            'honorarios_atrasados', 'honorarios_vencer'
         );
+    }
+
+    // ── Prioridades de hoje ──────────────────────────────────────
+
+    private function prioridades(): array
+    {
+        $rows = DB::table('recebimentos as r')
+            ->join('processos as p', 'p.id', '=', 'r.processo_id')
+            ->leftJoin('pessoas as cl', 'cl.id', '=', 'p.cliente_id')
+            ->select('r.id', 'r.valor', 'r.data', 'cl.nome as cliente_nome')
+            ->where('r.recebido', false)
+            ->whereRaw("r.data <= ?", [today()->addDay()->format('Y-m-d')])
+            ->orderBy('r.data')
+            ->take(5)
+            ->get();
+
+        return $rows->map(function ($r) {
+            $data     = Carbon::parse($r->data);
+            $atrasado = $data->isPast() && !$data->isToday();
+            return [
+                'cliente'   => $r->cliente_nome ?? '—',
+                'valor'     => (float) $r->valor,
+                'descricao' => $atrasado
+                    ? 'Cobrança imediata recomendada.'
+                    : 'Enviar lembrete preventivo.',
+                'urgencia'  => $atrasado ? 'vencido' : 'amanha',
+                'tag'       => $atrasado
+                    ? 'VENCIDO HÁ ' . today()->diffInDays($data) . ' DIA(S)'
+                    : 'VENCE AMANHÃ',
+            ];
+        })->toArray();
+    }
+
+    // ── Agenda financeira próximos 7 dias ────────────────────────
+
+    private function agendaFinanceira(): array
+    {
+        $rows = DB::table('recebimentos as r')
+            ->join('processos as p', 'p.id', '=', 'r.processo_id')
+            ->leftJoin('pessoas as cl', 'cl.id', '=', 'p.cliente_id')
+            ->select('r.id', 'r.valor', 'r.data', 'cl.nome as cliente_nome')
+            ->where('r.recebido', false)
+            ->whereRaw("r.data BETWEEN ? AND ?", [
+                today()->format('Y-m-d'),
+                today()->addDays(7)->format('Y-m-d'),
+            ])
+            ->orderBy('r.data')
+            ->take(5)
+            ->get();
+
+        return $rows->map(fn($r) => [
+            'data'      => Carbon::parse($r->data)->format('d/m'),
+            'titulo'    => 'Receber R$ ' . number_format($r->valor, 2, ',', '.'),
+            'descricao' => $r->cliente_nome ?? '—',
+            'tipo'      => 'entrada',
+        ])->toArray();
     }
 
     // ── Ações rápidas ───────────────────────────────────────────
@@ -96,10 +152,10 @@ class FinanceiroConsolidado extends Component
     public function marcarRecebido(int $id): void
     {
         DB::table('recebimentos')->where('id', $id)->update([
-            'recebido'          => true,
-            'data_recebimento'  => today(),
-            'valor_recebido'    => DB::table('recebimentos')->where('id', $id)->value('valor'),
-            'updated_at'        => now(),
+            'recebido'         => true,
+            'data_recebimento' => today(),
+            'valor_recebido'   => DB::table('recebimentos')->where('id', $id)->value('valor'),
+            'updated_at'       => now(),
         ]);
         $this->dispatch('toast', message: 'Recebimento marcado como recebido.', type: 'success');
     }
@@ -119,7 +175,7 @@ class FinanceiroConsolidado extends Component
 
     public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        if ($this->aba === 'receber') {
+        if ($this->abaAtiva === 'receber') {
             $rows = $this->queryReceber()->get();
             return response()->streamDownload(function () use ($rows) {
                 $out = fopen('php://output', 'w');
@@ -139,7 +195,7 @@ class FinanceiroConsolidado extends Component
             }, 'receber-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
         }
 
-        if ($this->aba === 'pagar') {
+        if ($this->abaAtiva === 'pagar') {
             $rows = $this->queryPagar()->get();
             return response()->streamDownload(function () use ($rows) {
                 $out = fopen('php://output', 'w');
@@ -182,7 +238,7 @@ class FinanceiroConsolidado extends Component
         }, 'honorarios-atraso-'.now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
-    // ── Fluxo de Caixa (período configurável) ───────────────────
+    // ── Fluxo de Caixa (mensal) ─────────────────────────────────
 
     private function fluxoCaixa(): array
     {
@@ -193,8 +249,6 @@ class FinanceiroConsolidado extends Component
 
         $rows = [];
         foreach ($meses as $mes) {
-            [$ano, $m] = explode('-', $mes);
-
             $recebido = DB::selectOne("
                 SELECT COALESCE(SUM(valor_recebido),0) AS total
                 FROM recebimentos
@@ -218,7 +272,7 @@ class FinanceiroConsolidado extends Component
 
             $rows[] = [
                 'mes'        => $mes,
-                'label'      => \Carbon\Carbon::createFromFormat('Y-m', $mes)->translatedFormat('M/Y'),
+                'label'      => Carbon::createFromFormat('Y-m', $mes)->translatedFormat('M/Y'),
                 'recebido'   => (float) $recebido,
                 'pago'       => (float) $pago,
                 'honorarios' => (float) $honorarios,
@@ -304,23 +358,34 @@ class FinanceiroConsolidado extends Component
 
     public function render(): \Illuminate\View\View
     {
-        $kpis       = $this->kpis();
-        $fluxo      = $this->aba === 'fluxo' ? $this->fluxoCaixa() : [];
+        $metricas         = $this->metricas();
+        $fluxo            = $this->abaAtiva === 'fluxo' ? $this->fluxoCaixa() : [];
+        $prioridades      = $this->abaAtiva === 'visao'  ? $this->prioridades() : [];
+        $agendaFinanceira = $this->abaAtiva === 'visao'  ? $this->agendaFinanceira() : [];
 
-        $receber    = $this->aba === 'receber'
+        $receber      = $this->abaAtiva === 'receber'
             ? $this->queryReceber()->paginate(20, ['*'], 'rec_page')
             : null;
 
-        $pagar      = $this->aba === 'pagar'
+        $pagar        = $this->abaAtiva === 'pagar'
             ? $this->queryPagar()->paginate(20, ['*'], 'pag_page')
             : null;
 
-        $honAtrasados = $this->aba === 'honorarios'
+        $honAtrasados = $this->abaAtiva === 'honorarios'
             ? $this->queryHonorariosAtrasados()->paginate(20, ['*'], 'hon_page')
             : null;
 
+        $inadimplentesCount = DB::table('honorario_parcelas')
+            ->whereIn('status', ['atrasado', 'pendente'])
+            ->whereRaw('vencimento < CURRENT_DATE')
+            ->count();
+        $aReceberCount = DB::table('recebimentos')->where('recebido', false)->count();
+        $aPagarCount   = DB::table('pagamentos')->where('pago', false)->count();
+
         return view('livewire.financeiro-consolidado', compact(
-            'kpis', 'fluxo', 'receber', 'pagar', 'honAtrasados'
+            'metricas', 'fluxo', 'receber', 'pagar', 'honAtrasados',
+            'prioridades', 'agendaFinanceira',
+            'inadimplentesCount', 'aReceberCount', 'aPagarCount'
         ));
     }
 }

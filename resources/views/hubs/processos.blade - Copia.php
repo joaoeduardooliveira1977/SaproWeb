@@ -45,9 +45,6 @@
         <h1 style="font-size:24px;font-weight:800;color:var(--primary);margin:0;">Central de Processos</h1>
         <p style="font-size:13px;color:var(--muted);margin-top:4px;">Gerencie processos, partes, documentos, prazos e procurações.</p>
     </div>
-
-
-
     <div style="display:flex;gap:10px;">
         <a href="{{ route('processos.novo') }}"
             style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#1d4ed8,#2563a8);color:#fff;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;transition:opacity .15s;"

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
+    <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     @php
@@ -465,11 +468,6 @@
     animation: mf-pulse 1.8s ease-in-out infinite;
   }
 </style>
-
-
-
-
-
 
 
 </head>

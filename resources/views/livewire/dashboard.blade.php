@@ -6,7 +6,8 @@
     <div style="margin-bottom:18px;">
 
         {{-- Faixa de atenção --}}
-        <div style="
+        
+	<div style="
             background: linear-gradient(90deg, #3b82f6 0%, #4f46e5 45%, #60a5fa 100%);
             border-radius: 16px;
             padding: 22px 24px;
@@ -83,6 +84,10 @@
         </div>
 
         {{-- Cards principais --}}
+
+
+
+
         <div class="dash-kpis-v2" style="
             display:grid;
             grid-template-columns:repeat(4,1fr);
@@ -293,6 +298,8 @@
         box-shadow:0 8px 20px rgba(15,23,42,.04);
         min-height:100%;
     ">
+
+
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
             <div>
                 <div style="font-size:15px;font-weight:800;color:#0f172a;">⏰ Próximos Prazos</div>
@@ -425,7 +432,7 @@
         position:relative;
         overflow:hidden;
     ">
-        <div style="
+       <div style="
             position:absolute;
             right:-20px;
             top:-20px;
@@ -456,6 +463,10 @@
                     <div style="font-size:12px;color:rgba(255,255,255,.72);">Insights automáticos do dia</div>
                 </div>
             </div>
+
+
+
+
 
             <div style="
                 background:rgba(255,255,255,.06);
@@ -577,6 +588,8 @@
                         ">
                             !
                         </div>
+
+
 
                         <div style="flex:1;min-width:0;">
                             <div style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">

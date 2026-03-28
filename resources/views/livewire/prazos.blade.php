@@ -233,6 +233,7 @@
     }
 </style>
 
+@if(!$embed)
 {{-- ══ Voltar ══ --}}
 <a href="{{ route('processos.hub') }}"
    style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:8px;"
@@ -278,7 +279,16 @@
         </button>
     </div>
 </div>
+@endif {{-- /!embed header --}}
 
+@if($embed)
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+    <button class="btn btn-primary btn-sm" wire:click="abrirModal()" style="display:flex;align-items:center;gap:6px;">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo Prazo
+    </button>
+</div>
+@else
 {{-- ══ Analista IA ══ --}}
 <div class="ia-bar">
     <div class="ia-bar-label">
@@ -314,11 +324,13 @@
     <span>{{ $respostaIA }}</span>
 </div>
 @endif
+@endif {{-- /!embed IA --}}
 
 {{-- ══ Grid principal ══ --}}
-<div class="prazos-grid">
+<div class="prazos-grid" @if($embed) style="grid-template-columns:1fr;" @endif>
 
     {{-- ── Coluna esquerda: Filtros ── --}}
+    @if(!$embed)
     <div class="prazos-filtros">
         <div class="prazos-filtros-title">Filtros</div>
 
@@ -424,11 +436,13 @@
         </button>
         @endif
     </div>
+    @endif {{-- /!embed sidebar --}}
 
     {{-- ── Coluna direita ── --}}
     <div>
 
         {{-- Métricas --}}
+        @if(!$embed)
         <div class="prazos-metricas">
 
             {{-- Prazos em Aberto --}}
@@ -491,6 +505,7 @@
             </div>
 
         </div>
+        @endif {{-- /!embed métricas --}}
         {{-- /métricas --}}
 
 {{-- ══ Lista ══ --}}

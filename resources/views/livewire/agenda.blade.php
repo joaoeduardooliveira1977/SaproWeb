@@ -11,6 +11,7 @@
 </style>
 
 {{-- Cabecalho --}}
+@if(!$embed)
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
     <div>
         <a href="{{ route('processos.hub') }}"
@@ -49,8 +50,19 @@
         </button>
     </div>
 </div>
+@endif {{-- /!embed header --}}
+
+@if($embed)
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+    <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo Evento
+    </button>
+</div>
+@endif
 
 {{-- Analista IA --}}
+@if(!$embed)
 <div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);border-radius:12px;padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
     <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -85,11 +97,13 @@
     <button wire:click="limparIA" style="background:none;border:none;color:#93c5fd;cursor:pointer;font-size:18px;line-height:1;padding:0 4px;flex-shrink:0;" title="Fechar">&times;</button>
 </div>
 @endif
+@endif {{-- /!embed IA --}}
 
 {{-- Grid principal --}}
-<div class="agenda-grid" style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start;">
+<div class="agenda-grid" style="display:grid;grid-template-columns:{{ $embed ? '1fr' : '280px 1fr' }};gap:20px;align-items:start;">
 
     {{-- COLUNA ESQUERDA: Filtros --}}
+@if(!$embed)
     <div class="filtros-ag" style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;position:sticky;top:20px;">
 
         {{-- Tipo de Evento --}}
@@ -187,11 +201,13 @@
         </button>
         @endif
     </div>
+@endif {{-- /!embed sidebar --}}
 
     {{-- COLUNA DIREITA --}}
     <div>
 
         {{-- Metricas --}}
+        @if(!$embed)
         <div class="metricas-ag" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
 
             {{-- Hoje --}}
@@ -247,6 +263,7 @@
             </div>
 
         </div>
+        @endif {{-- /!embed metricas --}}
 
         {{-- Conteudo: Calendario + Lista --}}
         <div class="card">

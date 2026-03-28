@@ -1,140 +1,258 @@
 <div>
 
-{{-- ══ KPIs ══════════════════════════════════════════════════════ --}}
-<div class="stat-grid">
-
-    <div class="stat-card" style="border-left-color:#16a34a;">
-        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
-        <div class="stat-val" style="color:#16a34a;">R$ {{ number_format($kpis['aReceber'],2,',','.') }}</div>
-        <div class="stat-label">A receber (em aberto)</div>
+{{-- ── Cabeçalho ── --}}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+    <div>
+        <h1 style="font-size:26px;font-weight:800;color:var(--text);margin:0;">Financeiro Consolidado</h1>
+        <p style="font-size:13px;color:var(--muted);margin-top:4px;">Visão premium de recebimentos, despesas, fluxo de caixa e honorários.</p>
     </div>
-
-    <div class="stat-card" style="border-left-color:#2563a8;">
-        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="stat-val" style="color:#2563a8;">R$ {{ number_format($kpis['recebidoMes'],2,',','.') }}</div>
-        <div class="stat-label">Recebido este mês</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button onclick="window.print()"
+            style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Imprimir
+        </button>
+        <a href="{{ route('relatorios.financeiro-periodo') }}"
+            style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Gerar relatório
+        </a>
+        <a href="{{ route('financeiro') }}"
+            style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:linear-gradient(135deg,#1d4ed8,#2563a8);color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo lançamento
+        </a>
     </div>
-
-    <div class="stat-card" style="border-left-color:#dc2626;">
-        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-        <div class="stat-val" style="color:#dc2626;">R$ {{ number_format($kpis['aPagar'],2,',','.') }}</div>
-        <div class="stat-label">A pagar (em aberto)</div>
-    </div>
-
-    <div class="stat-card" style="border-left-color:#d97706;">
-        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-        <div class="stat-val" style="color:#d97706;">R$ {{ number_format($kpis['pagoMes'],2,',','.') }}</div>
-        <div class="stat-label">Pago este mês</div>
-    </div>
-
-    <div class="stat-card" style="border-left-color:#7c3aed;">
-        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-        <div class="stat-val" style="color:#7c3aed;">R$ {{ number_format($kpis['honAtrasado'],2,',','.') }}</div>
-        <div class="stat-label">Honorários em atraso</div>
-    </div>
-
-    <div class="stat-card" style="border-left-color:#0891b2;">
-        <div class="stat-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
-        <div class="stat-val" style="color:#0891b2;">R$ {{ number_format($kpis['honPendente'],2,',','.') }}</div>
-        <div class="stat-label">Honorários a vencer</div>
-    </div>
-
 </div>
 
-{{-- ══ Abas ══════════════════════════════════════════════════════ --}}
-<div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--border);overflow-x:auto;white-space:nowrap;">
-    @foreach([
-        'visao-geral' => 'Visão Geral',
-        'fluxo'       => 'Fluxo de Caixa',
-        'receber'     => 'Contas a Receber',
-        'pagar'       => 'Contas a Pagar',
-        'honorarios'  => 'Honorários Atrasados',
-    ] as $key => $label)
-    <button wire:click="$set('aba','{{ $key }}')"
-        style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;
-               border-bottom:3px solid {{ $aba === $key ? 'var(--primary)' : 'transparent' }};
-               color:{{ $aba === $key ? 'var(--primary)' : 'var(--muted)' }};
-               margin-bottom:-2px;transition:all .15s;">
-        {{ $label }}
+{{-- ── Resumo Inteligente + Card Saldo ── --}}
+@php $saldo = $metricas['a_receber'] + $metricas['honorarios_vencer'] - $metricas['a_pagar']; @endphp
+<div style="display:grid;grid-template-columns:1fr 320px;gap:20px;margin-bottom:24px;" class="fin-resumo-grid">
+
+    {{-- Alertas inteligentes --}}
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;">
+        <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px;">Resumo Inteligente</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+
+            <div style="background:{{ $saldo >= 0 ? '#f0fdf4' : '#fef2f2' }};border:1px solid {{ $saldo >= 0 ? '#86efac' : '#fca5a5' }};border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <div style="font-size:14px;font-weight:700;color:{{ $saldo >= 0 ? '#16a34a' : '#dc2626' }};">
+                        Você tem <strong>R$ {{ number_format(abs($saldo), 2, ',', '.') }}</strong> de saldo projetado.
+                    </div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:2px;">Projeção {{ $saldo >= 0 ? 'positiva' : 'negativa' }} para os próximos 30 dias.</div>
+                </div>
+                <span style="font-size:20px;">{{ $saldo >= 0 ? '📈' : '📉' }}</span>
+            </div>
+
+            @if($metricas['a_receber'] > 0)
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <div style="font-size:14px;font-weight:700;color:#d97706;">
+                        Existem <strong>R$ {{ number_format($metricas['a_receber'], 2, ',', '.') }}</strong> a receber.
+                    </div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:2px;">Priorize cobrança dos títulos mais próximos do vencimento.</div>
+                </div>
+                <span style="font-size:20px;">💰</span>
+            </div>
+            @endif
+
+            @if($metricas['honorarios_atrasados'] > 0)
+            <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <div style="font-size:14px;font-weight:700;color:#dc2626;">
+                        Há <strong>R$ {{ number_format($metricas['honorarios_atrasados'], 2, ',', '.') }}</strong> em honorários atrasados.
+                    </div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:2px;">Ação necessária para reduzir inadimplência.</div>
+                </div>
+                <span style="font-size:20px;">⚠️</span>
+            </div>
+            @endif
+
+            @if($metricas['a_receber'] == 0 && $metricas['honorarios_atrasados'] == 0)
+            <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 16px;text-align:center;color:#16a34a;font-size:13px;font-weight:600;">
+                ✅ Nenhuma pendência financeira crítica no momento!
+            </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- Card escuro saldo --}}
+    <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:16px;padding:28px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;">
+        <div>
+            <div style="font-size:13px;color:#94a3b8;margin-bottom:8px;">Saldo Projetado</div>
+            <div style="font-size:34px;font-weight:800;letter-spacing:-1px;margin-bottom:6px;color:{{ $saldo >= 0 ? '#4ade80' : '#f87171' }};">
+                R$ {{ number_format(abs($saldo), 2, ',', '.') }}
+            </div>
+            <div style="font-size:12px;color:#64748b;">Receitas + honorários − despesas previstas</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px;">
+            <a href="{{ route('inadimplencia') }}"
+                style="flex:1;text-align:center;padding:10px;background:#2563a8;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">
+                Cobrar agora
+            </a>
+            <a href="{{ route('financeiro.consolidado') }}"
+                style="flex:1;text-align:center;padding:10px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">
+                Ver contas
+            </a>
+        </div>
+    </div>
+</div>
+
+{{-- ── 6 KPIs ── --}}
+@php
+$kpis = [
+    ['label'=>'A receber',           'val'=>$metricas['a_receber'],           'cor'=>'#16a34a', 'tag'=>'Recebimentos em aberto',    'tag_cor'=>'#16a34a'],
+    ['label'=>'Recebido este mês',   'val'=>$metricas['recebido_mes'],        'cor'=>'#2563a8', 'tag'=>'Competência ' . now()->translatedFormat('M/Y'), 'tag_cor'=>'#64748b'],
+    ['label'=>'A pagar',             'val'=>$metricas['a_pagar'],             'cor'=>'#dc2626', 'tag'=>'Despesas pendentes',        'tag_cor'=>'#dc2626'],
+    ['label'=>'Pago este mês',       'val'=>$metricas['pago_mes'],            'cor'=>'#d97706', 'tag'=>'Saídas registradas',        'tag_cor'=>'#d97706'],
+    ['label'=>'Honorários atrasados','val'=>$metricas['honorarios_atrasados'],'cor'=>'#7c3aed', 'tag'=>'● Ação necessária',        'tag_cor'=>'#7c3aed'],
+    ['label'=>'Honorários a vencer', 'val'=>$metricas['honorarios_vencer'],  'cor'=>'#0891b2', 'tag'=>'↑ Carteira futura',        'tag_cor'=>'#0891b2'],
+];
+@endphp
+<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px;" class="fin-kpis">
+    @foreach($kpis as $k)
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px;border-top:3px solid {{ $k['cor'] }};">
+        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">{{ $k['label'] }}</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px;">R$ {{ number_format($k['val'], 2, ',', '.') }}</div>
+        <div style="font-size:11px;color:{{ $k['tag_cor'] }};font-weight:600;">{{ $k['tag'] }}</div>
+    </div>
+    @endforeach
+</div>
+
+{{-- ── Abas de navegação ── --}}
+@php
+$abas = [
+    ['id'=>'visao',      'label'=>'📊 Visão Geral',         'count'=>null],
+    ['id'=>'fluxo',      'label'=>'📈 Fluxo de Caixa',      'count'=>null],
+    ['id'=>'receber',    'label'=>'💰 A Receber',            'count'=>$aReceberCount],
+    ['id'=>'pagar',      'label'=>'💸 A Pagar',              'count'=>$aPagarCount],
+    ['id'=>'honorarios', 'label'=>'⚠️ Honorários Atrasados', 'count'=>$inadimplentesCount],
+];
+@endphp
+<div style="display:flex;gap:4px;background:#f8fafc;border-radius:12px;padding:4px;margin-bottom:20px;overflow-x:auto;">
+    @foreach($abas as $aba)
+    <button wire:click="$set('abaAtiva', '{{ $aba['id'] }}')"
+        style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;
+        background:{{ $abaAtiva === $aba['id'] ? '#fff' : 'transparent' }};
+        color:{{ $abaAtiva === $aba['id'] ? '#1d4ed8' : '#64748b' }};
+        box-shadow:{{ $abaAtiva === $aba['id'] ? '0 1px 4px rgba(0,0,0,.1)' : 'none' }};">
+        {{ $aba['label'] }}
+        @if(!empty($aba['count']))
+        <span style="background:#dc2626;color:#fff;border-radius:99px;padding:1px 6px;font-size:10px;font-weight:800;">{{ $aba['count'] }}</span>
+        @endif
     </button>
     @endforeach
 </div>
 
-{{-- ══ Filtros (abas com lista) ══════════════════════════════════ --}}
-@if(in_array($aba, ['receber','pagar','honorarios']))
-<div class="filter-bar" style="margin-bottom:16px;">
-    @if($aba !== 'honorarios')
-    <input type="month" wire:model.live="filtroMes" title="Mês">
-    <select wire:model.live="filtroStatus">
-        <option value="pendente">Apenas pendentes</option>
-        <option value="todos">Todos</option>
-    </select>
-    @endif
-    <button wire:click="exportarCsv" wire:loading.attr="disabled"
-        class="btn btn-sm btn-secondary-outline" style="margin-left:auto;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;">
-        <span wire:loading.remove wire:target="exportarCsv" style="display:inline-flex;align-items:center;gap:6px;"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar CSV</span>
-        <span wire:loading wire:target="exportarCsv">Gerando…</span>
-    </button>
-</div>
-@endif
-
 {{-- ══ ABA: VISÃO GERAL ══════════════════════════════════════════ --}}
-@if($aba === 'visao-geral')
-<div class="card">
-    <div class="card-header">
-        <span class="card-title">Resumo Financeiro</span>
+@if($abaAtiva === 'visao')
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="fin-visao">
+
+    {{-- Resumo Financeiro --}}
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:8px;">
+            <div style="font-size:16px;font-weight:800;color:var(--text);">Resumo Financeiro</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <a href="{{ route('financeiro.consolidado') }}" style="padding:6px 12px;background:#f1f5f9;border-radius:8px;font-size:12px;font-weight:600;color:#475569;text-decoration:none;">Ver contas</a>
+                <a href="{{ route('inadimplencia') }}" style="padding:6px 12px;background:#f1f5f9;border-radius:8px;font-size:12px;font-weight:600;color:#475569;text-decoration:none;">Cobrar</a>
+                <a href="{{ route('financeiro') }}" style="padding:6px 12px;background:linear-gradient(135deg,#1d4ed8,#2563a8);border-radius:8px;font-size:12px;font-weight:700;color:#fff;text-decoration:none;">+ Registrar</a>
+            </div>
+        </div>
+
+        @php
+        $linhas = [
+            ['label'=>'Recebimentos em aberto', 'desc'=>'Títulos pendentes de clientes',       'val'=>$metricas['a_receber'],          'cor'=>'#16a34a', 'btn'=>'Ver lista',   'rota'=>route('financeiro.consolidado')],
+            ['label'=>'Recebido este mês',       'desc'=>'Total efetivamente recebido',          'val'=>$metricas['recebido_mes'],       'cor'=>null,      'btn'=>'Detalhar',    'rota'=>route('financeiro.consolidado')],
+            ['label'=>'Despesas em aberto',      'desc'=>'Compromissos ainda não quitados',     'val'=>$metricas['a_pagar'],            'cor'=>'#dc2626', 'btn'=>'Pagar',       'rota'=>route('financeiro')],
+            ['label'=>'Pago este mês',           'desc'=>'Saídas já registradas',               'val'=>$metricas['pago_mes'],           'cor'=>null,      'btn'=>'Detalhar',    'rota'=>route('financeiro.consolidado')],
+            ['label'=>'Honorários atrasados',    'desc'=>'Valores que exigem atenção imediata', 'val'=>$metricas['honorarios_atrasados'],'cor'=>'#7c3aed','btn'=>'Cobrar agora','rota'=>route('inadimplencia')],
+            ['label'=>'Honorários a vencer',     'desc'=>'Receita futura prevista',             'val'=>$metricas['honorarios_vencer'],  'cor'=>null,      'btn'=>'Ver agenda',  'rota'=>route('honorarios')],
+        ];
+        @endphp
+
+        <div style="display:flex;flex-direction:column;">
+            @foreach($linhas as $linha)
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);">
+                <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text);">{{ $linha['label'] }}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:1px;">{{ $linha['desc'] }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="font-size:14px;font-weight:800;color:{{ $linha['cor'] ?? 'var(--text)' }};">
+                        R$ {{ number_format($linha['val'], 2, ',', '.') }}
+                    </div>
+                    <a href="{{ $linha['rota'] }}"
+                        style="padding:5px 10px;background:{{ $linha['cor'] ? $linha['cor'].'18' : '#f1f5f9' }};color:{{ $linha['cor'] ?? '#475569' }};border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;">
+                        {{ $linha['btn'] }}
+                    </a>
+                </div>
+            </div>
+            @endforeach
+        </div>
     </div>
-    <div class="form-grid">
-        <div>
-            <h3 style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">Recebimentos</h3>
-            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px;">
-                <span style="color:var(--muted);">Em aberto</span>
-                <span style="color:#16a34a;font-weight:700;">R$ {{ number_format($kpis['aReceber'],2,',','.') }}</span>
+
+    {{-- Prioridades + Agenda --}}
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+        {{-- Prioridades de Hoje --}}
+        <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <div style="font-size:16px;font-weight:800;color:var(--text);">Prioridades de Hoje</div>
+                <span style="background:#fef2f2;color:#dc2626;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;">
+                    {{ count($prioridades) }} ações
+                </span>
             </div>
-            <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;">
-                <span style="color:var(--muted);">Recebido este mês</span>
-                <span style="font-weight:700;">R$ {{ number_format($kpis['recebidoMes'],2,',','.') }}</span>
+            @forelse($prioridades as $p)
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:11px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        {{ $p['cliente'] }} — R$ {{ number_format($p['valor'], 2, ',', '.') }}
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;">{{ $p['descricao'] }}</div>
+                </div>
+                <span style="flex-shrink:0;margin-left:10px;font-size:10px;font-weight:700;white-space:nowrap;padding:3px 8px;border-radius:6px;
+                    background:{{ $p['urgencia'] === 'vencido' ? '#fef2f2' : '#fffbeb' }};
+                    color:{{ $p['urgencia'] === 'vencido' ? '#dc2626' : '#d97706' }};">
+                    {{ $p['tag'] }}
+                </span>
             </div>
+            @empty
+            <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">
+                ✅ Nenhuma pendência crítica hoje.
+            </div>
+            @endforelse
         </div>
-        <div>
-            <h3 style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">Despesas</h3>
-            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px;">
-                <span style="color:var(--muted);">Em aberto</span>
-                <span style="color:#dc2626;font-weight:700;">R$ {{ number_format($kpis['aPagar'],2,',','.') }}</span>
+
+        {{-- Agenda Financeira --}}
+        <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <div style="font-size:16px;font-weight:800;color:var(--text);">Agenda Financeira</div>
+                <span style="background:#f1f5f9;color:#64748b;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:600;">Próximos 7 dias</span>
             </div>
-            <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;">
-                <span style="color:var(--muted);">Pago este mês</span>
-                <span style="font-weight:700;">R$ {{ number_format($kpis['pagoMes'],2,',','.') }}</span>
+            @forelse($agendaFinanceira as $item)
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $item['data'] }} — {{ $item['titulo'] }}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;">{{ $item['descricao'] }}</div>
+                </div>
+                <span style="flex-shrink:0;margin-left:10px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;
+                    background:{{ $item['tipo'] === 'entrada' ? '#f0fdf4' : '#fef2f2' }};
+                    color:{{ $item['tipo'] === 'entrada' ? '#16a34a' : '#dc2626' }};">
+                    {{ strtoupper($item['tipo']) }}
+                </span>
             </div>
-        </div>
-        <div>
-            <h3 style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">Honorários</h3>
-            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px;">
-                <span style="color:var(--muted);">Em atraso</span>
-                <span style="color:#7c3aed;font-weight:700;">R$ {{ number_format($kpis['honAtrasado'],2,',','.') }}</span>
+            @empty
+            <div style="text-align:center;padding:16px;color:var(--muted);font-size:13px;">
+                Nenhum compromisso financeiro nos próximos 7 dias.
             </div>
-            <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;">
-                <span style="color:var(--muted);">A vencer</span>
-                <span style="font-weight:700;">R$ {{ number_format($kpis['honPendente'],2,',','.') }}</span>
-            </div>
-        </div>
-        <div style="background:#f0fdf4;border-radius:8px;padding:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Saldo Projetado</div>
-            @php $saldo = $kpis['aReceber'] + $kpis['honPendente'] - $kpis['aPagar']; @endphp
-            <div style="font-size:28px;font-weight:700;color:{{ $saldo >= 0 ? '#16a34a' : '#dc2626' }};">
-                R$ {{ number_format(abs($saldo),2,',','.') }}
-            </div>
-            <div style="font-size:12px;color:var(--muted);margin-top:4px;">
-                {{ $saldo >= 0 ? 'Superávit projetado' : 'Déficit projetado' }}
-            </div>
+            @endforelse
         </div>
     </div>
 </div>
 @endif
 
 {{-- ══ ABA: FLUXO DE CAIXA ══════════════════════════════════════ --}}
-@if($aba === 'fluxo')
-
+@if($abaAtiva === 'fluxo')
 @php
     $labels     = collect($fluxo)->pluck('label');
     $recebidos  = collect($fluxo)->pluck('recebido');
@@ -143,16 +261,17 @@
     $saldos     = collect($fluxo)->pluck('saldo');
 @endphp
 
-{{-- Gráfico --}}
-<div class="card" style="margin-bottom:16px;">
-    <div class="card-header">
-        <span class="card-title"><div style="display:inline-flex;align-items:center;gap:6px;"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg> Fluxo de Caixa — Últimos {{ $periodoFluxo }} meses</div></span>
-        <div style="display:flex;gap:4px;">
+<div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div style="font-size:16px;font-weight:800;color:var(--text);">
+            Fluxo de Caixa — Últimos {{ $periodoFluxo }} meses
+        </div>
+        <div style="display:flex;gap:6px;">
             @foreach([3 => '3m', 6 => '6m', 12 => '12m'] as $val => $label)
             <button wire:click="$set('periodoFluxo', {{ $val }})"
-                style="padding:4px 12px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;border:1.5px solid var(--border);
-                       background:{{ $periodoFluxo == $val ? 'var(--primary)' : 'transparent' }};
-                       color:{{ $periodoFluxo == $val ? '#fff' : 'var(--muted)' }};">
+                style="padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;
+                background:{{ $periodoFluxo == $val ? '#1d4ed8' : '#fff' }};
+                color:{{ $periodoFluxo == $val ? '#fff' : 'var(--muted)' }};">
                 {{ $label }}
             </button>
             @endforeach
@@ -163,48 +282,49 @@
     </div>
 </div>
 
-{{-- Tabela --}}
-<div class="card">
-    <div class="card-header">
-        <span class="card-title">Detalhamento mensal</span>
+<div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;">
+    <div style="padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:16px;font-weight:800;color:var(--text);">Detalhamento mensal</div>
+        <button wire:click="exportarCsv" wire:loading.attr="disabled"
+            style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#f1f5f9;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:#475569;cursor:pointer;">
+            <span wire:loading.remove wire:target="exportarCsv" style="display:inline-flex;align-items:center;gap:5px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Exportar CSV
+            </span>
+            <span wire:loading wire:target="exportarCsv">Gerando…</span>
+        </button>
     </div>
     <div class="table-wrap">
         <table>
             <thead>
-                <tr>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Mês</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;text-align:right;">Recebimentos</th>
-                    <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;text-align:right;">Honorários recebidos</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;text-align:right;">Despesas pagas</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;text-align:right;">Saldo do mês</th>
+                <tr style="background:#f8fafc;">
+                    <th style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Mês</th>
+                    <th style="padding:12px 16px;text-align:right;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Recebimentos</th>
+                    <th class="hide-sm" style="padding:12px 16px;text-align:right;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Honorários</th>
+                    <th style="padding:12px 16px;text-align:right;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Despesas</th>
+                    <th style="padding:12px 16px;text-align:right;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Saldo</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($fluxo as $linha)
-                <tr>
-                    <td style="font-weight:600;">{{ $linha['label'] }}</td>
-                    <td style="text-align:right;color:#16a34a;">R$ {{ number_format($linha['recebido'],2,',','.') }}</td>
-                    <td class="hide-sm" style="text-align:right;color:#0891b2;">R$ {{ number_format($linha['honorarios'],2,',','.') }}</td>
-                    <td style="text-align:right;color:#dc2626;">R$ {{ number_format($linha['pago'],2,',','.') }}</td>
-                    <td style="text-align:right;font-weight:700;color:{{ $linha['saldo'] >= 0 ? '#16a34a' : '#dc2626' }};">
+                <tr style="border-bottom:1px solid #f1f5f9;">
+                    <td style="padding:12px 16px;font-weight:600;">{{ $linha['label'] }}</td>
+                    <td style="padding:12px 16px;text-align:right;color:#16a34a;font-weight:600;">R$ {{ number_format($linha['recebido'],2,',','.') }}</td>
+                    <td class="hide-sm" style="padding:12px 16px;text-align:right;color:#0891b2;font-weight:600;">R$ {{ number_format($linha['honorarios'],2,',','.') }}</td>
+                    <td style="padding:12px 16px;text-align:right;color:#dc2626;font-weight:600;">R$ {{ number_format($linha['pago'],2,',','.') }}</td>
+                    <td style="padding:12px 16px;text-align:right;font-weight:800;color:{{ $linha['saldo'] >= 0 ? '#16a34a' : '#dc2626' }};">
                         R$ {{ number_format($linha['saldo'],2,',','.') }}
                     </td>
                 </tr>
                 @endforeach
             </tbody>
             <tfoot>
-                <tr style="background:#f8fafc;">
-                    <td style="font-weight:700;">Total</td>
-                    <td style="text-align:right;font-weight:700;color:#16a34a;">
-                        R$ {{ number_format(collect($fluxo)->sum('recebido'),2,',','.') }}
-                    </td>
-                    <td class="hide-sm" style="text-align:right;font-weight:700;color:#0891b2;">
-                        R$ {{ number_format(collect($fluxo)->sum('honorarios'),2,',','.') }}
-                    </td>
-                    <td style="text-align:right;font-weight:700;color:#dc2626;">
-                        R$ {{ number_format(collect($fluxo)->sum('pago'),2,',','.') }}
-                    </td>
-                    <td style="text-align:right;font-weight:700;color:{{ collect($fluxo)->sum('saldo') >= 0 ? '#16a34a' : '#dc2626' }};">
+                <tr style="background:#f8fafc;font-weight:700;">
+                    <td style="padding:12px 16px;">Total</td>
+                    <td style="padding:12px 16px;text-align:right;color:#16a34a;">R$ {{ number_format(collect($fluxo)->sum('recebido'),2,',','.') }}</td>
+                    <td class="hide-sm" style="padding:12px 16px;text-align:right;color:#0891b2;">R$ {{ number_format(collect($fluxo)->sum('honorarios'),2,',','.') }}</td>
+                    <td style="padding:12px 16px;text-align:right;color:#dc2626;">R$ {{ number_format(collect($fluxo)->sum('pago'),2,',','.') }}</td>
+                    <td style="padding:12px 16px;text-align:right;color:{{ collect($fluxo)->sum('saldo') >= 0 ? '#16a34a' : '#dc2626' }};">
                         R$ {{ number_format(collect($fluxo)->sum('saldo'),2,',','.') }}
                     </td>
                 </tr>
@@ -218,89 +338,27 @@
 (function () {
     const ctx = document.getElementById('chartFluxo');
     if (!ctx) return;
-
-    const labels     = @json($labels);
-    const recebidos  = @json($recebidos);
-    const honorarios = @json($honorarios);
-    const pagos      = @json($pagos);
-    const saldos     = @json($saldos);
-
     new Chart(ctx, {
         data: {
-            labels,
+            labels: @json($labels),
             datasets: [
-                {
-                    type: 'bar',
-                    label: 'Recebimentos',
-                    data: recebidos,
-                    backgroundColor: '#16a34a33',
-                    borderColor: '#16a34a',
-                    borderWidth: 2,
-                    borderRadius: 5,
-                },
-                {
-                    type: 'bar',
-                    label: 'Honorários',
-                    data: honorarios,
-                    backgroundColor: '#0891b233',
-                    borderColor: '#0891b2',
-                    borderWidth: 2,
-                    borderRadius: 5,
-                },
-                {
-                    type: 'bar',
-                    label: 'Despesas',
-                    data: pagos,
-                    backgroundColor: '#dc262633',
-                    borderColor: '#dc2626',
-                    borderWidth: 2,
-                    borderRadius: 5,
-                },
-                {
-                    type: 'line',
-                    label: 'Saldo',
-                    data: saldos,
-                    borderColor: '#e8a020',
-                    backgroundColor: '#e8a02022',
-                    borderWidth: 2.5,
-                    pointBackgroundColor: '#e8a020',
-                    pointRadius: 5,
-                    tension: 0.3,
-                    fill: true,
-                    yAxisID: 'ySaldo',
-                },
+                { type:'bar',  label:'Recebimentos', data:@json($recebidos),  backgroundColor:'#16a34a33', borderColor:'#16a34a', borderWidth:2, borderRadius:5 },
+                { type:'bar',  label:'Honorários',   data:@json($honorarios), backgroundColor:'#0891b233', borderColor:'#0891b2', borderWidth:2, borderRadius:5 },
+                { type:'bar',  label:'Despesas',      data:@json($pagos),      backgroundColor:'#dc262633', borderColor:'#dc2626', borderWidth:2, borderRadius:5 },
+                { type:'line', label:'Saldo',          data:@json($saldos),    borderColor:'#e8a020', backgroundColor:'#e8a02022', borderWidth:2.5, pointBackgroundColor:'#e8a020', pointRadius:5, tension:0.3, fill:true, yAxisID:'ySaldo' },
             ],
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
+            responsive:true, maintainAspectRatio:false,
+            interaction:{ mode:'index', intersect:false },
             plugins: {
-                legend: { position: 'top', labels: { font: { size: 12 }, padding: 16 } },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => ' R$ ' + ctx.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
-                    },
-                },
+                legend:{ position:'top', labels:{ font:{ size:12 }, padding:16 } },
+                tooltip:{ callbacks:{ label: ctx => ' R$ ' + ctx.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits:2 }) } },
             },
             scales: {
-                x: { grid: { display: false } },
-                y: {
-                    position: 'left',
-                    ticks: {
-                        callback: v => 'R$ ' + (v / 1000).toFixed(0) + 'k',
-                        font: { size: 11 },
-                    },
-                    grid: { color: '#f1f5f9' },
-                },
-                ySaldo: {
-                    position: 'right',
-                    grid: { drawOnChartArea: false },
-                    ticks: {
-                        callback: v => 'R$ ' + (v / 1000).toFixed(0) + 'k',
-                        font: { size: 11 },
-                    },
-                },
+                x:{ grid:{ display:false } },
+                y:{ position:'left', ticks:{ callback: v => 'R$ '+(v/1000).toFixed(0)+'k', font:{size:11} }, grid:{color:'#f1f5f9'} },
+                ySaldo:{ position:'right', grid:{ drawOnChartArea:false }, ticks:{ callback: v => 'R$ '+(v/1000).toFixed(0)+'k', font:{size:11} } },
             },
         },
     });
@@ -309,55 +367,77 @@
 @endif
 
 {{-- ══ ABA: CONTAS A RECEBER ═════════════════════════════════════ --}}
-@if($aba === 'receber')
-<div class="card">
-    <div class="card-header">
-        <span class="card-title">Contas a Receber</span>
-        @if($receber)
-        <span style="font-size:12px;color:var(--muted);">{{ $receber->total() }} registro(s)</span>
-        @endif
+@if($abaAtiva === 'receber')
+<div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;">
+    <div style="padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+            <div style="font-size:16px;font-weight:800;color:var(--text);">Contas a Receber</div>
+            @if($receber)<span style="font-size:12px;color:var(--muted);">{{ $receber->total() }} registro(s)</span>@endif
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="month" wire:model.live="filtroMes"
+                style="padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;">
+            <select wire:model.live="filtroStatus"
+                style="padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;">
+                <option value="pendente">Apenas pendentes</option>
+                <option value="todos">Todos</option>
+            </select>
+            <button wire:click="exportarCsv" wire:loading.attr="disabled"
+                style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#f1f5f9;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:#475569;cursor:pointer;">
+                <span wire:loading.remove wire:target="exportarCsv" style="display:inline-flex;align-items:center;gap:5px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    CSV
+                </span>
+                <span wire:loading wire:target="exportarCsv">…</span>
+            </button>
+            <a href="{{ route('financeiro') }}"
+                style="padding:7px 14px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">
+                + Novo
+            </a>
+        </div>
     </div>
     @if($receber && $receber->isEmpty())
-        <p style="text-align:center;color:var(--muted);padding:30px 0;">Nenhum registro encontrado.</p>
+        <p style="text-align:center;color:var(--muted);padding:40px;">✅ Nenhum recebimento pendente.</p>
     @else
     <div class="table-wrap">
-        <table>
+        <table style="width:100%;border-collapse:collapse;">
             <thead>
-                <tr>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Data</th>
-                    <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Processo</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Cliente</th>
-                    <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Descrição</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;text-align:right;">Valor</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Status</th>
+                <tr style="background:#f8fafc;">
+                    <th style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Data</th>
+                    <th class="hide-sm" style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Processo</th>
+                    <th style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Cliente</th>
+                    <th class="hide-sm" style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Descrição</th>
+                    <th style="padding:12px 16px;text-align:right;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Valor</th>
+                    <th style="padding:12px 16px;text-align:center;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Status</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($receber ?? [] as $row)
-                <tr>
-                    <td style="white-space:nowrap;">
+                <tr style="border-bottom:1px solid #f1f5f9;">
+                    <td style="padding:12px 16px;white-space:nowrap;font-size:13px;">
                         {{ $row->data ? \Carbon\Carbon::parse($row->data)->format('d/m/Y') : '—' }}
                     </td>
-                    <td class="hide-sm" style="font-family:monospace;font-size:11px;">{{ $row->processo_numero ?? '—' }}</td>
-                    <td>{{ $row->cliente_nome ?? '—' }}</td>
-                    <td class="hide-sm" style="font-size:12px;">{{ $row->descricao ?? '—' }}</td>
-                    <td style="text-align:right;font-weight:600;color:#16a34a;">
+                    <td class="hide-sm" style="padding:12px 16px;font-family:monospace;font-size:11px;color:var(--muted);">{{ $row->processo_numero ?? '—' }}</td>
+                    <td style="padding:12px 16px;font-size:13px;font-weight:600;">{{ $row->cliente_nome ?? '—' }}</td>
+                    <td class="hide-sm" style="padding:12px 16px;font-size:12px;color:var(--muted);">{{ $row->descricao ?? '—' }}</td>
+                    <td style="padding:12px 16px;text-align:right;font-size:14px;font-weight:800;color:#16a34a;">
                         R$ {{ number_format($row->valor,2,',','.') }}
                     </td>
-                    <td>
+                    <td style="padding:12px 16px;text-align:center;">
                         @if($row->recebido)
-                            <span class="badge" style="background:#dcfce7;color:#166534;">Recebido</span>
+                            <span style="padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">Recebido</span>
                         @else
-                            <span class="badge" style="background:#fef9c3;color:#854d0e;">Pendente</span>
+                            <span style="padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#fef9c3;color:#854d0e;">Pendente</span>
                         @endif
                     </td>
-                    <td>
+                    <td style="padding:12px 16px;text-align:center;">
                         @if(!$row->recebido)
                         <button wire:click="marcarRecebido({{ $row->id }})"
                             wire:confirm="Marcar como recebido hoje?"
-                            class="btn btn-sm btn-success" style="font-size:11px;padding:3px 8px;display:inline-flex;align-items:center;gap:4px;">
-                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Recebido
+                            style="display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:#dcfce7;color:#166534;border:1px solid #86efac;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            Recebido
                         </button>
                         @endif
                     </td>
@@ -367,76 +447,90 @@
         </table>
     </div>
     @if($receber)
-        <div style="margin-top:12px;">{{ $receber->links() }}</div>
-        <p style="font-size:12px;color:var(--muted);margin-top:8px;">
-            Total filtrado:
-            <strong style="color:#16a34a;">
-                R$ {{ number_format($this->queryReceber()->sum('r.valor'),2,',','.') }}
-            </strong>
+    <div style="padding:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <p style="font-size:12px;color:var(--muted);margin:0;">
+            Total filtrado: <strong style="color:#16a34a;">R$ {{ number_format($this->queryReceber()->sum('r.valor'),2,',','.') }}</strong>
         </p>
+        {{ $receber->links() }}
+    </div>
     @endif
     @endif
 </div>
 @endif
 
 {{-- ══ ABA: CONTAS A PAGAR ═══════════════════════════════════════ --}}
-@if($aba === 'pagar')
-<div class="card">
-    <div class="card-header">
-        <span class="card-title">Contas a Pagar</span>
-        @if($pagar)
-        <span style="font-size:12px;color:var(--muted);">{{ $pagar->total() }} registro(s)</span>
-        @endif
+@if($abaAtiva === 'pagar')
+<div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;">
+    <div style="padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+            <div style="font-size:16px;font-weight:800;color:var(--text);">Contas a Pagar</div>
+            @if($pagar)<span style="font-size:12px;color:var(--muted);">{{ $pagar->total() }} registro(s)</span>@endif
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="month" wire:model.live="filtroMes"
+                style="padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;">
+            <select wire:model.live="filtroStatus"
+                style="padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;">
+                <option value="pendente">Apenas pendentes</option>
+                <option value="todos">Todos</option>
+            </select>
+            <button wire:click="exportarCsv" wire:loading.attr="disabled"
+                style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#f1f5f9;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:#475569;cursor:pointer;">
+                <span wire:loading.remove wire:target="exportarCsv" style="display:inline-flex;align-items:center;gap:5px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    CSV
+                </span>
+                <span wire:loading wire:target="exportarCsv">…</span>
+            </button>
+        </div>
     </div>
     @if($pagar && $pagar->isEmpty())
-        <p style="text-align:center;color:var(--muted);padding:30px 0;">Nenhum registro encontrado.</p>
+        <p style="text-align:center;color:var(--muted);padding:40px;">✅ Nenhuma despesa pendente.</p>
     @else
     <div class="table-wrap">
-        <table>
+        <table style="width:100%;border-collapse:collapse;">
             <thead>
-                <tr>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Vencimento</th>
-                    <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Processo</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Cliente</th>
-                    <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Fornecedor</th>
-                    <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Descrição</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;text-align:right;">Valor</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Status</th>
+                <tr style="background:#f8fafc;">
+                    <th style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Vencimento</th>
+                    <th class="hide-sm" style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Processo</th>
+                    <th style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Cliente</th>
+                    <th class="hide-sm" style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Fornecedor</th>
+                    <th class="hide-sm" style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Descrição</th>
+                    <th style="padding:12px 16px;text-align:right;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Valor</th>
+                    <th style="padding:12px 16px;text-align:center;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Status</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($pagar ?? [] as $row)
-                @php
-                    $vencido = !$row->pago && $row->data_vencimento && \Carbon\Carbon::parse($row->data_vencimento)->isPast();
-                @endphp
-                <tr>
-                    <td style="white-space:nowrap;{{ $vencido ? 'color:#dc2626;font-weight:600;' : '' }}">
+                @php $vencido = !$row->pago && $row->data_vencimento && \Carbon\Carbon::parse($row->data_vencimento)->isPast(); @endphp
+                <tr style="border-bottom:1px solid #f1f5f9;">
+                    <td style="padding:12px 16px;white-space:nowrap;font-size:13px;{{ $vencido ? 'color:#dc2626;font-weight:600;' : '' }}">
                         {{ $row->data_vencimento ? \Carbon\Carbon::parse($row->data_vencimento)->format('d/m/Y') : '—' }}
-                        @if($vencido) <span style="font-size:10px;vertical-align:middle;"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> @endif
                     </td>
-                    <td class="hide-sm" style="font-family:monospace;font-size:11px;">{{ $row->processo_numero ?? '—' }}</td>
-                    <td>{{ $row->cliente_nome ?? '—' }}</td>
-                    <td class="hide-sm" style="font-size:12px;">{{ $row->fornecedor_nome ?? '—' }}</td>
-                    <td class="hide-sm" style="font-size:12px;">{{ $row->descricao ?? '—' }}</td>
-                    <td style="text-align:right;font-weight:600;color:#dc2626;">
+                    <td class="hide-sm" style="padding:12px 16px;font-family:monospace;font-size:11px;color:var(--muted);">{{ $row->processo_numero ?? '—' }}</td>
+                    <td style="padding:12px 16px;font-size:13px;font-weight:600;">{{ $row->cliente_nome ?? '—' }}</td>
+                    <td class="hide-sm" style="padding:12px 16px;font-size:12px;color:var(--muted);">{{ $row->fornecedor_nome ?? '—' }}</td>
+                    <td class="hide-sm" style="padding:12px 16px;font-size:12px;color:var(--muted);">{{ $row->descricao ?? '—' }}</td>
+                    <td style="padding:12px 16px;text-align:right;font-size:14px;font-weight:800;color:#dc2626;">
                         R$ {{ number_format($row->valor,2,',','.') }}
                     </td>
-                    <td>
+                    <td style="padding:12px 16px;text-align:center;">
                         @if($row->pago)
-                            <span class="badge" style="background:#dcfce7;color:#166534;">Pago</span>
+                            <span style="padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">Pago</span>
                         @elseif($vencido)
-                            <span class="badge" style="background:#fee2e2;color:#991b1b;">Vencido</span>
+                            <span style="padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#fee2e2;color:#991b1b;">Vencido</span>
                         @else
-                            <span class="badge" style="background:#fef9c3;color:#854d0e;">Pendente</span>
+                            <span style="padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#fef9c3;color:#854d0e;">Pendente</span>
                         @endif
                     </td>
-                    <td>
+                    <td style="padding:12px 16px;text-align:center;">
                         @if(!$row->pago)
                         <button wire:click="marcarPago({{ $row->id }})"
                             wire:confirm="Marcar como pago hoje?"
-                            class="btn btn-sm" style="font-size:11px;padding:3px 8px;background:#fef9c3;color:#854d0e;border:1px solid #fde68a;display:inline-flex;align-items:center;gap:4px;">
-                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Pago
+                            style="display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:#fef9c3;color:#854d0e;border:1px solid #fde68a;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            Pago
                         </button>
                         @endif
                     </td>
@@ -446,59 +540,72 @@
         </table>
     </div>
     @if($pagar)
-        <div style="margin-top:12px;">{{ $pagar->links() }}</div>
-        <p style="font-size:12px;color:var(--muted);margin-top:8px;">
-            Total filtrado:
-            <strong style="color:#dc2626;">
-                R$ {{ number_format($this->queryPagar()->sum('p.valor'),2,',','.') }}
-            </strong>
+    <div style="padding:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <p style="font-size:12px;color:var(--muted);margin:0;">
+            Total filtrado: <strong style="color:#dc2626;">R$ {{ number_format($this->queryPagar()->sum('p.valor'),2,',','.') }}</strong>
         </p>
+        {{ $pagar->links() }}
+    </div>
     @endif
     @endif
 </div>
 @endif
 
 {{-- ══ ABA: HONORÁRIOS ATRASADOS ════════════════════════════════ --}}
-@if($aba === 'honorarios')
-<div class="card">
-    <div class="card-header">
-        <span class="card-title">Honorários em Atraso</span>
-        @if($honAtrasados)
-        <span style="font-size:12px;color:var(--muted);">{{ $honAtrasados->total() }} parcela(s)</span>
-        @endif
+@if($abaAtiva === 'honorarios')
+<div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;">
+    <div style="padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+            <div style="font-size:16px;font-weight:800;color:var(--text);">Honorários em Atraso</div>
+            @if($honAtrasados)<span style="font-size:12px;color:var(--muted);">{{ $honAtrasados->total() }} parcela(s)</span>@endif
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <button wire:click="exportarCsv" wire:loading.attr="disabled"
+                style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#f1f5f9;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:#475569;cursor:pointer;">
+                <span wire:loading.remove wire:target="exportarCsv" style="display:inline-flex;align-items:center;gap:5px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    CSV
+                </span>
+                <span wire:loading wire:target="exportarCsv">…</span>
+            </button>
+            <a href="{{ route('inadimplencia') }}"
+                style="padding:7px 16px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">
+                Cobrar todos
+            </a>
+        </div>
     </div>
     @if($honAtrasados && $honAtrasados->isEmpty())
-        <p style="text-align:center;color:var(--muted);padding:30px 0;">Nenhuma parcela em atraso.</p>
+        <p style="text-align:center;color:var(--muted);padding:40px;">✅ Nenhum honorário atrasado.</p>
     @else
     <div class="table-wrap">
-        <table>
+        <table style="width:100%;border-collapse:collapse;">
             <thead>
-                <tr>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Vencimento</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Atraso</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Cliente</th>
-                    <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Processo</th>
-                    <th class="hide-sm" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Contrato</th>
-                    <th class="hide-xs" style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Parcela</th>
-                    <th style="font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;text-align:right;">Valor</th>
+                <tr style="background:#f8fafc;">
+                    <th style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Vencimento</th>
+                    <th style="padding:12px 16px;text-align:center;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Atraso</th>
+                    <th style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Cliente</th>
+                    <th class="hide-sm" style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Processo</th>
+                    <th class="hide-sm" style="padding:12px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Contrato</th>
+                    <th class="hide-xs" style="padding:12px 16px;text-align:center;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Parcela</th>
+                    <th style="padding:12px 16px;text-align:right;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Valor</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($honAtrasados ?? [] as $row)
-                <tr>
-                    <td style="white-space:nowrap;color:#dc2626;font-weight:600;">
+                <tr style="border-bottom:1px solid #f1f5f9;">
+                    <td style="padding:12px 16px;white-space:nowrap;color:#dc2626;font-weight:700;font-size:13px;">
                         {{ \Carbon\Carbon::parse($row->vencimento)->format('d/m/Y') }}
                     </td>
-                    <td style="text-align:center;">
-                        <span class="badge" style="background:#fee2e2;color:#991b1b;">
+                    <td style="padding:12px 16px;text-align:center;">
+                        <span style="padding:3px 10px;border-radius:99px;font-size:11px;font-weight:800;background:#fee2e2;color:#991b1b;">
                             {{ $row->dias_atraso }} dia(s)
                         </span>
                     </td>
-                    <td>{{ $row->cliente_nome ?? '—' }}</td>
-                    <td class="hide-sm" style="font-family:monospace;font-size:11px;">{{ $row->processo_numero ?? '—' }}</td>
-                    <td class="hide-sm" style="font-size:12px;">{{ $row->honorario_descricao ?? '—' }}</td>
-                    <td class="hide-xs" style="text-align:center;">{{ $row->numero_parcela }}ª</td>
-                    <td style="text-align:right;font-weight:600;color:#7c3aed;">
+                    <td style="padding:12px 16px;font-size:13px;font-weight:600;">{{ $row->cliente_nome ?? '—' }}</td>
+                    <td class="hide-sm" style="padding:12px 16px;font-family:monospace;font-size:11px;color:var(--muted);">{{ $row->processo_numero ?? '—' }}</td>
+                    <td class="hide-sm" style="padding:12px 16px;font-size:12px;color:var(--muted);">{{ $row->honorario_descricao ?? '—' }}</td>
+                    <td class="hide-xs" style="padding:12px 16px;text-align:center;font-size:13px;">{{ $row->numero_parcela }}ª</td>
+                    <td style="padding:12px 16px;text-align:right;font-size:14px;font-weight:800;color:#7c3aed;">
                         R$ {{ number_format($row->valor,2,',','.') }}
                     </td>
                 </tr>
@@ -507,16 +614,26 @@
         </table>
     </div>
     @if($honAtrasados)
-        <div style="margin-top:12px;">{{ $honAtrasados->links() }}</div>
-        <p style="font-size:12px;color:var(--muted);margin-top:8px;">
-            Total em atraso:
-            <strong style="color:#7c3aed;">
-                R$ {{ number_format($this->queryHonorariosAtrasados()->sum('hp.valor'),2,',','.') }}
-            </strong>
+    <div style="padding:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <p style="font-size:12px;color:var(--muted);margin:0;">
+            Total em atraso: <strong style="color:#7c3aed;">R$ {{ number_format($this->queryHonorariosAtrasados()->sum('hp.valor'),2,',','.') }}</strong>
         </p>
+        {{ $honAtrasados->links() }}
+    </div>
     @endif
     @endif
 </div>
 @endif
+
+<style>
+@media (max-width: 1024px) {
+    .fin-resumo-grid { grid-template-columns: 1fr !important; }
+    .fin-kpis        { grid-template-columns: repeat(3,1fr) !important; }
+    .fin-visao       { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 640px) {
+    .fin-kpis { grid-template-columns: 1fr 1fr !important; }
+}
+</style>
 
 </div>
