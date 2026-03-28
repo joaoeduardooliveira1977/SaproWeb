@@ -358,3 +358,50 @@ php artisan migrate --path=database/migrations/2026_03_18_225203_add_tenant_id_t
 
 
 
+
+
+
+
+
+
+
+  {{-- ── Análise IA (sob demanda) ── --}}
+    <div style="margin-bottom:16px;">
+        <button onclick="toggleAnaliseIA()" id="btn-analise-ia"
+            style="display:inline-flex;align-items:left;gap:8px;padding:9px 18px;
+            background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;border:none;
+            border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;
+            box-shadow:0 4px 14px rgba(37,99,168,.3);transition:opacity .2s;"
+            onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+            </svg>
+            <span id="btn-analise-ia-txt">✨ Análise IA</span>
+        </button>
+    </div>
+
+    <div id="bloco-analise-ia" style="display:none;margin-bottom:16px;">
+        @livewire(\App\Livewire\ProcessoAnaliseIA::class, ['processoId' => $processo->id])
+    </div>
+
+
+
+
+
+
+
+@section('page-title', 'Processo ' . $processo->numero)
+@section('breadcrumb')<a href="{{ route('processos') }}">Processos</a> <span class="sep">›</span> <span class="current">{{ $processo->numero }}</span>@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+

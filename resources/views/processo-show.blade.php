@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @php use Illuminate\Support\Facades\Storage; @endphp
-@section('page-title', 'Processo ' . $processo->numero)
-@section('breadcrumb')<a href="{{ route('processos') }}">Processos</a> <span class="sep">›</span> <span class="current">{{ $processo->numero }}</span>@endsection
+
+
 
 @section('content')
 <div>
@@ -9,7 +9,11 @@
     {{-- ── Cabecalho ── --}}
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
         <div>
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+           
+
+
+
+	    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                 <h2 style="font-size:20px;font-weight:700;color:var(--primary);">&#9878; {{ $processo->numero }}</h2>
                 <span style="padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;
                     background:{{ $processo->status === 'Ativo' ? '#dcfce7' : '#f1f5f9' }};
@@ -23,13 +27,27 @@
                 </span>
                 @endif
             </div>
+
+
+
+
+
+
+
             <p style="font-size:13px;color:#64748b;margin-top:4px;">
                 {{ $processo->cliente?->nome ?? '&mdash;' }}
                 @if($processo->tipoAcao) &nbsp;&middot;&nbsp; {{ $processo->tipoAcao->descricao }} @endif
                 @if($processo->vara) &nbsp;&middot;&nbsp; {{ $processo->vara }} @endif
             </p>
         </div>
-        <div class="card-actions">
+        
+
+
+
+
+
+
+	<div class="card-actions">
             @if($processo->tjsp_ultima_consulta)
                 <span style="font-size:11px;color:var(--muted)">
                     <span style="display:inline-flex;align-items:center;gap:4px;"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg> DATAJUD: {{ \Carbon\Carbon::parse($processo->tjsp_ultima_consulta)->format('d/m/Y H:i') }}</span>
@@ -40,6 +58,30 @@
             <a href="{{ route('processos') }}" class="btn btn-secondary btn-sm">&larr; Voltar</a>
         </div>
     </div>
+
+
+
+ 
+
+    <script>
+    function toggleAnaliseIA() {
+        const bloco = document.getElementById('bloco-analise-ia');
+        const txt   = document.getElementById('btn-analise-ia-txt');
+        if (bloco.style.display === 'none') {
+            bloco.style.display = 'block';
+            txt.textContent = '✕ Fechar Análise IA';
+        } else {
+            bloco.style.display = 'none';
+            txt.textContent = '✨ Análise IA';
+        }
+    }
+    </script>
+
+
+
+
+
+
 
     {{-- ── Abas ── --}}
     <div style="display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:20px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
@@ -165,7 +207,7 @@
         </div>
     </div>
 
-    @livewire(\App\Livewire\ProcessoAnaliseIA::class, ['processoId' => $processo->id])
+ 
 
     {{-- ── ABA: ANDAMENTOS ── --}}
     <div id="tab-andamentos" class="tab-content" style="display:none;">
