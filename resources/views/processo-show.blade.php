@@ -35,7 +35,20 @@
 
 
             <p style="font-size:13px;color:#64748b;margin-top:4px;">
-                {{ $processo->cliente?->nome ?? '&mdash;' }}
+
+
+<p style="font-size:13px;color:#64748b;margin-top:4px;">
+    {{ $processo->cliente?->nome ?? '&mdash;' }}
+    @if($processo->tipoAcao) &nbsp;&middot;&nbsp; {{ $processo->tipoAcao->descricao }} @endif
+    @if($processo->vara) &nbsp;&middot;&nbsp; {{ $processo->vara }} @endif
+</p>
+@if($processo->parte_contraria)
+<p style="font-size:12px;color:#94a3b8;margin-top:2px;">
+    ⚖ vs. {{ $processo->parte_contraria }}
+</p>
+@endif
+
+
                 @if($processo->tipoAcao) &nbsp;&middot;&nbsp; {{ $processo->tipoAcao->descricao }} @endif
                 @if($processo->vara) &nbsp;&middot;&nbsp; {{ $processo->vara }} @endif
             </p>

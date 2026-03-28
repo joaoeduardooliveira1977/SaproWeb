@@ -304,6 +304,11 @@
                                     <span title="Modificado ontem" style="padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;background:#f1f5f9;color:#64748b;letter-spacing:.2px;">ontem</span>
                                     @endif
                                 </div>
+                                @if($p->parte_contraria)
+                                <div style="font-size:11px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;">
+                                    ⚖ {{ $p->parte_contraria }}
+                                </div>
+                                @endif
                                 @if($p->data_distribuicao)
                                 <div style="font-size:11px;color:var(--muted);margin-top:3px;">
                                     Distribuido em {{ $p->data_distribuicao->format('d/m/Y') }}
