@@ -82,10 +82,33 @@ class WorkflowRegras extends Component
 
     // ── Abrir modal ───────────────────────────────────────────────
 
+    /** Estrutura padrão de uma ação visual (sem JSON exposto) */
+    private function acaoVazia(): array
+    {
+        return [
+            'tipo'                => '',
+            'config_json'         => '{}',
+            'wpp_destinatario'    => 'advogado_processo',
+            'wpp_mensagem'        => '',
+            'prazo_titulo'        => '',
+            'prazo_dias'          => 15,
+            'prazo_tipo_contagem' => 'uteis',
+            'prazo_responsavel'   => 'advogado_processo',
+            'notif_titulo'        => '',
+            'notif_mensagem'      => '',
+            'notif_destinatario'  => 'advogado_processo',
+            'agenda_titulo'       => '',
+            'agenda_dias'         => 1,
+            'agenda_hora'         => '09:00',
+            'agenda_urgente'      => false,
+            'score_valor'         => 'auto',
+        ];
+    }
+
     public function novaRegra(): void
     {
         $this->resetForm();
-        $this->acoes = [['tipo' => '', 'config_json' => '{}']];
+        $this->acoes = [$this->acaoVazia()];
         $this->modal = true;
     }
 
@@ -93,24 +116,39 @@ class WorkflowRegras extends Component
     {
         $regra = WorkflowRegra::with('acoes')->findOrFail($id);
 
-        $this->editandoId      = $id;
-        $this->nome            = $regra->nome;
-        $this->descricao       = $regra->descricao ?? '';
-        $this->gatilho         = $regra->gatilho;
-        $this->ativo           = $regra->ativo;
+        $this->editandoId        = $id;
+        $this->nome              = $regra->nome;
+        $this->descricao         = $regra->descricao ?? '';
+        $this->gatilho           = $regra->gatilho;
+        $this->ativo             = $regra->ativo;
         $this->gatilhoConfigJson = json_encode($regra->gatilho_config ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        $this->condicoes       = $regra->condicoes ?? [];
-        $this->acoes           = $regra->acoes->map(fn($a) => [
-            'tipo'        => $a->tipo,
-            'config_json' => json_encode($a->config ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
-        ])->toArray();
+        $this->condicoes         = $regra->condicoes ?? [];
+
+        // Hidratar campos visuais a partir do JSON salvo
+        $this->acoes = $regra->acoes->map(function ($a) {
+            $c = $a->config ?? [];
+            return [
+                'tipo'                => $a->tipo,
+                'config_json'         => json_encode($c),
+                'wpp_destinatario'    => $c['destinatario']   ?? 'advogado_processo',
+                'wpp_mensagem'        => $c['mensagem']       ?? '',
+                'prazo_titulo'        => $c['titulo']         ?? '',
+                'prazo_dias'          => $c['dias']           ?? 15,
+                'prazo_tipo_contagem' => $c['tipo_contagem']  ?? 'uteis',
+                'prazo_responsavel'   => $c['responsavel']    ?? 'advogado_processo',
+                'notif_titulo'        => $c['titulo']         ?? '',
+                'notif_mensagem'      => $c['mensagem']       ?? '',
+                'notif_destinatario'  => $c['destinatario']   ?? 'advogado_processo',
+                'agenda_titulo'       => $c['titulo']         ?? '',
+                'agenda_dias'         => $c['dias_a_partir']  ?? 1,
+                'agenda_hora'         => $c['hora']           ?? '09:00',
+                'agenda_urgente'      => $c['urgente']        ?? false,
+                'score_valor'         => $c['score']          ?? 'auto',
+            ];
+        })->toArray();
 
         if (empty($this->acoes)) {
-            $this->acoes = [['tipo' => '', 'config_json' => '{}']];
-        }
-
-        if (empty($this->condicoes)) {
-            $this->condicoes = [];
+            $this->acoes = [$this->acaoVazia()];
         }
 
         $this->modal = true;
@@ -152,12 +190,54 @@ class WorkflowRegras extends Component
             $regra = WorkflowRegra::create($dados);
         }
 
-        // Recriar ações na ordem
+        // Converter campos visuais → JSON e recriar ações na ordem
         foreach ($this->acoes as $index => $acaoForm) {
             $config = [];
-            try {
-                $config = json_decode($acaoForm['config_json'] ?? '{}', true) ?? [];
-            } catch (\Throwable) {}
+            switch ($acaoForm['tipo']) {
+                case 'enviar_whatsapp':
+                    $config = [
+                        'destinatario' => $acaoForm['wpp_destinatario'] ?? 'advogado_processo',
+                        'mensagem'     => $acaoForm['wpp_mensagem']     ?? '',
+                        'canal'        => 'whatsapp',
+                    ];
+                    break;
+                case 'criar_prazo':
+                    $config = [
+                        'titulo'        => $acaoForm['prazo_titulo']        ?? 'Prazo — {andamento_descricao}',
+                        'dias'          => (int) ($acaoForm['prazo_dias']   ?? 15),
+                        'tipo_contagem' => $acaoForm['prazo_tipo_contagem'] ?? 'uteis',
+                        'responsavel'   => $acaoForm['prazo_responsavel']   ?? 'advogado_processo',
+                        'prazo_fatal'   => false,
+                    ];
+                    break;
+                case 'criar_notificacao':
+                    $config = [
+                        'tipo'         => 'alerta',
+                        'titulo'       => $acaoForm['notif_titulo']       ?? 'Atenção: {andamento_descricao}',
+                        'mensagem'     => $acaoForm['notif_mensagem']     ?? '',
+                        'destinatario' => $acaoForm['notif_destinatario'] ?? 'advogado_processo',
+                    ];
+                    break;
+                case 'criar_agenda':
+                    $config = [
+                        'titulo'        => $acaoForm['agenda_titulo']   ?? 'Compromisso — {numero}',
+                        'dias_a_partir' => (int) ($acaoForm['agenda_dias'] ?? 1),
+                        'hora'          => $acaoForm['agenda_hora']     ?? '09:00',
+                        'urgente'       => (bool) ($acaoForm['agenda_urgente'] ?? false),
+                        'responsavel'   => 'advogado_processo',
+                    ];
+                    break;
+                case 'atualizar_score':
+                    $config = ['score' => $acaoForm['score_valor'] ?? 'auto'];
+                    break;
+                case 'chamar_ia':
+                    $config = ['tipo' => 'resumo_andamento', 'salvar_em' => 'andamento.resumo_ia'];
+                    break;
+                default:
+                    try {
+                        $config = json_decode($acaoForm['config_json'] ?? '{}', true) ?? [];
+                    } catch (\Throwable) {}
+            }
 
             WorkflowAcao::create([
                 'regra_id' => $regra->id,
@@ -221,57 +301,12 @@ class WorkflowRegras extends Component
 
     public function adicionarAcao(): void
     {
-        $this->acoes[] = ['tipo' => '', 'config_json' => '{}'];
+        $this->acoes[] = $this->acaoVazia();
     }
 
     public function removerAcao(int $index): void
     {
         array_splice($this->acoes, $index, 1);
-    }
-
-    public function preencherConfigPadrao(int $index): void
-    {
-        $tipo = $this->acoes[$index]['tipo'] ?? '';
-
-        $templates = [
-            WorkflowRegra::ACAO_CRIAR_PRAZO => [
-                'titulo'         => 'Prazo — {andamento_descricao}',
-                'dias'           => 15,
-                'tipo_contagem'  => 'uteis',
-                'prazo_fatal'    => false,
-                'responsavel'    => 'advogado_processo',
-            ],
-            WorkflowRegra::ACAO_CRIAR_NOTIFICACAO => [
-                'tipo'        => 'alerta',
-                'titulo'      => 'Atenção: {andamento_descricao}',
-                'mensagem'    => 'Novo andamento no processo {numero}.',
-                'destinatario' => 'advogado_processo',
-            ],
-            WorkflowRegra::ACAO_CRIAR_AGENDA => [
-                'titulo'         => 'Compromisso — {numero}',
-                'tipo'           => 'prazo',
-                'dias_a_partir'  => 1,
-                'hora'           => '09:00',
-                'urgente'        => false,
-                'responsavel'    => 'advogado_processo',
-            ],
-            WorkflowRegra::ACAO_ENVIAR_WHATSAPP => [
-                'destinatario' => 'advogado_processo',
-                'mensagem'     => 'Novo andamento no processo {numero}: {andamento_descricao}',
-                'canal'        => 'whatsapp',
-            ],
-            WorkflowRegra::ACAO_ATUALIZAR_SCORE => [
-                'score' => 'auto',
-            ],
-            WorkflowRegra::ACAO_CHAMAR_IA => [
-                'tipo'     => 'resumo_andamento',
-                'salvar_em' => 'andamento.resumo_ia',
-            ],
-        ];
-
-        if (isset($templates[$tipo])) {
-            $this->acoes[$index]['config_json'] = json_encode($templates[$tipo], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        }
     }
 
     // ── Reset form ────────────────────────────────────────────────

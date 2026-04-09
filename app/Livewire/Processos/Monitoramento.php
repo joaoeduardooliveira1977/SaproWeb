@@ -206,6 +206,41 @@ class Monitoramento extends Component
         $this->dispatch('toast', message: 'Notificações atualizadas.', type: 'success');
     }
 
+    public function verificarTodos(): void
+    {
+        $tenantId = auth('usuarios')->user()->tenant_id;
+
+        $processos = \App\Models\Processo::where('tenant_id', $tenantId)
+            ->where('status', 'Ativo')
+            ->whereNotNull('numero')
+            ->where('numero', '!=', '')
+            ->pluck('numero')
+            ->toArray();
+
+        if (empty($processos)) {
+            $this->dispatch('toast', message: 'Nenhum processo ativo encontrado.', type: 'warning');
+            return;
+        }
+
+        $processos = array_slice($processos, 0, 500);
+
+        foreach ($processos as $numero) {
+            $lote = \App\Models\LoteVerificacao::create([
+                'processo_numero' => $numero,
+                'status'          => 'aguardando',
+                'user_id'         => auth('usuarios')->user()->id,
+            ]);
+
+            \App\Jobs\VerificarProcessoDatajud::dispatch($numero, $lote->id);
+        }
+
+        $this->aba = 'lote';
+        $this->dispatch('toast',
+            message: count($processos) . ' processos enviados para verificação.',
+            type: 'success'
+        );
+    }
+
 
     // ─────────────────────────────────────────────────
     //  OUTROS FILTROS

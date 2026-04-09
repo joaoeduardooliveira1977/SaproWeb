@@ -113,6 +113,8 @@
                 <span wire:loading.remove wire:target="atualizarAgora">Atualizar Andamentos Agora</span>
                 <span wire:loading wire:target="atualizarAgora">Atualizando...</span>
             </button>
+
+
         </div>
 
      
@@ -417,6 +419,45 @@
         
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($aba === 'lote'): ?>
         <div style="max-width:680px;">
+
+            
+            <div style="background:linear-gradient(135deg,#1a3a5c,#0f2540);border-radius:12px;
+                        padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;
+                        justify-content:space-between;gap:16px;">
+                <div>
+                    <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">
+                        Verificar todos os processos ativos
+                    </div>
+                    <div style="font-size:12px;color:#94a3b8;">
+                        Consulta automaticamente todos os <?php echo e($totalAtivos ?? 0); ?> processos
+                        ativos no DATAJUD sem precisar digitar nada.
+                    </div>
+                </div>
+                <button wire:click="verificarTodos"
+                    wire:loading.attr="disabled"
+                    wire:confirm="Isso vai verificar todos os processos ativos no DATAJUD. Pode demorar alguns minutos. Continuar?"
+                    style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;
+                           border-radius:9px;font-size:13px;font-weight:700;
+                           background:#1D9E75;color:#fff;border:none;cursor:pointer;
+                           white-space:nowrap;transition:background .15s;flex-shrink:0;"
+                    onmouseover="this.style.background='#15803d'"
+                    onmouseout="this.style.background='#1D9E75'">
+                    <svg wire:loading.remove wire:target="verificarTodos"
+                         width="14" height="14" fill="none" stroke="currentColor"
+                         stroke-width="2.5" viewBox="0 0 24 24">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+                    </svg>
+                    <svg wire:loading wire:target="verificarTodos"
+                         width="14" height="14" fill="none" stroke="currentColor"
+                         stroke-width="2.5" viewBox="0 0 24 24"
+                         style="animation:spin 1s linear infinite;">
+                        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                    </svg>
+                    <span wire:loading.remove wire:target="verificarTodos">Verificar Todos no DATAJUD</span>
+                    <span wire:loading wire:target="verificarTodos">Enviando...</span>
+                </button>
+            </div>
 
             
             <div style="border:2px dashed #e2e8f0;border-radius:10px;padding:32px;text-align:center;

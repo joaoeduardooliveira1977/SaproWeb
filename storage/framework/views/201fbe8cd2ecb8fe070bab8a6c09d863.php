@@ -384,13 +384,6 @@
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </select>
 
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($acao['tipo']): ?>
-                    <button wire:click="preencherConfigPadrao(<?php echo e($ai); ?>)" title="Preencher config padrão"
-                        style="padding:7px 10px;border:1.5px solid #bae6fd;border-radius:8px;background:#f0f9ff;cursor:pointer;color:#0369a1;font-size:11px;font-weight:600;white-space:nowrap;">
-                        Config padrão
-                    </button>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
                     <button wire:click="removerAcao(<?php echo e($ai); ?>)"
                         style="width:30px;height:30px;border:1.5px solid #fecaca;border-radius:8px;background:#fef2f2;cursor:pointer;color:#dc2626;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -398,18 +391,152 @@
                 </div>
 
                 
-                <div>
-                    <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">
-                        Configuração JSON
-                        <span style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">
-                            (use <code style="background:#e5e7eb;padding:1px 4px;border-radius:3px;">{numero}</code>,
-                            <code style="background:#e5e7eb;padding:1px 4px;border-radius:3px;">{cliente}</code>,
-                            <code style="background:#e5e7eb;padding:1px 4px;border-radius:3px;">{andamento_descricao}</code>)
-                        </span>
-                    </label>
-                    <textarea wire:model="acoes.<?php echo e($ai); ?>.config_json" rows="4"
-                        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:monospace;color:var(--text);background:var(--white);resize:vertical;box-sizing:border-box;line-height:1.5;"><?php echo e($acao['config_json']); ?></textarea>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($acao['tipo'] === 'enviar_whatsapp'): ?>
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-top:10px;">
+                    <div style="font-size:11px;font-weight:700;color:#15803d;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Configuração do WhatsApp</div>
+                    <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Enviar para</label>
+                            <select wire:model="acoes.<?php echo e($ai); ?>.wpp_destinatario"
+                                style="width:100%;padding:8px 10px;border:1.5px solid #d1fae5;border-radius:8px;font-size:13px;background:#fff;">
+                                <option value="advogado_processo">Advogado responsável pelo processo</option>
+                                <option value="cliente">Cliente do processo</option>
+                                <option value="todos">Todos os advogados do escritório</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">
+                                Mensagem
+                                <span style="font-weight:400;color:#6b7280;margin-left:6px;">Use: <code style="background:#e5e7eb;padding:1px 5px;border-radius:3px;font-size:11px;">{numero}</code> <code style="background:#e5e7eb;padding:1px 5px;border-radius:3px;font-size:11px;">{cliente}</code> <code style="background:#e5e7eb;padding:1px 5px;border-radius:3px;font-size:11px;">{andamento}</code></span>
+                            </label>
+                            <textarea wire:model="acoes.<?php echo e($ai); ?>.wpp_mensagem" rows="3"
+                                placeholder="Ex: Novo andamento no processo {numero} do cliente {cliente}: {andamento}"
+                                style="width:100%;padding:8px 10px;border:1.5px solid #d1fae5;border-radius:8px;font-size:13px;background:#fff;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+                        </div>
+                    </div>
                 </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($acao['tipo'] === 'criar_prazo'): ?>
+                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;margin-top:10px;">
+                    <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Configuração do Prazo</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div style="grid-column:1/-1;">
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Título do prazo <span style="font-weight:400;color:#6b7280;margin-left:6px;">Use: <code style="background:#e5e7eb;padding:1px 5px;border-radius:3px;font-size:11px;">{andamento}</code> <code style="background:#e5e7eb;padding:1px 5px;border-radius:3px;font-size:11px;">{numero}</code></span></label>
+                            <input wire:model="acoes.<?php echo e($ai); ?>.prazo_titulo" type="text"
+                                placeholder="Ex: Prazo recursal — {andamento}"
+                                style="width:100%;padding:8px 10px;border:1.5px solid #bfdbfe;border-radius:8px;font-size:13px;background:#fff;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Quantidade de dias</label>
+                            <input wire:model="acoes.<?php echo e($ai); ?>.prazo_dias" type="number" min="1" max="365"
+                                style="width:100%;padding:8px 10px;border:1.5px solid #bfdbfe;border-radius:8px;font-size:13px;background:#fff;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Tipo de contagem</label>
+                            <select wire:model="acoes.<?php echo e($ai); ?>.prazo_tipo_contagem"
+                                style="width:100%;padding:8px 10px;border:1.5px solid #bfdbfe;border-radius:8px;font-size:13px;background:#fff;">
+                                <option value="uteis">Dias úteis</option>
+                                <option value="corridos">Dias corridos</option>
+                            </select>
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Responsável pelo prazo</label>
+                            <select wire:model="acoes.<?php echo e($ai); ?>.prazo_responsavel"
+                                style="width:100%;padding:8px 10px;border:1.5px solid #bfdbfe;border-radius:8px;font-size:13px;background:#fff;">
+                                <option value="advogado_processo">Advogado responsável pelo processo</option>
+                                <option value="criador">Quem criou a regra</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($acao['tipo'] === 'criar_notificacao'): ?>
+                <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:14px;margin-top:10px;">
+                    <div style="font-size:11px;font-weight:700;color:#7c3aed;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Configuração da Notificação</div>
+                    <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Título</label>
+                            <input wire:model="acoes.<?php echo e($ai); ?>.notif_titulo" type="text"
+                                placeholder="Ex: Atenção: novo andamento em {numero}"
+                                style="width:100%;padding:8px 10px;border:1.5px solid #e9d5ff;border-radius:8px;font-size:13px;background:#fff;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Mensagem</label>
+                            <textarea wire:model="acoes.<?php echo e($ai); ?>.notif_mensagem" rows="2"
+                                placeholder="Ex: O processo {numero} teve novo andamento: {andamento}"
+                                style="width:100%;padding:8px 10px;border:1.5px solid #e9d5ff;border-radius:8px;font-size:13px;background:#fff;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Notificar</label>
+                            <select wire:model="acoes.<?php echo e($ai); ?>.notif_destinatario"
+                                style="width:100%;padding:8px 10px;border:1.5px solid #e9d5ff;border-radius:8px;font-size:13px;background:#fff;">
+                                <option value="advogado_processo">Advogado responsável pelo processo</option>
+                                <option value="todos">Todos os usuários do escritório</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($acao['tipo'] === 'criar_agenda'): ?>
+                <div style="background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:14px;margin-top:10px;">
+                    <div style="font-size:11px;font-weight:700;color:#d97706;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Configuração da Agenda</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div style="grid-column:1/-1;">
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Título do compromisso</label>
+                            <input wire:model="acoes.<?php echo e($ai); ?>.agenda_titulo" type="text"
+                                placeholder="Ex: Acompanhar processo {numero}"
+                                style="width:100%;padding:8px 10px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;background:#fff;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Agendar para daqui</label>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <input wire:model="acoes.<?php echo e($ai); ?>.agenda_dias" type="number" min="0" max="365"
+                                    style="width:80px;padding:8px 10px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;background:#fff;text-align:center;">
+                                <span style="font-size:13px;color:#374151;">dia(s)</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Horário</label>
+                            <input wire:model="acoes.<?php echo e($ai); ?>.agenda_hora" type="time"
+                                style="width:100%;padding:8px 10px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;background:#fff;box-sizing:border-box;">
+                        </div>
+                        <div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;margin-top:4px;">
+                            <input wire:model="acoes.<?php echo e($ai); ?>.agenda_urgente" type="checkbox"
+                                style="width:16px;height:16px;accent-color:#d97706;cursor:pointer;">
+                            <label style="font-size:13px;color:#374151;cursor:pointer;font-weight:500;">Marcar como urgente</label>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($acao['tipo'] === 'atualizar_score'): ?>
+                <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px;margin-top:10px;">
+                    <div style="font-size:11px;font-weight:700;color:#ea580c;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Configuração do Score</div>
+                    <div>
+                        <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Definir score como</label>
+                        <select wire:model="acoes.<?php echo e($ai); ?>.score_valor"
+                            style="width:100%;padding:8px 10px;border:1.5px solid #fed7aa;border-radius:8px;font-size:13px;background:#fff;">
+                            <option value="auto">Automático (o sistema decide)</option>
+                            <option value="critico">Crítico</option>
+                            <option value="atencao">Atenção</option>
+                            <option value="normal">Normal</option>
+                        </select>
+                    </div>
+                </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($acao['tipo'] === 'chamar_ia'): ?>
+                <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-top:10px;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <span style="font-size:13px;color:#0c4a6e;font-weight:500;">A IA irá gerar automaticamente um resumo do andamento e salvará no processo. Nenhuma configuração necessária.</span>
+                    </div>
+                </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
             </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
