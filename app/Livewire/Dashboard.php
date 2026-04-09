@@ -100,11 +100,17 @@ class Dashboard extends Component
             ->map(fn($r) => ['dia' => strtoupper($r->dia), 'total' => (int)$r->total])
             ->toArray();
 
+
         // ── Audiências da semana ──────────────────────────────────
-        $audienciasSemanais = \App\Models\Agenda::where('tenant_id', $tenantId)
-            ->where('data_hora', '>=', now()->startOfWeek())
-            ->where('data_hora', '<=', now()->endOfWeek())
-            ->count();
+        $audienciasSemanais = \App\Models\Agenda::whereHas('processo', fn($q) => 
+        $q->where('tenant_id', $tenantId)
+    )
+    ->where('data_hora', '>=', now()->startOfWeek())
+    ->where('data_hora', '<=', now()->endOfWeek())
+    ->count();
+
+
+
 
         return view('livewire.dashboard', compact(
             'totalProcessos', 'prazosHoje', 'totalReceber', 'andamentosHoje',
