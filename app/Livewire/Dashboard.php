@@ -72,12 +72,14 @@ class Dashboard extends Component
             ->get();
 
         // ── Agenda hoje ─────────────────────────────────────────────
-        $agendaHoje = Agenda::where('tenant_id', $tenantId)
-            ->whereDate('data_hora', today())
-            ->where('concluido', false)
-            ->orderBy('data_hora')
-            ->take(4)
-            ->get();
+        $agendaHoje = Agenda::whereHas('processo', fn($q) => 
+        $q->where('tenant_id', $tenantId)
+    	)
+    		->whereDate('data_hora', today())
+    		->where('concluido', false)
+    		->orderBy('data_hora')
+    		->take(4)
+    ->get();
 
         // ── Visão geral processos ───────────────────────────────────
         $criticos    = Processo::where('tenant_id', $tenantId)->where('status', 'Ativo')->where('score', 'critico')->count();
