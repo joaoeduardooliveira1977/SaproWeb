@@ -4,7 +4,7 @@
 
 
 @section('content')
-<div>
+<div style="width:100%;min-height:200px;">
 
     {{-- ── Cabecalho ── --}}
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
@@ -33,18 +33,17 @@
     @if($processo->tipoAcao) &nbsp;&middot;&nbsp; {{ $processo->tipoAcao->descricao }} @endif
     @if($processo->vara) &nbsp;&middot;&nbsp; {{ $processo->vara }} @endif
 </p>
+
+
 @if($processo->parte_contraria)
 <p style="font-size:12px;color:#94a3b8;margin-top:2px;">
-    ⚖ vs. {{ $processo->parte_contraria }}
+    ⚖ vs. {{ $processo->parte_contraria }} 
+
 </p>
+
+
 @endif
-            </p>
-        </div>
-        
-
-
-
-
+            </div>
 
 
 	<div class="card-actions">
@@ -83,6 +82,7 @@
 
 
 
+<div>
     {{-- ── Abas ── --}}
     <div style="display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:20px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
         @php
@@ -230,7 +230,7 @@
     </div>
 
     {{-- ── ABA: FINANCEIRO ── --}}
-    <div id="tab-financeiro" class="tab-content" style="display:none;">
+    <div id="tab-financeiro" class="tab-content" style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden;">
         @livewire('financeiro', ['processoId' => $processo->id])
     </div>
 
@@ -400,23 +400,51 @@
         </div>
     </div>
 
-</div>
+</div>{{-- última aba --}}
+</div>{{-- /processo-tabs-wrapper --}}
 
 <script>
 const TAB_KEY = 'processo_{{ $processo->id }}_tab';
 
 function showTab(name) {
-    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    // Esconder todas as abas normais
+    document.querySelectorAll('.tab-content').forEach(el => {
+        if (el.id === 'tab-financeiro') {
+            el.style.position = 'absolute';
+            el.style.opacity = '0';
+            el.style.pointerEvents = 'none';
+            el.style.height = '0';
+            el.style.overflow = 'hidden';
+        } else {
+            el.style.display = 'none';
+        }
+    });
+
     document.querySelectorAll('[id^="tab-btn-"]').forEach(btn => {
         btn.style.borderBottomColor = 'transparent';
         btn.style.color = 'var(--muted)';
     });
-    document.getElementById('tab-' + name).style.display = 'block';
+
+    // Mostrar a aba selecionada
+    const tab = document.getElementById('tab-' + name);
+    if (tab) {
+        if (name === 'financeiro') {
+            tab.style.position = 'relative';
+            tab.style.opacity = '1';
+            tab.style.pointerEvents = 'auto';
+            tab.style.height = 'auto';
+            tab.style.overflow = 'visible';
+        } else {
+            tab.style.display = 'block';
+        }
+    }
+
     const btn = document.getElementById('tab-btn-' + name);
     if (btn) {
         btn.style.borderBottomColor = 'var(--primary)';
         btn.style.color = 'var(--primary)';
     }
+
     localStorage.setItem(TAB_KEY, name);
 }
 

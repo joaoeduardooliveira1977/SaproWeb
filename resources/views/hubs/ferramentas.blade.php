@@ -189,6 +189,14 @@
                 'route' => route('crm'),
                 'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
             ],
+            [
+                'label' => 'Workflow de Automação',
+                'desc'  => 'Regras automáticas por gatilho e ação',
+                'cor'   => '#7c3aed',
+                'bg'    => '#f5f3ff',
+                'route' => route('workflow.regras'),
+                'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+            ],
         ];
         @endphp
         @foreach($ferramentas as $f)

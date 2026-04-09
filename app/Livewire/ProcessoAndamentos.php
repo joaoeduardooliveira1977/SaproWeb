@@ -313,7 +313,7 @@ Responda em formato estruturado com:
 
 Seja objetivo e use linguagem jurídica profissional.";
 
-        $resultado = app(\App\Services\GeminiService::class)->gerar($prompt, 500);
+        $resultado = app(\App\Services\AIService::class)->gerar($prompt, 500);
 
         if ($resultado === '__IA_BLOQUEADA__') {
             $this->sugestaoIA        = 'IA disponível nos planos Starter e Pro. Faça upgrade para acessar este recurso.';

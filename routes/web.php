@@ -45,6 +45,7 @@ use App\Http\Controllers\IAController;
     // ── Geral (todos os perfis autenticados) ───────────────────
     	Route::middleware('perfil:geral')->group(function () {
         Route::get('/', fn() => view('dashboard'))->name('dashboard');
+        Route::get('/dashboard-preview', fn() => view('dashboard-preview'))->name('dashboard.preview');
         Route::get('/agenda',     fn() => view('agenda'))->name('agenda');
         Route::get('/prazos',     fn() => view('prazos'))->name('prazos');
         Route::get('/audiencias', fn() => view('audiencias'))->name('audiencias');
@@ -61,6 +62,7 @@ use App\Http\Controllers\IAController;
     // ── Processos ───────────────────────────────────────────────
     Route::middleware('perfil:processos')->group(function () {
         Route::get('/processos',             fn() => view('processos'))->name('processos');
+        Route::get('/processos/monitoramento', \App\Livewire\Processos\Monitoramento::class)->name('processos.monitoramento');
         Route::get('/processos/novo',        fn() => view('processo-form'))->name('processos.novo');
         Route::get('/processos/{id}/editar', fn($id) => view('processo-form', ['id' => $id]))->name('processos.editar');
         Route::get('/processos/{id}',        [ProcessoController::class, 'show'])->name('processos.show');
@@ -115,13 +117,14 @@ use App\Http\Controllers\IAController;
 
     // ── Ferramentas ─────────────────────────────────────────────
     Route::middleware('perfil:ferramentas')->group(function () {
-        Route::get('/tjsp',         fn() => view('tjsp'))->name('tjsp');
+        Route::get('/tjsp', \App\Livewire\Processos\Monitoramento::class)->name('tjsp');
         Route::get('/assistente',   fn() => view('assistente'))->name('assistente');
         Route::get('/aasp-publicacoes', fn() => view('aasp-publicacoes'))->name('aasp-publicacoes');
         Route::get('/calculadora',  fn() => view('calculadora'))->name('calculadora');
-        Route::get('/monitoramento', fn() => view('monitoramento'))->name('monitoramento');
+        Route::get('/monitoramento', \App\Livewire\Processos\Monitoramento::class)->name('monitoramento');
         Route::get('/conciliacao-bancaria', fn() => view('conciliacao-bancaria'))->name('conciliacao-bancaria');
         Route::get('/crm', fn() => view('crm'))->name('crm');
+        Route::get('/workflow-regras', \App\Livewire\WorkflowRegras::class)->name('workflow.regras');
     });
 
     // ── Administração (admin only) ──────────────────────────────

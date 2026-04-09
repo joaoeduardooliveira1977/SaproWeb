@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Processo;
-use App\Services\GeminiService;
+use App\Services\AIService;
 use Illuminate\Support\Facades\DB;
 
 class ProcessoAnaliseIA extends Component
@@ -82,7 +82,7 @@ Dados do processo:
 {$dados}
 PROMPT;
 
-        $result = app(GeminiService::class)->gerar($prompt, 1500);
+        $result = app(AIService::class)->gerar($prompt, 1500);
 
         if ($result === '__IA_BLOQUEADA__') {
             $this->erro    = 'IA disponível nos planos Starter e Pro. Faça upgrade para acessar este recurso.';

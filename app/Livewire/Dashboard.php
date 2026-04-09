@@ -2,202 +2,111 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
+use App\Models\{Agenda, Prazo, Processo, Recebimento};
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use App\Models\{Processo, Pessoa, Agenda, Prazo, Recebimento, Procuracao};
+use Livewire\Component;
 
 class Dashboard extends Component
 {
-    public array $stats              = [];
-    public array $agendaHoje         = [];
-    public array $processos          = [];
-    public array $prazosProximos     = [];
-    public array $processosParados   = [];
-    public array $processosPorFase   = [];
-    public array $ultimasAtividades  = [];
-    public array $receitaMensal      = [];
-    public array $riscosPrioritarios = [];
-    public int   $procuracoesVencendo = 0;
-    public int   $procuracoesVencidas = 0;
-
-
     public function placeholder(): \Illuminate\View\View
     {
         return view('livewire.partials.skeleton', ['cards' => 4, 'blocks' => 2, 'blockHeight' => 240]);
     }
 
-    public function mount(): void
+    public function render()
     {
-        $this->carregarDados();
-    }
+        $user     = auth('usuarios')->user();
+        $tenantId = $user->tenant_id;
 
-    public function carregarDados(): void
-    {
-        $this->stats = [
-            'processos_ativos'      => Processo::where('status', 'Ativo')->count(),
-            'audiencias_hoje'       => Agenda::whereDate('data_hora', today())->where('tipo', 'Audiência')->count(),
-            'prazos_7dias'          => Prazo::where('status', 'aberto')
-                                        ->whereBetween('data_prazo', [today(), today()->addDays(7)])
-                                        ->count(),
-            'prazos_vencidos'       => Prazo::where('status', 'aberto')
-                                        ->where('data_prazo', '<', today())
-                                        ->count(),
-            'recebimentos_pendentes'=> Recebimento::where('recebido', false)->sum('valor'),
-            'clientes'              => Pessoa::ativos()->doTipo('Cliente')->count(),
-            'processos_parados'     => Processo::where('status', 'Ativo')
-                                        ->whereNotExists(fn($q) => $q->from('andamentos')
-                                            ->whereColumn('andamentos.processo_id', 'processos.id')
-                                            ->where('andamentos.created_at', '>=', now()->subDays(30)))
-                                        ->count(),
-        ];
+        // ── KPI Stats ──────────────────────────────────────────────
+        $totalProcessos = Processo::where('tenant_id', $tenantId)
+            ->where('status', 'Ativo')->count();
 
-        $this->agendaHoje = Agenda::with('processo')
-            ->whereDate('data_hora', today())
-            ->where('concluido', false)
-            ->orderBy('data_hora')
-            ->get()
-            ->map(fn($a) => [
-                'hora'    => $a->data_hora->format('H:i'),
-                'titulo'  => $a->titulo,
-                'tipo'    => $a->tipo,
-                'urgente' => $a->urgente,
-                'processo'=> $a->processo?->numero,
-            ])
-            ->toArray();
+        $prazosHoje = Prazo::where('tenant_id', $tenantId)
+            ->where('status', 'aberto')
+            ->whereDate('data_prazo', today())->count();
 
-        $this->processos = Processo::with(['cliente', 'fase', 'risco'])
-            ->where('status', 'Ativo')
-            ->latest()
-            ->take(6)
-            ->get()
-            ->map(fn($p) => [
-                'id'        => $p->id,
-                'numero'    => $p->numero,
-                'cliente'   => $p->cliente?->nome,
-                'fase'      => $p->fase?->descricao,
-                'risco'     => $p->risco?->descricao,
-                'risco_cor' => $p->risco?->cor_hex ?? '#64748b',
-            ])
-            ->toArray();
+        $totalReceber = (float) Recebimento::where('tenant_id', $tenantId)
+            ->where('recebido', false)->sum('valor');
 
-        $this->processosParados = Processo::with(['cliente', 'fase'])
+        $andamentosHoje = DB::table('andamentos')
+            ->join('processos', 'processos.id', '=', 'andamentos.processo_id')
+            ->where('processos.tenant_id', $tenantId)
+            ->whereDate('andamentos.created_at', today())->count();
+
+        $processosParados = Processo::where('tenant_id', $tenantId)
             ->where('status', 'Ativo')
             ->whereNotExists(fn($q) => $q->from('andamentos')
                 ->whereColumn('andamentos.processo_id', 'processos.id')
                 ->where('andamentos.created_at', '>=', now()->subDays(30)))
-            ->orderBy('updated_at')
-            ->take(5)
-            ->get()
-            ->map(fn($p) => [
-                'id'      => $p->id,
-                'numero'  => $p->numero,
-                'cliente' => $p->cliente?->nome ?? '—',
-                'fase'    => $p->fase?->descricao,
-                'dias'    => (int) now()->diffInDays($p->updated_at),
-            ])
-            ->toArray();
+            ->count();
 
-        // Procurações
-        $this->procuracoesVencidas  = Procuracao::where('ativa', true)
-            ->whereNotNull('data_validade')->where('data_validade', '<', today())->count();
-        $this->procuracoesVencendo  = Procuracao::where('ativa', true)
-            ->whereNotNull('data_validade')
-            ->whereBetween('data_validade', [today(), today()->addDays(30)])->count();
-
-        // Processos por Fase (barras horizontais)
-        $this->processosPorFase = DB::table('processos')
-            ->join('fases', 'fases.id', '=', 'processos.fase_id')
-            ->where('processos.status', 'Ativo')
-            ->whereNotNull('processos.fase_id')
-            ->selectRaw('fases.descricao as fase, COUNT(*) as total')
-            ->groupBy('fases.id', 'fases.descricao')
-            ->orderByDesc('total')
-            ->limit(6)
-            ->get()
-            ->map(fn($f) => ['fase' => $f->fase, 'total' => (int) $f->total])
-            ->toArray();
-
-        // Últimas atividades (andamentos recentes)
-        $this->ultimasAtividades = DB::table('andamentos')
-            ->join('processos', 'processos.id', '=', 'andamentos.processo_id')
-            ->join('pessoas as clientes', 'clientes.id', '=', 'processos.cliente_id')
-            ->leftJoin('usuarios', 'usuarios.id', '=', 'andamentos.usuario_id')
-            ->leftJoin('pessoas as upes', 'upes.id', '=', 'usuarios.pessoa_id')
-            ->select(
-                'andamentos.descricao',
-                'andamentos.created_at',
-                'processos.numero',
-                'processos.id as processo_id',
-                'clientes.nome as cliente_nome',
-                'upes.nome as usuario_nome'
-            )
-            ->orderByDesc('andamentos.created_at')
-            ->limit(5)
-            ->get()
-            ->map(fn($a) => [
-                'descricao'   => Str::limit($a->descricao, 80),
-                'numero'      => $a->numero,
-                'processo_id' => $a->processo_id,
-                'cliente'     => $a->cliente_nome,
-                'usuario'     => $a->usuario_nome ?? 'Sistema',
-                'quando'      => \Carbon\Carbon::parse($a->created_at)->diffForHumans(),
-            ])
-            ->toArray();
-
-        // Receita mensal (últimos 6 meses)
-        $this->receitaMensal = collect(range(5, 0))->map(function ($i) {
-            $mes = now()->subMonths($i);
-            return [
-                'mes'   => $mes->locale('pt_BR')->isoFormat('MMM'),
-                'valor' => (float) Recebimento::where('recebido', true)
-                    ->whereYear('data_recebimento', $mes->year)
-                    ->whereMonth('data_recebimento', $mes->month)
-                    ->sum('valor'),
-            ];
-        })->toArray();
-
-        $this->prazosProximos = Prazo::with('processo')
+        // ── Ações urgentes (prazos próximos 7 dias) ─────────────────
+        $acoesUrgentes = Prazo::with(['processo.cliente'])
+            ->where('tenant_id', $tenantId)
             ->where('status', 'aberto')
-            ->where('data_prazo', '<=', today()->addDays(15))
+            ->where('data_prazo', '<=', now()->addDays(7))
             ->orderBy('data_prazo')
             ->take(5)
+            ->get();
+
+        // ── Últimos andamentos ──────────────────────────────────────
+        $ultimosAndamentos = DB::table('andamentos')
+            ->join('processos', 'processos.id', '=', 'andamentos.processo_id')
+            ->leftJoin('pessoas as clientes', 'clientes.id', '=', 'processos.cliente_id')
+            ->where('processos.tenant_id', $tenantId)
+            ->select(
+                'andamentos.id',
+                'andamentos.descricao',
+                'andamentos.created_at',
+                'processos.id as processo_id',
+                'processos.numero',
+                'clientes.nome as cliente_nome'
+            )
+            ->orderByDesc('andamentos.created_at')
+            ->limit(6)
+            ->get();
+
+        // ── Agenda hoje ─────────────────────────────────────────────
+        $agendaHoje = Agenda::where('tenant_id', $tenantId)
+            ->whereDate('data_hora', today())
+            ->where('concluido', false)
+            ->orderBy('data_hora')
+            ->take(4)
+            ->get();
+
+        // ── Visão geral processos ───────────────────────────────────
+        $criticos    = Processo::where('tenant_id', $tenantId)->where('status', 'Ativo')->where('score', 'critico')->count();
+        $atencao     = Processo::where('tenant_id', $tenantId)->where('status', 'Ativo')->where('score', 'atencao')->count();
+        $normais     = Processo::where('tenant_id', $tenantId)->where('status', 'Ativo')->where('score', 'normal')->count();
+        $monitorados = Processo::where('tenant_id', $tenantId)->where('status', 'Ativo')->whereNotNull('numero')->count();
+
+        // ── Atividade da semana (PostgreSQL) ─────────────────────
+        $atividadeSemana = DB::table('andamentos')
+            ->join('processos', 'processos.id', '=', 'andamentos.processo_id')
+            ->where('processos.tenant_id', $tenantId)
+            ->where('andamentos.created_at', '>=', now()->startOfWeek())
+            ->where('andamentos.created_at', '<=', now()->endOfWeek())
+            ->selectRaw("TO_CHAR(andamentos.created_at, 'Dy') as dia, DATE(andamentos.created_at) as data, COUNT(*) as total")
+            ->groupByRaw("TO_CHAR(andamentos.created_at, 'Dy'), DATE(andamentos.created_at)")
+            ->orderByRaw("DATE(andamentos.created_at)")
             ->get()
-            ->map(fn($p) => [
-                'titulo'   => $p->titulo,
-                'processo' => $p->processo?->numero,
-                'data'     => $p->data_prazo->format('d/m'),
-                'fatal'    => $p->prazo_fatal,
-                'urgencia' => $p->urgencia(),
-                'dias'     => $p->diasRestantes(),
-            ])
+            ->map(fn($r) => ['dia' => strtoupper($r->dia), 'total' => (int)$r->total])
             ->toArray();
 
+        // ── Audiências da semana ──────────────────────────────────
+        $audienciasSemanais = \App\Models\Agenda::where('tenant_id', $tenantId)
+            ->where('data_hora', '>=', now()->startOfWeek())
+            ->where('data_hora', '<=', now()->endOfWeek())
+            ->count();
 
-	$this->riscosPrioritarios = Processo::with(['cliente', 'risco'])
-    		->where('status', 'Ativo')
-    		->whereNotNull('risco_id')
-    		->orderByDesc('risco_id')
-    		->take(5)
-    		->get()
-    		->map(fn($p) => [
-        		'numero'  => $p->numero,
-        		'cliente' => $p->cliente?->nome ?? 'Sem cliente',
-        		'risco'   => $p->risco?->descricao ?? 'Médio',
-    	])
-   ->toArray();
-
-
-
-
-
-
-
-
-    }
-
-    public function render()
-    {
-        return view('livewire.dashboard');
+        return view('livewire.dashboard', compact(
+            'totalProcessos', 'prazosHoje', 'totalReceber', 'andamentosHoje',
+            'acoesUrgentes', 'ultimosAndamentos',
+            'agendaHoje', 'processosParados',
+            'criticos', 'atencao', 'normais', 'monitorados',
+            'atividadeSemana', 'audienciasSemanais'
+        ));
     }
 }

@@ -52,60 +52,68 @@
         }
 
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
-        .layout { display: flex; height: 100vh; overflow: hidden; }
+        .layout { display: grid; grid-template-columns: 116px 1fr; height: 100vh; overflow: hidden; }
 
-        /* ── Sidebar ── */
+        /* ── Sidebar minimalista com ícone + label ── */
         .sidebar {
-            width: 220px; background: var(--sidebar); color: #fff;
-            display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
-            transition: transform .3s ease; z-index: 100;
+            width: 116px; background: #0f2540;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 14px 0; gap: 2px; flex-shrink: 0;
+            height: 100vh; position: sticky; top: 0; overflow-y: auto; z-index: 100;
         }
-        .sidebar-header { padding: 20px 18px 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
-        .sidebar-logo { margin-bottom: 4px; display:flex; align-items:center; }
-        .sidebar-title { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
-        .sidebar-sub { font-size: 10px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: 1.5px; }
+        .nav-logo {
+            width: 50px; height: 50px; border-radius: 14px; background: #1D9E75;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 14px; text-decoration: none; border: none; cursor: pointer; flex-shrink: 0;
+        }
+        .nav-logo svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2; }
+        .nav-btn {
+            width: 100px; height: 62px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; border: none; background: transparent; transition: all .2s;
+            position: relative; gap: 4px; text-decoration: none;
+        }
+        .nav-btn:hover  { background: rgba(255,255,255,.07); }
+        .nav-btn.active { background: rgba(29,158,117,.18); }
+        .nav-btn svg    { width: 24px; height: 24px; stroke: rgba(255,255,255,.4); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: stroke .2s; }
+        .nav-btn.active svg { stroke: #1D9E75; }
+        .nav-btn:hover svg  { stroke: rgba(255,255,255,.75); }
+        .nav-btn-label { font-size: 11px; color: rgba(255,255,255,.3); font-weight: 500; letter-spacing: .3px; transition: color .2s; line-height: 1; }
+        .nav-btn.active .nav-btn-label { color: #1D9E75; }
+        .nav-btn:hover .nav-btn-label  { color: rgba(255,255,255,.6); }
+        .nav-badge {
+            position: absolute; top: 5px; right: 5px;
+            width: 15px; height: 15px; border-radius: 50%;
+            background: #ef4444; color: #fff; font-size: 8px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            border: 1.5px solid #0f2540;
+        }
+        .nav-sep    { width: 36px; height: 1px; background: rgba(255,255,255,.08); margin: 6px 0; flex-shrink: 0; }
+        .nav-spacer { flex: 1; }
 
-        .nav-pinned { padding: 6px 0 4px; }
-        .nav-sep { height: 1px; background: rgba(255,255,255,.08); margin: 6px 18px 10px; }
-        .nav-group { padding: 2px 0 4px; }
-        .nav-group-label {
-            font-size: 10px; font-weight: 700; color: rgba(255,255,255,.4); text-transform: uppercase;
-            letter-spacing: 1.2px; padding: 6px 18px 5px;
-            display: flex; align-items: center; justify-content: space-between;
-            cursor: pointer; user-select: none; transition: color .15s;
-        }
-        .nav-group-label:hover { color: rgba(255,255,255,.7); }
-        .nav-group-label .chevron { font-size: 9px; transition: transform .22s ease; display: inline-block; opacity:.6; }
-        .nav-group-label.collapsed .chevron { transform: rotate(-90deg); }
-        .nav-group-dot { display:inline-block; width:6px; height:6px; border-radius:2px; flex-shrink:0; margin-right:1px; }
-        .nav-group-items {
-            overflow: hidden; transition: max-height .28s ease, opacity .2s ease;
-            max-height: 500px; opacity: 1;
-        }
-        .nav-group-items.collapsed { max-height: 0; opacity: 0; }
-        .nav-item {
-            display: flex; align-items: center; gap: 10px; padding: 8px 18px;
-            font-size: 13px; color: rgba(255,255,255,.7); cursor: pointer;
-            border-left: 3px solid transparent; text-decoration: none; transition: all .15s;
-        }
-        .nav-item:hover { color: #fff; background: rgba(255,255,255,.05); }
-        .nav-item.active { color: var(--accent); background: rgba(232,160,32,.12); border-left-color: var(--accent); font-weight: 600; }
-        .nav-icon { width: 20px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
-
-        .perfil-badge {
-            display: inline-block; padding: 2px 8px; border-radius: 10px;
-            font-size: 10px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: .5px; margin-top: 4px;
-        }
-        .sidebar-footer { margin-top: auto; padding: 12px 18px; border-top: 1px solid rgba(255,255,255,.08); font-size: 12px; color: rgba(255,255,255,.4); }
-
-        /* ── Overlay mobile ── */
-        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 99; }
+        /* ── Drawer mobile ── */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 199; }
         .sidebar-overlay.active { display: block; }
-        .hamburger { display: none; background: none; border: none; cursor: pointer; font-size: 22px; color: var(--primary); padding: 4px 8px; }
+        .nav-drawer {
+            position: fixed; left: 0; top: 0; width: 220px; height: 100vh;
+            background: #0f2540; z-index: 200; display: flex; flex-direction: column; padding: 20px 0;
+            transform: translateX(-100%); transition: transform .25s ease;
+        }
+        .nav-drawer.open { transform: translateX(0); }
+        .nav-drawer-item {
+            display: flex; align-items: center; gap: 12px; padding: 10px 20px;
+            font-size: 13px; font-weight: 600; color: rgba(255,255,255,.65);
+            text-decoration: none; transition: background .15s, color .15s;
+            border-left: 3px solid transparent; border: none; background: none; cursor: pointer; width: 100%; text-align: left;
+        }
+        .nav-drawer-item:hover  { background: rgba(255,255,255,.06); color: #fff; }
+        .nav-drawer-item.active { color: #1D9E75; background: rgba(29,158,117,.12); border-left-color: #1D9E75; }
+        .nav-drawer-item svg    { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+        .nav-drawer-sep { height: 1px; background: rgba(255,255,255,.08); margin: 6px 20px; }
+        .hamburger { display: none; background: none; border: none; cursor: pointer; color: var(--primary); padding: 4px 6px; align-items: center; }
 
         /* ── Main ── */
-        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .main { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
         .topbar { height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); overflow: visible; position: relative; z-index: 100; }
         .topbar-title { font-size: 16px; font-weight: 600; color: var(--primary); flex-shrink: 0; }
         .topbar-user { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
@@ -304,9 +312,9 @@
             .grid-3 { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 768px) {
-            .sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); width: 260px; }
-            .sidebar.open { transform: translateX(0); }
-            .hamburger { display: block; }
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .hamburger { display: flex !important; }
             .grid-2 { grid-template-columns: 1fr; }
             .grid-3 { grid-template-columns: 1fr 1fr; }
             .content { padding: 16px; }
@@ -338,12 +346,12 @@
             @page { margin: 1.5cm; }
 
             /* Oculta elementos de navegação e interação */
-            .sidebar, .sidebar-overlay, .topbar, #toast-container,
+            .sidebar, .sidebar-overlay, .nav-drawer, .topbar, #toast-container,
             .hamburger, .filter-bar, .pagination-bar, .btn-actions,
             .card-actions, #themeToggle,
             button:not(.print-keep), a.btn { display: none !important; }
 
-            /* Layout: remove flex/overflow para impressão linear */
+            /* Layout: remove grid/overflow para impressão linear */
             html, body { height: auto !important; background: #fff !important; }
             .layout { display: block !important; height: auto !important; }
             .main   { display: block !important; }
@@ -490,119 +498,159 @@
         </div>
     </div>
 
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+@php
+    $rota       = request()->route()->getName();
+    $perfil     = auth('usuarios')->user()?->perfil ?? 'estagiario';
+    $isAdmin    = in_array($perfil, ['admin', 'administrador', 'super_admin']);
+    $isAdvogado = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado']);
+    $isFinanc   = in_array($perfil, ['admin', 'administrador', 'super_admin', 'financeiro']);
+    $hubAtivo   = '';
+    $rotasProcessos  = ['processos','processos.novo','processos.editar','processos.show','pessoas','correspondentes','procuracoes','documentos','minutas','assinatura-digital','audiencias','prazos','agenda','processos.hub'];
+    $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','financeiro.hub'];
+    $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','ferramentas.hub','workflow.regras'];
+    $rotasAdmin      = ['usuarios','tabelas','administradoras','indices','auditoria','admin.portal-acesso','admin.portal-mensagens','admin.notificacoes-whatsapp','admin.hub'];
+    if (in_array($rota, $rotasProcessos))   $hubAtivo = 'processos';
+    if (in_array($rota, $rotasFinanceiro))  $hubAtivo = 'financeiro';
+    if (in_array($rota, $rotasFerramentas)) $hubAtivo = 'ferramentas';
+    if (in_array($rota, $rotasAdmin))       $hubAtivo = 'admin';
+    $canProc    = in_array($perfil, ['admin','administrador','super_admin','advogado','estagiario','recepcionista']);
+    $canPessoas = in_array($perfil, ['admin','administrador','super_admin','advogado','estagiario','recepcionista']);
+    $canAgenda  = in_array($perfil, ['admin','administrador','super_admin','advogado','estagiario','recepcionista']);
+    $canDocs    = in_array($perfil, ['admin','administrador','super_admin','advogado','estagiario']);
+@endphp
 
-    <nav class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg></div>
-            <div class="sidebar-title">SISTEMA JURÍDICO</div>
-            <div class="sidebar-sub">Web</div>
-        </div>
+{{-- Overlay mobile --}}
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleDrawer()"></div>
 
-        @php
-            	$rota       = request()->route()->getName();
-            	$perfil     = auth('usuarios')->user()?->perfil ?? 'estagiario';
-            	$isAdmin    = in_array($perfil, ['admin', 'administrador', 'super_admin']);
-		$isAdvogado = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado']);
-		$isFinanc   = in_array($perfil, ['admin', 'administrador', 'super_admin', 'financeiro']);
+{{-- Drawer mobile --}}
+<nav class="nav-drawer" id="navDrawer">
+    <a href="{{ route('dashboard') }}" class="nav-drawer-item {{ $rota==='dashboard' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início
+    </a>
+    <a href="{{ route('processos.hub') }}" class="nav-drawer-item {{ $hubAtivo==='processos' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Processos
+    </a>
+    <a href="{{ route('prazos') }}" class="nav-drawer-item {{ $rota==='prazos' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Prazos
+        @if($prazosHoje>0)<span style="margin-left:auto;background:#ef4444;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;">{{ $prazosHoje }}</span>@endif
+    </a>
+    <a href="{{ route('agenda') }}" class="nav-drawer-item {{ $rota==='agenda' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agenda
+    </a>
+    <a href="{{ route('pessoas') }}" class="nav-drawer-item {{ $rota==='pessoas' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clientes
+    </a>
+    <div class="nav-drawer-sep"></div>
+    @if($isFinanc)
+    <a href="{{ route('financeiro.hub') }}" class="nav-drawer-item {{ $hubAtivo==='financeiro' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Financeiro
+    </a>
+    @endif
+    <a href="{{ route('tjsp') }}" class="nav-drawer-item {{ $rota==='tjsp' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Monitor
+    </a>
+    @if($isAdvogado)
+    <a href="{{ route('ferramentas.hub') }}" class="nav-drawer-item {{ $hubAtivo==='ferramentas' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Ferramentas
+    </a>
+    @endif
+    <div class="nav-drawer-sep"></div>
+    @if($isAdmin)
+    <a href="{{ route('admin.hub') }}" class="nav-drawer-item {{ $hubAtivo==='admin' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Admin
+    </a>
+    @endif
+    <a href="{{ route('minha-conta') }}" class="nav-drawer-item {{ $rota==='minha-conta' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Conta
+    </a>
+    <form action="{{ route('logout') }}" method="POST" style="margin:0;">@csrf
+        <button type="submit" class="nav-drawer-item" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color=''">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair
+        </button>
+    </form>
+</nav>
 
-            // Detecta o grupo ativo para destacar o item de menu
-            $hubAtivo = '';
-            $rotasProcessos  = ['processos','processos.novo','processos.editar','processos.show','pessoas','correspondentes','procuracoes','documentos','minutas','assinatura-digital','audiencias','prazos','agenda','processos.hub'];
-            $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','financeiro.hub'];
-            $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','ferramentas.hub'];
-            $rotasAdmin      = ['usuarios','tabelas','administradoras','indices','auditoria','admin.portal-acesso','admin.portal-mensagens','admin.notificacoes-whatsapp','admin.hub'];
-            if (in_array($rota, $rotasProcessos))   $hubAtivo = 'processos';
-            if (in_array($rota, $rotasFinanceiro))  $hubAtivo = 'financeiro';
-            if (in_array($rota, $rotasFerramentas)) $hubAtivo = 'ferramentas';
-            if (in_array($rota, $rotasAdmin))       $hubAtivo = 'admin';
+{{-- Sidebar desktop (ícone + label) --}}
+<nav class="sidebar">
+    <a href="{{ route('dashboard') }}" class="nav-logo" title="SAPRO Jurídico">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg>
+    </a>
 
-            // Variáveis de permissão ainda usadas no topbar / quick-add
-           	$canProc    = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado', 'estagiario', 'recepcionista']);
-		$canPessoas = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado', 'estagiario', 'recepcionista']);
-		$canAgenda  = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado', 'estagiario', 'recepcionista']);
-		$canDocs    = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado', 'estagiario']);
-        @endphp
+    <a href="{{ route('dashboard') }}" class="nav-btn {{ $rota==='dashboard' ? 'active' : '' }}" title="Início">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="nav-btn-label">Início</span>
+    </a>
 
-        {{-- Dashboard --}}
-        <div style="padding:10px 0 4px;">
-            <a href="{{ route('dashboard') }}" class="nav-item {{ $rota === 'dashboard' ? 'active' : '' }}" style="font-size:14px;font-weight:600;">
-                <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-                Dashboard
-            </a>
-        </div>
+    <a href="{{ route('processos.hub') }}" class="nav-btn {{ $hubAtivo==='processos' ? 'active' : '' }}" title="Processos">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="nav-btn-label">Processos</span>
+    </a>
 
-        <div style="height:1px;background:rgba(255,255,255,.08);margin:2px 18px 8px;"></div>
+    <a href="{{ route('prazos') }}" class="nav-btn {{ $rota==='prazos' ? 'active' : '' }}" title="Prazos">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span class="nav-btn-label">Prazos</span>
+        @if($prazosHoje>0)<span class="nav-badge">{{ $prazosHoje > 9 ? '9+' : $prazosHoje }}</span>@endif
+    </a>
 
-        {{-- Processos --}}
-        <a href="{{ route('processos.hub') }}"
-           class="nav-item {{ $hubAtivo === 'processos' ? 'active' : '' }}"
-           style="font-size:14px;font-weight:600;padding:10px 18px;">
-            <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg></span>
-            Processos
-        </a>
+    <a href="{{ route('agenda') }}" class="nav-btn {{ $rota==='agenda' ? 'active' : '' }}" title="Agenda">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="nav-btn-label">Agenda</span>
+    </a>
 
-        {{-- Financeiro --}}
-        @if($isFinanc)
-        <a href="{{ route('financeiro.hub') }}"
-           class="nav-item {{ $hubAtivo === 'financeiro' ? 'active' : '' }}"
-           style="font-size:14px;font-weight:600;padding:10px 18px;">
-            <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg></span>
-            Financeiro
-        </a>
-        @endif
+    <a href="{{ route('pessoas') }}" class="nav-btn {{ $rota==='pessoas' ? 'active' : '' }}" title="Clientes">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <span class="nav-btn-label">Clientes</span>
+    </a>
 
-        {{-- Ferramentas --}}
-        @if($isAdvogado)
-        <a href="{{ route('ferramentas.hub') }}"
-           class="nav-item {{ $hubAtivo === 'ferramentas' ? 'active' : '' }}"
-           style="font-size:14px;font-weight:600;padding:10px 18px;">
-            <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></span>
-            Ferramentas
-        </a>
-        @endif
+    <div class="nav-sep"></div>
 
-        {{-- Administração --}}
-        @if($isAdmin)
-        <a href="{{ route('admin.hub') }}"
-           class="nav-item {{ $hubAtivo === 'admin' ? 'active' : '' }}"
-           style="font-size:14px;font-weight:600;padding:10px 18px;">
-            <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>
-            Administração
-        </a>
-        @endif
+    @if($isFinanc)
+    <a href="{{ route('financeiro.hub') }}" class="nav-btn {{ $hubAtivo==='financeiro' ? 'active' : '' }}" title="Financeiro">
+        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span class="nav-btn-label">Financeiro</span>
+    </a>
+    @endif
 
-        <div style="height:1px;background:rgba(255,255,255,.08);margin:8px 18px 6px;"></div>
+    <a href="{{ route('tjsp') }}" class="nav-btn {{ $rota==='tjsp' ? 'active' : '' }}" title="Monitor DATAJUD">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span class="nav-btn-label">Monitor</span>
+    </a>
 
-        {{-- Minha Conta --}}
-        <a href="{{ route('minha-conta') }}" class="nav-item {{ $rota === 'minha-conta' ? 'active' : '' }}" style="font-size:13px;">
-            <span class="nav-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-            Minha Conta
-        </a>
+    @if($isAdvogado)
+    <a href="{{ route('ferramentas.hub') }}" class="nav-btn {{ $hubAtivo==='ferramentas' ? 'active' : '' }}" title="Ferramentas">
+        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+        <span class="nav-btn-label">Tools</span>
+    </a>
+    @endif
 
-        <div class="sidebar-footer">
-            {{ auth('usuarios')->user()?->nome ?? 'Usuário' }}<br>
-            @php
-               	$perfilCores  = ['admin'=>'#dc2626', 'administrador'=>'#dc2626', 'super_admin'=>'#7c3aed', 'advogado'=>'#2563a8', 'estagiario'=>'#7c3aed', 'financeiro'=>'#16a34a', 'recepcionista'=>'#d97706'];
-		$perfilLabels = ['admin'=>'Administrador', 'administrador'=>'Administrador', 'super_admin'=>'Super Admin', 'advogado'=>'Advogado', 'estagiario'=>'Estagiário', 'financeiro'=>'Financeiro', 'recepcionista'=>'Recepcionista'];
-                $cor   = $perfilCores[$perfil]  ?? '#64748b';
-                $label = $perfilLabels[$perfil] ?? $perfil;
-            @endphp
-            <span class="perfil-badge" style="background:{{ $cor }}30;color:{{ $cor }};border:1px solid {{ $cor }}50;">
-                {{ $label }}
-            </span><br><br>
-            <form action="{{ route('logout') }}" method="POST" style="display:inline">
-                @csrf
-                <button type="submit" style="background:none;border:none;cursor:pointer;color:#f87171;font-size:12px;padding:0;">
-                    ⏻ Sair
-                </button>
-            </form>
-        </div>
-    </nav>
+    <div class="nav-spacer"></div>
+    <div class="nav-sep"></div>
+
+    @if($isAdmin)
+    <a href="{{ route('admin.hub') }}" class="nav-btn {{ $hubAtivo==='admin' ? 'active' : '' }}" title="Administração">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span class="nav-btn-label">Admin</span>
+    </a>
+    @endif
+
+    <a href="{{ route('minha-conta') }}" class="nav-btn {{ $rota==='minha-conta' ? 'active' : '' }}" title="Minha Conta">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="nav-btn-label">Conta</span>
+    </a>
+
+    <form action="{{ route('logout') }}" method="POST" style="margin:0;">@csrf
+        <button type="submit" class="nav-btn" title="Sair"
+            onmouseover="this.querySelector('svg').style.stroke='#f87171';this.querySelector('.nav-btn-label').style.color='#f87171'"
+            onmouseout="this.querySelector('svg').style.stroke='';this.querySelector('.nav-btn-label').style.color=''">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span class="nav-btn-label">Sair</span>
+        </button>
+    </form>
+</nav>
 
     <div class="main">
         <div class="topbar">
-            <button class="hamburger" onclick="toggleSidebar()" aria-label="Abrir menu" style="display:inline-flex;align-items:center;justify-content:center;"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+            <button class="hamburger" onclick="toggleDrawer()" aria-label="Abrir menu"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
             <span class="topbar-title" style="flex-shrink:0;">@yield('page-title', 'Dashboard')</span>
             @if($canProc)
             
@@ -687,65 +735,17 @@
 </div>
 
 <script>
-    // ── Sidebar mobile ──
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
+    // ── Drawer mobile ──
+    function toggleDrawer() {
+        document.getElementById('navDrawer').classList.toggle('open');
         document.getElementById('sidebarOverlay').classList.toggle('active');
     }
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => { if (window.innerWidth <= 768) toggleSidebar(); });
-    });
     function checkWidth() {
         const u = document.querySelector('.topbar-username');
         if (u) u.style.display = window.innerWidth > 480 ? 'inline' : 'none';
     }
     checkWidth();
     window.addEventListener('resize', checkWidth);
-
-    // ── Accordion ──
-    const STORAGE_KEY = 'navGroups';
-
-    function getState() {
-        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
-    }
-    function saveState(state) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-
-    function toggleGroup(group) {
-        const items = document.getElementById('group-' + group);
-        const label = items?.previousElementSibling;
-        if (!items) return;
-        const isCollapsed = items.classList.toggle('collapsed');
-        label?.classList.toggle('collapsed', isCollapsed);
-        const state = getState();
-        state[group] = !isCollapsed; // true = open
-        saveState(state);
-    }
-
-    function initAccordion() {
-        const state   = getState();
-        const groups  = document.querySelectorAll('.nav-group[data-group]');
-
-        groups.forEach(g => {
-            const group = g.dataset.group;
-            const items = document.getElementById('group-' + group);
-            const label = items?.previousElementSibling;
-            if (!items) return;
-
-            // Abre apenas se tiver item ativo ou se o usuário abriu manualmente antes
-            const hasActive = items.querySelector('.nav-item.active');
-            const userOpened = Object.prototype.hasOwnProperty.call(state, group) && state[group] === true;
-            const shouldOpen = hasActive || userOpened;
-
-            if (!shouldOpen) {
-                items.classList.add('collapsed');
-                label?.classList.add('collapsed');
-            }
-        });
-    }
-
-    initAccordion();
 
     // ── Toasts ──
     const TOAST_ICONS = {
@@ -915,8 +915,8 @@
                     close ? close.click() : backdrop.click();
                     return;
                 }
-                if (document.getElementById('sidebar')?.classList.contains('open')) {
-                    toggleSidebar();
+                if (document.getElementById('navDrawer')?.classList.contains('open')) {
+                    toggleDrawer();
                 }
                 return;
             }

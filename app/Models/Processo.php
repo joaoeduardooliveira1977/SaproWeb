@@ -21,6 +21,8 @@ class Processo extends Model
         'secretaria_id', 'reparticao_id', 'vara', 'valor_causa', 'valor_risco',
         'observacoes', 'status', 'criado_por',
         'analise_ia', 'analise_ia_em',
+        'score', 'resumo_ia', 'monitoramento_ativo', 'frequencia_monitoramento',
+        'ultima_verificacao_datajud',
     ];
 
     protected $casts = [
@@ -28,7 +30,9 @@ class Processo extends Model
         'extrajudicial'     => 'boolean',
         'valor_causa'       => 'decimal:2',
         'valor_risco'       => 'decimal:2',
-        'analise_ia_em'     => 'datetime',
+        'analise_ia_em'              => 'datetime',
+        'monitoramento_ativo'        => 'boolean',
+        'ultima_verificacao_datajud' => 'datetime',
     ];
 
     // ── Relacionamentos ────────────────────────────

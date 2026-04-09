@@ -103,7 +103,7 @@ Pergunta do usuário: {$this->perguntaIA}
 
 Responda em 1-3 frases objetivas. Se a pergunta pedir para filtrar ou mostrar algo específico, além de responder, termine com: FILTRO:campo=valor (ex: FILTRO:risco=Alto ou FILTRO:fase=Recursal ou FILTRO:busca=nome)";
 
-        $resposta = app(\App\Services\GeminiService::class)->gerar($contexto, 300);
+        $resposta = app(\App\Services\AIService::class)->gerar($contexto, 300);
 
         if ($resposta === null) {
             $this->respostaIA = 'IA temporariamente indisponível. Tente novamente em instantes.';

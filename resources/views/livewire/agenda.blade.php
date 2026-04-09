@@ -1,14 +1,20 @@
 <div>
+@verbatim
 <style>
+@media (max-width: 900px) {
+    .agenda-filter-bar { flex-wrap: wrap; }
+    .agenda-filter-bar select,
+    .agenda-filter-bar input[type=date] { width: 100%; }
+    .agenda-filter-busca-wrap { min-width: 100%; }
+}
 @media (max-width: 768px) {
-    .agenda-grid  { grid-template-columns: 1fr !important; }
-    .metricas-ag  { grid-template-columns: 1fr 1fr !important; }
-    .filtros-ag   { position: static !important; }
+    .metricas-ag { grid-template-columns: 1fr 1fr !important; }
 }
 @media (max-width: 480px) {
-    .metricas-ag  { grid-template-columns: 1fr !important; }
+    .metricas-ag { grid-template-columns: 1fr !important; }
 }
 </style>
+@endverbatim
 
 {{-- Cabecalho --}}
 @if(!$embed)
@@ -99,111 +105,62 @@
 @endif
 @endif {{-- /!embed IA --}}
 
-{{-- Grid principal --}}
-<div class="agenda-grid" style="display:grid;grid-template-columns:{{ $embed ? '1fr' : '280px 1fr' }};gap:20px;align-items:start;">
-
-    {{-- COLUNA ESQUERDA: Filtros --}}
+{{-- ══ Filtros horizontais ══ --}}
 @if(!$embed)
-    <div class="filtros-ag" style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;position:sticky;top:20px;">
+<div class="agenda-filter-bar" style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
 
-        {{-- Tipo de Evento --}}
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Tipo de Evento</div>
-            <div style="display:flex;flex-direction:column;gap:3px;">
-                @php
-                $tiposFiltro = [
-                    ''          => ['Todos',     'var(--primary)', array_sum($tipoCounts)],
-                    'Audiencia' => ['Audiencia', '#d97706',        $tipoCounts['Audiência']  ?? 0],
-                    'Prazo'     => ['Prazo',     '#dc2626',        $tipoCounts['Prazo']       ?? 0],
-                    'Reuniao'   => ['Reuniao',   '#7c3aed',        $tipoCounts['Reunião']     ?? 0],
-                    'Consulta'  => ['Consulta',  '#0891b2',        $tipoCounts['Consulta']    ?? 0],
-                    'Despacho'  => ['Despacho',  '#16a34a',        $tipoCounts['Despacho']    ?? 0],
-                    'Outros'    => ['Outros',    '#2563a8',        $tipoCounts['Outros']      ?? 0],
-                ];
-                // Mapeamento dos valores reais para o filtro tipo (que usa strings com acento)
-                $tipoValores = [
-                    ''          => '',
-                    'Audiencia' => 'Audiência',
-                    'Prazo'     => 'Prazo',
-                    'Reuniao'   => 'Reunião',
-                    'Consulta'  => 'Consulta',
-                    'Despacho'  => 'Despacho',
-                    'Outros'    => 'Outros',
-                ];
-                @endphp
-                @foreach($tiposFiltro as $key => [$label, $cor, $cnt])
-                @php
-                    $valorReal = $tipoValores[$key];
-                    $sel = $tipo === $valorReal;
-                @endphp
-                <button wire:click="$set('tipo', '{{ $valorReal }}')"
-                    style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;width:100%;transition:all .15s;border:1.5px solid {{ $sel ? $cor.'88' : 'transparent' }};background:{{ $sel ? $cor.'18' : 'transparent' }};color:{{ $sel ? $cor : 'var(--text)' }};">
-                    <span style="display:flex;align-items:center;gap:7px;font-weight:{{ $sel ? '600' : '400' }};">
-                        @if($key !== '')
-                        <span style="width:8px;height:8px;border-radius:50%;background:{{ $cor }};flex-shrink:0;display:inline-block;"></span>
-                        @endif
-                        {{ $label }}
-                    </span>
-                    @if($cnt > 0 || $key === '')
-                    <span style="font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;background:{{ $sel ? $cor.'22' : '#f1f5f9' }};color:{{ $sel ? $cor : 'var(--muted)' }};">{{ $cnt }}</span>
-                    @endif
-                </button>
-                @endforeach
-            </div>
-        </div>
+    {{-- Tipo --}}
+    <select wire:model.live="tipo"
+        style="padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:140px;outline:none;">
+        <option value="">Todos os tipos</option>
+        <option value="Audiência">Audiência</option>
+        <option value="Prazo">Prazo</option>
+        <option value="Reunião">Reunião</option>
+        <option value="Consulta">Consulta</option>
+        <option value="Despacho">Despacho</option>
+        <option value="Outros">Outros</option>
+    </select>
 
-        {{-- Periodo (so na lista) --}}
-        @if(!$vistaCalendario)
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Periodo</div>
-            <div style="display:flex;flex-direction:column;gap:6px;">
-                <div>
-                    <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px;">De</label>
-                    <input wire:model.live="data_ini" type="date"
-                        style="width:100%;box-sizing:border-box;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
-                </div>
-                <div>
-                    <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px;">Ate</label>
-                    <input wire:model.live="data_fim" type="date"
-                        style="width:100%;box-sizing:border-box;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
-                </div>
-            </div>
-        </div>
-        @endif
+    {{-- Responsável --}}
+    <select wire:model.live="responsavel_id"
+        style="padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:140px;outline:none;">
+        <option value="">Responsável</option>
+        @foreach($responsaveis as $r)
+            <option value="{{ $r->id }}">{{ $r->nome }}</option>
+        @endforeach
+    </select>
 
-        {{-- Responsavel --}}
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Responsavel</div>
-            <select wire:model.live="responsavel_id"
-                style="width:100%;box-sizing:border-box;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
-                <option value="">Todos</option>
-                @foreach($responsaveis as $r)
-                    <option value="{{ $r->id }}">{{ $r->nome }}</option>
-                @endforeach
-            </select>
-        </div>
+    {{-- Período --}}
+    @if(!$vistaCalendario)
+    <input wire:model.live="data_ini" type="date" title="De"
+        style="padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);width:130px;outline:none;">
+    <input wire:model.live="data_fim" type="date" title="Até"
+        style="padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);width:130px;outline:none;">
+    @endif
 
-        {{-- Situacao --}}
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Situacao</div>
-            <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;border:1.5px solid {{ $so_pendentes ? '#2563a8' : 'var(--border)' }};background:{{ $so_pendentes ? '#eff6ff' : 'transparent' }};color:{{ $so_pendentes ? '#1d4ed8' : 'var(--text)' }};">
-                <input type="checkbox" wire:model.live="so_pendentes" style="width:14px;height:14px;accent-color:#2563a8;margin:0;cursor:pointer;">
-                <span style="font-weight:{{ $so_pendentes ? '600' : '400' }};">So pendentes</span>
-            </label>
-        </div>
+    {{-- Só pendentes --}}
+    <label style="display:flex;align-items:center;gap:7px;padding:8px 12px;border:1.5px solid {{ $so_pendentes ? '#2563a8' : 'var(--border)' }};border-radius:8px;cursor:pointer;font-size:13px;background:{{ $so_pendentes ? '#eff6ff' : 'transparent' }};color:{{ $so_pendentes ? '#1d4ed8' : 'var(--text)' }};white-space:nowrap;">
+        <input type="checkbox" wire:model.live="so_pendentes" style="width:14px;height:14px;accent-color:#2563a8;margin:0;cursor:pointer;">
+        Só pendentes
+    </label>
 
-        {{-- Limpar --}}
-        @if($tipo || $responsavel_id || !$so_pendentes || $data_ini !== today()->format('Y-m-d') || $data_fim !== today()->addDays(30)->format('Y-m-d'))
-        <button wire:click="$set('tipo',''); $set('responsavel_id',''); $set('so_pendentes', true); $set('data_ini', '{{ today()->format('Y-m-d') }}'); $set('data_fim', '{{ today()->addDays(30)->format('Y-m-d') }}')"
-            style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;background:none;color:var(--muted);cursor:pointer;">
-            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Limpar filtros
-        </button>
-        @endif
-    </div>
-@endif {{-- /!embed sidebar --}}
+    {{-- Limpar --}}
+    @if($tipo || $responsavel_id || !$so_pendentes || $data_ini !== today()->format('Y-m-d') || $data_fim !== today()->addDays(30)->format('Y-m-d'))
+    <button wire:click="$set('tipo',''); $set('responsavel_id',''); $set('so_pendentes', true); $set('data_ini', '{{ today()->format('Y-m-d') }}'); $set('data_fim', '{{ today()->addDays(30)->format('Y-m-d') }}')"
+        style="margin-left:auto;padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;"
+        onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+        <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Limpar filtros
+    </button>
+    @endif
+</div>
+@endif {{-- /!embed filters --}}
 
-    {{-- COLUNA DIREITA --}}
+{{-- Grid principal --}}
+<div class="agenda-grid" style="display:grid;grid-template-columns:1fr;gap:20px;align-items:start;">
+
+    {{-- Coluna única --}}
     <div>
 
         {{-- Metricas --}}

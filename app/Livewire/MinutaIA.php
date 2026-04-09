@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Processo;
-use App\Services\GeminiService;
+use App\Services\AIService;
 
 class MinutaIA extends Component
 {
@@ -86,7 +86,7 @@ Dados do processo:
 Gere apenas o texto do documento, sem explicações adicionais.
 PROMPT;
 
-        $result = app(GeminiService::class)->gerar($prompt, 1500);
+        $result = app(AIService::class)->gerar($prompt, 1500);
 
         if ($result === null) {
             $this->erro    = 'IA temporariamente indisponível. Tente novamente.';

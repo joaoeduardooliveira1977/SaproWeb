@@ -21,9 +21,11 @@ class NotificacoesBell extends Component
 
     public function marcarLida(int $id): void
     {
+        $usuarioId = auth('usuarios')->id();
+
         Notificacao::where('id', $id)
-            ->where(function ($q) {
-                $q->where('usuario_id', auth('usuarios')->id())
+            ->where(function ($q) use ($usuarioId) {
+                $q->where('usuario_id', $usuarioId)
                   ->orWhereNull('usuario_id');
             })
             ->update(['lida' => true]);
@@ -33,11 +35,10 @@ class NotificacoesBell extends Component
     {
         $usuarioId = auth('usuarios')->id();
 
-        Notificacao::where('usuario_id', $usuarioId)
-            ->where('lida', false)
-            ->update(['lida' => true]);
-
-        Notificacao::whereNull('usuario_id')
+        Notificacao::where(function ($q) use ($usuarioId) {
+                $q->where('usuario_id', $usuarioId)
+                  ->orWhereNull('usuario_id');
+            })
             ->where('lida', false)
             ->update(['lida' => true]);
     }
@@ -46,10 +47,12 @@ class NotificacoesBell extends Component
     {
         $usuarioId = auth('usuarios')->id();
 
-        $notificacoes = Notificacao::paraUsuario($usuarioId)
-            ->orderBy('lida')
-            ->orderByDesc('created_at')
-            ->limit(30)
+        $notificacoes = Notificacao::where(function ($q) use ($usuarioId) {
+                $q->where('usuario_id', $usuarioId)
+                  ->orWhereNull('usuario_id');
+            })
+            ->orderBy('created_at', 'desc')
+            ->take(10)
             ->get();
 
         $naoLidas = $notificacoes->where('lida', false)->count();

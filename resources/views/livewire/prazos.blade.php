@@ -25,7 +25,7 @@
 <style>
     .prazos-grid {
         display: grid;
-        grid-template-columns: 280px 1fr;
+        grid-template-columns: 1fr;
         gap: 20px;
         align-items: start;
     }
@@ -70,105 +70,48 @@
         color: var(--muted);
         font-weight: 500;
     }
-    .prazos-filtros {
+    .prazos-filter-bar {
         background: var(--white);
         border: 1.5px solid var(--border);
         border-radius: 12px;
-        padding: 20px;
-        position: sticky;
-        top: 20px;
-    }
-    .prazos-filtros-title {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: .5px;
-        margin: 0 0 10px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid var(--border);
-    }
-    .prazos-filtros-section {
+        padding: 14px 16px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
         margin-bottom: 16px;
     }
-    .prazos-filtros-section-lbl {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: .5px;
-        margin-bottom: 8px;
-        display: block;
-    }
-    .prazos-toggle-btn {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-        text-align: left;
-        padding: 8px 10px;
-        border-radius: 8px;
-        border: 1.5px solid transparent;
-        background: none;
-        cursor: pointer;
-        font-size: 13px;
-        color: var(--text);
-        transition: background .12s, border-color .12s;
-        margin-bottom: 3px;
-    }
-    .prazos-toggle-btn:hover { background: var(--surface); }
-    .prazos-toggle-btn.active {
-        background: #eff6ff;
-        border-color: #bfdbfe;
-        color: #1e40af;
-        font-weight: 600;
-    }
-    .prazos-toggle-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        flex-shrink: 0;
-    }
-    .prazos-toggle-count {
-        margin-left: auto;
-        font-size: 11px;
-        background: #f1f5f9;
-        color: var(--muted);
-        padding: 1px 6px;
-        border-radius: 10px;
-        font-weight: 600;
-    }
-    .prazos-input {
-        width: 100%;
-        padding: 8px 10px 8px 34px;
+    .prazos-filter-bar input,
+    .prazos-filter-bar select {
+        padding: 8px 11px;
         border: 1.5px solid var(--border);
         border-radius: 8px;
         font-size: 13px;
         background: var(--white);
         color: var(--text);
-        box-sizing: border-box;
+        outline: none;
+        transition: border-color .15s;
     }
-    .prazos-select {
-        width: 100%;
-        padding: 8px 10px;
-        border: 1.5px solid var(--border);
-        border-radius: 8px;
-        font-size: 13px;
-        background: var(--white);
-        color: var(--text);
-        box-sizing: border-box;
+    .prazos-filter-bar input:focus,
+    .prazos-filter-bar select:focus { border-color: var(--primary-light); }
+    .prazos-filter-busca {
+        flex: 1;
+        min-width: 180px;
+        padding-left: 34px !important;
     }
-    .prazos-date-input {
-        width: 100%;
-        padding: 7px 10px;
-        border: 1.5px solid var(--border);
-        border-radius: 8px;
-        font-size: 12px;
-        background: var(--white);
-        color: var(--text);
-        box-sizing: border-box;
-        margin-bottom: 6px;
+    .prazos-filter-busca-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 180px;
     }
+    .prazos-filter-busca-wrap svg {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+    .prazos-filter-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
     .ia-bar {
         background: linear-gradient(135deg, #0f2540 0%, #1a3a5c 100%);
         border-radius: 12px;
@@ -227,11 +170,26 @@
         align-items: flex-start;
         gap: 10px;
     }
+</style>
+@verbatim
+<style>
+    @media (max-width: 900px) {
+        .prazos-filter-bar { gap: 6px; }
+        .prazos-filter-bar select,
+        .prazos-filter-bar input[type=date] { min-width: unset; width: 100%; }
+        .prazos-filter-busca-wrap { min-width: 100%; }
+    }
     @media (max-width: 768px) {
-        .prazos-grid { grid-template-columns: 1fr; }
         .prazos-metricas { grid-template-columns: repeat(2, 1fr); }
     }
 </style>
+@endverbatim
+
+
+
+
+
+
 
 @if(!$embed)
 {{-- ══ Voltar ══ --}}
@@ -248,12 +206,16 @@
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
     
 
-{{--<div>
+{{--
+
+
+
+<div>
         <h1 style="font-size:20px;font-weight:800;margin:0;">Prazos</h1>
         <div style="font-size:13px;color:var(--muted);margin-top:2px;">Gestão e controle de prazos processuais</div>
     	</div> 
---}}
 
+--}}
 
 
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
@@ -289,7 +251,12 @@
     </button>
 </div>
 @else
-{{-- ══ Analista IA ══ --}}
+
+
+
+
+
+{{-- ══ Analista IA ══  --}}
 <div class="ia-bar">
     <div class="ia-bar-label">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2">
@@ -324,121 +291,86 @@
     <span>{{ $respostaIA }}</span>
 </div>
 @endif
-@endif {{-- /!embed IA --}}
+@endif  {{-- ══ Analista IA ══  --}}
 
-{{-- ══ Grid principal ══ --}}
-<div class="prazos-grid" @if($embed) style="grid-template-columns:1fr;" @endif>
 
-    {{-- ── Coluna esquerda: Filtros ── --}}
-    @if(!$embed)
-    <div class="prazos-filtros">
-        <div class="prazos-filtros-title">Filtros</div>
 
-        {{-- Busca --}}
-        <div class="prazos-filtros-section">
-            <div style="position:relative;">
-                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
-                    style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input type="text" wire:model.live.debounce.300ms="filtroBusca"
-                       placeholder="Buscar por título…"
-                       class="prazos-input">
-            </div>
-        </div>
 
-        {{-- Status --}}
-        <div class="prazos-filtros-section">
-            <span class="prazos-filtros-section-lbl">Status</span>
-            @php
-            $statusOpts = [
-                'aberto'   => ['label'=>'Em aberto',  'cor'=>'#16a34a'],
-                'cumprido' => ['label'=>'Cumpridos',  'cor'=>'#64748b'],
-                'perdido'  => ['label'=>'Perdidos',   'cor'=>'#991b1b'],
-                'todos'    => ['label'=>'Todos',      'cor'=>'#94a3b8'],
-            ];
-            @endphp
-            @foreach($statusOpts as $val => $opt)
-            <button class="prazos-toggle-btn {{ $filtroStatus === $val ? 'active' : '' }}"
-                    wire:click="$set('filtroStatus', '{{ $val }}')">
-                <span class="prazos-toggle-dot" style="background:{{ $opt['cor'] }};"></span>
-                {{ $opt['label'] }}
-            </button>
-            @endforeach
-        </div>
 
-        {{-- Tipo --}}
-        <div class="prazos-filtros-section">
-            <span class="prazos-filtros-section-lbl">Tipo</span>
-            <button class="prazos-toggle-btn {{ $filtroTipo === '' ? 'active' : '' }}"
-                    wire:click="$set('filtroTipo', '')">
-                <span class="prazos-toggle-dot" style="background:#94a3b8;"></span>
-                Todos
-            </button>
-            @php
-            $tipoOpts = [
-                'Prazo'       => '#2563eb',
-                'Prazo Fatal' => '#9d174d',
-                'Audiência'   => '#d97706',
-                'Diligência'  => '#7c3aed',
-                'Recurso'     => '#0891b2',
-            ];
-            @endphp
-            @foreach($tipoOpts as $tipo => $cor)
-            <button class="prazos-toggle-btn {{ $filtroTipo === $tipo ? 'active' : '' }}"
-                    wire:click="$set('filtroTipo', '{{ $tipo }}')">
-                <span class="prazos-toggle-dot" style="background:{{ $cor }};"></span>
-                {{ $tipo }}
-                <span class="prazos-toggle-count">{{ $tipoCounts[$tipo] ?? 0 }}</span>
-            </button>
-            @endforeach
-        </div>
 
-        {{-- Responsável --}}
-        <div class="prazos-filtros-section">
-            <span class="prazos-filtros-section-lbl">Responsável</span>
-            <select wire:model.live="filtroResponsavel" class="prazos-select">
-                <option value="">Todos</option>
-                @foreach($usuarios as $u)
-                    <option value="{{ $u->id }}">{{ $u->nome }}</option>
-                @endforeach
-            </select>
-        </div>
 
-        {{-- Processo --}}
-        @if(!$embed)
-        <div class="prazos-filtros-section">
-            <span class="prazos-filtros-section-lbl">Processo</span>
-            <select wire:model.live="filtroProcesso" class="prazos-select">
-                <option value="">Todos</option>
-                @foreach($processos as $p)
-                    <option value="{{ $p->id }}">{{ $p->numero }} — {{ $p->cliente?->nome ?? '—' }}</option>
-                @endforeach
-            </select>
-        </div>
-        @endif
 
-        {{-- Período --}}
-        <div class="prazos-filtros-section">
-            <span class="prazos-filtros-section-lbl">Período</span>
-            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px;">De</label>
-            <input type="date" wire:model.live="filtroDataIni" class="prazos-date-input">
-            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px;">Até</label>
-            <input type="date" wire:model.live="filtroDataFim" class="prazos-date-input">
-        </div>
+{{-- ══ Filtros horizontais ══ --}}
+@if(!$embed)
+<div class="prazos-filter-bar">
 
-        {{-- Limpar --}}
+    {{-- Busca --}}
+    <div class="prazos-filter-busca-wrap">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" wire:model.live.debounce.300ms="filtroBusca"
+               placeholder="Buscar por título, processo…"
+               class="prazos-filter-busca" style="width:100%;">
+    </div>
+
+    {{-- Status --}}
+    <select wire:model.live="filtroStatus" style="min-width:130px;">
+        <option value="aberto">Em aberto</option>
+        <option value="cumprido">Cumpridos</option>
+        <option value="perdido">Perdidos</option>
+        <option value="todos">Todos</option>
+    </select>
+
+    {{-- Tipo --}}
+    <select wire:model.live="filtroTipo" style="min-width:130px;">
+        <option value="">Todos os tipos</option>
+        <option value="Prazo">Prazo</option>
+        <option value="Prazo Fatal">Prazo Fatal</option>
+        <option value="Audiência">Audiência</option>
+        <option value="Diligência">Diligência</option>
+        <option value="Recurso">Recurso</option>
+    </select>
+
+    {{-- Responsável --}}
+    <select wire:model.live="filtroResponsavel" style="min-width:130px;">
+        <option value="">Responsável</option>
+        @foreach($usuarios as $u)
+            <option value="{{ $u->id }}">{{ $u->nome }}</option>
+        @endforeach
+    </select>
+
+    {{-- Processo --}}
+    <select wire:model.live="filtroProcesso" style="min-width:160px;">
+        <option value="">Todos os processos</option>
+        @foreach($processos as $p)
+            <option value="{{ $p->id }}">{{ $p->numero }}</option>
+        @endforeach
+    </select>
+
+    {{-- Período --}}
+    <input type="date" wire:model.live="filtroDataIni" title="De" style="width:130px;">
+    <input type="date" wire:model.live="filtroDataFim" title="Até" style="width:130px;">
+
+    {{-- Limpar --}}
+    <div class="prazos-filter-actions">
         @if($filtroBusca || $filtroTipo || $filtroResponsavel || $filtroProcesso || $filtroDataIni || $filtroDataFim || $filtroStatus !== 'aberto')
         <button wire:click="$set('filtroBusca',''); $set('filtroTipo',''); $set('filtroResponsavel',''); $set('filtroProcesso',''); $set('filtroDataIni',''); $set('filtroDataFim',''); $set('filtroStatus','aberto')"
-            style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;">
+            style="padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;"
+            onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
             <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             Limpar filtros
         </button>
         @endif
     </div>
-    @endif {{-- /!embed sidebar --}}
+</div>
+@endif {{-- /!embed filters --}}
 
-    {{-- ── Coluna direita ── --}}
+{{-- ══ Grid principal ══ --}}
+<div class="prazos-grid">
+
+    {{-- ── Coluna única ── --}}
     <div>
 
         {{-- Métricas --}}

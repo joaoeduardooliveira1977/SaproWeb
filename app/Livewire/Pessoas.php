@@ -171,7 +171,7 @@ Pergunta: {$this->perguntaIA}
 
 Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tipo=Valor ou FILTRO:busca=texto";
 
-        $resposta = app(\App\Services\GeminiService::class)->gerar($contexto, 300);
+        $resposta = app(\App\Services\AIService::class)->gerar($contexto, 300);
 
         if ($resposta === '__IA_BLOQUEADA__') {
             $this->respostaIA = 'IA disponível nos planos Starter e Pro. Faça upgrade para acessar este recurso.';
@@ -290,7 +290,7 @@ Gere um perfil estruturado com:
 
 Use linguagem profissional e objetiva.";
 
-        $resultado = app(\App\Services\GeminiService::class)->gerar($prompt, 600);
+        $resultado = app(\App\Services\AIService::class)->gerar($prompt, 600);
 
         if ($resultado === '__IA_BLOQUEADA__') {
             $this->perfilIA      = 'IA disponível nos planos Starter e Pro. Faça upgrade para acessar este recurso.';

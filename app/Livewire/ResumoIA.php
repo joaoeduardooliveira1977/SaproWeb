@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Services\GeminiService;
+use App\Services\AIService;
 use Illuminate\Support\Facades\{DB, Cache};
 use App\Models\{Agenda, Prazo, Processo};
 
@@ -61,7 +61,7 @@ class ResumoIA extends Component
 
         $prompt = "Você é um assistente jurídico. Crie um briefing matinal objetivo para o advogado com base nos dados abaixo. Destaque urgências, organize por prioridade e sugira o foco do dia. Máximo 150 palavras. Use linguagem direta e profissional, sem markdown.\n\nDados:\n{$dados}";
 
-        $result = app(GeminiService::class)->gerar($prompt, 350);
+        $result = app(AIService::class)->gerar($prompt, 350);
 
         if ($result === '__IA_BLOQUEADA__') {
             $this->resumo  = 'IA disponível nos planos Starter e Pro. Faça upgrade para acessar este recurso.';

@@ -24,3 +24,17 @@ Schedule::command('datajud:verificar')->weekdays()->dailyAt('06:00');
 
 // Busca publicações AASP do dia automaticamente (dias úteis, 8h30)
 Schedule::command('aasp:buscar')->weekdays()->dailyAt('08:30');
+
+// Dispara gatilhos de workflow baseados em tempo (prazos vencendo/vencidos, inatividade)
+Schedule::command('workflow:verificar-agendados')
+    ->dailyAt('07:30')
+    ->timezone('America/Sao_Paulo');
+
+// Verifica monitoramentos automáticos de processos: 7h e 13h
+Schedule::job(new \App\Jobs\VerificarMonitoramentos())
+    ->dailyAt('07:00')
+    ->timezone('America/Sao_Paulo');
+
+Schedule::job(new \App\Jobs\VerificarMonitoramentos())
+    ->dailyAt('13:00')
+    ->timezone('America/Sao_Paulo');

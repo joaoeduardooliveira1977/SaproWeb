@@ -186,7 +186,7 @@ class ProcessoForm extends Component
             . "Responda exatamente neste formato: RISCO: [nível] — [justificativa breve]. "
             . "Dados: {$dados}";
 
-        $result = app(\App\Services\GeminiService::class)->gerar($prompt, 200);
+        $result = app(\App\Services\AIService::class)->gerar($prompt, 200);
 
         $this->sugestaoRisco       = $result ?? 'IA temporariamente indisponível. Tente novamente.';
         $this->gerandoRisco        = false;

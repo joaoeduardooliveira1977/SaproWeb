@@ -1,3 +1,6 @@
+@php $notificacoes ??= collect(); $naoLidas ??= 0; @endphp
+
+
 <div style="position:relative;" wire:poll.60s>
 
     {{-- ── Sininho ── --}}

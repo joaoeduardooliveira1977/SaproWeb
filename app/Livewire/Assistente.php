@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
 class Assistente extends Component
@@ -39,7 +38,7 @@ class Assistente extends Component
         $this->carregando = true;
 
         $contexto = $this->buscarContexto($pergunta);
-        $resposta = $this->perguntarGemini($pergunta, $contexto);
+        $resposta = $this->perguntarIA($pergunta, $contexto);
 
         $this->mensagens[] = [
             'tipo'  => 'bot',
@@ -348,75 +347,41 @@ class Assistente extends Component
         return $contexto;
     }
 
-    private function perguntarGemini(string $pergunta, string $contexto): string
+    private function perguntarIA(string $pergunta, string $contexto): string
     {
         try {
-            $sistemaPrompt = "Você é um assistente jurídico inteligente do sistema SAPRO.
+            $system = "Você é um assistente jurídico inteligente do sistema SAPRO.
 Responda de forma clara, objetiva e profissional em português brasileiro.
 Use os dados abaixo para responder com precisão. Não invente informações.
 Se não encontrar a informação, diga que não encontrou e sugira onde buscar.
-Pode usar markdown: **negrito**, listas com -, `código`.
+Pode usar markdown: **negrito**, listas com -, \`código\`.
 
 === DADOS DO SISTEMA (atualizados agora) ===
 {$contexto}
 === FIM DOS DADOS ===";
 
-            // Monta histórico multi-turn (últimas 10 trocas = 20 mensagens)
+            // Monta histórico multi-turn nas últimas 20 mensagens
+            // excluindo a saudação inicial do bot
             $historico = array_slice($this->mensagens, -20);
-            $contents  = [];
+            $saudacao  = $this->mensagens[0]['texto'] ?? '';
 
-            // Primeira mensagem traz o contexto do sistema
-            $contents[] = [
-                'role'  => 'user',
-                'parts' => [['text' => $sistemaPrompt . "\n\nPrimeira pergunta: " . $pergunta]],
-            ];
-
-            // Se há histórico anterior, substitui a primeira entrada e adiciona o restante
-            if (count($historico) > 1) {
-                $contents = [];
-                foreach ($historico as $msg) {
-                    if ($msg['tipo'] === 'bot' && $msg['texto'] === $this->mensagens[0]['texto']) {
-                        continue; // pula a saudação inicial
-                    }
-                    $role     = $msg['tipo'] === 'usuario' ? 'user' : 'model';
-                    $contents[] = [
-                        'role'  => $role,
-                        'parts' => [['text' => $msg['texto']]],
-                    ];
+            $messages = [];
+            foreach ($historico as $msg) {
+                if ($msg['tipo'] === 'bot' && $msg['texto'] === $saudacao) {
+                    continue; // pula mensagem de boas-vindas
                 }
-                // Injeta contexto na última mensagem do usuário
-                if (!empty($contents) && end($contents)['role'] === 'user') {
-                    $last = array_pop($contents);
-                    array_unshift($contents, [
-                        'role'  => 'user',
-                        'parts' => [['text' => $sistemaPrompt]],
-                    ]);
-                    array_unshift($contents, ...[]);
-                    $contents[] = $last;
-                }
+                $role       = $msg['tipo'] === 'usuario' ? 'user' : 'assistant';
+                $messages[] = ['role' => $role, 'content' => $msg['texto']];
             }
 
-            // Garante que contents não está vazio e termina com role=user
-            if (empty($contents)) {
-                $contents = [[
-                    'role'  => 'user',
-                    'parts' => [['text' => $sistemaPrompt . "\n\n" . $pergunta]],
-                ]];
+            // Garante que há pelo menos a pergunta atual
+            if (empty($messages)) {
+                $messages = [['role' => 'user', 'content' => $pergunta]];
             }
 
-            $response = Http::withHeaders(['Content-Type' => 'application/json'])
-                ->timeout(30)
-                ->post(
-                    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . env('GEMINI_API_KEY'),
-                    ['contents' => $contents]
-                );
+            $resposta = app(\App\Services\AIService::class)->gerarChat($system, $messages, 1024);
 
-            if (! $response->successful()) {
-                return '⚠️ Erro ao consultar a IA (HTTP ' . $response->status() . '). Tente novamente.';
-            }
-
-            return $response->json('candidates.0.content.parts.0.text')
-                ?? 'Não consegui processar sua pergunta.';
+            return $resposta ?? 'Não consegui processar sua pergunta.';
 
         } catch (\Exception $e) {
             return '⚠️ Erro: ' . $e->getMessage();

@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\Andamento;
 use App\Models\Processo;
+use App\Observers\AndamentoObserver;
 use App\Observers\ProcessoObserver;
 
 class AppServiceProvider extends ServiceProvider
@@ -16,5 +18,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Processo::observe(ProcessoObserver::class);
+        Andamento::observe(AndamentoObserver::class);
     }
 }

@@ -32,8 +32,17 @@ return [
     ],
 
     'gemini' => [
-    'key' => env('GEMINI_API_KEY'),
-	],
+        'key' => env('GEMINI_API_KEY'),
+    ],
+
+    'claude' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+    ],
+
+    'ai' => [
+        // 'claude' usa Claude Sonnet 4.6  |  'gemini' usa Gemini 2.5 Flash
+        'provider' => env('AI_PROVIDER', 'claude'),
+    ],
 
     'clicksign' => [
         'token'   => env('CLICKSIGN_ACCESS_TOKEN', ''),
@@ -53,5 +62,12 @@ return [
         'from_sms'      => env('TWILIO_SMS_FROM', ''),
         'canal_padrao'  => env('TWILIO_CANAL_PADRAO', 'whatsapp'),
     ],
+
+	'datajud' => [
+    	'key' => env('DATAJUD_API_KEY'),
+	],
+
+
+
 
 ];
