@@ -27,8 +27,11 @@ class Dashboard extends Component
             ->where('status', 'aberto')
             ->whereDate('data_prazo', today())->count();
 
-        $totalReceber = (float) Recebimento::where('tenant_id', $tenantId)
-            ->where('recebido', false)->sum('valor');
+        $totalReceber = (float) Recebimento::whereHas('processo', fn($q) => 
+    		$q->where('tenant_id', $tenantId)
+		)->where('recebido', false)->sum('valor');
+
+
 
         $andamentosHoje = DB::table('andamentos')
             ->join('processos', 'processos.id', '=', 'andamentos.processo_id')
