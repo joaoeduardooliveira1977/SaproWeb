@@ -42,14 +42,45 @@
 {{-- ══════════════════════════════════════════════════════════ --}}
 @if($aba === 'inicio')
 
+    <div style="background:#fff;border:1px solid #dbeafe;border-left:4px solid #2563a8;border-radius:12px;padding:18px 22px;margin-bottom:20px;display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap;">
+        <div style="display:flex;gap:14px;align-items:flex-start;min-width:260px;flex:1;">
+            <div style="width:44px;height:44px;border-radius:10px;background:#eff6ff;color:#2563a8;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3L2 9l4 2-4 4h8m0-12l10 6-4 2 4 4h-8m0-12v18"/></svg>
+            </div>
+            <div>
+                <div style="font-size:18px;font-weight:800;color:#1a3a5c;margin-bottom:4px;">Olá, {{ strtok($pessoa?->nome ?? 'cliente', ' ') }}</div>
+                <div style="font-size:13px;color:#475569;line-height:1.55;">Este é o seu espaço para acompanhar processos, documentos, compromissos, honorários e mensagens com o escritório.</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+            <button wire:click="trocarAba('processos')" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;">Ver processos</button>
+            <button wire:click="trocarAba('mensagens')" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;">Enviar mensagem</button>
+        </div>
+    </div>
+
+    <div class="portal-help-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+        <button wire:click="trocarAba('processos')" style="text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px;cursor:pointer;">
+            <strong style="display:block;font-size:13px;color:#1a3a5c;margin-bottom:4px;">Acompanhe seus processos</strong>
+            <span style="font-size:12px;color:#64748b;line-height:1.45;">Veja dados principais, prazos e últimos andamentos liberados pelo escritório.</span>
+        </button>
+        <button wire:click="trocarAba('documentos')" style="text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px;cursor:pointer;">
+            <strong style="display:block;font-size:13px;color:#1a3a5c;margin-bottom:4px;">Baixe documentos</strong>
+            <span style="font-size:12px;color:#64748b;line-height:1.45;">Acesse arquivos disponibilizados para consulta ou download.</span>
+        </button>
+        <button wire:click="trocarAba('mensagens')" style="text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px;cursor:pointer;">
+            <strong style="display:block;font-size:13px;color:#1a3a5c;margin-bottom:4px;">Fale com o escritório</strong>
+            <span style="font-size:12px;color:#64748b;line-height:1.45;">Envie dúvidas e acompanhe as respostas em um só lugar.</span>
+        </button>
+    </div>
+
     <div class="stats-grid">
         <div class="stat-card" style="cursor:pointer;" wire:click="trocarAba('processos')">
             <div class="stat-value">{{ $stats['total'] }}</div>
-            <div class="stat-label">Processos</div>
+            <div class="stat-label">Seus processos</div>
         </div>
         <div class="stat-card" style="cursor:pointer;" wire:click="trocarAba('processos')">
             <div class="stat-value" style="color:#16a34a;">{{ $stats['ativos'] }}</div>
-            <div class="stat-label">Processos ativos</div>
+            <div class="stat-label">Em andamento</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" style="color:#2563a8;">{{ $stats['agenda'] }}</div>
@@ -171,7 +202,7 @@
     <div class="card" style="background:#f0f9ff;border:1px solid #bae6fd;">
         <div class="card-body" style="padding:16px 24px;">
             <p style="font-size:13px;color:#0369a1;margin:0;">
-                <span style="display:inline-flex;align-items:flex-start;gap:6px;"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Use as abas acima para acompanhar seus processos, documentos, honorários e enviar mensagens ao escritório.</span>
+                <span style="display:inline-flex;align-items:flex-start;gap:6px;"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Dica: se tiver dúvida sobre algum andamento, abra a aba Mensagens e envie uma pergunta ao escritório.</span>
             </p>
         </div>
     </div>
@@ -185,6 +216,14 @@
 
     {{-- Filtro Judicial / Extrajudicial --}}
     @if(!$processoAberto)
+    <div style="background:#fff;border:1px solid #dbeafe;border-left:4px solid #2563a8;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;">
+        <div style="min-width:260px;flex:1;">
+            <div style="font-size:16px;font-weight:800;color:#1a3a5c;margin-bottom:4px;">Seus processos</div>
+            <div style="font-size:13px;color:#475569;line-height:1.5;">Clique em um processo para ver detalhes, prazos em aberto e histórico de andamentos liberados pelo escritório.</div>
+        </div>
+        <button wire:click="trocarAba('mensagens')" class="btn btn-outline" style="white-space:nowrap;">Tenho uma dúvida</button>
+    </div>
+
     <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
         @foreach(['todos' => 'Todos', 'judiciais' => 'Judiciais', 'extrajudiciais' => 'Extrajudiciais'] as $chave => $rotulo)
         <button wire:click="setFiltroProcessos('{{ $chave }}')"
@@ -309,7 +348,7 @@
             <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;">
                 <div>
                     <div style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:4px;">
-                        {{ $proc->numero }}
+                        {{ $proc->numero ?: 'Processo extrajudicial' }}
                     </div>
                     <div style="font-size:13px;color:#64748b;">
                         {{ $proc->parte_contraria ?: '—' }}
@@ -335,11 +374,25 @@
                     {{ $totalAndamentos }} andamento(s) →
                 </span>
             </div>
+            @if($ultimoAndamento)
+            <div style="margin-top:10px;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+                <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px;">Último andamento</div>
+                <div style="font-size:12px;color:#334155;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                    {{ $ultimoAndamento->descricao }}
+                </div>
+            </div>
+            @else
+            <div style="margin-top:10px;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;color:#64748b;">
+                Ainda não há andamentos liberados para este processo.
+            </div>
+            @endif
         </div>
         @endforeach
 
         @if($processos->isEmpty())
-        <div class="empty"><div class="empty-icon" style="display:flex;justify-content:center;"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><p>Nenhum processo encontrado.</p></div>
+        <div class="card">
+            <div class="empty"><div class="empty-icon" style="display:flex;justify-content:center;"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><p>Nenhum processo encontrado.</p><p style="font-size:12px;margin-top:6px;">Se você esperava ver algum processo aqui, envie uma mensagem ao escritório pelo portal.</p></div>
+        </div>
         @endif
 
     @endif
@@ -350,17 +403,29 @@
 {{-- ══════════════════════════════════════════════════════════ --}}
 @if($aba === 'documentos')
 
+    <div style="background:#fff;border:1px solid #dbeafe;border-left:4px solid #2563a8;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;">
+        <div style="min-width:260px;flex:1;">
+            <div style="font-size:16px;font-weight:800;color:#1a3a5c;margin-bottom:4px;">Documentos liberados</div>
+            <div style="font-size:13px;color:#475569;line-height:1.5;">Aqui ficam os arquivos que o escritório disponibilizou para você consultar ou baixar.</div>
+        </div>
+        <span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;">{{ $documentos->count() }} documento(s)</span>
+    </div>
+
     @if($documentos->isEmpty())
         <div class="card">
             <div class="empty" style="padding:60px;">
                 <div class="empty-icon" style="display:flex;justify-content:center;"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
                 <p>Nenhum documento disponível no portal.</p>
-                <p style="font-size:12px;margin-top:8px;">O escritório disponibilizará documentos assim que estiverem prontos.</p>
+                <p style="font-size:12px;margin-top:8px;">O escritório disponibilizará documentos assim que estiverem prontos. Se precisar de algum arquivo específico, envie uma mensagem.</p>
+                <button wire:click="trocarAba('mensagens')" class="btn btn-outline" style="margin-top:14px;">Solicitar documento</button>
             </div>
         </div>
     @else
     <div class="card">
-        <div class="card-header"><span style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Documentos Disponíveis</span></div>
+        <div class="card-header" style="justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <span style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Documentos disponíveis</span>
+            <span style="font-size:12px;color:#64748b;font-weight:500;">Clique em Baixar para abrir o arquivo</span>
+        </div>
         @foreach($documentos as $doc)
         @php
             $icone_svg = match($doc->tipo) {
@@ -377,7 +442,7 @@
                 : '';
         @endphp
         <div style="display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid #f1f5f9;">
-            <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;">{!! $icone_svg !!}</span>
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">{!! $icone_svg !!}</span>
             <div style="flex:1;min-width:0;">
                 <div style="font-size:14px;font-weight:600;color:var(--primary);">{{ $doc->titulo }}</div>
                 <div style="font-size:12px;color:#64748b;margin-top:2px;">
@@ -414,6 +479,14 @@
         $totalAtrasado = $honorarios->where('status','atrasado')->sum('valor');
     @endphp
 
+    <div style="background:#fff;border:1px solid #dbeafe;border-left:4px solid #2563a8;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;">
+        <div style="min-width:260px;flex:1;">
+            <div style="font-size:16px;font-weight:800;color:#1a3a5c;margin-bottom:4px;">Honorários e pagamentos</div>
+            <div style="font-size:13px;color:#475569;line-height:1.5;">Consulte parcelas pagas, pendentes e em atraso. Quando o PIX estiver disponível, o QR Code será gerado diretamente nesta tela.</div>
+        </div>
+        <button wire:click="trocarAba('mensagens')" class="btn btn-outline" style="white-space:nowrap;">Falar sobre pagamento</button>
+    </div>
+
     @if($pixPago)
     <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;margin-bottom:20px;font-size:13px;color:#166534;">
         <span style="display:inline-flex;align-items:center;gap:6px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <strong>Aviso de pagamento enviado!</strong></span> Nossa equipe irá confirmar o recebimento em breve. Confira sua aba de mensagens.
@@ -439,6 +512,10 @@
     <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;margin-bottom:20px;font-size:13px;color:#1e40af;">
         <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> <span>Para parcelas pendentes ou em atraso, clique em <strong>Pagar via PIX</strong> para gerar o QR Code instantaneamente.</span>
     </div>
+    @else
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:20px;font-size:13px;color:#475569;">
+        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> <span>Pagamentos via PIX ainda não estão disponíveis neste portal. Use a aba Mensagens para solicitar orientações ao escritório.</span>
+    </div>
     @endif
 
     @if($honorarios->isEmpty())
@@ -446,11 +523,12 @@
             <div class="empty" style="padding:60px;">
                 <div class="empty-icon" style="display:flex;justify-content:center;"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
                 <p>Nenhum contrato de honorários registrado.</p>
+                <p style="font-size:12px;margin-top:8px;">Quando houver parcelas liberadas pelo escritório, elas aparecerão aqui.</p>
             </div>
         </div>
     @else
     <div class="card">
-        <div class="card-header"><span style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Parcelas de Honorários</span></div>
+        <div class="card-header" style="justify-content:space-between;gap:12px;flex-wrap:wrap;"><span style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Parcelas de honorários</span><span style="font-size:12px;color:#64748b;font-weight:500;">Confira vencimento, valor e status de cada parcela</span></div>
         <div style="overflow-x:auto;">
             <table>
                 <thead>
@@ -517,8 +595,13 @@
 {{-- ══════════════════════════════════════════════════════════ --}}
 @if($aba === 'mensagens')
 
+<div style="max-width:760px;margin:0 auto 16px;background:#fff;border:1px solid #dbeafe;border-left:4px solid #2563a8;border-radius:12px;padding:16px 20px;">
+    <div style="font-size:16px;font-weight:800;color:#1a3a5c;margin-bottom:4px;">Fale com o escritório</div>
+    <div style="font-size:13px;color:#475569;line-height:1.5;">Envie dúvidas sobre processos, documentos, pagamentos ou qualquer solicitação. Quando a mensagem for sobre um processo específico, selecione o processo antes de enviar.</div>
+</div>
+
 <div class="card" style="max-width:720px;margin:0 auto;">
-    <div class="card-header"><span style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Mensagens com o Escritório</span></div>
+    <div class="card-header" style="justify-content:space-between;gap:12px;flex-wrap:wrap;"><span style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Mensagens com o escritório</span><span style="font-size:12px;color:#64748b;font-weight:500;">A resposta aparecerá nesta conversa</span></div>
 
     {{-- Chat --}}
     <div style="padding:16px 24px;max-height:480px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;"
@@ -545,7 +628,8 @@
         @empty
         <div class="empty" style="padding:40px;">
             <div class="empty-icon" style="display:flex;justify-content:center;"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-            <p>Nenhuma mensagem ainda. Envie uma mensagem para o escritório.</p>
+            <p>Nenhuma mensagem ainda.</p>
+            <p style="font-size:12px;margin-top:8px;">Use o campo abaixo para enviar sua primeira dúvida ao escritório.</p>
         </div>
         @endforelse
     </div>
@@ -556,6 +640,7 @@
             <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">
                 Processo (opcional)
             </label>
+            <div style="font-size:11px;color:#94a3b8;margin-top:3px;">Selecione um processo apenas quando a mensagem for sobre um caso específico.</div>
             <select wire:model="msgProcessoId"
                 style="width:100%;padding:7px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;">
                 <option value="">— Mensagem geral —</option>
@@ -566,7 +651,7 @@
         </div>
         <div style="display:flex;gap:8px;align-items:flex-end;">
             <textarea wire:model="novaMensagem"
-                placeholder="Digite sua mensagem..."
+                placeholder="Digite sua mensagem para o escritório..."
                 rows="3"
                 style="flex:1;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13px;resize:none;font-family:inherit;"
                 wire:keydown.ctrl.enter="enviarMensagem"></textarea>
@@ -591,6 +676,12 @@
 @endif
 
 </div>{{-- /container --}}
+
+<style>
+    @media (max-width: 900px) {
+        .portal-help-grid { grid-template-columns: 1fr !important; }
+    }
+</style>
 
 
 {{-- ── Modal PIX ── --}}

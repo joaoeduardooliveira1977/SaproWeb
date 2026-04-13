@@ -1,16 +1,42 @@
 <div>
 
 {{-- ── Cabeçalho ──────────────────────────────────────────────── --}}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
     <div>
-        <h1 style="font-size:22px;font-weight:800;color:var(--primary);margin:0;">Workflow de Automação</h1>
-        <p style="font-size:13px;color:var(--muted);margin-top:4px;">Defina regras que disparam ações automáticas em resposta a eventos do sistema.</p>
+        <h1 style="font-size:24px;font-weight:800;color:var(--primary);margin:0;">Workflow de Automação</h1>
+        <p style="font-size:13px;color:var(--muted);margin:4px 0 0;line-height:1.5;">Crie rotinas automáticas para reduzir trabalho manual no acompanhamento dos processos.</p>
     </div>
     <button wire:click="novaRegra"
-        style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s;"
+        style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s;"
         onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Nova Regra
+    </button>
+</div>
+
+{{-- ── Guia de uso ────────────────────────────────────────────── --}}
+<div class="wf-guide" style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;display:grid;grid-template-columns:minmax(260px,1fr) repeat(3,minmax(150px,1fr));gap:12px;align-items:center;">
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:38px;height:38px;border-radius:8px;background:#eff6ff;color:#2563a8;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <div><div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px;">Como funciona?</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Uma regra funciona assim: quando algo acontece, o sistema verifica condições e executa ações automaticamente.</div></div>
+    </div>
+    <div style="border-left:3px solid #2563a8;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">1. Gatilho</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Ex.: novo andamento ou prazo vencendo.</span></div>
+    <div style="border-left:3px solid #7c3aed;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">2. Condições</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Filtre quando a regra deve agir.</span></div>
+    <div style="border-left:3px solid #059669;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">3. Ações</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Crie prazo, agenda, alerta, WhatsApp ou IA.</span></div>
+</div>
+
+<div class="wf-examples" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+    <button wire:click="criarModelo('intimacao')" style="text-align:left;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;">
+        <strong style="display:block;font-size:13px;color:var(--primary);margin-bottom:4px;">Intimação recebida</strong>
+        <span style="font-size:12px;color:var(--muted);line-height:1.45;">Modelo pronto: criar prazo, avisar o advogado e gerar resumo com IA.</span>
+    </button>
+    <button wire:click="criarModelo('sem_andamento')" style="text-align:left;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;">
+        <strong style="display:block;font-size:13px;color:var(--primary);margin-bottom:4px;">Processo sem andamento</strong>
+        <span style="font-size:12px;color:var(--muted);line-height:1.45;">Modelo pronto: avisar e agendar revisão após 30 dias sem movimento.</span>
+    </button>
+    <button wire:click="criarModelo('prazo_vencendo')" style="text-align:left;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;">
+        <strong style="display:block;font-size:13px;color:var(--primary);margin-bottom:4px;">Prazo vencendo</strong>
+        <span style="font-size:12px;color:var(--muted);line-height:1.45;">Modelo pronto: notificar e enviar WhatsApp ao responsável.</span>
     </button>
 </div>
 
@@ -18,19 +44,19 @@
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;" class="wf-kpis">
     @php
     $kpis = [
-        ['label'=>'Total de Regras',    'val'=>$totalRegras,   'bg'=>'linear-gradient(135deg,#1d4ed8,#2563a8)',   'ico'=>'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>'],
-        ['label'=>'Regras Ativas',      'val'=>$totalAtivas,   'bg'=>'linear-gradient(135deg,#059669,#16a34a)',   'ico'=>'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'],
-        ['label'=>'Total de Execuções', 'val'=>$totalExecucoes,'bg'=>'linear-gradient(135deg,#7c3aed,#6d28d9)',   'ico'=>'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>'],
-        ['label'=>'Erros Hoje',         'val'=>$errosHoje,     'bg'=>'linear-gradient(135deg,#dc2626,#b91c1c)',   'ico'=>'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'],
+        ['label'=>'Total de regras',    'val'=>$totalRegras,   'cor'=>'#2563a8', 'ico'=>'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>'],
+        ['label'=>'Regras ativas',      'val'=>$totalAtivas,   'cor'=>'#059669', 'ico'=>'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'],
+        ['label'=>'Execuções',          'val'=>$totalExecucoes,'cor'=>'#7c3aed', 'ico'=>'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>'],
+        ['label'=>'Erros hoje',         'val'=>$errosHoje,     'cor'=>'#dc2626', 'ico'=>'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'],
     ];
     @endphp
     @foreach($kpis as $k)
-    <div style="background:{{ $k['bg'] }};border-radius:12px;padding:18px;color:#fff;box-shadow:0 4px 15px rgba(0,0,0,.12);">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:16px;color:{{ $k['cor'] }};">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
             {!! $k['ico'] !!}
         </div>
-        <div style="font-size:26px;font-weight:800;letter-spacing:-1px;">{{ $k['val'] }}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:3px;">{{ $k['label'] }}</div>
+        <div style="font-size:24px;font-weight:800;letter-spacing:-1px;">{{ $k['val'] }}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">{{ $k['label'] }}</div>
     </div>
     @endforeach
 </div>
@@ -51,23 +77,27 @@
 @if($aba === 'regras')
 
 {{-- Filtros --}}
-<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
-    <input wire:model.live.debounce.300ms="busca" type="text" placeholder="Buscar por nome…"
-        style="flex:1;min-width:180px;padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:var(--white);outline:none;">
-    <select wire:model.live="filtroGatilho"
-        style="padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:var(--white);cursor:pointer;">
-        <option value="">Todos os gatilhos</option>
-        @foreach($gatilhos as $val => $label)
-        <option value="{{ $val }}">{{ $label }}</option>
-        @endforeach
-    </select>
+<div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:18px;">
+    <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px;">Encontrar regra</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input wire:model.live.debounce.300ms="busca" type="text" placeholder="Buscar por nome da automação…"
+            style="flex:1;min-width:220px;padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:var(--white);outline:none;">
+        <select wire:model.live="filtroGatilho"
+            style="padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:var(--white);cursor:pointer;">
+            <option value="">Todos os gatilhos</option>
+            @foreach($gatilhos as $val => $label)
+            <option value="{{ $val }}">{{ $label }}</option>
+            @endforeach
+        </select>
+    </div>
 </div>
 
 @if($regras->isEmpty())
-<div style="text-align:center;padding:60px 20px;color:var(--muted);">
+<div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;text-align:center;padding:56px 20px;color:var(--muted);">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity:.3;margin-bottom:16px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-    <div style="font-size:15px;font-weight:600;">Nenhuma regra encontrada</div>
-    <div style="font-size:13px;margin-top:6px;">Clique em "Nova Regra" para criar a primeira automação.</div>
+    <div style="font-size:15px;font-weight:800;color:var(--text);">Nenhuma regra encontrada</div>
+    <div style="font-size:13px;margin-top:6px;">Comece por uma automação simples, como avisar o advogado quando um novo andamento chegar.</div>
+    <button wire:click="novaRegra" class="btn btn-primary" style="margin-top:14px;">Criar primeira regra</button>
 </div>
 @else
 
@@ -173,6 +203,10 @@
 {{-- ABA HISTÓRICO                                                --}}
 {{-- ════════════════════════════════════════════════════════════ --}}
 @if($aba === 'historico')
+<div style="background:#f8fafc;border:1.5px solid var(--border);border-left:4px solid #475569;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+    <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:4px;">Histórico de execuções</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.5;">Use esta aba para auditar se as automações estão rodando corretamente. Erros aqui indicam regras que precisam de ajuste ou configuração externa, como WhatsApp.</div>
+</div>
 <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;">
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
         <thead>
@@ -231,6 +265,7 @@
         <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1.5px solid var(--border);">
             <div style="font-size:17px;font-weight:800;color:var(--text);">
                 {{ $editandoId ? 'Editar Regra' : 'Nova Regra de Workflow' }}
+                <div style="font-size:12px;font-weight:500;color:var(--muted);margin-top:3px;">Defina o gatilho, refine com condições e escolha as ações automáticas.</div>
             </div>
             <button wire:click="fecharModal"
                 style="width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);">
@@ -239,6 +274,9 @@
         </div>
 
         <div style="padding:24px;">
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:12px;color:#1e40af;line-height:1.5;">
+                <strong>Exemplo:</strong> quando um novo andamento for registrado, se a descrição contiver “intimação”, criar um prazo e enviar WhatsApp ao advogado responsável.
+            </div>
 
             {{-- Erros de validação --}}
             @if($errors->any())
@@ -578,4 +616,3 @@
 
 
 </div>
-

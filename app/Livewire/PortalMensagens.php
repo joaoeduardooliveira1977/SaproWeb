@@ -99,8 +99,12 @@ class PortalMensagens extends Component
             ->where('lida_escritorio', false)
             ->count();
 
+        $totalConversas = DB::table('portal_mensagens')
+            ->distinct('pessoa_id')
+            ->count('pessoa_id');
+
         return view('livewire.portal-mensagens', compact(
-            'clientes', 'conversa', 'clienteSelecionado', 'totalNaoLidas'
+            'clientes', 'conversa', 'clienteSelecionado', 'totalNaoLidas', 'totalConversas'
         ));
     }
 }

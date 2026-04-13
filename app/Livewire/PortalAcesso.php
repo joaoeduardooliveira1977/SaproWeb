@@ -64,7 +64,10 @@ class PortalAcesso extends Component
     public function render()
     {
         return view('livewire.portal-acesso', [
-            'pessoas' => $this->get(),
+            'pessoas'        => $this->get(),
+            'totalClientes'  => Pessoa::ativos()->doTipo('Cliente')->count(),
+            'portalAtivos'   => Pessoa::ativos()->doTipo('Cliente')->where('portal_ativo', true)->count(),
+            'portalInativos' => Pessoa::ativos()->doTipo('Cliente')->where('portal_ativo', false)->count(),
         ]);
     }
 }

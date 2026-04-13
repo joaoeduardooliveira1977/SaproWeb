@@ -49,6 +49,12 @@ class Assistente extends Component
         $this->carregando = false;
     }
 
+    public function perguntarPronto(string $pergunta): void
+    {
+        $this->pergunta = $pergunta;
+        $this->enviar();
+    }
+
     public function limpar(): void
     {
         $this->mensagens = [[

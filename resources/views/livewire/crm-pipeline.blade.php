@@ -13,6 +13,43 @@
     ];
 @endphp
 
+{{-- ── Cabeçalho / guia ─────────────────────────────────────── --}}
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:18px;">
+    <div>
+        <h1 style="font-size:24px;font-weight:800;color:var(--primary);margin:0;">CRM Jurídico</h1>
+        <p style="font-size:13px;color:var(--muted);margin:4px 0 0;line-height:1.5;">Acompanhe interessados, negociações e próximos contatos até a conversão em cliente.</p>
+    </div>
+    <button wire:click="novaOportunidade()" class="btn btn-primary btn-sm">
+        <svg aria-hidden="true" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nova oportunidade
+    </button>
+</div>
+
+<div class="crm-guide" style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;display:grid;grid-template-columns:minmax(260px,1fr) repeat(3,minmax(150px,1fr));gap:12px;align-items:center;">
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:38px;height:38px;border-radius:8px;background:#eff6ff;color:#2563a8;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+        <div><div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px;">Como usar o CRM</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Use o funil para não perder contatos comerciais: registre o lead, mova pelas etapas e crie atividades de retorno.</div></div>
+    </div>
+    <div style="border-left:3px solid #2563a8;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">1. Novo contato</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Cadastre quem procurou o escritório.</span></div>
+    <div style="border-left:3px solid #7c3aed;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">2. Evolução</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Passe por qualificação, reunião e proposta.</span></div>
+    <div style="border-left:3px solid #059669;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">3. Conversão</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Quando fechar, converta em cliente.</span></div>
+</div>
+
+<div class="crm-actions" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+    <button wire:click="novaOportunidade('novo_contato')" style="text-align:left;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;">
+        <strong style="display:block;font-size:13px;color:var(--primary);margin-bottom:4px;">Cadastrar lead</strong>
+        <span style="font-size:12px;color:var(--muted);line-height:1.45;">Registre nome, telefone, origem e área de interesse.</span>
+    </button>
+    <button wire:click="$set('aba','atividades')" style="text-align:left;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;">
+        <strong style="display:block;font-size:13px;color:var(--primary);margin-bottom:4px;">Ver retornos pendentes</strong>
+        <span style="font-size:12px;color:var(--muted);line-height:1.45;">Acompanhe tarefas, ligações, reuniões e follow-ups.</span>
+    </button>
+    <button wire:click="$set('aba','lista')" style="text-align:left;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;">
+        <strong style="display:block;font-size:13px;color:var(--primary);margin-bottom:4px;">Consultar oportunidades</strong>
+        <span style="font-size:12px;color:var(--muted);line-height:1.45;">Busque contatos e veja status, responsável e previsão.</span>
+    </button>
+</div>
+
 {{-- ── KPIs ──────────────────────────────────────────────────── --}}
 <div class="stat-grid" style="margin-bottom:20px;">
     <div class="stat-card" style="border-left-color:var(--primary);">
@@ -55,10 +92,6 @@
             <option value="{{ $k }}">{{ $v }}</option>
             @endforeach
         </select>
-        <button wire:click="novaOportunidade()" class="btn btn-primary btn-sm">
-            <svg aria-hidden="true" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nova
-        </button>
     </div>
 </div>
 
@@ -66,6 +99,9 @@
 {{-- ABA: PIPELINE (KANBAN)                                      --}}
 {{-- ════════════════════════════════════════════════════════════ --}}
 @if($aba === 'pipeline')
+<div style="background:#f8fafc;border:1.5px solid var(--border);border-left:4px solid #2563a8;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);line-height:1.5;">
+    <strong style="color:var(--text);">Dica:</strong> clique em um card para editar a oportunidade, registrar atividades ou converter em cliente. Use o sinal <strong>+</strong> em cada coluna para criar uma oportunidade já naquela etapa.
+</div>
 <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:start;overflow-x:auto;">
     @foreach(['novo_contato','qualificacao','reuniao','proposta','negociacao'] as $etapa)
     @php $cor = $etapaCores[$etapa]; $cards = $kanban[$etapa]; @endphp
@@ -480,5 +516,23 @@
     </div>
 </div>
 @endif
+
+<style>
+    @media (max-width: 1100px) {
+        .crm-guide {
+            grid-template-columns: 1fr 1fr !important;
+        }
+
+        .crm-actions {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .crm-guide {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
 
 </div>

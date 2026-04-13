@@ -1,7 +1,29 @@
 <div>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+    <div>
+        <h2 style="font-size:22px;font-weight:800;color:var(--primary);margin:0;display:flex;align-items:center;gap:8px;">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Mensagens do portal
+        </h2>
+        <p style="font-size:13px;color:var(--muted);margin:4px 0 0;line-height:1.5;">Atenda as mensagens enviadas pelos clientes dentro do Portal do Cliente.</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="display:inline-flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);font-weight:700;">{{ $totalConversas }} conversa(s)</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;background:{{ $totalNaoLidas > 0 ? '#fef2f2' : '#f0fdf4' }};border:1px solid {{ $totalNaoLidas > 0 ? '#fecaca' : '#bbf7d0' }};border-radius:8px;padding:8px 10px;font-size:12px;color:{{ $totalNaoLidas > 0 ? '#b91c1c' : '#166534' }};font-weight:700;">{{ $totalNaoLidas }} não lida(s)</span>
+    </div>
+</div>
 
+<div class="portal-msg-guide" style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;display:grid;grid-template-columns:minmax(260px,1fr) repeat(3,minmax(150px,1fr));gap:12px;align-items:center;">
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:38px;height:38px;border-radius:8px;background:#eff6ff;color:#2563a8;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 10h.01"/><path d="M12 10h.01"/><path d="M16 10h.01"/><path d="M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 0 1-4-.8L3 20l1.3-3.9A7.2 7.2 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg></div>
+        <div><div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px;">Fluxo de atendimento</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Use esta tela como caixa de entrada do portal. Ao abrir uma conversa, as mensagens do cliente são marcadas como lidas.</div></div>
+    </div>
+    <div style="border-left:3px solid #dc2626;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">1. Pendências</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Comece por “Não lidas”.</span></div>
+    <div style="border-left:3px solid #2563a8;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">2. Contexto</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Veja cliente e processo vinculado.</span></div>
+    <div style="border-left:3px solid #059669;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">3. Resposta</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Use Ctrl+Enter para enviar.</span></div>
+</div>
 
-<div style="display:grid;grid-template-columns:300px 1fr;gap:20px;height:calc(100vh - 160px);min-height:400px;">
+<div class="portal-msg-layout" style="display:grid;grid-template-columns:320px 1fr;gap:16px;height:calc(100vh - 285px);min-height:420px;">
 
     {{-- ── Lista de clientes ── --}}
     <div class="card" style="margin:0;display:flex;flex-direction:column;overflow:hidden;">
@@ -101,13 +123,24 @@
                 <div style="margin-bottom:12px;display:flex;justify-content:center;">
                     <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 </div>
-                Selecione um cliente para ver a conversa.
+                <div style="font-weight:800;color:var(--text);margin-bottom:4px;">Selecione um cliente</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.5;">A conversa aparecerá aqui para resposta do escritório.</div>
             </div>
         </div>
         @endif
     </div>
 
 </div>
+
+<style>
+    @media (max-width: 1000px) {
+        .portal-msg-guide { grid-template-columns:1fr 1fr !important; }
+        .portal-msg-layout { grid-template-columns:1fr !important;height:auto !important; }
+    }
+    @media (max-width: 720px) {
+        .portal-msg-guide { grid-template-columns:1fr !important; }
+    }
+</style>
 
 <script>
     document.addEventListener('livewire:updated', () => {

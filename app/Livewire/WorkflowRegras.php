@@ -112,6 +112,91 @@ class WorkflowRegras extends Component
         $this->modal = true;
     }
 
+    public function criarModelo(string $modelo): void
+    {
+        $this->resetForm();
+        $this->ativo = true;
+
+        match ($modelo) {
+            'intimacao' => $this->modeloIntimacao(),
+            'sem_andamento' => $this->modeloSemAndamento(),
+            'prazo_vencendo' => $this->modeloPrazoVencendo(),
+            default => $this->acoes = [$this->acaoVazia()],
+        };
+
+        $this->modal = true;
+    }
+
+    private function modeloIntimacao(): void
+    {
+        $this->nome = 'Intimação recebida';
+        $this->descricao = 'Quando um novo andamento mencionar intimação, criar prazo, avisar o advogado e gerar resumo com IA.';
+        $this->gatilho = WorkflowRegra::GATILHO_ANDAMENTO_CRIADO;
+        $this->condicoes = [
+            ['campo' => 'andamento.descricao', 'op' => 'contem', 'valor' => 'intimação'],
+        ];
+        $this->acoes = [
+            array_merge($this->acaoVazia(), [
+                'tipo' => WorkflowRegra::ACAO_CRIAR_PRAZO,
+                'prazo_titulo' => 'Analisar intimação — {numero}',
+                'prazo_dias' => 5,
+                'prazo_tipo_contagem' => 'uteis',
+                'prazo_responsavel' => 'advogado_processo',
+            ]),
+            array_merge($this->acaoVazia(), [
+                'tipo' => WorkflowRegra::ACAO_ENVIAR_WHATSAPP,
+                'wpp_destinatario' => 'advogado_processo',
+                'wpp_mensagem' => 'Novo andamento com possível intimação no processo {numero} do cliente {cliente}: {andamento}',
+            ]),
+            array_merge($this->acaoVazia(), [
+                'tipo' => WorkflowRegra::ACAO_CHAMAR_IA,
+            ]),
+        ];
+    }
+
+    private function modeloSemAndamento(): void
+    {
+        $this->nome = 'Processo sem andamento';
+        $this->descricao = 'Avisar o responsável quando um processo ficar muitos dias sem movimentação.';
+        $this->gatilho = WorkflowRegra::GATILHO_SEM_ANDAMENTO_DIAS;
+        $this->gatilhoConfigJson = json_encode(['dias' => 30], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $this->acoes = [
+            array_merge($this->acaoVazia(), [
+                'tipo' => WorkflowRegra::ACAO_CRIAR_NOTIFICACAO,
+                'notif_titulo' => 'Processo sem andamento',
+                'notif_mensagem' => 'O processo {numero} está sem andamento há 30 dias. Verifique se há providência pendente.',
+                'notif_destinatario' => 'advogado_processo',
+            ]),
+            array_merge($this->acaoVazia(), [
+                'tipo' => WorkflowRegra::ACAO_CRIAR_AGENDA,
+                'agenda_titulo' => 'Revisar processo sem andamento — {numero}',
+                'agenda_dias' => 1,
+                'agenda_hora' => '09:00',
+                'agenda_urgente' => false,
+            ]),
+        ];
+    }
+
+    private function modeloPrazoVencendo(): void
+    {
+        $this->nome = 'Prazo vencendo';
+        $this->descricao = 'Avisar o responsável quando um prazo estiver próximo do vencimento.';
+        $this->gatilho = WorkflowRegra::GATILHO_PRAZO_VENCENDO;
+        $this->acoes = [
+            array_merge($this->acaoVazia(), [
+                'tipo' => WorkflowRegra::ACAO_CRIAR_NOTIFICACAO,
+                'notif_titulo' => 'Prazo vencendo',
+                'notif_mensagem' => 'O processo {numero} possui prazo próximo do vencimento. Revise a providência necessária.',
+                'notif_destinatario' => 'advogado_processo',
+            ]),
+            array_merge($this->acaoVazia(), [
+                'tipo' => WorkflowRegra::ACAO_ENVIAR_WHATSAPP,
+                'wpp_destinatario' => 'advogado_processo',
+                'wpp_mensagem' => 'Atenção: prazo vencendo no processo {numero} do cliente {cliente}.',
+            ]),
+        ];
+    }
+
     public function editarRegra(int $id): void
     {
         $regra = WorkflowRegra::with('acoes')->findOrFail($id);

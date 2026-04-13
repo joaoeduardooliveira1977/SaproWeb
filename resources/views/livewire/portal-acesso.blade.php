@@ -1,23 +1,49 @@
 <div>
     {{-- Header --}}
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
         <div>
-            <h2 style="font-size:20px; font-weight:700; color:var(--primary);display:flex;align-items:center;gap:8px;"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Portal do Cliente</h2>
-            <p style="font-size:13px; color:#64748b; margin-top:4px;">Gerencie o acesso dos clientes ao portal</p>
+            <h2 style="font-size:22px; font-weight:800; color:var(--primary);margin:0;display:flex;align-items:center;gap:8px;"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Portal do Cliente</h2>
+            <p style="font-size:13px; color:#64748b; margin:4px 0 0;line-height:1.5;">Libere acesso para o cliente acompanhar processos, documentos e mensagens com o escritório.</p>
         </div>
-        <a href="{{ route('portal.login') }}" target="_blank" style="font-size:13px; color:#2563a8; text-decoration:none;">
+        <a href="{{ route('portal.login') }}" target="_blank" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
             <span style="display:inline-flex;align-items:center;gap:4px;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Abrir portal</span>
         </a>
     </div>
 
+    <div class="portal-guide" style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;display:grid;grid-template-columns:minmax(260px,1fr) repeat(3,minmax(150px,1fr));gap:12px;align-items:center;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:38px;height:38px;border-radius:8px;background:#eff6ff;color:#2563a8;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M12 4h9"/><path d="M4 9h16"/><path d="M4 15h16"/><path d="M4 4h.01"/><path d="M4 20h.01"/></svg></div>
+            <div><div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px;">Como usar esta tela</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Ative o portal, defina uma senha e envie o link ao cliente. Ele poderá acompanhar processos e conversar pelo portal.</div></div>
+        </div>
+        <div style="border-left:3px solid #2563a8;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">1. Localize o cliente</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Use a busca por nome ou documento.</span></div>
+        <div style="border-left:3px solid #059669;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">2. Defina a senha</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Ao salvar, o acesso já fica ativo.</span></div>
+        <div style="border-left:3px solid #d97706;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">3. Acompanhe mensagens</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Responda pela tela Mensagens do portal.</span></div>
+    </div>
+
+    <div class="portal-kpis" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+        <div style="background:white;border:1.5px solid var(--border);border-radius:10px;padding:15px;">
+            <div style="font-size:22px;font-weight:800;color:#2563a8;">{{ $totalClientes }}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Clientes cadastrados</div>
+        </div>
+        <div style="background:white;border:1.5px solid var(--border);border-radius:10px;padding:15px;">
+            <div style="font-size:22px;font-weight:800;color:#059669;">{{ $portalAtivos }}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Com portal ativo</div>
+        </div>
+        <div style="background:white;border:1.5px solid var(--border);border-radius:10px;padding:15px;">
+            <div style="font-size:22px;font-weight:800;color:#d97706;">{{ $portalInativos }}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Aguardando liberação</div>
+        </div>
+    </div>
+
     {{-- Busca --}}
-    <div style="margin-bottom:20px;">
-        <input wire:model.live="busca" type="text" placeholder="Buscar cliente..."
-            style="width:100%; max-width:400px; padding:10px 16px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:14px; outline:none;">
+    <div style="background:white;border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;">
+        <label style="display:block;font-size:12px;font-weight:800;color:var(--text);margin-bottom:7px;">Buscar cliente</label>
+        <input wire:model.live="busca" type="text" placeholder="Digite nome, CPF/CNPJ ou e-mail..."
+            style="width:100%; max-width:520px; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:14px; outline:none;">
     </div>
 
     {{-- Tabela --}}
-    <div style="background:white; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.08); overflow:hidden;">
+    <div style="background:white; border:1.5px solid var(--border); border-radius:10px; overflow:hidden;">
         <table style="width:100%; border-collapse:collapse;">
             <thead>
                 <tr style="background:#f8fafc;">
@@ -67,8 +93,9 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align:center; padding:40px; color:#94a3b8; font-size:14px;">
-                        Nenhum cliente encontrado.
+                    <td colspan="6" style="text-align:center; padding:42px; color:#64748b; font-size:14px;">
+                        <div style="font-weight:800;color:var(--text);margin-bottom:4px;">Nenhum cliente encontrado</div>
+                        <div style="font-size:12px;color:var(--muted);">Revise a busca ou cadastre o cliente antes de liberar o portal.</div>
                     </td>
                 </tr>
                 @endforelse
@@ -107,4 +134,14 @@
         </div>
     </div>
     @endif
+
+    <style>
+        @media (max-width: 1100px) {
+            .portal-guide { grid-template-columns:1fr 1fr !important; }
+        }
+        @media (max-width: 760px) {
+            .portal-guide,
+            .portal-kpis { grid-template-columns:1fr !important; }
+        }
+    </style>
 </div>

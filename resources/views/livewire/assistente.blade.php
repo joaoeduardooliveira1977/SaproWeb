@@ -30,9 +30,58 @@
         border-color: var(--danger);
         animation: mic-pulse 1s infinite;
     }
+    .ai-shell {
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100dvh - 140px);
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    .ai-guide {
+        background: #fff;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+    .ai-guide-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+    }
+    .ai-prompt-card {
+        text-align: left;
+        background: #f8fafc;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+        cursor: pointer;
+        transition: border-color .15s, transform .15s, background .15s;
+    }
+    .ai-prompt-card:hover {
+        background: #fff;
+        border-color: var(--primary);
+        transform: translateY(-1px);
+    }
+    .ai-chat-card {
+        flex: 1;
+        min-height: 300px;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    @media (max-width: 900px) {
+        .ai-guide-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+        .ai-guide-grid { grid-template-columns: 1fr; }
+    }
     </style>
 
-    <div style="display: flex; flex-direction: column; height: calc(100dvh - 140px); max-width: 900px; margin: 0 auto;">
+    <div class="ai-shell">
 
         {{-- Header --}}
         <div class="card" style="margin-bottom: 12px; padding: 16px 20px;">
@@ -40,10 +89,10 @@
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div style="width: 44px; height: 44px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center;"><svg aria-hidden="true" width="22" height="22" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><line x1="12" y1="3" x2="12" y2="7"/><circle cx="8" cy="15" r="1" fill="white"/><circle cx="16" cy="15" r="1" fill="white"/></svg></div>
                     <div>
-                        <div style="font-weight: 700; font-size: 16px; color: var(--primary);">Assistente JurÃ­dico Software Jurídico</div>
+                        <div style="font-weight: 700; font-size: 16px; color: var(--primary);">Assistente IA</div>
                         <div style="font-size: 12px; color: var(--success); display: flex; align-items: center; gap: 4px;">
                             <span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block;"></span>
-                            Online â€” powered by Google Gemini
+                            Online - consultando dados do sistema
                         </div>
                     </div>
                 </div>
@@ -55,8 +104,42 @@
             </div>
         </div>
 
+        {{-- Guia rapido --}}
+        <div class="ai-guide">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+                <div style="max-width:620px;">
+                    <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:5px;">Comece pela pergunta certa</div>
+                    <div style="font-size:13px;color:var(--muted);line-height:1.6;">
+                        Use a IA para transformar dados do sistema em orientacao pratica: rotina do dia, riscos, prazos, clientes e financeiro.
+                    </div>
+                </div>
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;font-size:12px;color:#166534;max-width:320px;">
+                    Dica: quanto mais objetiva for a pergunta, melhor a resposta. Exemplo: "quais prazos exigem atencao esta semana?"
+                </div>
+            </div>
+
+            @php
+                $atalhosIA = [
+                    ['titulo' => 'Rotina do dia', 'desc' => 'Prazos, compromissos e alertas para hoje.', 'pergunta' => 'O que exige minha atencao hoje no escritorio?'],
+                    ['titulo' => 'Prazos criticos', 'desc' => 'Lista os prazos vencidos ou proximos.', 'pergunta' => 'Quais prazos estao vencidos ou vencem nos proximos 7 dias?'],
+                    ['titulo' => 'Carteira de processos', 'desc' => 'Resumo dos processos ativos e pontos de risco.', 'pergunta' => 'Faca um resumo da carteira de processos ativos e destaque riscos.'],
+                    ['titulo' => 'Clientes', 'desc' => 'Clientes com mais processos ou pendencias.', 'pergunta' => 'Quais clientes precisam de mais atencao agora?'],
+                    ['titulo' => 'Financeiro', 'desc' => 'Recebidos, pendencias e inadimplencia.', 'pergunta' => 'Qual e o resumo financeiro do mes e quais clientes estao inadimplentes?'],
+                    ['titulo' => 'Proximo passo', 'desc' => 'Ajuda a organizar providencias.', 'pergunta' => 'Sugira uma lista de prioridades para o escritorio nesta semana.'],
+                ];
+            @endphp
+
+            <div class="ai-guide-grid">
+                @foreach($atalhosIA as $atalho)
+                    <button type="button" wire:click="perguntarPronto(@js($atalho['pergunta']))" class="ai-prompt-card">
+                        <span style="display:block;font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px;">{{ $atalho['titulo'] }}</span>
+                        <span style="display:block;font-size:12px;color:var(--muted);line-height:1.45;">{{ $atalho['desc'] }}</span>
+                    </button>
+                @endforeach
+            </div>
+        </div>
         {{-- Mensagens --}}
-        <div class="card" style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px;" id="chat-messages">
+        <div class="card ai-chat-card" id="chat-messages">
 
             @foreach($mensagens as $msg)
                 @if($msg['tipo'] === 'bot')
@@ -145,7 +228,7 @@
             </div>
 
             <div style="font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center;">
-                Os dados sÃ£o consultados em tempo real do banco de dados do Software Jurídico
+                Os dados sao consultados em tempo real no banco de dados do Software Juridico
             </div>
         </div>
     </div>
