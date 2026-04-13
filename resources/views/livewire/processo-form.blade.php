@@ -386,14 +386,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
     	@endforeach
 		</select>
 
-
-
-                    <select wire:model.live="tipo_acao_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
-                        <option value="">— Selecione —</option>
-                        @foreach($tiposAcao as $t)
-                            <option value="{{ $t->id }}">{{ $t->descricao }}</option>
-                        @endforeach
-                    </select>
+          
                 </div>
 
                 {{-- Tipo de Processo --}}
