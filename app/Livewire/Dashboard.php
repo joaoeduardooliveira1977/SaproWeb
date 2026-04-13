@@ -75,23 +75,23 @@ class Dashboard extends Component
             ->take(8)
             ->get();
 
-        $audiencias7 = Audiencia::with(['processo:id,numero,cliente_id', 'processo.cliente:id,nome'])
-            ->where('tenant_id', $tenantId)
-            ->where('status', 'agendada')
-            ->where('data_hora', '>=', $hoje)
-            ->where('data_hora', '<=', $em7dias)
-            ->orderBy('data_hora')
-            ->take(5)
-            ->get();
+     	$audiencias7 = Audiencia::with(['processo:id,numero,cliente_id', 'processo.cliente:id,nome'])
+    		->whereHas('processo', fn($q) => $q->where('tenant_id', $tenantId))
+    		->where('status', 'agendada')
+    		->where('data_hora', '>=', $hoje)
+    		->where('data_hora', '<=', $em7dias)
+    		->orderBy('data_hora')
+    		->take(5)
+    		->get();
 
-        $agenda7 = Agenda::with(['processo:id,numero,cliente_id', 'processo.cliente:id,nome'])
-            ->where('tenant_id', $tenantId)
-            ->where('concluido', false)
-            ->where('data_hora', '>=', $hoje)
-            ->where('data_hora', '<=', $em7dias)
-            ->orderBy('data_hora')
-            ->take(5)
-            ->get();
+	$agenda7 = Agenda::with(['processo:id,numero,cliente_id', 'processo.cliente:id,nome'])
+    		->whereHas('processo', fn($q) => $q->where('tenant_id', $tenantId))
+    		->where('concluido', false)
+    		->where('data_hora', '>=', $hoje)
+    		->where('data_hora', '<=', $em7dias)
+    		->orderBy('data_hora')
+    		->take(5)
+    		->get();
 
         // Merge e ordenar por data
         $timeline = collect();
