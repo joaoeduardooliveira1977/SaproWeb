@@ -52,6 +52,7 @@
     .pub-title { font-size:14px;font-weight:700;color:var(--primary);margin-bottom:4px;line-height:1.35; }
     .pub-meta { display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:11px; }
     .pub-body { color:var(--text);font-size:12px;line-height:1.55;white-space:pre-wrap;margin-top:10px; }
+    .pub-hint { margin-top:10px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:9px 10px;color:var(--muted);font-size:11px;line-height:1.4; }
     .pub-footer { display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border); }
     .pub-processo { font-family:monospace;font-size:11px;color:var(--muted); }
     .pill-vinculada { background:#dcfce7;color:#166534;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700; }
@@ -145,6 +146,11 @@
                         <option value="{{ $adv->codigo_aasp }}">{{ $adv->nome }}</option>
                     @endforeach
                 </select>
+                <select wire:model.live="filtroVinculo">
+                    <option value="">Todos os vínculos</option>
+                    <option value="pendentes">Somente pendentes</option>
+                    <option value="vinculadas">Somente vinculadas</option>
+                </select>
             </div>
         </div>
 
@@ -165,7 +171,16 @@
         @if($publicacoes->isEmpty())
             <div class="empty-state" style="padding:34px 20px;">
                 <div class="empty-state-title">Nenhuma publicação encontrada</div>
-                <div class="empty-state-sub">Ajuste os filtros ou faça uma nova busca na AASP para a data desejada.</div>
+                <div class="empty-state-sub" style="max-width:520px;margin:6px auto 14px;line-height:1.5;">
+                    Ajuste os filtros ou faça uma nova busca na AASP para a data desejada. Se for o primeiro uso, confira se há advogado ativo configurado.
+                </div>
+                <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
+                    <button type="button" class="btn btn-primary btn-sm" wire:click="buscarPublicacoes" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="buscarPublicacoes">Buscar publicações</span>
+                        <span wire:loading wire:target="buscarPublicacoes">Buscando...</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary-outline btn-sm" wire:click="$set('aba','advogados')">Configurar advogados</button>
+                </div>
             </div>
         @else
             <div class="pub-list">
@@ -192,7 +207,20 @@
 
                         @if($pub->texto)
                             <div class="pub-body">{{ Str::limit($pub->texto, 520) }}</div>
+                            @if(Str::length($pub->texto) > 520)
+                                <button type="button" class="expand-btn" wire:click="abrirTextoPublicacao({{ $pub->id }})" style="margin-top:6px;">Ver texto completo</button>
+                            @endif
                         @endif
+
+                        @unless($pub->processo_id)
+                            <div class="pub-hint">
+                                @if(!$pub->numero_processo)
+                                    Número do processo não informado na publicação.
+                                @else
+                                    Número informado pela AASP, mas ainda sem vínculo confirmado com um processo do sistema.
+                                @endif
+                            </div>
+                        @endunless
 
                         <div class="pub-footer">
                             <div class="pub-processo">Processo: {{ $pub->numero_processo ?: 'não informado na publicação' }}</div>
@@ -200,6 +228,7 @@
                                 @if($pub->processo_id && $pub->processo)
                                     <a class="btn btn-secondary-outline btn-sm" href="{{ route('processos.show', $pub->processo_id) }}">Abrir processo</a>
                                 @elseif($pub->numero_processo)
+                                    <button type="button" class="btn btn-primary btn-sm" wire:click="abrirVinculo({{ $pub->id }})">Vincular processo</button>
                                     <a class="btn btn-secondary-outline btn-sm" href="{{ route('processos', ['busca' => $pub->numero_processo]) }}">Pesquisar processo</a>
                                 @endif
                             </div>
@@ -211,6 +240,81 @@
         @endif
     </div>
 
+@endif
+@if($modalVinculo)
+    <div class="modal-backdrop">
+        <div class="modal" style="max-width:720px;">
+            <div class="modal-header">
+                <span class="modal-title">Vincular publicação ao processo</span>
+                <button class="modal-close" wire:click="fecharModalVinculo" aria-label="Fechar">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <div class="form-field" style="margin-bottom:14px;">
+                <label class="lbl">Buscar processo</label>
+                <input type="text" wire:model.live.debounce.350ms="buscaProcessoVinculo" placeholder="Digite o número do processo">
+                <span style="font-size:11px;color:var(--muted);">O sistema busca pelo número com e sem pontuação.</span>
+            </div>
+
+            @if($processosVinculo->isEmpty())
+                <div class="empty-state" style="padding:26px 16px;">
+                    <div class="empty-state-title">Nenhum processo encontrado</div>
+                    <div class="empty-state-sub">Revise o número, pesquise sem pontuação ou cadastre o processo antes de vincular a publicação.</div>
+                </div>
+            @else
+                <div class="pub-list">
+                    @foreach($processosVinculo as $proc)
+                        <div class="pub-card">
+                            <div class="pub-card-top">
+                                <div>
+                                    <div class="pub-title">{{ $proc->numero }}</div>
+                                    <div class="pub-meta">
+                                        <span>{{ $proc->cliente?->nome ?? 'Cliente não informado' }}</span>
+                                        <span>{{ $proc->status ?? 'Sem status' }}</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm" wire:click="vincularProcesso({{ $proc->id }})">Vincular</button>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" wire:click="fecharModalVinculo">Cancelar</button>
+            </div>
+        </div>
+    </div>
+@endif
+@if($modalTextoPublicacao && $textoPublicacao)
+    <div class="modal-backdrop">
+        <div class="modal" style="max-width:760px;">
+            <div class="modal-header">
+                <span class="modal-title">Texto completo da publicação</span>
+                <button class="modal-close" wire:click="fecharTextoPublicacao" aria-label="Fechar">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <div class="pub-card" style="margin-bottom:14px;">
+                <div class="pub-title">{{ $textoPublicacao->titulo ?: 'Publicação sem título informado' }}</div>
+                <div class="pub-meta">
+                    <span>{{ $textoPublicacao->data ? $textoPublicacao->data->format('d/m/Y') : 'Sem data' }}</span>
+                    @if($textoPublicacao->numero_processo)<span>Processo {{ $textoPublicacao->numero_processo }}</span>@endif
+                    @if($textoPublicacao->jornal)<span>{{ $textoPublicacao->jornal }}</span>@endif
+                </div>
+            </div>
+
+            <div style="white-space:pre-wrap;font-size:13px;line-height:1.65;color:var(--text);max-height:55vh;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:14px;background:var(--white);">
+                {{ $textoPublicacao->texto ?: 'Texto não informado.' }}
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" wire:click="fecharTextoPublicacao">Fechar</button>
+            </div>
+        </div>
+    </div>
 @endif
 @if($aba === 'advogados')
 

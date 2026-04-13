@@ -92,6 +92,11 @@ class Agenda extends Component
 
     // ── Modal ──────────────────────────────────────────────────
 
+    public function novoEvento(): void
+    {
+        $this->abrirModal();
+    }
+
     public function abrirModal(?int $id = null, string $data = ''): void
     {
         $this->eventoId    = $id;

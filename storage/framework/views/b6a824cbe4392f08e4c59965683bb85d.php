@@ -3,15 +3,7 @@
 <?php $__env->startSection('page-title', 'Prazos'); ?>
 
 
-
-
-
-
 <?php $__env->startSection('content'); ?>
-<div style="margin-bottom:24px;">
-    <h2 style="font-size:20px;font-weight:700;color:var(--primary);">⏳ Controle de Prazos</h2>
-    <p style="font-size:13px;color:#64748b;margin-top:4px;">Gerencie prazos processuais com cálculo automático de dias úteis e corridos</p>
-</div>
 
 <?php
 $__split = function ($name, $params = []) {

@@ -21,6 +21,7 @@ class AaspPublicacoes extends Component
     public string $dataBusca    = '';
     public string $filtroData   = '';
     public string $filtroAdvogado = '';
+    public string $filtroVinculo  = '';
     public array  $logBusca     = [];
 
     // ── Modal Advogado ────────────────────────────────────────
@@ -40,12 +41,24 @@ class AaspPublicacoes extends Component
     // ── Confirmações ─────────────────────────────────────────
     public ?int $confirmarExcluirAdv = null;
 
+    public bool $modalVinculo = false;
+    public ?int $publicacaoVinculoId = null;
+    public string $buscaProcessoVinculo = '';
+
+    public bool $modalTextoPublicacao = false;
+    public ?int $textoPublicacaoId = null;
+
     // ─────────────────────────────────────────────────────────
 
     public function mount(): void
     {
         $this->dataBusca  = now()->format('Y-m-d');
         $this->filtroData = now()->format('Y-m-d');
+
+        if (in_array(request('vinculo'), ['pendentes', 'vinculadas'], true)) {
+            $this->filtroVinculo = request('vinculo');
+        }
+
         $this->carregarConfig();
     }
 
@@ -183,6 +196,46 @@ class AaspPublicacoes extends Component
         $this->filtroData = $this->dataBusca;
     }
 
+    public function abrirVinculo(int $publicacaoId): void
+    {
+        $publicacao = AaspPublicacao::findOrFail($publicacaoId);
+
+        $this->publicacaoVinculoId = $publicacao->id;
+        $this->buscaProcessoVinculo = $publicacao->numero_processo ?? '';
+        $this->modalVinculo = true;
+    }
+
+    public function vincularProcesso(int $processoId): void
+    {
+        if (!$this->publicacaoVinculoId) {
+            return;
+        }
+
+        AaspPublicacao::whereKey($this->publicacaoVinculoId)->update([
+            'processo_id' => $processoId,
+        ]);
+
+        $this->fecharModalVinculo();
+        $this->dispatch('toast', message: 'Publicacao vinculada ao processo.', type: 'success');
+    }
+
+    public function fecharModalVinculo(): void
+    {
+        $this->modalVinculo = false;
+        $this->publicacaoVinculoId = null;
+        $this->buscaProcessoVinculo = '';
+    }
+    public function abrirTextoPublicacao(int $publicacaoId): void
+    {
+        $this->textoPublicacaoId = $publicacaoId;
+        $this->modalTextoPublicacao = true;
+    }
+
+    public function fecharTextoPublicacao(): void
+    {
+        $this->modalTextoPublicacao = false;
+        $this->textoPublicacaoId = null;
+    }
     public function gerarPdf(): mixed
     {
         $publicacoes = $this->queryPublicacoes()->get();
@@ -661,6 +714,12 @@ class AaspPublicacoes extends Component
             $q->where('codigo_aasp', $this->filtroAdvogado);
         }
 
+        if ($this->filtroVinculo === 'vinculadas') {
+            $q->whereNotNull('processo_id');
+        } elseif ($this->filtroVinculo === 'pendentes') {
+            $q->whereNull('processo_id');
+        }
+
         return $q;
     }
 
@@ -671,7 +730,30 @@ class AaspPublicacoes extends Component
         $publicacoes = $this->queryPublicacoes()->get();
         $advogados   = AaspAdvogado::orderBy('nome')->get();
         $totalDia    = AaspPublicacao::whereDate('data', $this->filtroData ?: now())->count();
+        $processosVinculo = collect();
+        $textoPublicacao = null;
 
-        return view('livewire.aasp-publicacoes', compact('publicacoes', 'advogados', 'totalDia'));
+        if ($this->modalTextoPublicacao && $this->textoPublicacaoId) {
+            $textoPublicacao = AaspPublicacao::with('processo')->find($this->textoPublicacaoId);
+        }
+
+        if ($this->modalVinculo && trim($this->buscaProcessoVinculo) !== '') {
+            $termo = trim($this->buscaProcessoVinculo);
+            $termoNumerico = preg_replace('/[^0-9]/', '', $termo);
+
+            $processosVinculo = Processo::with('cliente')
+                ->where(function ($q) use ($termo, $termoNumerico) {
+                    $q->where('numero', 'ilike', '%' . $termo . '%');
+
+                    if ($termoNumerico !== '') {
+                        $q->orWhere('numero', 'ilike', '%' . $termoNumerico . '%');
+                    }
+                })
+                ->orderByDesc('created_at')
+                ->limit(8)
+                ->get();
+        }
+
+        return view('livewire.aasp-publicacoes', compact('publicacoes', 'advogados', 'totalDia', 'processosVinculo', 'textoPublicacao'));
     }
 }

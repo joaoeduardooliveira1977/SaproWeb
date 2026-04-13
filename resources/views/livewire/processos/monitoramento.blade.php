@@ -24,8 +24,8 @@
                 <svg width="11" height="11" style="width:11px;height:11px;min-width:11px;min-height:11px;max-width:11px;max-height:11px;display:block;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
                 Processos
             </a>
-            <h2 style="font-size:24px;font-weight:800;color:var(--text);margin:0 0 4px;">Monitoramento DATAJUD</h2>
-            <p style="font-size:13px;color:var(--muted);margin:0;">Consulte andamentos, verifique processos em lote e acompanhe alertas importantes.</p>
+            <h2 style="font-size:24px;font-weight:800;color:var(--text);margin:0 0 4px;">Central DATAJUD</h2>
+            <p style="font-size:13px;color:var(--muted);margin:0;">Consulte novas movimentações, acompanhe alertas e mantenha os processos importantes sob monitoramento.</p>
         </div>
 
         @php
@@ -48,15 +48,15 @@
             } elseif (($monitorados->count() ?? 0) === 0) {
                 $acaoRecomendada = [
                     'label' => 'Ative o primeiro monitoramento',
-                    'desc' => 'Escolha processos relevantes para acompanhamento recorrente.',
+                    'desc' => 'Escolha os casos que precisam de acompanhamento recorrente.',
                     'aba' => 'monitoramentos',
                     'cor' => '#7c3aed',
                     'bg' => '#f5f3ff',
                 ];
             } else {
                 $acaoRecomendada = [
-                    'label' => 'Consulte os processos no DATAJUD',
-                    'desc' => 'Rode uma consulta para buscar novas movimentações.',
+                    'label' => 'Consulte processos no DATAJUD',
+                    'desc' => 'Busque novas movimentações em lote ou por lista.',
                     'aba' => 'lote',
                     'cor' => '#059669',
                     'bg' => '#f0fdf4',
@@ -64,13 +64,13 @@
             }
         @endphp
 
-        {{-- Guia rápido --}}
+        {{-- Guia rapido --}}
         <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;">
                 <div style="min-width:260px;flex:1;">
-                    <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;">O que fazer nesta tela?</div>
+                    <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;">Como usar a Central DATAJUD</div>
                     <div style="font-size:13px;color:var(--muted);line-height:1.6;">
-                        Use o DATAJUD para encontrar novas movimentações dos processos. Comece por alertas e andamentos, ou faça uma consulta quando quiser verificar vários processos de uma vez.
+                        Comece pelos alertas do dia. Quando quiser conferir vários processos de uma vez, use a consulta. Depois mantenha monitorados apenas os casos que merecem acompanhamento constante.
                     </div>
                     <button wire:click="$set('aba','{{ $acaoRecomendada['aba'] }}')"
                         style="display:flex;align-items:flex-start;gap:10px;text-align:left;margin-top:14px;background:{{ $acaoRecomendada['bg'] }};border:1.5px solid {{ $acaoRecomendada['cor'] }}33;border-radius:10px;padding:12px;cursor:pointer;width:100%;">
@@ -85,18 +85,18 @@
                 <div class="datajud-guide-actions" style="display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:10px;flex:1.4;min-width:420px;">
                     <button wire:click="$set('aba','feed')"
                         style="text-align:left;background:{{ $aba === 'feed' ? '#eff6ff' : '#fff' }};border:1.5px solid {{ $aba === 'feed' ? '#2563a8' : 'var(--border)' }};border-radius:10px;padding:12px;cursor:pointer;">
-                        <div style="font-size:12px;font-weight:800;color:#2563a8;margin-bottom:4px;">1. Ver alertas</div>
-                        <div style="font-size:11px;color:var(--muted);line-height:1.4;">Abra o feed para priorizar processos críticos e novos andamentos.</div>
+                        <div style="font-size:12px;font-weight:800;color:#2563a8;margin-bottom:4px;">1. Alertas</div>
+                        <div style="font-size:11px;color:var(--muted);line-height:1.4;">Priorize processos críticos e novos andamentos.</div>
                     </button>
                     <button wire:click="$set('aba','lote')"
                         style="text-align:left;background:{{ $aba === 'lote' ? '#f0fdf4' : '#fff' }};border:1.5px solid {{ $aba === 'lote' ? '#059669' : 'var(--border)' }};border-radius:10px;padding:12px;cursor:pointer;">
-                        <div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:4px;">2. Consultar processos</div>
-                        <div style="font-size:11px;color:var(--muted);line-height:1.4;">Verifique todos os ativos ou cole uma lista de números CNJ.</div>
+                        <div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:4px;">2. Consultar</div>
+                        <div style="font-size:11px;color:var(--muted);line-height:1.4;">Verifique todos os ativos ou cole uma lista CNJ.</div>
                     </button>
                     <button wire:click="$set('aba','monitoramentos')"
                         style="text-align:left;background:{{ $aba === 'monitoramentos' ? '#f5f3ff' : '#fff' }};border:1.5px solid {{ $aba === 'monitoramentos' ? '#7c3aed' : 'var(--border)' }};border-radius:10px;padding:12px;cursor:pointer;">
-                        <div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:4px;">3. Monitorar casos</div>
-                        <div style="font-size:11px;color:var(--muted);line-height:1.4;">Ative acompanhamento nos processos que precisam de vigilância.</div>
+                        <div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:4px;">3. Monitorar</div>
+                        <div style="font-size:11px;color:var(--muted);line-height:1.4;">Acompanhe apenas os casos que exigem vigilância.</div>
                     </button>
                 </div>
             </div>
@@ -184,9 +184,9 @@
         {{-- ABAS --}}
         <div style="display:flex;align-items:center;border-bottom:2px solid #e2e8f0;margin-bottom:16px;">
             @foreach([
-                'feed'           => 'Alertas e Andamentos',
-                'lote'           => 'Consultar no DATAJUD',
-                'monitoramentos' => 'Processos Monitorados',
+                'feed'           => 'Alertas',
+                'lote'           => 'Consultar',
+                'monitoramentos' => 'Monitorados',
             ] as $tab => $label)
                 <button wire:click="$set('aba','{{ $tab }}')"
                         style="padding:9px 18px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;white-space:nowrap;
@@ -224,26 +224,26 @@
         @php
             $dicasPorAba = [
                 'feed' => [
-                    'titulo' => 'Priorize o que exige atenção',
-                    'texto' => 'Use os chips de criticidade para começar pelos processos com maior risco. Os filtros avançados aparecem apenas nesta aba.',
+                    'titulo' => 'Veja primeiro o que pede atenção',
+                    'texto' => 'Comece pelos alertas e use os filtros apenas quando precisar localizar um processo, cliente ou status específico.',
                     'cor' => '#2563a8',
                     'bg' => '#eff6ff',
                 ],
                 'lote' => [
-                    'titulo' => 'Escolha uma forma de consulta',
-                    'texto' => 'Use “Consultar todos” para uma varredura ampla ou “Consultar lista” quando quiser verificar apenas processos específicos.',
+                    'titulo' => 'Consulte em lote quando fizer sentido',
+                    'texto' => 'Use a consulta geral para revisar a base ou cole uma lista CNJ quando quiser conferir apenas alguns processos.',
                     'cor' => '#059669',
                     'bg' => '#f0fdf4',
                 ],
                 'monitoramentos' => [
-                    'titulo' => 'Acompanhe só os casos relevantes',
-                    'texto' => 'Mantenha aqui os processos que precisam de vigilância recorrente. O restante pode ser consultado sob demanda.',
+                    'titulo' => 'Deixe monitorado apenas o essencial',
+                    'texto' => 'Mantenha aqui os processos que precisam de acompanhamento recorrente. O restante pode ser consultado sob demanda.',
                     'cor' => '#7c3aed',
                     'bg' => '#f5f3ff',
                 ],
                 'historico' => [
-                    'titulo' => 'Consulte o passado quando precisar',
-                    'texto' => 'O histórico fica separado para pesquisa e conferência, sem competir com os alertas do dia.',
+                    'titulo' => 'Pesquise consultas anteriores',
+                    'texto' => 'Use o histórico para conferência e pesquisa, sem misturar esses registros com os alertas do dia.',
                     'cor' => '#2563a8',
                     'bg' => '#eff6ff',
                 ],
@@ -526,7 +526,10 @@
                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
                 </svg>
-                <p style="font-size:13px;margin:0;color:#64748b;">Nenhum andamento encontrado para o filtro selecionado.</p>
+                <p style="font-size:14px;margin:0;color:#1e293b;font-weight:800;">Nenhum andamento encontrado</p>
+                <p style="font-size:12px;color:#64748b;margin:6px auto 0;max-width:440px;line-height:1.5;">
+                    Ajuste os filtros para ampliar a busca ou use a aba Consultar para verificar processos no DATAJUD e atualizar o feed.
+                </p>
             </div>
         @endforelse
 
@@ -539,7 +542,21 @@
              ABA 2 — VERIFICAR EM LOTE
         ══════════════════════════════════════════════ --}}
         @if($aba === 'lote')
-        <div style="max-width:860px;">
+        <div style="max-width:920px;">
+
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #059669;border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:12px;">
+                <div style="width:30px;height:30px;border-radius:8px;background:#dcfce7;color:#047857;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-size:14px;font-weight:800;color:#064e3b;margin-bottom:3px;">Escolha o tipo de consulta</div>
+                    <div style="font-size:12px;color:#475569;line-height:1.5;">
+                        Use <strong>todos os processos</strong> para uma revisão completa da base. Use <strong>lista CNJ</strong> quando quiser conferir apenas processos específicos.
+                    </div>
+                </div>
+            </div>
 
             <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;">
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
@@ -550,9 +567,10 @@
                             </svg>
                         </div>
                         <div>
+                            <div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Opção 1 · revisão completa</div>
                             <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px;">Consultar todos os processos ativos</div>
                             <div style="font-size:12px;color:var(--muted);line-height:1.5;">
-                                Use quando quiser consultar todos os {{ $totalAtivos ?? 0 }} processos ativos no DATAJUD. A busca roda em segundo plano e a fila aparece abaixo.
+                                Consulta os {{ $totalAtivos ?? 0 }} processos ativos no DATAJUD. A busca roda em segundo plano e a fila aparece abaixo.
                             </div>
                         </div>
                     </div>
@@ -568,7 +586,7 @@
                         <svg wire:loading wire:target="verificarTodos" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite;">
                             <path d="M21 12a9 9 0 11-6.219-8.56"/>
                         </svg>
-                        <span wire:loading.remove wire:target="verificarTodos">Consultar todos</span>
+                        <span wire:loading.remove wire:target="verificarTodos">Consultar todos os ativos</span>
                         <span wire:loading wire:target="verificarTodos">Enviando...</span>
                     </button>
                 </div>
@@ -577,7 +595,8 @@
             <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
                     <div>
-                        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px;">Consultar uma lista específica</div>
+                        <div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Opção 2 · processos selecionados</div>
+                        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px;">Consultar lista CNJ</div>
                         <div style="font-size:12px;color:var(--muted);line-height:1.5;">Use quando quiser consultar apenas alguns números CNJ. Você pode importar uma planilha ou colar um processo por linha.</div>
                     </div>
                     <span style="font-size:11px;color:#64748b;background:#f8fafc;border:1px solid var(--border);border-radius:99px;padding:4px 10px;font-weight:700;">Máx. 500 por vez</span>
@@ -688,9 +707,15 @@
         <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:16px;">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
                 <div style="min-width:260px;flex:1;">
-                    <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;">Processos em vigilância</div>
+                    <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;">Processos monitorados</div>
                     <div style="font-size:12px;color:var(--muted);line-height:1.5;">
-                        {{ $monitorados->count() }} processo(s) com acompanhamento recorrente. Use esta área para manter só os casos que precisam de atenção contínua.
+                        {{ $monitorados->count() }} processo(s) com acompanhamento recorrente. Mantenha aqui apenas os casos que precisam de atenção contínua.
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                        <span style="font-size:11px;color:#64748b;font-weight:700;">Prioridade:</span>
+                        <span style="font-size:10px;font-weight:800;color:#dc2626;background:#fef2f2;border-radius:99px;padding:3px 8px;">Crítico</span>
+                        <span style="font-size:10px;font-weight:800;color:#d97706;background:#fffbeb;border-radius:99px;padding:3px 8px;">Atenção</span>
+                        <span style="font-size:10px;font-weight:800;color:#059669;background:#f0fdf4;border-radius:99px;padding:3px 8px;">Normal</span>
                     </div>
                 </div>
                 <button wire:click="abrirModalMonitoramento"
@@ -701,7 +726,7 @@
                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
-                    Adicionar processo
+                    Adicionar monitoramento
                 </button>
             </div>
         </div>
@@ -716,7 +741,7 @@
                 $sc3 = $scoreColorsM[$proc->score] ?? $scoreColorsM['normal'];
                 $freqLabel = ['6h'=>'a cada 6h','12h'=>'a cada 12h','diario'=>'diário'][$proc->frequencia_monitoramento] ?? 'diário';
             @endphp
-            <div style="background:#fff;border:1.5px solid var(--border);border-left:4px solid {{ $sc3['border'] }};border-radius:12px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;">
+            <div style="background:#fff;border:1.5px solid var(--border);border-left:4px solid {{ $sc3['border'] }};border-radius:12px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-shadow:0 6px 18px rgba(15,37,64,.04);">
 
                 {{-- Ícone --}}
                 <div style="width:40px;height:40px;border-radius:8px;background:{{ $sc3['iconBg'] }};
@@ -730,14 +755,14 @@
                 <div style="flex:1;min-width:0;">
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
                         <span style="font-size:13px;font-weight:800;color:#0f2540;font-family:monospace;">{{ $proc->numero_processo }}</span>
-                        <span style="font-size:10px;font-weight:800;color:{{ $sc3['iconTxt'] }};background:{{ $sc3['iconBg'] }};border-radius:99px;padding:2px 8px;">{{ $sc3['label'] }}</span>
-                        <span style="font-size:10px;font-weight:800;color:{{ $proc->ativo ? '#059669' : '#64748b' }};background:{{ $proc->ativo ? '#f0fdf4' : '#f1f5f9' }};border-radius:99px;padding:2px 8px;">{{ $proc->ativo ? 'Ativo' : 'Pausado' }}</span>
+                        <span style="font-size:10px;font-weight:800;color:{{ $sc3['iconTxt'] }};background:{{ $sc3['iconBg'] }};border-radius:99px;padding:2px 8px;">Prioridade {{ $sc3['label'] }}</span>
+                        <span style="font-size:10px;font-weight:800;color:{{ $proc->ativo ? '#059669' : '#64748b' }};background:{{ $proc->ativo ? '#f0fdf4' : '#f1f5f9' }};border-radius:99px;padding:2px 8px;">{{ $proc->ativo ? 'Monitorando' : 'Pausado' }}</span>
                     </div>
                     <div style="font-size:12px;color:#64748b;font-weight:600;">{{ $proc->processo->cliente->nome ?? 'Cliente não informado' }}</div>
                     @if($proc->processo->vara ?? null)
                         <div style="font-size:11px;color:#94a3b8;">{{ $proc->processo->vara }}</div>
                     @endif
-                    <div style="display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;padding-top:6px;border-top:1px solid #f1f5f9;">
                         <svg width="11" height="11" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                         </svg>
@@ -780,7 +805,14 @@
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
                 <p style="font-size:13px;margin:0;color:#64748b;font-weight:700;">Nenhum processo em monitoramento.</p>
-                <p style="font-size:12px;color:#94a3b8;margin:4px 0 0;">Clique em "Adicionar processo" para começar pelos casos mais importantes.</p>
+                <p style="font-size:12px;color:#94a3b8;margin:4px auto 14px;max-width:420px;line-height:1.5;">Adicione apenas os casos que precisam de acompanhamento recorrente, como processos sensíveis, urgentes ou com movimentação frequente.</p>
+                <button wire:click="abrirModalMonitoramento"
+                        style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;background:#059669;color:#fff;border:none;cursor:pointer;">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Adicionar monitoramento
+                </button>
             </div>
         @endforelse
 

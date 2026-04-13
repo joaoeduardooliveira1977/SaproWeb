@@ -113,13 +113,15 @@ class Processo extends Model
     }
 
     public function scopeBusca($query, string $termo)
-    {
-        return $query->where(function ($q) use ($termo) {
-            $q->where('numero', 'ilike', "%{$termo}%")
-              ->orWhereHas('cliente',  fn($c) => $c->where('nome', 'ilike', "%{$termo}%"))
-              ->orWhereHas('advogado', fn($a) => $a->where('nome', 'ilike', "%{$termo}%"));
-        });
-    }
+	{
+    	return $query->where(function ($q) use ($termo) {
+        $q->where('numero', 'ilike', "%{$termo}%")
+          ->orWhere('parte_contraria', 'ilike', "%{$termo}%")
+          ->orWhereHas('cliente',        fn($c) => $c->where('nome', 'ilike', "%{$termo}%"))
+          ->orWhereHas('advogado',       fn($a) => $a->where('nome', 'ilike', "%{$termo}%"))
+          ->orWhereHas('parteContraria', fn($p) => $p->where('nome', 'ilike', "%{$termo}%"));
+    	});
+	}
 
     // ── Acessores ──────────────────────────────────
     public function getTotalCustasAttribute(): float

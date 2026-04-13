@@ -160,12 +160,12 @@
     <div class="agenda-actions">
         
         <div style="display:flex;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;">
-            <button wire:click="<?php echo e($vistaCalendario ? 'toggleVista' : ''); ?>"
+            <button type="button" <?php if($vistaCalendario): ?> wire:click="toggleVista" <?php endif; ?>
                 style="padding:5px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;background:<?php echo e(!$vistaCalendario ? 'var(--primary)' : 'transparent'); ?>;color:<?php echo e(!$vistaCalendario ? '#fff' : 'var(--muted)'); ?>;">
                 <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                 Lista
             </button>
-            <button wire:click="<?php echo e(!$vistaCalendario ? 'toggleVista' : ''); ?>"
+            <button type="button" <?php if(!$vistaCalendario): ?> wire:click="toggleVista" <?php endif; ?>
                 style="padding:5px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;background:<?php echo e($vistaCalendario ? 'var(--primary)' : 'transparent'); ?>;color:<?php echo e($vistaCalendario ? '#fff' : 'var(--muted)'); ?>;">
                 <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 Cal.
@@ -178,7 +178,7 @@
             </span>
             <span wire:loading wire:target="exportarCsv">Gerando...</span>
         </button>
-        <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
+        <button type="button" wire:click="novoEvento" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
             <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Novo evento
         </button>
@@ -270,7 +270,7 @@
 
 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($embed): ?>
 <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-    <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
+    <button type="button" wire:click="novoEvento" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
         <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Novo Evento
     </button>
@@ -709,7 +709,6 @@
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     </div>
-        </div>
 
     </div>
 </div>
@@ -833,7 +832,5 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
         </div>
     </div>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-</div>
-
 </div>
 <?php /**PATH C:\projetos\saproweb-base\resources\views/livewire/agenda.blade.php ENDPATH**/ ?>

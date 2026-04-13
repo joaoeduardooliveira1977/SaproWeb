@@ -1,3 +1,4 @@
+﻿
 <?php $__env->startSection('page-title', 'Central de Ferramentas'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -73,7 +74,7 @@
             'bg'    => '#fffbeb',
             'cor'   => '#d97706',
             'tag'   => 'aguardando vinculação',
-            'route' => route('aasp-publicacoes'),
+            'route' => route('aasp-publicacoes', ['vinculo' => 'pendentes']),
             'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/><path d="M4 6h2"/><path d="M4 10h2"/><path d="M4 14h2"/></svg>',
         ],
         [
@@ -178,7 +179,7 @@
                 'cor'   => '#d97706',
                 'bg'    => '#fffbeb',
                 'badge' => 'AASP',
-                'route' => route('aasp-publicacoes'),
+                'route' => route('aasp-publicacoes', ['vinculo' => 'pendentes']),
                 'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/><path d="M4 6h2"/><path d="M4 10h2"/><path d="M4 14h2"/></svg>',
             ],
             [
