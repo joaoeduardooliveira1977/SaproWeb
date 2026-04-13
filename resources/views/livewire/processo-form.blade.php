@@ -376,28 +376,18 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Tipo de Ação</label>
                     {{-- Atalhos rápidos --}}
-                    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;">
-                        @php
-                        $acaoRapida = [
-                            'Cobrança de Condomínio',
-                            'Despejo por Falta de Pagamento',
-                            'Ação de Cobrança',
-                            'Execução de Título',
-                        ];
-                        @endphp
-                        @foreach($acaoRapida as $acao)
-                        @php $acaoId = \App\Models\TipoAcao::where('descricao', 'ilike', "%{$acao}%")->value('id'); @endphp
-                        @if($acaoId)
-                        <button type="button" wire:click="$set('tipo_acao_id', {{ $acaoId }})"
-                            style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;
-                                   border:1.5px solid {{ $tipo_acao_id == $acaoId ? 'var(--primary)' : 'var(--border)' }};
-                                   background:{{ $tipo_acao_id == $acaoId ? '#eff6ff' : 'var(--white)' }};
-                                   color:{{ $tipo_acao_id == $acaoId ? 'var(--primary)' : 'var(--muted)' }};">
-                            {{ $acao }}
-                        </button>
-                        @endif
-                        @endforeach
-                    </div>
+                    
+
+
+	<select wire:model.live="tipo_acao_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
+    		<option value="">— Selecione —</option>
+    		@foreach($tiposAcao as $t)
+        <option value="{{ $t->id }}">{{ $t->descricao }}</option>
+    	@endforeach
+		</select>
+
+
+
                     <select wire:model.live="tipo_acao_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
                         <option value="">— Selecione —</option>
                         @foreach($tiposAcao as $t)
