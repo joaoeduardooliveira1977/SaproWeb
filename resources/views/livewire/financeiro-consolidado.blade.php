@@ -3,22 +3,26 @@
 {{-- ── Cabeçalho ── --}}
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
     <div>
-        <h1 style="font-size:26px;font-weight:800;color:var(--text);margin:0;">Financeiro Consolidado</h1>
-        <p style="font-size:13px;color:var(--muted);margin-top:4px;">Visão premium de recebimentos, despesas, fluxo de caixa e honorários.</p>
+        <h1 style="font-size:24px;font-weight:800;color:var(--primary);margin:0;">Financeiro Consolidado</h1>
+        <p style="font-size:13px;color:var(--muted);margin:2px 0 0;">
+            Visão geral de recebimentos, despesas, fluxo de caixa e honorários
+            <span style="color:#cbd5e1;margin:0 6px;">|</span>
+            <a href="{{ route('financeiro.hub') }}" style="color:var(--primary);text-decoration:none;font-weight:600;">Voltar para central</a>
+        </p>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button onclick="window.print()"
-            style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">
+            style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#fff;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             Imprimir
         </button>
         <a href="{{ route('relatorios.financeiro-periodo') }}"
-            style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">
+            style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#fff;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             Gerar relatório
         </a>
         <a href="{{ route('financeiro') }}"
-            style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:linear-gradient(135deg,#1d4ed8,#2563a8);color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">
+            style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:var(--primary);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Novo lançamento
         </a>
@@ -77,21 +81,21 @@
     </div>
 
     {{-- Card escuro saldo --}}
-    <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:16px;padding:28px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;">
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;color:var(--text);display:flex;flex-direction:column;justify-content:space-between;">
         <div>
-            <div style="font-size:13px;color:#94a3b8;margin-bottom:8px;">Saldo Projetado</div>
-            <div style="font-size:34px;font-weight:800;letter-spacing:-1px;margin-bottom:6px;color:{{ $saldo >= 0 ? '#4ade80' : '#f87171' }};">
+            <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Saldo Projetado</div>
+            <div style="font-size:30px;font-weight:800;letter-spacing:-1px;margin-bottom:6px;color:{{ $saldo >= 0 ? '#16a34a' : '#dc2626' }};">
                 R$ {{ number_format(abs($saldo), 2, ',', '.') }}
             </div>
-            <div style="font-size:12px;color:#64748b;">Receitas + honorários − despesas previstas</div>
+            <div style="font-size:12px;color:var(--muted);">Receitas + honorários - despesas previstas</div>
         </div>
         <div style="display:flex;gap:10px;margin-top:20px;">
             <a href="{{ route('inadimplencia') }}"
-                style="flex:1;text-align:center;padding:10px;background:#2563a8;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">
+                style="flex:1;text-align:center;padding:10px;background:var(--primary);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">
                 Cobrar agora
             </a>
             <a href="{{ route('financeiro.consolidado') }}"
-                style="flex:1;text-align:center;padding:10px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">
+                style="flex:1;text-align:center;padding:10px;background:#fff;color:var(--text);border:1.5px solid var(--border);border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">
                 Ver contas
             </a>
         </div>
@@ -155,7 +159,7 @@ $abas = [
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
                 <a href="{{ route('financeiro.consolidado') }}" style="padding:6px 12px;background:#f1f5f9;border-radius:8px;font-size:12px;font-weight:600;color:#475569;text-decoration:none;">Ver contas</a>
                 <a href="{{ route('inadimplencia') }}" style="padding:6px 12px;background:#f1f5f9;border-radius:8px;font-size:12px;font-weight:600;color:#475569;text-decoration:none;">Cobrar</a>
-                <a href="{{ route('financeiro') }}" style="padding:6px 12px;background:linear-gradient(135deg,#1d4ed8,#2563a8);border-radius:8px;font-size:12px;font-weight:700;color:#fff;text-decoration:none;">+ Registrar</a>
+                <a href="{{ route('financeiro') }}" style="padding:6px 12px;background:var(--primary);border-radius:8px;font-size:12px;font-weight:700;color:#fff;text-decoration:none;">+ Registrar</a>
             </div>
         </div>
 
@@ -391,7 +395,7 @@ $abas = [
                 <span wire:loading wire:target="exportarCsv">…</span>
             </button>
             <a href="{{ route('financeiro') }}"
-                style="padding:7px 14px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">
+                style="padding:7px 14px;background:#16a34a;color:#fff;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">
                 + Novo
             </a>
         </div>
@@ -569,7 +573,7 @@ $abas = [
                 <span wire:loading wire:target="exportarCsv">…</span>
             </button>
             <a href="{{ route('inadimplencia') }}"
-                style="padding:7px 16px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">
+                style="padding:7px 16px;background:#dc2626;color:#fff;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">
                 Cobrar todos
             </a>
         </div>

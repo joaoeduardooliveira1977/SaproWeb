@@ -9,18 +9,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('processos', function (Blueprint $table) {
-            $table->foreignId('tenant_id')
-                  ->nullable()
-                  ->constrained()
-                  ->cascadeOnDelete();
+            if (!Schema::hasColumn('processos', 'tenant_id')) {
+                $table->foreignId('tenant_id')
+                      ->nullable()
+                      ->constrained()
+                      ->cascadeOnDelete();
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('processos', function (Blueprint $table) {
-            $table->dropForeign(['tenant_id']);
-            $table->dropColumn('tenant_id');
+            if (Schema::hasColumn('processos', 'tenant_id')) {
+                $table->dropConstrainedForeignId('tenant_id');
+            }
         });
     }
 };

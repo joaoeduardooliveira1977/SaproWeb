@@ -1,13 +1,21 @@
 <div>
+@verbatim
+<style>
+@media (max-width: 900px) {
+    .financeiro-total-grid { grid-template-columns: 1fr !important; }
+}
+</style>
+@endverbatim
+
     {{-- ══ Cards de totais ══ --}}
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+    <div class="financeiro-total-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
 
         {{-- Pagamentos --}}
         <button wire:click="$set('aba','pagamentos')"
-            style="text-align:left;background:var(--white);border-radius:10px;padding:16px;border-left:4px solid #dc2626;border-top:none;border-right:none;border-bottom:none;box-shadow:{{ $aba==='pagamentos' ? '0 0 0 2px #dc2626' : '0 1px 3px rgba(0,0,0,.08)' }};cursor:pointer;transition:box-shadow .15s,transform .1s;width:100%;"
-            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'"
-            onmouseout="this.style.transform='';this.style.boxShadow='{{ $aba==='pagamentos' ? '0 0 0 2px #dc2626' : '0 1px 3px rgba(0,0,0,.08)' }}'">
-            <div class="stat-icon"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+            style="text-align:left;background:var(--white);border-radius:10px;padding:14px;border:1.5px solid {{ $aba==='pagamentos' ? '#dc2626' : 'var(--border)' }};box-shadow:none;cursor:pointer;transition:border-color .15s,transform .1s;width:100%;"
+            onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#dc2626'"
+            onmouseout="this.style.transform='';this.style.borderColor='{{ $aba==='pagamentos' ? '#dc2626' : 'var(--border)' }}'">
+            <div style="width:36px;height:36px;border-radius:8px;background:#fef2f2;color:#dc2626;display:flex;align-items:center;justify-content:center;margin-bottom:10px;"><svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
             <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Pagamentos</div>
             <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;font-size:13px">
                 <div style="display:flex;justify-content:space-between">
@@ -24,16 +32,16 @@
                 </div>
             </div>
             @if($aba === 'pagamentos')
-            <div style="font-size:10px;color:#dc2626;font-weight:600;margin-top:6px;">● aba ativa</div>
+            <div style="font-size:10px;color:#dc2626;font-weight:700;margin-top:6px;">Aba ativa</div>
             @endif
         </button>
 
         {{-- Recebimentos --}}
         <button wire:click="$set('aba','recebimentos')"
-            style="text-align:left;background:var(--white);border-radius:10px;padding:16px;border-left:4px solid #16a34a;border-top:none;border-right:none;border-bottom:none;box-shadow:{{ $aba==='recebimentos' ? '0 0 0 2px #16a34a' : '0 1px 3px rgba(0,0,0,.08)' }};cursor:pointer;transition:box-shadow .15s,transform .1s;width:100%;"
-            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'"
-            onmouseout="this.style.transform='';this.style.boxShadow='{{ $aba==='recebimentos' ? '0 0 0 2px #16a34a' : '0 1px 3px rgba(0,0,0,.08)' }}'">
-            <div class="stat-icon"><svg aria-hidden="true" width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+            style="text-align:left;background:var(--white);border-radius:10px;padding:14px;border:1.5px solid {{ $aba==='recebimentos' ? '#16a34a' : 'var(--border)' }};box-shadow:none;cursor:pointer;transition:border-color .15s,transform .1s;width:100%;"
+            onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#16a34a'"
+            onmouseout="this.style.transform='';this.style.borderColor='{{ $aba==='recebimentos' ? '#16a34a' : 'var(--border)' }}'">
+            <div style="width:36px;height:36px;border-radius:8px;background:#f0fdf4;color:#16a34a;display:flex;align-items:center;justify-content:center;margin-bottom:10px;"><svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
             <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Recebimentos</div>
             <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;font-size:13px">
                 <div style="display:flex;justify-content:space-between">
@@ -50,16 +58,16 @@
                 </div>
             </div>
             @if($aba === 'recebimentos')
-            <div style="font-size:10px;color:#16a34a;font-weight:600;margin-top:6px;">● aba ativa</div>
+            <div style="font-size:10px;color:#16a34a;font-weight:700;margin-top:6px;">Aba ativa</div>
             @endif
         </button>
 
         {{-- Apontamentos --}}
         <button wire:click="$set('aba','apontamentos')"
-            style="text-align:left;background:var(--white);border-radius:10px;padding:16px;border-left:4px solid #7c3aed;border-top:none;border-right:none;border-bottom:none;box-shadow:{{ $aba==='apontamentos' ? '0 0 0 2px #7c3aed' : '0 1px 3px rgba(0,0,0,.08)' }};cursor:pointer;transition:box-shadow .15s,transform .1s;width:100%;"
-            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'"
-            onmouseout="this.style.transform='';this.style.boxShadow='{{ $aba==='apontamentos' ? '0 0 0 2px #7c3aed' : '0 1px 3px rgba(0,0,0,.08)' }}'">
-            <div class="stat-icon"><svg aria-hidden="true" width="18" height="18" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            style="text-align:left;background:var(--white);border-radius:10px;padding:14px;border:1.5px solid {{ $aba==='apontamentos' ? '#7c3aed' : 'var(--border)' }};box-shadow:none;cursor:pointer;transition:border-color .15s,transform .1s;width:100%;"
+            onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#7c3aed'"
+            onmouseout="this.style.transform='';this.style.borderColor='{{ $aba==='apontamentos' ? '#7c3aed' : 'var(--border)' }}'">
+            <div style="width:36px;height:36px;border-radius:8px;background:#f5f3ff;color:#7c3aed;display:flex;align-items:center;justify-content:center;margin-bottom:10px;"><svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
             <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Apontamentos</div>
             <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;font-size:13px">
                 <div style="display:flex;justify-content:space-between">
@@ -72,7 +80,7 @@
                 </div>
             </div>
             @if($aba === 'apontamentos')
-            <div style="font-size:10px;color:#7c3aed;font-weight:600;margin-top:6px;">● aba ativa</div>
+            <div style="font-size:10px;color:#7c3aed;font-weight:700;margin-top:6px;">Aba ativa</div>
             @endif
         </button>
 

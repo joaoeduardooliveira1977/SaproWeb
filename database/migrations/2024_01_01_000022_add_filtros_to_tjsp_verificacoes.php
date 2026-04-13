@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasTable('tjsp_verificacoes') || Schema::hasColumn('tjsp_verificacoes', 'filtros')) {
+            return;
+        }
+
         Schema::table('tjsp_verificacoes', function (Blueprint $table) {
             $table->json('filtros')->nullable()->after('novos_andamentos');
         });
@@ -15,6 +19,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (!Schema::hasTable('tjsp_verificacoes') || !Schema::hasColumn('tjsp_verificacoes', 'filtros')) {
+            return;
+        }
+
         Schema::table('tjsp_verificacoes', function (Blueprint $table) {
             $table->dropColumn('filtros');
         });

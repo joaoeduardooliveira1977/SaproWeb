@@ -48,10 +48,12 @@ use App\Http\Controllers\IAController;
         Route::get('/dashboard-preview', fn() => view('dashboard-preview'))->name('dashboard.preview');
         Route::get('/agenda',     fn() => view('agenda'))->name('agenda');
         Route::get('/prazos',     fn() => view('prazos'))->name('prazos');
+        Route::get('/sla',        fn() => view('sla'))->name('sla');
         Route::get('/audiencias', fn() => view('audiencias'))->name('audiencias');
         Route::get('/minha-conta', fn() => view('minha-conta'))->name('minha-conta');
         Route::post('/minha-conta', [AuthController::class, 'trocarSenha'])->name('minha-conta.salvar');
         Route::get('/processos-hub',   fn() => view('hubs.processos'))->name('processos.hub');
+        Route::get('/cadastros-hub',   fn() => view('hubs.cadastros'))->name('cadastros.hub');
     });
 
     // ── Hubs de seção ──────────────────────────────────────────
@@ -73,9 +75,10 @@ use App\Http\Controllers\IAController;
 
     // ── Pessoas ─────────────────────────────────────────────────
     Route::middleware('perfil:pessoas')->group(function () {
-        Route::get('/pessoas',         fn() => view('pessoas'))->name('pessoas');
-        Route::get('/correspondentes', fn() => view('correspondentes'))->name('correspondentes');
-        Route::get('/procuracoes',     fn() => view('procuracoes'))->name('procuracoes');
+        Route::get('/pessoas',                fn() => view('pessoas'))->name('pessoas');
+        Route::get('/pessoas/{clienteId}/pasta', fn($clienteId) => view('pasta-cliente', compact('clienteId')))->name('pessoas.pasta');
+        Route::get('/correspondentes',        fn() => view('correspondentes'))->name('correspondentes');
+        Route::get('/procuracoes',            fn() => view('procuracoes'))->name('procuracoes');
     });
 
     // ── Documentos & Minutas ────────────────────────────────────
@@ -107,6 +110,8 @@ use App\Http\Controllers\IAController;
         Route::get('/financeiro-periodo', [RelatorioController::class, 'financeiroPorPeriodo'])->name('financeiro-periodo');
         Route::get('/sem-andamento',         [RelatorioController::class, 'processosSemAndamento'])->name('sem-andamento');
         Route::get('/produtividade-pdf',     [RelatorioController::class, 'produtividadeAdvogado'])->name('produtividade-pdf');
+        Route::get('/por-tipo-acao',         [RelatorioController::class, 'processosPorTipoAcao'])->name('por-tipo-acao');
+        Route::get('/lista-geral',           [RelatorioController::class, 'listaGeral'])->name('lista-geral');
     });
 
     // ── Analytics & Produtividade ────────────────────────────────
@@ -143,20 +148,15 @@ use App\Http\Controllers\IAController;
 
 
 // ─── Webhooks (sem auth/csrf) ──────────────────────────────────
-	Route::post('/webhooks/clicksign', [AssinaturaWebhookController::class, 'handle'])
-    	->name('webhooks.clicksign')
-    	->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('/webhooks/clicksign', [AssinaturaWebhookController::class, 'handle'])
+    ->name('webhooks.clicksign')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 
-	Route::prefix('portal')->name('portal.')->group(function () {
-    	Route::get('/login',     PortalLogin::class)->name('login');
-   	 Route::get('/dashboard', PortalDashboard::class)->name('dashboard');
-
-
-	
-// ─── Webhooks (IA) ──────────────────────────────────
-	Route::get('/ia-teste', [IAController::class, 'teste']);
-
-
-
+Route::prefix('portal')->name('portal.')->group(function () {
+    Route::get('/login',     PortalLogin::class)->name('login');
+    Route::get('/dashboard', PortalDashboard::class)->name('dashboard');
 });
+
+// ─── IA (teste) ────────────────────────────────────────────
+Route::get('/ia-teste', [IAController::class, 'teste'])->middleware('auth:usuarios');

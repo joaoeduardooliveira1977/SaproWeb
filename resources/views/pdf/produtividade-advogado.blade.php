@@ -80,6 +80,6 @@
     </tfoot>
 </table>
 
-<div class="footer">Sistema Jurídico SAPRO &nbsp;·&nbsp; {{ $gerado_em }}</div>
+<div class="footer">Software Jur�dico &nbsp;·&nbsp; {{ $gerado_em }}</div>
 </body>
 </html>

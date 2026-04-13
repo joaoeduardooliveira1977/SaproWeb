@@ -202,7 +202,7 @@ class VerificarAndamentosTjsp implements ShouldQueue
             }
 
             foreach ($porAdvogado as $telefone => $dados) {
-                $linhas = ["📋 *SAPRO — Novos andamentos detectados*\n"];
+                $linhas = ["📋 *Software Jur�dico — Novos andamentos detectados*\n"];
                 foreach ($dados['processos'] as $p) {
                     $linhas[] = "⚖️ *{$p['numero']}* ({$p['cliente']})";
                     foreach (array_slice($p['andamentos'], 0, 3) as $a) {
@@ -214,7 +214,7 @@ class VerificarAndamentosTjsp implements ShouldQueue
                         $linhas[] = '  _...e mais ' . (count($p['andamentos']) - 3) . ' andamento(s)_';
                     }
                 }
-                $linhas[] = "\nAcesse o SAPRO para detalhes.";
+                $linhas[] = "\nAcesse o Software Jur�dico para detalhes.";
 
                 $svc->enviar(
                     telefone:         $telefone,

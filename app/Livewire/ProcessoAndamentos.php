@@ -96,7 +96,7 @@ class ProcessoAndamentos extends Component
                 'processo_id' => $this->processoId,
                 'data'        => $this->data,
                 'descricao'   => $this->descricao,
-                'usuario_id'  => Auth::id(),
+                'usuario_id'  => Auth::guard('usuarios')->id(),
             ])->id;
         }
 
@@ -200,12 +200,12 @@ class ProcessoAndamentos extends Component
 
         $numero   = $this->processo->numero ?? '—';
         $dataFmt  = \Carbon\Carbon::parse($data)->format('d/m/Y');
-        $sistNome = config('mail.from.name', 'SAPRO');
+        $sistNome = config('mail.from.name', 'Software Jur�dico');
 
         $corpo = "
         <div style='font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;background:#f1f5f9;border-radius:8px;overflow:hidden;'>
             <div style='background:#1a3a5c;padding:24px 32px;'>
-                <div style='color:#93c5fd;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;'>Sistema Jurídico — {$sistNome}</div>
+                <div style='color:#93c5fd;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;'>Software Jur�dico — {$sistNome}</div>
                 <div style='color:#fff;font-size:20px;font-weight:700;margin-top:8px;'>Atualização no seu processo</div>
             </div>
             <div style='background:#fff;padding:24px 32px;border:1px solid #e2e8f0;border-top:none;'>
@@ -243,7 +243,7 @@ class ProcessoAndamentos extends Component
         $mime         = $arquivo->getMimeType();
         $tamanho      = $arquivo->getSize();
         $caminho      = $arquivo->store($pasta, 'public');
-        $uploadedBy   = auth()->user()->login ?? 'Sistema';
+        $uploadedBy   = auth('usuarios')->user()?->login ?? 'Sistema';
 
         DB::insert(
             'INSERT INTO documentos

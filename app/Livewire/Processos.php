@@ -36,12 +36,13 @@ class Processos extends Component
 
     public function arquivar(): void
     {
-        abort_unless(Auth::user()->temAcao('processos.arquivar'), 403, 'Sem permissão.');
+        $usuario = Auth::guard('usuarios')->user();
+        abort_unless($usuario?->temAcao('processos.arquivar'), 403, 'Sem permissão.');
 
         $processo = Processo::findOrFail($this->processoParaExcluir);
 
         $processo->update(['status' => 'Arquivado']);
-        Auth::user()->registrarAuditoria('Arquivou processo', 'processos', $processo->id);
+        $usuario->registrarAuditoria('Arquivou processo', 'processos', $processo->id);
 
         $this->confirmandoExclusao  = false;
         $this->processoParaExcluir  = null;
@@ -89,7 +90,7 @@ class Processos extends Component
             ->map(fn($a) => $a->nome . ': ' . $a->processos_como_advogado_count)
             ->join(', ');
 
-        $contexto = "Você é um analista jurídico do sistema SAPRO. Responda de forma objetiva e direta em português.
+        $contexto = "Você é um analista jurídico do sistema Software Jur�dico. Responda de forma objetiva e direta em português.
 
 Dados atuais do escritório:
 - Total processos ativos: {$totalAtivos}

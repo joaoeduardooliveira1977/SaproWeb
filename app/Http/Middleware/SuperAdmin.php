@@ -10,7 +10,7 @@ class SuperAdmin
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check() || Auth::user()->perfil !== 'super_admin') {
+        if (!Auth::guard('usuarios')->check() || Auth::guard('usuarios')->user()->perfil !== 'super_admin') {
             abort(403, 'Acesso restrito.');
         }
         return $next($request);

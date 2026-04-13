@@ -123,7 +123,7 @@ class Correspondentes extends Component
             Correspondente::findOrFail($this->correspondente_id)->update($dados);
             $this->dispatch('toast', message: 'Correspondência atualizada.', type: 'success');
         } else {
-            $dados['solicitado_por'] = Auth::id();
+            $dados['solicitado_por'] = Auth::guard('usuarios')->id();
             Correspondente::create($dados);
             $this->dispatch('toast', message: 'Correspondência cadastrada.', type: 'success');
         }

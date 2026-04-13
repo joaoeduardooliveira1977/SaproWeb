@@ -7,14 +7,12 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     public function up(): void
-{
-    if (Schema::hasTable('notificacoes')) {
-        return;
-    }
+    {
+        if (Schema::hasTable('notificacoes')) {
+            return;
+        }
 
-    Schema::create('notificacoes', function (Blueprint $table) {
-
-
+        Schema::create('notificacoes', function (Blueprint $table) {
             $table->id();
             $table->enum('tipo', ['critico', 'prazo', 'andamento', 'decisao', 'informativo'])->default('informativo');
             $table->string('titulo');
@@ -31,6 +29,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('notificacoes');
+        // A tabela pode ter sido criada por uma migration anterior.
     }
 };

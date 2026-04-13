@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Tenant — {{ $tenant->nome }} — SAPRO Super Admin</title>
+    <title>Tenant — {{ $tenant->nome }} — Software Jur�dico Super Admin</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; min-height: 100vh; }
@@ -26,7 +26,7 @@
 <body>
 
 <div class="topbar">
-    <div class="topbar-title">⚖️ SAPRO — Super Admin</div>
+    <div class="topbar-title">⚖️ Software Jur�dico — Super Admin</div>
     <a href="{{ route('super-admin.index') }}" class="btn btn-secondary" style="background:rgba(255,255,255,.1);color:#93c5fd;">
         ← Voltar
     </a>

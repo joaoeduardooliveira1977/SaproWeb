@@ -22,7 +22,7 @@ class ProcessoMinuta extends Component
     public function selecionar(int $id): void
     {
         $minuta  = Minuta::findOrFail($id);
-        $processo = Processo::with(['cliente', 'advogado', 'juiz', 'tipoAcao', 'fase'])->findOrFail($this->processoId);
+        $processo = Processo::with(['cliente', 'advogado', 'tipoAcao', 'fase'])->findOrFail($this->processoId);
 
         $this->minutaId    = $id;
         $this->titulo      = $minuta->titulo;

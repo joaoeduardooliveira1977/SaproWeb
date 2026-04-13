@@ -16,7 +16,7 @@
   <!-- Base -->
   <rect x="200" y="355" width="112" height="10" rx="5" fill="#e8a020"/>
   <rect x="176" y="362" width="160" height="10" rx="5" fill="#e8a020"/>
-  <!-- SAPRO text -->
+  <!-- Software Juridico text -->
   <text x="256" y="420" font-family="Arial,sans-serif" font-size="56" font-weight="700"
-        fill="#ffffff" text-anchor="middle" letter-spacing="4">SAPRO</text>
+        fill="#ffffff" text-anchor="middle" letter-spacing="4">JURIDICO</text>
 </svg>

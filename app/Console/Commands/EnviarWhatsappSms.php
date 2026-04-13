@@ -96,7 +96,7 @@ class EnviarWhatsappSms extends Command
                 $emoji     = $prazo->prazo_fatal ? '🚨' : '⏳';
                 $fatal     = $prazo->prazo_fatal ? ' *(FATAL)*' : '';
 
-                $msg  = "{$emoji} *SAPRO Jurídico — Prazo{$fatal}*\n";
+                $msg  = "{$emoji} *Software Jur�dico Jurídico — Prazo{$fatal}*\n";
                 $msg .= "Olá {$prazo->responsavel_nome}!\n\n";
                 $msg .= "Prazo vence {$diasLabel}: *{$prazo->titulo}*\n";
                 $msg .= "Data: " . Carbon::parse($prazo->data_prazo)->format('d/m/Y') . "\n";
@@ -150,7 +150,7 @@ class EnviarWhatsappSms extends Command
                 continue;
             }
 
-            $msg  = "💳 *SAPRO Jurídico — Aviso de Pagamento*\n";
+            $msg  = "💳 *Software Jur�dico Jurídico — Aviso de Pagamento*\n";
             $msg .= "Olá *{$parcela->cliente_nome}*!\n\n";
             $msg .= "Identificamos a parcela {$parcela->numero_parcela}ª ";
             $msg .= "de R$ " . number_format($parcela->valor, 2, ',', '.') . " em aberto.\n";
@@ -216,7 +216,7 @@ class EnviarWhatsappSms extends Command
             ];
             $tipoLabel = $tipos[$aud->tipo] ?? 'Audiência';
 
-            $msg  = "📅 *SAPRO Jurídico — Lembrete de Audiência*\n";
+            $msg  = "📅 *Software Jur�dico Jurídico — Lembrete de Audiência*\n";
             $msg .= "Olá *{$aud->advogado_nome}*!\n\n";
             $msg .= "Você tem *{$tipoLabel}* amanhã às *{$hora}*.\n";
             if ($aud->processo_numero) {

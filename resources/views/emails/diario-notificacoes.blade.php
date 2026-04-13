@@ -32,7 +32,7 @@
 
   {{-- Cabeçalho --}}
   <div class="header">
-    <div class="header-sub">Sistema Jurídico SAPRO</div>
+    <div class="header-sub">Software Jur�dico</div>
     <div class="header-title">Notificações do dia — {{ $dataFmt }}</div>
     <div class="header-greeting">Olá, {{ $usuario->nome }}</div>
   </div>
@@ -105,7 +105,7 @@
 
   {{-- Rodapé --}}
   <div class="footer">
-    <span class="footer-text">Gerado pelo Sistema Jurídico SAPRO &nbsp;·&nbsp; {{ $geradoEm }}</span>
+    <span class="footer-text">Gerado pelo Software Jur�dico &nbsp;·&nbsp; {{ $geradoEm }}</span>
   </div>
 
 </div>

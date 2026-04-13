@@ -105,7 +105,7 @@ class VerificarMonitoramentos implements ShouldQueue
                 }
 
                 // Cria notificação interna
-                if (!Notificacao::jaExiste('monitoramento_andamento', 'monitoramento', $mon->id)) {
+                if (!Notificacao::jaExiste('monitoramento_andamento', 'monitoramento', $mon->id, $novoHash)) {
                     Notificacao::create([
                         'usuario_id'      => null,
                         'tipo'            => 'monitoramento_andamento',
@@ -113,7 +113,7 @@ class VerificarMonitoramentos implements ShouldQueue
                         'mensagem'        => 'Monitoramento automático detectou novos movimentos no processo ' . $mon->numero_processo . ' (' . ($resultado['tribunal'] ?? $mon->tribunal) . ').',
                         'referencia_tipo' => 'monitoramento',
                         'referencia_id'   => $mon->id,
-                        'link'            => '/tjsp',
+                        'link'            => '/tjsp#' . $novoHash,
                         'lida'            => false,
                     ]);
                 }
@@ -180,7 +180,7 @@ class VerificarMonitoramentos implements ShouldQueue
 <tr><td align='center'>
 <table width='600' cellpadding='0' cellspacing='0' style='max-width:600px;width:100%;'>
   <tr><td style='background:#1a3a5c;padding:24px;border-radius:10px 10px 0 0;'>
-    <p style='margin:0;color:#93c5fd;font-size:12px;text-transform:uppercase;letter-spacing:1px;'>SAPRO — Monitoramento Automático</p>
+    <p style='margin:0;color:#93c5fd;font-size:12px;text-transform:uppercase;letter-spacing:1px;'>Software Jur�dico — Monitoramento Automático</p>
     <h2 style='margin:8px 0 0;color:#fff;font-size:20px;'>📋 Novos andamentos detectados</h2>
   </td></tr>
   <tr><td style='background:#fff;padding:24px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;'>
@@ -197,7 +197,7 @@ class VerificarMonitoramentos implements ShouldQueue
       </tr></thead>
       <tbody>{$linhasHtml}</tbody>
     </table>
-    <a href='{$url}' style='display:inline-block;background:#1a3a5c;color:#fff;padding:11px 22px;border-radius:7px;text-decoration:none;font-weight:600;font-size:13px;'>Ver no SAPRO →</a>
+    <a href='{$url}' style='display:inline-block;background:#1a3a5c;color:#fff;padding:11px 22px;border-radius:7px;text-decoration:none;font-weight:600;font-size:13px;'>Ver no Software Jur�dico →</a>
     <p style='margin:20px 0 0;font-size:11px;color:#94a3b8;'>Para desativar este monitoramento, acesse a aba Monitoramentos na página de Consulta Judicial.</p>
   </td></tr>
 </table>
@@ -206,7 +206,7 @@ class VerificarMonitoramentos implements ShouldQueue
 </body></html>";
 
             Mail::html($corpo, function ($msg) use ($email, $mon) {
-                $msg->to($email)->subject('SAPRO — Novo andamento: ' . $mon->numero_processo);
+                $msg->to($email)->subject('Software Jur�dico — Novo andamento: ' . $mon->numero_processo);
             });
 
         } catch (\Throwable $e) {

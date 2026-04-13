@@ -36,7 +36,7 @@ class PortalMensagens extends Component
         DB::table('portal_mensagens')->insert([
             'pessoa_id'       => $this->pessoaId,
             'processo_id'     => null,
-            'usuario_id'      => Auth::id(),
+            'usuario_id'      => Auth::guard('usuarios')->id(),
             'mensagem'        => $this->resposta,
             'de'              => 'escritorio',
             'lida_escritorio' => true,
@@ -48,7 +48,8 @@ class PortalMensagens extends Component
         // Envia e-mail ao cliente se tiver e-mail cadastrado
         $cliente = Pessoa::find($this->pessoaId);
         if ($cliente?->email) {
-            $remetente = Auth::user()?->nome ?? Auth::user()?->login ?? 'Escritório';
+            $usuario = Auth::guard('usuarios')->user();
+            $remetente = $usuario?->nome ?? $usuario?->login ?? 'Escritório';
             try {
                 Mail::to($cliente->email)
                     ->queue(new PortalNovaMensagem($cliente, $this->resposta, $remetente));

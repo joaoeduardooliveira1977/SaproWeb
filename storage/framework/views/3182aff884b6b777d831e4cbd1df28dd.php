@@ -1,5 +1,4 @@
 <?php $__env->startSection('page-title', 'Agenda'); ?>
-<?php $__env->startSection('breadcrumb'); ?><span class="current">Agenda</span><?php $__env->stopSection(); ?>
 <?php $__env->startSection('content'); ?>
 <?php
 $__split = function ($name, $params = []) {

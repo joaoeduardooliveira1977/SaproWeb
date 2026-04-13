@@ -3,6 +3,7 @@
 @media (max-width: 768px) {
     .pessoas-grid  { grid-template-columns: 1fr !important; }
     .metricas-grid { grid-template-columns: 1fr 1fr !important; }
+    .clientes-help { grid-template-columns: 1fr !important; }
     .filtros-panel { position: static !important; }
 }
 @media (max-width: 480px) {
@@ -12,17 +13,11 @@
 </style>
 
 {{-- Cabecalho --}}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:14px;">
     <div>
-        <a href="{{ route('processos.hub') }}"
-           style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:6px;"
-           onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-            Voltar
-        </a>
-        <h2 style="font-size:20px;font-weight:700;color:var(--text);margin:0;">Pessoas</h2>
-        <p style="font-size:13px;color:var(--muted);margin:2px 0 0;">
-            {{ $pessoas->total() }} pessoa{{ $pessoas->total() !== 1 ? 's' : '' }} cadastrada{{ $pessoas->total() !== 1 ? 's' : '' }}
+        <h1 style="font-size:24px;font-weight:800;color:var(--text);margin:0 0 4px;">Clientes</h1>
+        <p style="font-size:13px;color:var(--muted);margin:0;max-width:620px;line-height:1.5;">
+            Consulte contatos, identifique o papel de cada pessoa e acesse rapidamente a pasta do cliente.
         </p>
     </div>
     <div style="display:flex;gap:8px;">
@@ -36,15 +31,34 @@
         </button>
         <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
             <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nova Pessoa
+            Novo Cliente
         </button>
     </div>
 </div>
 
+<div class="clientes-help" style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:center;">
+    <div>
+        <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:4px;">Como usar esta tela</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6;">
+            Use a busca para localizar o cadastro, filtre por tipo quando precisar separar clientes de advogados ou partes contrárias e use a pasta do cliente para ver os vínculos do processo.
+        </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Total filtrado</div>
+            <div style="font-size:20px;font-weight:800;color:var(--text);margin-top:2px;">{{ number_format($pessoas->total()) }}</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Clientes ativos</div>
+            <div style="font-size:20px;font-weight:800;color:var(--text);margin-top:2px;">{{ number_format($totalClientes) }}</div>
+        </div>
+    </div>
+</div>
+
 {{-- Analista IA --}}
-<div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);border-radius:12px;padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
+<div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
     <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
             <path d="M18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/>
         </svg>
@@ -53,12 +67,11 @@
         wire:model="perguntaIA"
         wire:keydown.enter="perguntarIA"
         type="text"
-        placeholder="Pergunte sobre as pessoas... Ex: quantos advogados temos, clientes sem email, listar juizes"
-        style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 16px;color:#fff;font-size:13px;outline:none;"
-        onfocus="this.style.borderColor='rgba(147,197,253,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.2)'">
+        placeholder="Pergunte à IA: clientes sem e-mail, advogados cadastrados, partes contrárias..."
+        style="flex:1;background:#f8fafc;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;">
     <button wire:click="perguntarIA" wire:loading.attr="disabled" wire:target="perguntarIA"
-        style="background:#2563a8;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:background .15s;"
-        onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563a8'">
+        class="btn btn-primary btn-sm"
+        style="white-space:nowrap;display:flex;align-items:center;gap:6px;">
         <span wire:loading.remove wire:target="perguntarIA" style="display:flex;align-items:center;gap:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
@@ -87,27 +100,37 @@
 @endif
 
 {{-- Grid principal --}}
-<div class="pessoas-grid" style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;">
+<div class="pessoas-grid" style="display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start;">
 
     {{-- COLUNA ESQUERDA: Filtros --}}
-    <div class="filtros-panel" style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;position:sticky;top:20px;">
+    <div class="filtros-panel" style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:16px;position:sticky;top:20px;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div style="font-size:14px;font-weight:800;color:var(--text);">Filtros</div>
+            @if($busca || $tipo)
+            <button wire:click="$set('busca',''); $set('tipo','')"
+                style="border:0;background:transparent;color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;padding:0;">
+                Limpar
+            </button>
+            @endif
+        </div>
 
         {{-- Busca --}}
-        <div style="margin-bottom:20px;">
+        <div style="margin-bottom:16px;">
             <div style="position:relative;">
                 <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
                     style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
                 <input type="text" wire:model.live.debounce.300ms="busca"
-                    placeholder="Buscar por nome, CPF, e-mail..."
+                    placeholder="Nome, CPF/CNPJ ou e-mail"
                     style="width:100%;box-sizing:border-box;padding:9px 10px 9px 34px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
             </div>
         </div>
 
         {{-- Filtro por Tipo --}}
-        <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">Tipo de Pessoa</div>
+        <div style="margin-bottom:4px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">Tipo no cadastro</div>
             <div style="display:flex;flex-direction:column;gap:4px;">
 
                 {{-- Todos --}}
@@ -140,14 +163,6 @@
             </div>
         </div>
 
-        {{-- Limpar --}}
-        @if($busca || $tipo)
-        <button wire:click="$set('busca',''); $set('tipo','')"
-            style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;background:none;color:var(--muted);cursor:pointer;">
-            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Limpar filtros
-        </button>
-        @endif
     </div>
 
     {{-- COLUNA DIREITA: Metricas + Tabela --}}
@@ -156,7 +171,7 @@
         {{-- Metricas --}}
         <div class="metricas-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
 
-            {{-- Total Pessoas --}}
+            {{-- Total cadastrados --}}
             <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
                 <div style="width:40px;height:40px;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -166,7 +181,7 @@
                 </div>
                 <div>
                     <div style="font-size:22px;font-weight:800;color:var(--text);line-height:1.1;">{{ number_format($totalPessoas) }}</div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">cadastradas</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">cadastros ativos</div>
                 </div>
             </div>
 
@@ -207,7 +222,7 @@
                 </div>
                 <div>
                     <div style="font-size:22px;font-weight:800;color:#b91c1c;line-height:1.1;">{{ number_format($totalPartes) }}</div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">partes contrarias</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">partes contrárias</div>
                 </div>
             </div>
 
@@ -219,11 +234,11 @@
                 <table style="border-collapse:collapse;width:100%;">
                     <thead>
                         <tr style="border-bottom:1px solid var(--border);">
-                            <th style="padding:12px 16px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:left;">Pessoa</th>
+                            <th style="padding:12px 16px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:left;">Nome</th>
                             <th class="hide-sm" style="padding:12px 16px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:left;">CPF / CNPJ</th>
                             <th style="padding:12px 16px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:left;">Tipo</th>
                             <th class="hide-sm" style="padding:12px 16px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:left;">Contato</th>
-                            <th style="padding:12px 16px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:center;width:100px;">Acoes</th>
+                            <th style="padding:12px 16px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:center;width:100px;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -304,6 +319,13 @@
                                         <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                                     </button>
                                     @if(in_array('Cliente', $tiposPorPessoa->get($p->id, [])))
+                                    <a href="{{ route('pessoas.pasta', $p->id) }}" title="Pasta do Cliente"
+                                        style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#eff6ff;color:#2563eb;border:none;cursor:pointer;transition:background .15s;text-decoration:none;"
+                                        onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                                    </a>
+                                    @endif
+                                    @if(in_array('Cliente', $tiposPorPessoa->get($p->id, [])))
                                     <button wire:click="gerarPerfilIA({{ $p->id }})" title="Perfil IA"
                                         style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#f5f3ff;color:#7c3aed;border:none;cursor:pointer;transition:background .15s;"
                                         onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='#f5f3ff'">
@@ -319,8 +341,8 @@
                         <tr>
                             <td colspan="5" style="text-align:center;padding:48px;color:var(--muted);">
                                 <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;display:block;opacity:.3;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                <div style="font-size:14px;font-weight:500;">Nenhuma pessoa encontrada</div>
-                                <div style="font-size:12px;margin-top:4px;">Tente ajustar os filtros ou cadastre uma nova pessoa.</div>
+                                <div style="font-size:14px;font-weight:500;">Nenhum cadastro encontrado</div>
+                                <div style="font-size:12px;margin-top:4px;">Tente ajustar os filtros ou cadastre um novo cliente.</div>
                             </td>
                         </tr>
                         @endforelse
@@ -348,7 +370,7 @@
                     </span>
                     <button wire:click="nextPage" @disabled(!$pessoas->hasMorePages())
                         style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-weight:600;background:var(--white);color:var(--text);cursor:pointer;opacity:{{ $pessoas->hasMorePages() ? '1' : '.4' }};">
-                        Proxima
+                        Próxima
                         <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
                 </div>
@@ -358,7 +380,7 @@
         {{-- Nota informativa --}}
         <div style="margin-top:12px;padding:10px 14px;background:#f0f9ff;border-radius:8px;font-size:12px;color:#64748b;border:1px solid #bae6fd;display:flex;align-items:center;gap:8px;">
             <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Uma pessoa pode ter multiplos tipos (ex: Advogado que tambem e Cliente) sem duplicar o cadastro.
+            Um cadastro pode ter múltiplos tipos, como advogado e cliente, sem duplicar informações.
         </div>
 
     </div>{{-- /coluna direita --}}
@@ -415,10 +437,10 @@
 </div>
 @endif
 
-{{-- ── Modal Cadastro ── --}}
+{{-- Modal Cadastro --}}
 @if($modalAberto)
 <div class="modal-backdrop" wire:click.self="fecharModal">
-    <div class="modal" style="max-width:580px;max-height:90vh;overflow-y:auto;">
+    <div class="modal" style="max-width:720px;max-height:90vh;overflow-y:auto;">
 
         {{-- Header --}}
         <div class="modal-header">
@@ -426,7 +448,10 @@
                 <div style="width:36px;height:36px;border-radius:8px;background:#eff6ff;display:flex;align-items:center;justify-content:center;">
                     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </div>
-                <span class="modal-title">{{ $pessoaId ? 'Editar Pessoa' : 'Nova Pessoa' }}</span>
+                <div>
+                    <div class="modal-title">{{ $pessoaId ? 'Editar Cadastro' : 'Novo Cliente' }}</div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:2px;">Preencha o essencial primeiro e complete os dados complementares quando necessário.</div>
+                </div>
             </div>
             <button wire:click="fecharModal" class="modal-close" aria-label="Fechar">
                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -436,12 +461,18 @@
         @php
         $inp = "width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);box-sizing:border-box;";
         $sec = "font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px;display:flex;align-items:center;gap:6px;";
+        $box = "border:1.5px solid var(--border);border-radius:10px;background:#f8fafc;padding:14px 14px 2px;margin-bottom:12px;";
         @endphp
 
-        {{-- Seção: Dados Pessoais --}}
-        <div style="{{ $sec }}">
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1e40af;line-height:1.5;">
+            Dica: marque todos os tipos que se aplicam. O mesmo cadastro pode ser cliente, advogado ou parte contrária sem duplicar a ficha.
+        </div>
+
+        {{-- Seção: Dados Cadastrais --}}
+        <div style="{{ $box }}">
+        <div style="{{ $sec }}margin-top:0;">
             <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            Dados Pessoais
+            Dados Cadastrais
         </div>
         <div class="form-field" style="margin-bottom:12px;">
             <label class="lbl">Nome Completo *</label>
@@ -468,8 +499,11 @@
             </div>
         </div>
 
+        </div>
+
         {{-- Seção: Contato --}}
-        <div style="{{ $sec }}border-top:1px solid var(--border);padding-top:16px;">
+        <div style="{{ $box }}">
+        <div style="{{ $sec }}margin-top:0;">
             <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             Contato
         </div>
@@ -489,8 +523,11 @@
             @error('email')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
         </div>
 
+        </div>
+
         {{-- Seção: Endereço --}}
-        <div style="{{ $sec }}border-top:1px solid var(--border);padding-top:16px;">
+        <div style="{{ $box }}">
+        <div style="{{ $sec }}margin-top:0;">
             <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             Endereço
         </div>
@@ -513,10 +550,16 @@
             </div>
         </div>
 
+        </div>
+
         {{-- Seção: Tipos --}}
-        <div style="{{ $sec }}border-top:1px solid var(--border);padding-top:16px;">
+        <div style="{{ $box }}">
+        <div style="{{ $sec }}margin-top:0;">
             <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Tipos de Pessoa *
+            Tipo no cadastro *
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5;margin:-4px 0 10px;">
+            Escolha o papel deste cadastro no sistema. Use "Cliente" quando ele tiver processos vinculados.
         </div>
         @error('tipos_selecionados')<span style="color:var(--danger);font-size:11px;display:block;margin-bottom:8px;">{{ $message }}</span>@enderror
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
@@ -557,6 +600,8 @@
             <label class="lbl" style="display:block;margin-bottom:6px;">Observações</label>
             <textarea wire:model="observacoes" rows="2" placeholder="Observações internas..."
                 style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>
+        </div>
+
         </div>
 
         {{--- Footer --}}

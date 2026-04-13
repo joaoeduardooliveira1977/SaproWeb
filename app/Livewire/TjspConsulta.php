@@ -153,7 +153,7 @@ class TjspConsulta extends Component
         $processo = Processo::where('numero', $this->resultadoConsulta['numero'])->first();
 
         if (!$processo) {
-            $this->dispatch('toast', message: 'Processo não encontrado no SAPRO. Cadastre o processo antes de importar andamentos.', type: 'error');
+            $this->dispatch('toast', message: 'Processo não encontrado no Software Jur�dico. Cadastre o processo antes de importar andamentos.', type: 'error');
             return;
         }
 
@@ -247,7 +247,7 @@ class TjspConsulta extends Component
         $ultimaVerif      = TjspVerificacao::where('status', 'concluido')->latest()->first();
         $monitoramentos   = Monitoramento::where('ativo', true)->count();
 
-        $contexto = "Você é um assistente jurídico do sistema SAPRO. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
 
 Dados da Consulta Judicial:
 - Total de processos ativos: {$totalAtivos}
@@ -328,6 +328,19 @@ Responda em 1-3 frases objetivas.";
             $processoDoResultado = Processo::where('numero', $this->resultadoConsulta['numero'])->first();
         }
 
+        // Diff visual: quais andamentos do resultado já existem no processo
+        $andamentosNovosSet = [];
+        if ($this->resultadoConsulta && $processoDoResultado) {
+            $existentes = Andamento::where('processo_id', $processoDoResultado->id)
+                ->get(['data', 'descricao'])
+                ->mapWithKeys(fn($a) => [$a->data->format('Y-m-d') . '||' . $a->descricao => true])
+                ->all();
+            foreach ($this->resultadoConsulta['andamentos'] as $idx => $a) {
+                $key = ($a['data'] ?? '') . '||' . ($a['descricao'] ?? '');
+                $andamentosNovosSet[$idx] = ! isset($existentes[$key]);
+            }
+        }
+
         return view('livewire.tjsp-consulta', [
             'verificacao'          => $verificacao,
             'totalFiltrado'        => $totalFiltrado,
@@ -338,6 +351,7 @@ Responda em 1-3 frases objetivas.";
             'monitoramentosAtivos' => $monitoramentosAtivos,
             'consultasRecentes'    => $consultasRecentes,
             'processoDoResultado'  => $processoDoResultado,
+            'andamentosNovosSet'   => $andamentosNovosSet,
         ]);
     }
 
@@ -370,12 +384,16 @@ Responda em 1-3 frases objetivas.";
                 $q->whereDate('tjsp_ultima_consulta', today())
             )
             ->when($this->filtroConsulta === 'semana', fn($q) =>
-                $q->where('tjsp_ultima_consulta', '<', now()->subWeek())
-                  ->orWhereNull('tjsp_ultima_consulta')
+                $q->where(fn($sub) =>
+                    $sub->where('tjsp_ultima_consulta', '<', now()->subWeek())
+                        ->orWhereNull('tjsp_ultima_consulta')
+                )
             )
             ->when($this->filtroConsulta === 'mes', fn($q) =>
-                $q->where('tjsp_ultima_consulta', '<', now()->subMonth())
-                  ->orWhereNull('tjsp_ultima_consulta')
+                $q->where(fn($sub) =>
+                    $sub->where('tjsp_ultima_consulta', '<', now()->subMonth())
+                        ->orWhereNull('tjsp_ultima_consulta')
+                )
             )
             ->when($this->filtroNumero, fn($q) =>
                 $q->where('numero', 'ilike', "%{$this->filtroNumero}%")

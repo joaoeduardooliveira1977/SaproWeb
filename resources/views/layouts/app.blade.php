@@ -17,9 +17,9 @@
             } catch (\Exception $e) {}
         }
     @endphp
-    <title>{{ $prazosHoje > 0 ? "({$prazosHoje}) " : '' }}@yield('page-title', 'Dashboard') — JURÍDICO</title>
+    <title>{{ $prazosHoje > 0 ? "({$prazosHoje}) " : '' }}@yield('page-title', 'Dashboard') — Software Jurídico</title>
     {{-- Anti-FOUC: aplica tema antes do render --}}
-    <script>(function(){var t=localStorage.getItem('sapro-theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}());</script>
+    <script>(function(){var t=localStorage.getItem('software-juridico-theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}());</script>
 
     {{-- PWA --}}
     <link rel="manifest" href="/manifest.json">
@@ -27,7 +27,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="JURÍDICO">
+    <meta name="apple-mobile-web-app-title" content="Software Jurídico">
     <link rel="apple-touch-icon" href="/icons/icon.svg">
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -54,7 +54,7 @@
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
         .layout { display: grid; grid-template-columns: 116px 1fr; height: 100vh; overflow: hidden; }
 
-        /* ── Sidebar minimalista com ícone + label ── */
+        /* Sidebar minimalista com icone + label */
         .sidebar {
             width: 116px; background: #0f2540;
             display: flex; flex-direction: column; align-items: center;
@@ -91,7 +91,7 @@
         .nav-sep    { width: 36px; height: 1px; background: rgba(255,255,255,.08); margin: 6px 0; flex-shrink: 0; }
         .nav-spacer { flex: 1; }
 
-        /* ── Drawer mobile ── */
+        /* Drawer mobile */
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 199; }
         .sidebar-overlay.active { display: block; }
         .nav-drawer {
@@ -112,7 +112,7 @@
         .nav-drawer-sep { height: 1px; background: rgba(255,255,255,.08); margin: 6px 20px; }
         .hamburger { display: none; background: none; border: none; cursor: pointer; color: var(--primary); padding: 4px 6px; align-items: center; }
 
-        /* ── Main ── */
+        /* Main */
         .main { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
         .topbar { height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); overflow: visible; position: relative; z-index: 100; }
         .topbar-title { font-size: 16px; font-weight: 600; color: var(--primary); flex-shrink: 0; }
@@ -120,22 +120,22 @@
         .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
         .content { flex: 1; overflow: auto; padding: 24px; }
 
-        /* ── Cards ── */
+        /* Cards */
         .card { background: var(--white); border-radius: 10px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,.07); border: 1px solid var(--border); }
         .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
         .card-title { font-size: 15px; font-weight: 600; color: var(--primary); }
 
-        /* ── Grid ── */
+        /* Grid */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 
-        /* ── Stat Cards ── */
+        /* Stat Cards */
         .stat-card { background: var(--white); border-radius: 10px; padding: 16px 20px; box-shadow: 0 1px 6px rgba(0,0,0,.07); border: 1px solid var(--border); border-left-width: 4px; }
         .stat-val { font-size: 28px; font-weight: 700; color: var(--primary); }
         .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
         .stat-icon { display: inline-flex; align-items: center; margin-bottom: 4px; }
 
-        /* ── Table ── */
+        /* Table */
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         thead th { background: var(--bg); color: var(--muted); padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; border-bottom: 2px solid var(--border); }
@@ -143,10 +143,10 @@
         tbody tr:hover td { background: #eff6ff; }
         tbody td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
 
-        /* ── Badges ── */
+        /* Badges */
         .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
 
-        /* ── Buttons ── */
+        /* Buttons */
         .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s; text-decoration: none; }
         .btn:hover { filter: brightness(.92); transform: translateY(-1px); }
         .btn:active { transform: translateY(0); }
@@ -158,7 +158,7 @@
         .btn-sm { padding: 6px 12px; font-size: 12px; }
         .btn-icon { padding: 4px 8px; font-size: 15px; background: transparent; border: none; cursor: pointer; }
 
-        /* ── Forms ── */
+        /* Forms */
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
         .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
         .form-field { display: flex; flex-direction: column; gap: 5px; }
@@ -167,17 +167,17 @@
         input:focus, select:focus, textarea:focus { border-color: var(--primary-light); }
         .invalid-feedback { color: var(--danger); font-size: 11px; margin-top: 3px; }
 
-        /* ── Search bar ── */
+        /* Search bar */
         .search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
         .search-bar input  { flex: 1; }
         .search-bar select { width: 160px; }
 
-        /* ── Alert / Flash ── */
+        /* Alert / Flash */
         .alert { padding: 10px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
         .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
-        /* ── Modal ── */
+        /* Modal */
         .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 50; display: flex; align-items: center; justify-content: center; }
         .modal { background: var(--white); border-radius: 12px; padding: 28px; width: 660px; max-width: 96vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
         .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
@@ -185,25 +185,25 @@
         .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
         .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 
-        /* ── Pagination ── */
+        /* Pagination */
         .pagination { display: flex; gap: 4px; margin-top: 16px; }
         .pagination a, .pagination span { padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; color: var(--primary); border: 1px solid var(--border); }
         .pagination span[aria-current] { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-        /* ── PWA / Safe area ── */
+        /* PWA / Safe area */
         @supports (padding: env(safe-area-inset-bottom)) {
             .sidebar { padding-bottom: env(safe-area-inset-bottom); }
             .content { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
         }
 
-        /* ── Stat Grid (auto-fit) ── */
+        /* Stat Grid (auto-fit) */
         .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 20px; }
 
-        /* ── Card Actions ── */
+        /* Card Actions */
         .card-header { flex-wrap: wrap; gap: 8px; }
         .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
-        /* ── Action buttons in tables ── */
+        /* Action buttons in tables */
         .btn-actions { display: inline-flex; gap: 4px; align-items: center; flex-wrap: wrap; }
         .btn-action {
             display: inline-flex; align-items: center; justify-content: center;
@@ -218,7 +218,7 @@
         .btn-action-yellow { background: #fffbeb; border-color: #fde68a; color: #d97706; }
         .btn-action-red    { background: #fff1f2; border-color: #fecdd3; color: #e11d48; }
 
-        /* ── Pagination Bar ── */
+        /* Pagination Bar */
         .pagination-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 12px 0; gap: 8px; font-size: 13px; color: var(--muted); }
         .page-btns { display: flex; gap: 6px; flex-wrap: wrap; }
         .page-btn { padding: 6px 12px; background: var(--white); color: var(--primary); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; cursor: pointer; transition: background .15s; }
@@ -226,20 +226,20 @@
         .page-btn:disabled { background: #f1f5f9; color: #94a3b8; cursor: default; }
         .page-current { padding: 6px 12px; background: #f1f5f9; border-radius: 6px; font-size: 12px; color: var(--text); }
 
-        /* ── Btn secondary outline ── */
+        /* Btn secondary outline */
         .btn-secondary-outline { background: #f1f5f9; color: #475569; border: 1.5px solid var(--border); }
 
-        /* ── Filter Bar ── */
+        /* Filter Bar */
         .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
         .filter-bar input, .filter-bar select { padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 7px; font-size: 13px; flex: 1; min-width: 120px; max-width: 220px; }
         .filter-bar input[type=text] { flex: 2; min-width: 160px; }
         .filter-bar .filter-actions { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
 
-        /* ── Responsive visibility ── */
+        /* Responsive visibility */
         .hide-sm { display: table-cell; }
         .hide-xs { display: table-cell; }
 
-        /* ── Skeleton Loader ── */
+        /* Skeleton Loader */
         @keyframes shimmer {
             0%   { background-position: -400px 0; }
             100% { background-position:  400px 0; }
@@ -255,14 +255,14 @@
             background-size: 800px 100%;
         }
 
-        /* ── Empty State ── */
+        /* Empty State */
         .empty-state { padding: 56px 24px; text-align: center; color: var(--muted); }
         .empty-state-icon { display: flex; justify-content: center; margin-bottom: 14px; opacity: .3; }
         .empty-state-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
         .empty-state-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
         .empty-state-action { margin-top: 16px; }
 
-        /* ── Quick Add ── */
+        /* Quick Add */
         .quick-add { position: relative; flex-shrink: 0; }
         .quick-add-btn {
             display: inline-flex; align-items: center; gap: 5px;
@@ -291,7 +291,7 @@
         .quick-add-sep { height: 1px; background: var(--border); margin: 4px 8px; }
         @media (max-width: 480px) { .quick-add .qa-label { display: none; } }
 
-        /* ── Breadcrumb ── */
+        /* Breadcrumb */
         .breadcrumb-bar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 24px; height: 34px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
         .breadcrumb-bar a { color: var(--muted); text-decoration: none; transition: color .15s; }
         .breadcrumb-bar a:hover { color: var(--primary-light); }
@@ -300,7 +300,7 @@
         @media (max-width: 768px) { .breadcrumb-bar { padding: 0 16px; } }
         @media print { .breadcrumb-bar { display: none !important; } }
 
-        /* ── Utilities ── */
+        /* Utilities */
         .text-primary { color: var(--primary-light); font-weight: 600; }
         .mb-4 { margin-bottom: 16px; }
         .gap-2 { gap: 8px; }
@@ -341,17 +341,17 @@
             .topbar > div[style*="max-width:440px"] { display: none; }
         }
 
-        /* ── Print ─────────────────────────────────────────────────────────── */
+        /* â”€â”€ Print â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         @media print {
             @page { margin: 1.5cm; }
 
-            /* Oculta elementos de navegação e interação */
+            /* Oculta elementos de navegaÃ§Ã£o e interaÃ§Ã£o */
             .sidebar, .sidebar-overlay, .nav-drawer, .topbar, #toast-container,
             .hamburger, .filter-bar, .pagination-bar, .btn-actions,
             .card-actions, #themeToggle,
             button:not(.print-keep), a.btn { display: none !important; }
 
-            /* Layout: remove grid/overflow para impressão linear */
+            /* Layout: remove grid/overflow para impressÃ£o linear */
             html, body { height: auto !important; background: #fff !important; }
             .layout { display: block !important; height: auto !important; }
             .main   { display: block !important; }
@@ -361,7 +361,7 @@
             .card, .stat-card { box-shadow: none !important; border: 1px solid #ccc !important; page-break-inside: avoid; }
             .stat-grid { grid-template-columns: repeat(4, 1fr) !important; }
 
-            /* Tabelas: repete cabeçalho em cada página, sem quebra de linha */
+            /* Tabelas: repete cabeÃ§alho em cada pÃ¡gina, sem quebra de linha */
             .table-wrap { overflow: visible !important; }
             thead { display: table-header-group; }
             tr { page-break-inside: avoid; }
@@ -374,7 +374,7 @@
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
 
-        /* ── Dark Mode ─────────────────────────────────────────────────────── */
+        /* â”€â”€ Dark Mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         [data-theme="dark"] {
             --bg:           #0f172a;
             --white:        #1e293b;
@@ -403,7 +403,7 @@
         [data-theme="dark"] .filter-bar input,
         [data-theme="dark"] .filter-bar select { background: #0f172a; }
 
-        /* ── Toasts ── */
+        /* â”€â”€ Toasts â”€â”€ */
         #toast-container {
             position: fixed; top: 20px; right: 20px; z-index: 9999;
             display: flex; flex-direction: column; gap: 8px;
@@ -431,7 +431,7 @@
         [data-theme="dark"] .toast-info    { background: #1e3a8a; color: #bfdbfe; border-color: #1d4ed8; }
         @media (max-width: 480px) { #toast-container { top: 12px; right: 12px; width: calc(100vw - 24px); } }
 
-        /* ── Livewire Progress Bar ── */
+        /* â”€â”€ Livewire Progress Bar â”€â”€ */
         #lw-bar {
             position: fixed; top: 0; left: 0; height: 3px;
             background: var(--accent); z-index: 10000;
@@ -441,11 +441,11 @@
         #lw-bar.done { width: 100% !important; opacity: 0; transition: width .15s ease, opacity .3s .15s; }
         @keyframes lwGrow { 0% { width: 0 } 50% { width: 65% } 100% { width: 90% } }
 
-        /* ── Spin icon (botões salvando) ── */
+        /* â”€â”€ Spin icon (botÃµes salvando) â”€â”€ */
         .spin-icon { animation: spin .65s linear infinite; display: inline-block; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Confirm Modal ── */
+        /* â”€â”€ Confirm Modal â”€â”€ */
         #confirmModal {
             display: none; position: fixed; inset: 0;
             background: rgba(0,0,0,.5); z-index: 9997;
@@ -505,7 +505,8 @@
     $isAdvogado = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado']);
     $isFinanc   = in_array($perfil, ['admin', 'administrador', 'super_admin', 'financeiro']);
     $hubAtivo   = '';
-    $rotasProcessos  = ['processos','processos.novo','processos.editar','processos.show','pessoas','correspondentes','procuracoes','documentos','minutas','assinatura-digital','audiencias','prazos','agenda','processos.hub'];
+    $rotasProcessos  = ['processos','processos.novo','processos.editar','processos.show','documentos','minutas','assinatura-digital','audiencias','prazos','sla','agenda','processos.hub'];
+    $rotasCadastros  = ['cadastros.hub','correspondentes','procuracoes','administradoras','tabelas'];
     $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','financeiro.hub'];
     $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','ferramentas.hub','workflow.regras'];
     $rotasAdmin      = ['usuarios','tabelas','administradoras','indices','auditoria','admin.portal-acesso','admin.portal-mensagens','admin.notificacoes-whatsapp','admin.hub'];
@@ -513,6 +514,7 @@
     if (in_array($rota, $rotasFinanceiro))  $hubAtivo = 'financeiro';
     if (in_array($rota, $rotasFerramentas)) $hubAtivo = 'ferramentas';
     if (in_array($rota, $rotasAdmin))       $hubAtivo = 'admin';
+    if (in_array($rota, $rotasCadastros))   $hubAtivo = 'cadastros';
     $canProc    = in_array($perfil, ['admin','administrador','super_admin','advogado','estagiario','recepcionista']);
     $canPessoas = in_array($perfil, ['admin','administrador','super_admin','advogado','estagiario','recepcionista']);
     $canAgenda  = in_array($perfil, ['admin','administrador','super_admin','advogado','estagiario','recepcionista']);
@@ -530,6 +532,9 @@
     <a href="{{ route('processos.hub') }}" class="nav-drawer-item {{ $hubAtivo==='processos' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Processos
     </a>
+    <a href="{{ route('pessoas') }}" class="nav-drawer-item {{ in_array($rota, ['pessoas','pessoas.pasta']) ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clientes
+    </a>
     <a href="{{ route('prazos') }}" class="nav-drawer-item {{ $rota==='prazos' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Prazos
         @if($prazosHoje>0)<span style="margin-left:auto;background:#ef4444;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;">{{ $prazosHoje }}</span>@endif
@@ -537,8 +542,8 @@
     <a href="{{ route('agenda') }}" class="nav-drawer-item {{ $rota==='agenda' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agenda
     </a>
-    <a href="{{ route('pessoas') }}" class="nav-drawer-item {{ $rota==='pessoas' ? 'active' : '' }}" onclick="toggleDrawer()">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clientes
+    <a href="{{ route('cadastros.hub') }}" class="nav-drawer-item {{ $hubAtivo==='cadastros' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Cadastros
     </a>
     <div class="nav-drawer-sep"></div>
     @if($isFinanc)
@@ -546,8 +551,8 @@
         <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Financeiro
     </a>
     @endif
-    <a href="{{ route('tjsp') }}" class="nav-drawer-item {{ $rota==='tjsp' ? 'active' : '' }}" onclick="toggleDrawer()">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Monitor
+    <a href="{{ route('relatorios.index') }}" class="nav-drawer-item {{ $rota==='relatorios.index' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>Relatórios
     </a>
     @if($isAdvogado)
     <a href="{{ route('ferramentas.hub') }}" class="nav-drawer-item {{ $hubAtivo==='ferramentas' ? 'active' : '' }}" onclick="toggleDrawer()">
@@ -570,9 +575,9 @@
     </form>
 </nav>
 
-{{-- Sidebar desktop (ícone + label) --}}
+{{-- Sidebar desktop (icone + label) --}}
 <nav class="sidebar">
-    <a href="{{ route('dashboard') }}" class="nav-logo" title="SAPRO Jurídico">
+    <a href="{{ route('dashboard') }}" class="nav-logo" title="Software Jurídico">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg>
     </a>
 
@@ -586,6 +591,11 @@
         <span class="nav-btn-label">Processos</span>
     </a>
 
+    <a href="{{ route('pessoas') }}" class="nav-btn {{ in_array($rota, ['pessoas','pessoas.pasta']) ? 'active' : '' }}" title="Clientes">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <span class="nav-btn-label">Clientes</span>
+    </a>
+
     <a href="{{ route('prazos') }}" class="nav-btn {{ $rota==='prazos' ? 'active' : '' }}" title="Prazos">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <span class="nav-btn-label">Prazos</span>
@@ -597,9 +607,9 @@
         <span class="nav-btn-label">Agenda</span>
     </a>
 
-    <a href="{{ route('pessoas') }}" class="nav-btn {{ $rota==='pessoas' ? 'active' : '' }}" title="Clientes">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        <span class="nav-btn-label">Clientes</span>
+    <a href="{{ route('cadastros.hub') }}" class="nav-btn {{ $hubAtivo==='cadastros' ? 'active' : '' }}" title="Cadastros">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+        <span class="nav-btn-label">Cadastros</span>
     </a>
 
     <div class="nav-sep"></div>
@@ -611,9 +621,9 @@
     </a>
     @endif
 
-    <a href="{{ route('tjsp') }}" class="nav-btn {{ $rota==='tjsp' ? 'active' : '' }}" title="Monitor DATAJUD">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span class="nav-btn-label">Monitor</span>
+    <a href="{{ route('relatorios.index') }}" class="nav-btn {{ $rota==='relatorios.index' ? 'active' : '' }}" title="Relatórios">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+        <span class="nav-btn-label">Relatórios</span>
     </a>
 
     @if($isAdvogado)
@@ -735,7 +745,7 @@
 </div>
 
 <script>
-    // ── Drawer mobile ──
+    // â”€â”€ Drawer mobile â”€â”€
     function toggleDrawer() {
         document.getElementById('navDrawer').classList.toggle('open');
         document.getElementById('sidebarOverlay').classList.toggle('active');
@@ -747,7 +757,7 @@
     checkWidth();
     window.addEventListener('resize', checkWidth);
 
-    // ── Toasts ──
+    // â”€â”€ Toasts â”€â”€
     const TOAST_ICONS = {
         success: '<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
         error:   '<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
@@ -767,21 +777,21 @@
             }, duration);
         }
     };
-    // Session flash → toast
+    // Session flash â†’ toast
     @if(session('sucesso') || session('success'))
         toast(@json(session('sucesso') ?? session('success')), 'success');
     @endif
     @if(session('erro') || session('error'))
         toast(@json(session('erro') ?? session('error')), 'error');
     @endif
-    // Livewire events → toast
+    // Livewire events â†’ toast
     document.addEventListener('livewire:init', () => {
         Livewire.on('toast', ({ message, type = 'success', duration = 4000 }) => {
             toast(message, type, duration);
         });
     });
 
-    // ── Livewire Progress Bar + Save Button States ──
+    // â”€â”€ Livewire Progress Bar + Save Button States â”€â”€
     (function() {
         const bar = document.getElementById('lw-bar');
         let timer;
@@ -805,7 +815,7 @@
             document.querySelectorAll('[wire\\:click="salvar"]:not([data-lw-orig])').forEach(btn => {
                 btn.setAttribute('data-lw-orig', btn.innerHTML);
                 btn.disabled = true;
-                btn.innerHTML = '<svg class="spin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.18-5.19"/></svg>&nbsp;Salvando…';
+                btn.innerHTML = '<svg class="spin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.18-5.19"/></svg>&nbsp;Salvando...';
             });
         }
         function unlockSaveBtns() {
@@ -822,7 +832,7 @@
         document.addEventListener('livewire:navigated', barDone);
     })();
 
-    // ── Quick Add dropdown ──
+    // â”€â”€ Quick Add dropdown â”€â”€
     function toggleQuickAdd(e) {
         e.stopPropagation();
         document.getElementById('quickAddMenu')?.classList.toggle('open');
@@ -837,11 +847,11 @@
         if (e.key === 'Escape') document.getElementById('quickAddMenu')?.classList.remove('open');
     });
 
-    // ── Dark Mode ──
+    // â”€â”€ Dark Mode â”€â”€
     function toggleTheme() {
         const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('sapro-theme', next);
+        localStorage.setItem('software-juridico-theme', next);
         document.getElementById('themeToggle').innerHTML = next === 'dark'
             ? '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
             : '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
@@ -854,7 +864,7 @@
             : '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
     }());
 
-    // ── Custom Confirm Modal (substitui wire:confirm nativo) ──
+    // â”€â”€ Custom Confirm Modal (substitui wire:confirm nativo) â”€â”€
     (function () {
         const modal     = document.getElementById('confirmModal');
         const msgEl     = document.getElementById('confirmMsg');
@@ -876,19 +886,19 @@
             if (e.key === 'Enter')  { e.preventDefault(); close(true);  }
         });
 
-        // Livewire 3 faz `await window.confirm(msg)`, então uma Promise funciona
+        // Livewire 3 faz `await window.confirm(msg)`, entÃ£o uma Promise funciona
         window.confirm = function (message) {
             msgEl.textContent = message;
             const isDelete = /exclu|remov|apag|delet/i.test(message);
             btnOk.textContent  = isDelete ? 'Excluir' : 'Confirmar';
             btnOk.className    = 'btn ' + (isDelete ? 'btn-danger' : 'btn-primary');
             modal.style.display = 'flex';
-            setTimeout(() => btnCancel.focus(), 50); // foco no "Cancelar" por segurança
+            setTimeout(() => btnCancel.focus(), 50); // foco no "Cancelar" por seguranÃ§a
             return new Promise(r => { _resolve = r; });
         };
     }());
 
-    // ── Keyboard Shortcuts ──
+    // â”€â”€ Keyboard Shortcuts â”€â”€
     (function () {
         function inTextField() {
             const t = document.activeElement?.tagName;
@@ -896,10 +906,10 @@
         }
 
         document.addEventListener('keydown', function (e) {
-            // Ignora combinações com Ctrl/Meta (não interfere com atalhos do browser/OS)
+            // Ignora combinaÃ§Ãµes com Ctrl/Meta (nÃ£o interfere com atalhos do browser/OS)
             if (e.ctrlKey || e.metaKey) return;
 
-            // / → foca busca global
+            // / â†’ foca busca global
             if (e.key === '/' && !inTextField()) {
                 e.preventDefault();
                 const input = document.querySelector('.topbar input[type="text"]');
@@ -907,7 +917,7 @@
                 return;
             }
 
-            // Esc → fecha modal aberto ou sidebar mobile
+            // Esc â†’ fecha modal aberto ou sidebar mobile
             if (e.key === 'Escape') {
                 const backdrop = document.querySelector('.modal-backdrop');
                 if (backdrop) {
@@ -921,7 +931,7 @@
                 return;
             }
 
-            // Alt+N → clica no primeiro botão "Novo" da página
+            // Alt+N â†’ clica no primeiro botÃ£o "Novo" da pÃ¡gina
             if (e.altKey && (e.key === 'n' || e.key === 'N') && !inTextField()) {
                 e.preventDefault();
                 const content = document.querySelector('.content');
@@ -932,7 +942,7 @@
                 return;
             }
 
-            // ? → exibe atalhos disponíveis
+            // ? â†’ exibe atalhos disponÃ­veis
             if (e.key === '?' && !inTextField()) {
                 toast(
                     '<strong>Atalhos de teclado</strong><br>' +
@@ -946,7 +956,7 @@
         });
     }());
 
-    // ── Service Worker (PWA) ──
+    // â”€â”€ Service Worker (PWA) â”€â”€
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js').catch(() => {});

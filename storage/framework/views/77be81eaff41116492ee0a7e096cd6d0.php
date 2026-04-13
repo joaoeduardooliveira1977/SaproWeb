@@ -26,18 +26,18 @@
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
     <div>
-        <h1 style="font-size:24px;font-weight:800;color:var(--primary);margin:0;">Central de Ferramentas</h1>
+        <h1 style="font-size:26px;font-weight:800;color:var(--text);margin:0;">Central de Ferramentas</h1>
         <p style="font-size:13px;color:var(--muted);margin-top:4px;">Ferramentas jurídicas, consultas e assistentes inteligentes.</p>
     </div>
-    <div style="display:flex;gap:10px;">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <a href="<?php echo e(route('assistente')); ?>"
-            style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;transition:opacity .15s;"
+            style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:#fff;border:1.5px solid var(--border);color:var(--text);border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;transition:opacity .15s;"
             onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
             Assistente IA
         </a>
         <a href="<?php echo e(route('tjsp')); ?>"
-            style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#1d4ed8,#2563a8);color:#fff;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;transition:opacity .15s;"
+            style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:var(--primary);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;transition:opacity .15s;"
             onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
             Consultar DATAJUD
@@ -52,55 +52,68 @@
         [
             'label' => 'Processos Monitorados',
             'val'   => $totalProcessosMonitorados,
-            'bg'    => 'linear-gradient(135deg,#1d4ed8,#2563a8)',
+            'bg'    => '#eff6ff',
+            'cor'   => '#2563a8',
+            'tag'   => 'ativos para consulta',
             'route' => route('tjsp'),
-            'svg'   => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
+            'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
         ],
         [
             'label' => 'Andamentos Hoje',
             'val'   => $totalAndamentosHoje,
-            'bg'    => 'linear-gradient(135deg,#059669,#16a34a)',
+            'bg'    => '#f0fdf4',
+            'cor'   => '#059669',
+            'tag'   => 'importados hoje',
             'route' => route('tjsp'),
-            'svg'   => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+            'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
         ],
         [
             'label' => 'Publicações Não Vinculadas',
             'val'   => $publicacoesNaoLidas,
-            'bg'    => 'linear-gradient(135deg,#d97706,#b45309)',
+            'bg'    => '#fffbeb',
+            'cor'   => '#d97706',
+            'tag'   => 'aguardando vinculação',
             'route' => route('aasp-publicacoes'),
-            'svg'   => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/><path d="M4 6h2"/><path d="M4 10h2"/><path d="M4 14h2"/></svg>',
+            'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/><path d="M4 6h2"/><path d="M4 10h2"/><path d="M4 14h2"/></svg>',
         ],
         [
             'label' => 'Última Consulta DATAJUD',
             'val'   => $ultimaConsulta ? $ultimaConsulta->concluido_em->format('d/m H:i') : '—',
-            'bg'    => 'linear-gradient(135deg,#7c3aed,#6d28d9)',
+            'bg'    => '#f5f3ff',
+            'cor'   => '#7c3aed',
+            'tag'   => $ultimaConsulta ? 'última sincronização' : 'consulta pendente',
             'route' => route('tjsp'),
-            'svg'   => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+            'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
         ],
     ];
     ?>
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $kpis; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $k): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <a href="<?php echo e($k['route']); ?>" style="text-decoration:none;">
-        <div style="background:<?php echo e($k['bg']); ?>;border-radius:14px;padding:22px 20px;color:#fff;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 15px rgba(0,0,0,.15);"
-            onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,.2)'"
-            onmouseout="this.style.transform='';this.style.boxShadow='0 4px 15px rgba(0,0,0,.15)'">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+        <div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;transition:border-color .15s,transform .15s;"
+            onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='<?php echo e($k['cor']); ?>'"
+            onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+            <div style="width:40px;height:40px;border-radius:8px;background:<?php echo e($k['bg']); ?>;color:<?php echo e($k['cor']); ?>;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <?php echo $k['svg']; ?>
 
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
-            <div style="font-size:<?php echo e(strlen((string)$k['val']) > 8 ? '18' : '28'); ?>px;font-weight:800;margin-bottom:4px;letter-spacing:-1px;"><?php echo e($k['val']); ?></div>
-            <div style="font-size:13px;color:rgba(255,255,255,.8);font-weight:500;"><?php echo e($k['label']); ?></div>
+            <div style="min-width:0;">
+                <div style="font-size:20px;font-weight:800;color:<?php echo e($k['cor']); ?>;line-height:1.1;margin-bottom:3px;"><?php echo e($k['val']); ?></div>
+                <div style="font-size:12px;color:var(--text);font-weight:700;margin-bottom:4px;"><?php echo e($k['label']); ?></div>
+                <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    <?php echo e($k['tag']); ?>
+
+                </div>
+            </div>
         </div>
     </a>
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 </div>
 
 
-<div style="background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;">
+<div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;">
     <div style="display:flex;align-items:flex-start;gap:16px;">
-        <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+        <div style="width:52px;height:52px;border-radius:10px;background:#f5f3ff;color:#7c3aed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
         </div>
         <div style="flex:1;">
             <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:6px;">Status das Ferramentas</div>
@@ -136,8 +149,8 @@
 </div>
 
 
-<div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;">
-    <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;">Ferramentas Disponíveis</div>
+<div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;">
+    <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:20px;">Ferramentas Disponíveis</div>
     <div class="hub-ferramentas" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
         <?php
         $ferramentas = [
@@ -146,6 +159,7 @@
                 'desc'  => 'Correção monetária, juros e honorários',
                 'cor'   => '#2563a8',
                 'bg'    => '#eff6ff',
+                'badge' => 'CALC',
                 'route' => route('calculadora'),
                 'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="12" y1="10" x2="14" y2="10"/><line x1="16" y1="10" x2="16" y2="14"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="12" y1="14" x2="14" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="12" y1="18" x2="14" y2="18"/></svg>',
             ],
@@ -154,6 +168,7 @@
                 'desc'  => 'Buscar andamentos no DATAJUD/CNJ',
                 'cor'   => '#059669',
                 'bg'    => '#f0fdf4',
+                'badge' => 'CNJ',
                 'route' => route('tjsp'),
                 'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
             ],
@@ -162,6 +177,7 @@
                 'desc'  => 'Acompanhar intimações e publicações',
                 'cor'   => '#d97706',
                 'bg'    => '#fffbeb',
+                'badge' => 'AASP',
                 'route' => route('aasp-publicacoes'),
                 'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/><path d="M4 6h2"/><path d="M4 10h2"/><path d="M4 14h2"/></svg>',
             ],
@@ -170,6 +186,7 @@
                 'desc'  => 'Redação, análise e consultas inteligentes',
                 'cor'   => '#7c3aed',
                 'bg'    => '#f5f3ff',
+                'badge' => 'IA',
                 'route' => route('assistente'),
                 'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>',
             ],
@@ -178,6 +195,7 @@
                 'desc'  => 'Monitorar processos automaticamente',
                 'cor'   => '#0891b2',
                 'bg'    => '#f0f9ff',
+                'badge' => 'AUTO',
                 'route' => route('monitoramento'),
                 'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
             ],
@@ -186,6 +204,7 @@
                 'desc'  => 'Gestão comercial e funil de clientes',
                 'cor'   => '#dc2626',
                 'bg'    => '#fef2f2',
+                'badge' => 'CRM',
                 'route' => route('crm'),
                 'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
             ],
@@ -194,6 +213,7 @@
                 'desc'  => 'Regras automáticas por gatilho e ação',
                 'cor'   => '#7c3aed',
                 'bg'    => '#f5f3ff',
+                'badge' => 'FLOW',
                 'route' => route('workflow.regras'),
                 'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
             ],
@@ -201,17 +221,16 @@
         ?>
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $ferramentas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $f): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <a href="<?php echo e($f['route']); ?>" style="text-decoration:none;">
-            <div style="display:flex;align-items:center;gap:14px;padding:18px;border-radius:12px;background:<?php echo e($f['bg']); ?>;border:1.5px solid <?php echo e($f['cor']); ?>22;transition:all .15s;cursor:pointer;"
-                onmouseover="this.style.borderColor='<?php echo e($f['cor']); ?>';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.08)'"
-                onmouseout="this.style.borderColor='<?php echo e($f['cor']); ?>22';this.style.transform='';this.style.boxShadow=''">
-                <div style="width:44px;height:44px;border-radius:12px;background:#fff;color:<?php echo e($f['cor']); ?>;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.08);">
-                    <?php echo $f['svg']; ?>
-
+            <div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:16px;transition:border-color .15s,transform .15s;position:relative;min-height:148px;"
+                onmouseover="this.style.borderColor='<?php echo e($f['cor']); ?>';this.style.transform='translateY(-2px)'"
+                onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                    <div style="width:38px;height:38px;border-radius:8px;background:<?php echo e($f['bg']); ?>;color:<?php echo e($f['cor']); ?>;display:flex;align-items:center;justify-content:center;"><?php echo $f['svg']; ?></div>
+                    <span style="background:<?php echo e($f['cor']); ?>;color:#fff;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:800;"><?php echo e($f['badge']); ?></span>
                 </div>
-                <div>
-                    <div style="font-size:14px;font-weight:700;color:<?php echo e($f['cor']); ?>;"><?php echo e($f['label']); ?></div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;"><?php echo e($f['desc']); ?></div>
-                </div>
+                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:5px;"><?php echo e($f['label']); ?></div>
+                <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:8px;"><?php echo e($f['desc']); ?></div>
+                <div style="font-size:12px;font-weight:600;color:<?php echo e($f['cor']); ?>;">Acessar ferramenta →</div>
             </div>
         </a>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>

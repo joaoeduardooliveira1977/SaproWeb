@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 /**
- * SAPRO — Módulo Financeiro
+ * Software Jur�dico — Módulo Financeiro
  * Tabelas: apontamentos, pagamentos, recebimentos
  * Migradas do banco Access (APONTAMENTOS, PAGAMENTOS, RECEBIMENTOS)
  */

@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Jobs\ExecutarWorkflow;
 use App\Models\Processo;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ProcessoObserver
@@ -29,5 +30,11 @@ class ProcessoObserver
         ]);
 
         ExecutarWorkflow::paraFaseMudou($processo, $faseAnteriorId);
+    }
+
+    public function created(Processo $processo): void
+    {
+        Cache::forget("dashboard.tendencia.{$processo->tenant_id}");
+        Cache::forget("dashboard.topclientes.{$processo->tenant_id}");
     }
 }

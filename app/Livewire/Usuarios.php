@@ -106,7 +106,7 @@ class Usuarios extends Component
 
     public function toggleAtivo(int $id): void
     {
-        if ($id === auth()->id()) {
+        if ($id === auth('usuarios')->id()) {
             $this->dispatch('toast', message: 'Você não pode desativar sua própria conta!', type: 'error');
             return;
         }
@@ -115,7 +115,7 @@ class Usuarios extends Component
 
     public function excluir(int $id): void
     {
-        if ($id === auth()->id()) {
+        if ($id === auth('usuarios')->id()) {
             $this->dispatch('toast', message: 'Você não pode excluir sua própria conta!', type: 'error');
             return;
         }

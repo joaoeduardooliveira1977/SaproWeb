@@ -26,7 +26,7 @@
 
   <div class="header" style="background:{{ $headerBg }};">
     <div style="color:rgba(255,255,255,.5);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">
-      Sistema Jurídico SAPRO
+      Software Jur�dico
     </div>
     <div style="color:#fff;font-size:20px;font-weight:700;line-height:1.3;">
       {{ $fatal ? '🚨 PRAZO FATAL' : '⏳ Lembrete de Prazo' }}
@@ -87,7 +87,7 @@
 
   <div class="footer">
     <span style="font-size:11px;color:#64748b;">
-      Gerado pelo Sistema Jurídico SAPRO &nbsp;·&nbsp; {{ $geradoEm }}
+      Gerado pelo Software Jur�dico &nbsp;·&nbsp; {{ $geradoEm }}
     </span>
   </div>
 

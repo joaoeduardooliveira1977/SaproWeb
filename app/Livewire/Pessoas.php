@@ -50,6 +50,14 @@ class Pessoas extends Component
 
     public const TIPOS = ['Cliente', 'Advogado', 'Juiz', 'Parte Contrária', 'Usuário'];
 
+    public function mount(): void
+    {
+        if (request('novo') === 'cliente') {
+            $this->abrirModal();
+            $this->tipos_selecionados = ['Cliente'];
+        }
+    }
+
     protected function rules(): array
     {
         return [
@@ -103,7 +111,8 @@ class Pessoas extends Component
 
     public function salvar(): void
     {
-        abort_unless(Auth::user()->temAcao('pessoas.editar'), 403, 'Sem permissão.');
+        $usuario = Auth::guard('usuarios')->user();
+        abort_unless($usuario?->temAcao('pessoas.editar'), 403, 'Sem permissão.');
         $this->validate();
 
         $dados = [
@@ -133,7 +142,7 @@ class Pessoas extends Component
         }
 
         $pessoa->sincronizarTipos($this->tipos_selecionados);
-        Auth::user()->registrarAuditoria($acao, 'pessoas', $pessoa->id, null, ['nome' => $this->nome, 'tipos' => $this->tipos_selecionados]);
+        $usuario->registrarAuditoria($acao, 'pessoas', $pessoa->id, null, ['nome' => $this->nome, 'tipos' => $this->tipos_selecionados]);
 
         $this->fecharModal();
         $this->dispatch('toast', message: "Pessoa \"{$this->nome}\" salva com sucesso!", type: 'success');
@@ -141,10 +150,11 @@ class Pessoas extends Component
 
     public function desativar(int $id): void
     {
-        abort_unless(Auth::user()->temAcao('pessoas.desativar'), 403, 'Sem permissão.');
+        $usuario = Auth::guard('usuarios')->user();
+        abort_unless($usuario?->temAcao('pessoas.desativar'), 403, 'Sem permissão.');
         $pessoa = Pessoa::findOrFail($id);
         $pessoa->update(['ativo' => false]);
-        Auth::user()->registrarAuditoria('Desativou pessoa', 'pessoas', $id);
+        $usuario->registrarAuditoria('Desativou pessoa', 'pessoas', $id);
         $this->dispatch('toast', message: "Pessoa \"{$pessoa->nome}\" desativada.", type: 'success');
     }
 
@@ -158,7 +168,7 @@ class Pessoas extends Component
         $juizes    = Pessoa::ativos()->doTipo('Juiz')->count();
         $partes    = Pessoa::ativos()->doTipo('Parte Contrária')->count();
 
-        $contexto = "Você é um assistente jurídico do sistema SAPRO. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
 
 Dados do cadastro de pessoas:
 - Total de pessoas ativas: {$total}
@@ -257,7 +267,7 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
             return;
         }
 
-        $prompt = "Você é um assistente jurídico do sistema SAPRO. Gere um perfil completo e objetivo deste cliente.
+        $prompt = "Você é um assistente jurídico do sistema Software Jur�dico. Gere um perfil completo e objetivo deste cliente.
 
 DADOS DO CLIENTE:
 - Nome: {$pessoa->nome}

@@ -1,14 +1,141 @@
-<div>
+<div class="agenda-page">
 @verbatim
 <style>
+.agenda-page svg[width="10"] { width: 10px; height: 10px; }
+.agenda-page svg[width="11"] { width: 11px; height: 11px; }
+.agenda-page svg[width="12"] { width: 12px; height: 12px; }
+.agenda-page svg[width="13"] { width: 13px; height: 13px; }
+.agenda-page svg[width="14"] { width: 14px; height: 14px; }
+.agenda-page svg[width="15"] { width: 15px; height: 15px; }
+.agenda-page svg[width="16"] { width: 16px; height: 16px; }
+.agenda-page svg[width="18"] { width: 18px; height: 18px; }
+.agenda-page svg[width="20"] { width: 20px; height: 20px; }
+.agenda-page svg[width="40"] { width: 40px; height: 40px; }
+
+.agenda-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.agenda-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 0;
+}
+.agenda-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 2px 0 0;
+    line-height: 1.5;
+}
+.agenda-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+.agenda-guide {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    display: grid;
+    grid-template-columns: minmax(220px, .9fr) repeat(3, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: center;
+}
+.agenda-guide-title {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+.agenda-guide-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.agenda-guide h2 {
+    font-size: 15px;
+    margin: 0 0 3px;
+    color: var(--text);
+}
+.agenda-guide p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+.agenda-guide-step {
+    border-left: 3px solid var(--border);
+    padding-left: 10px;
+}
+.agenda-guide-step strong {
+    display: block;
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 3px;
+}
+.agenda-filter-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-right: 4px;
+    white-space: nowrap;
+}
+.agenda-ia-bar {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.agenda-list-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #f8fafc;
+    flex-wrap: wrap;
+}
+.agenda-list-head strong {
+    font-size: 14px;
+    color: var(--text);
+}
+.agenda-list-head span {
+    font-size: 12px;
+    color: var(--muted);
+}
+@media (max-width: 1180px) {
+    .agenda-guide { grid-template-columns: 1fr 1fr; }
+}
 @media (max-width: 900px) {
     .agenda-filter-bar { flex-wrap: wrap; }
     .agenda-filter-bar select,
     .agenda-filter-bar input[type=date] { width: 100%; }
     .agenda-filter-busca-wrap { min-width: 100%; }
+    .agenda-filter-label { width: 100%; }
 }
 @media (max-width: 768px) {
     .metricas-ag { grid-template-columns: 1fr 1fr !important; }
+    .agenda-guide { grid-template-columns: 1fr; }
+    .agenda-actions { justify-content: flex-start; }
 }
 @media (max-width: 480px) {
     .metricas-ag { grid-template-columns: 1fr !important; }
@@ -18,18 +145,18 @@
 
 {{-- Cabecalho --}}
 @if(!$embed)
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+<div class="agenda-header">
     <div>
-        <a href="{{ route('processos.hub') }}"
-           style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:6px;"
-           onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-            Voltar
-        </a>
-        <h2 style="font-size:20px;font-weight:700;color:var(--text);margin:0;">Agenda</h2>
-        <p style="font-size:13px;color:var(--muted);margin:2px 0 0;">{{ $eventos->total() }} evento{{ $eventos->total() !== 1 ? 's' : '' }} encontrado{{ $eventos->total() !== 1 ? 's' : '' }}</p>
+        <h1 class="agenda-title">Agenda</h1>
+        <p class="agenda-subtitle">
+            {{ $eventos->total() }} evento{{ $eventos->total() !== 1 ? 's' : '' }} encontrado{{ $eventos->total() !== 1 ? 's' : '' }}
+            <span style="color:#cbd5e1;margin:0 6px;">|</span>
+            <a href="{{ route('processos.hub') }}" style="color:var(--primary);text-decoration:none;font-weight:600;">Voltar para central</a>
+        </p>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+
+
+    <div class="agenda-actions">
         {{-- Toggle Vista --}}
         <div style="display:flex;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;">
             <button wire:click="{{ $vistaCalendario ? 'toggleVista' : '' }}"
@@ -52,11 +179,93 @@
         </button>
         <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
             <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Novo
+            Novo evento
         </button>
     </div>
 </div>
+<div class="agenda-guide">
+    <div class="agenda-guide-title">
+        <div class="agenda-guide-icon">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div>
+            <h2>Como usar esta agenda?</h2>
+            <p>Comece pelo que está atrasado, confirme os compromissos de hoje e depois organize os próximos 7 dias.</p>
+        </div>
+    </div>
+    <div class="agenda-guide-step" style="border-left-color:#ea580c;">
+        <strong>1. Atrasados</strong>
+        <p>Resolva ou conclua eventos que já passaram.</p>
+    </div>
+    <div class="agenda-guide-step" style="border-left-color:#2563eb;">
+        <strong>2. Hoje</strong>
+        <p>Use como pauta de atendimento e rotina diária.</p>
+    </div>
+    <div class="agenda-guide-step" style="border-left-color:#ca8a04;">
+        <strong>3. Semana</strong>
+        <p>Planeje audiências, reuniões e prazos próximos.</p>
+    </div>
+</div>
 @endif {{-- /!embed header --}}
+
+{{-- Visão rápida --}}
+@if(!$embed)
+<div class="metricas-ag" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+
+    {{-- Hoje --}}
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:22px;font-weight:800;color:#2563eb;line-height:1.1;">{{ $metricas['hoje'] }}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">eventos hoje</div>
+        </div>
+    </div>
+
+    {{-- Proximos 7 dias --}}
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:9px;background:#fefce8;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:22px;font-weight:800;color:#ca8a04;line-height:1.1;">{{ $metricas['semana'] }}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">proximos 7 dias</div>
+        </div>
+    </div>
+
+    {{-- Urgentes --}}
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:9px;background:#fff1f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:22px;font-weight:800;color:#dc2626;line-height:1.1;">{{ $metricas['urgentes'] }}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">urgentes</div>
+        </div>
+    </div>
+
+    {{-- Atrasados --}}
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:9px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:22px;font-weight:800;color:#ea580c;line-height:1.1;">{{ $metricas['atrasados'] }}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">em atraso</div>
+        </div>
+    </div>
+
+</div>
+@endif
 
 @if($embed)
 <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
@@ -69,17 +278,17 @@
 
 {{-- Analista IA --}}
 @if(!$embed)
-<div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);border-radius:12px;padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
-    <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+<div class="agenda-ia-bar">
+    <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:#eff6ff;color:#1d4ed8;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
             <path d="M18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/>
         </svg>
     </div>
     <input wire:model="perguntaIA" wire:keydown.enter="perguntarIA" type="text"
         placeholder="Pergunte sobre a agenda... Ex: quantos eventos urgentes, prazos desta semana, audiencias de amanha"
-        style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 16px;color:#fff;font-size:13px;outline:none;"
-        onfocus="this.style.borderColor='rgba(147,197,253,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.2)'">
+        style="flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-size:13px;outline:none;"
+        onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
     <button wire:click="perguntarIA" wire:loading.attr="disabled" wire:target="perguntarIA"
         style="background:#2563a8;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:background .15s;"
         onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563a8'">
@@ -107,11 +316,12 @@
 
 {{-- ══ Filtros horizontais ══ --}}
 @if(!$embed)
-<div class="agenda-filter-bar" style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+<div class="agenda-filter-bar" style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+    <span class="agenda-filter-label">Filtrar agenda</span>
 
     {{-- Tipo --}}
     <select wire:model.live="tipo"
-        style="padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:140px;outline:none;">
+        style="padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:var(--white);color:var(--text);width:132px;outline:none;">
         <option value="">Todos os tipos</option>
         <option value="Audiência">Audiência</option>
         <option value="Prazo">Prazo</option>
@@ -123,7 +333,7 @@
 
     {{-- Responsável --}}
     <select wire:model.live="responsavel_id"
-        style="padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:140px;outline:none;">
+        style="padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:var(--white);color:var(--text);width:130px;outline:none;">
         <option value="">Responsável</option>
         @foreach($responsaveis as $r)
             <option value="{{ $r->id }}">{{ $r->nome }}</option>
@@ -133,13 +343,13 @@
     {{-- Período --}}
     @if(!$vistaCalendario)
     <input wire:model.live="data_ini" type="date" title="De"
-        style="padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);width:130px;outline:none;">
+        style="padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:var(--white);color:var(--text);width:118px;outline:none;">
     <input wire:model.live="data_fim" type="date" title="Até"
-        style="padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);width:130px;outline:none;">
+        style="padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:var(--white);color:var(--text);width:118px;outline:none;">
     @endif
 
     {{-- Só pendentes --}}
-    <label style="display:flex;align-items:center;gap:7px;padding:8px 12px;border:1.5px solid {{ $so_pendentes ? '#2563a8' : 'var(--border)' }};border-radius:8px;cursor:pointer;font-size:13px;background:{{ $so_pendentes ? '#eff6ff' : 'transparent' }};color:{{ $so_pendentes ? '#1d4ed8' : 'var(--text)' }};white-space:nowrap;">
+    <label style="display:flex;align-items:center;gap:7px;padding:7px 10px;border:1.5px solid {{ $so_pendentes ? '#2563a8' : 'var(--border)' }};border-radius:7px;cursor:pointer;font-size:12px;background:{{ $so_pendentes ? '#eff6ff' : 'transparent' }};color:{{ $so_pendentes ? '#1d4ed8' : 'var(--text)' }};white-space:nowrap;">
         <input type="checkbox" wire:model.live="so_pendentes" style="width:14px;height:14px;accent-color:#2563a8;margin:0;cursor:pointer;">
         Só pendentes
     </label>
@@ -147,7 +357,7 @@
     {{-- Limpar --}}
     @if($tipo || $responsavel_id || !$so_pendentes || $data_ini !== today()->format('Y-m-d') || $data_fim !== today()->addDays(30)->format('Y-m-d'))
     <button wire:click="$set('tipo',''); $set('responsavel_id',''); $set('so_pendentes', true); $set('data_ini', '{{ today()->format('Y-m-d') }}'); $set('data_fim', '{{ today()->addDays(30)->format('Y-m-d') }}')"
-        style="margin-left:auto;padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;"
+        style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;"
         onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
         onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
         <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -162,65 +372,6 @@
 
     {{-- Coluna única --}}
     <div>
-
-        {{-- Metricas --}}
-        @if(!$embed)
-        <div class="metricas-ag" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
-
-            {{-- Hoje --}}
-            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                </div>
-                <div>
-                    <div style="font-size:22px;font-weight:800;color:#2563eb;line-height:1.1;">{{ $metricas['hoje'] }}</div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">eventos hoje</div>
-                </div>
-            </div>
-
-            {{-- Proximos 7 dias --}}
-            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;border-radius:9px;background:#fefce8;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                </div>
-                <div>
-                    <div style="font-size:22px;font-weight:800;color:#ca8a04;line-height:1.1;">{{ $metricas['semana'] }}</div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">proximos 7 dias</div>
-                </div>
-            </div>
-
-            {{-- Urgentes --}}
-            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;border-radius:9px;background:#fff1f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                </div>
-                <div>
-                    <div style="font-size:22px;font-weight:800;color:#dc2626;line-height:1.1;">{{ $metricas['urgentes'] }}</div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">urgentes</div>
-                </div>
-            </div>
-
-            {{-- Atrasados --}}
-            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;border-radius:9px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                    </svg>
-                </div>
-                <div>
-                    <div style="font-size:22px;font-weight:800;color:#ea580c;line-height:1.1;">{{ $metricas['atrasados'] }}</div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">em atraso</div>
-                </div>
-            </div>
-
-        </div>
-        @endif {{-- /!embed metricas --}}
 
         {{-- Conteudo: Calendario + Lista --}}
         <div class="card">
@@ -239,6 +390,24 @@
             $coresTipo = ['Prazo'=>'#dc2626','Audiência'=>'#d97706','Reunião'=>'#7c3aed',
                           'Consulta'=>'#0891b2','Despacho'=>'#16a34a','Outros'=>'#2563a8'];
         @endphp
+        {{-- Legenda unificada --}}
+        <div style="display:flex;gap:14px;flex-wrap:wrap;padding:10px 16px 8px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);">
+            <span style="font-weight:700;color:var(--text);">Legenda:</span>
+            <span style="display:flex;align-items:center;gap:4px;">
+                <span style="width:10px;height:10px;border-radius:2px;background:#f43f5e;display:inline-block;"></span> Prazo Fatal
+            </span>
+            <span style="display:flex;align-items:center;gap:4px;">
+                <span style="width:10px;height:10px;border-radius:2px;background:#f97316;display:inline-block;"></span> Prazo
+            </span>
+            <span style="display:flex;align-items:center;gap:4px;">
+                <span style="width:10px;height:10px;border-radius:2px;background:#3b82f6;display:inline-block;"></span> Audiência
+            </span>
+            @foreach(['Reunião'=>'#7c3aed','Consulta'=>'#0891b2','Despacho'=>'#16a34a','Outros'=>'#2563a8'] as $t => $c)
+            <span style="display:flex;align-items:center;gap:4px;">
+                <span style="width:10px;height:10px;border-radius:2px;background:{{ $c }};display:inline-block;"></span> {{ $t }}
+            </span>
+            @endforeach
+        </div>
 
         {{-- Navegação de mês --}}
         <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);">
@@ -274,15 +443,19 @@
                 @php $cursor = $inicioCelula->copy(); @endphp
                 @while($cursor->lte($ultimoDia) || $cursor->dayOfWeek !== 0)
                 @php
-                    $dataStr   = $cursor->format('Y-m-d');
-                    $doMes     = $cursor->month === $inicioMes->month;
-                    $isHoje    = $dataStr === $hoje;
-                    $isSel     = $dataStr === $diaSelecionado;
-                    $evsDia    = $eventosMes->get($dataStr, collect());
-                    $qtd       = $evsDia->count();
+                    $dataStr    = $cursor->format('Y-m-d');
+                    $doMes      = $cursor->month === $inicioMes->month;
+                    $isHoje     = $dataStr === $hoje;
+                    $isSel      = $dataStr === $diaSelecionado;
+                    $evsDia     = $eventosMes->get($dataStr, collect());
+                    $prazDia    = $prazosMes->get($dataStr, collect());
+                    $audDia     = $audienciasMes->get($dataStr, collect());
+                    $totalDia   = $evsDia->count() + $prazDia->count() + $audDia->count();
+                    $mostrados  = 0;
+                    $maxMostrar = 3;
                 @endphp
                 <div wire:click="selecionarDia('{{ $dataStr }}')"
-                    style="min-height:72px;padding:6px;border-radius:8px;cursor:pointer;
+                    style="min-height:80px;padding:6px;border-radius:8px;cursor:pointer;
                            border:2px solid {{ $isSel ? '#2563a8' : ($isHoje ? '#93c5fd' : 'transparent') }};
                            background:{{ $isSel ? '#eff6ff' : ($isHoje ? '#f0f9ff' : ($doMes ? '#fff' : '#f8fafc')) }};
                            box-shadow:{{ $doMes ? '0 1px 3px rgba(0,0,0,.06)' : 'none' }};
@@ -297,21 +470,51 @@
                         @if($isHoje)<span style="font-size:9px;background:#2563a8;color:#fff;border-radius:10px;padding:0 5px;margin-left:3px;">hoje</span>@endif
                     </div>
 
-                    {{-- Pontos/labels de eventos --}}
-                    @if($qtd > 0 && $doMes)
+                    @if($totalDia > 0 && $doMes)
                     <div style="display:flex;flex-direction:column;gap:2px;">
-                        @foreach($evsDia->take(3) as $ev)
-                        @php $cor = $coresTipo[$ev->tipo] ?? '#2563a8'; @endphp
-                        <div style="font-size:10px;font-weight:600;color:#fff;
-                                    background:{{ $cor }};border-radius:3px;padding:1px 5px;
-                                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-                             title="{{ $ev->titulo }}">
-                            {{ mb_strimwidth($ev->titulo, 0, 16, '…') }}
-                        </div>
+
+                        {{-- Prazos (fatal primeiro) --}}
+                        @foreach($prazDia->sortByDesc('prazo_fatal') as $pz)
+                            @if($mostrados < $maxMostrar)
+                            @php $corPz = $pz->prazo_fatal ? '#f43f5e' : '#f97316'; $mostrados++; @endphp
+                            <div style="font-size:10px;font-weight:600;color:#fff;background:{{ $corPz }};
+                                        border-radius:3px;padding:1px 5px;white-space:nowrap;
+                                        overflow:hidden;text-overflow:ellipsis;"
+                                 title="{{ $pz->titulo }}{{ $pz->prazo_fatal ? ' [FATAL]' : '' }}">
+                                {{ mb_strimwidth($pz->titulo, 0, 16, '…') }}
+                            </div>
+                            @endif
                         @endforeach
-                        @if($qtd > 3)
+
+                        {{-- Audiências --}}
+                        @foreach($audDia as $au)
+                            @if($mostrados < $maxMostrar)
+                            @php $mostrados++; @endphp
+                            <div style="font-size:10px;font-weight:600;color:#fff;background:#3b82f6;
+                                        border-radius:3px;padding:1px 5px;white-space:nowrap;
+                                        overflow:hidden;text-overflow:ellipsis;"
+                                 title="{{ $au->tipoLabel() }} — {{ $au->data_hora->format('H:i') }}">
+                                {{ $au->data_hora->format('H:i') }} {{ mb_strimwidth($au->tipoLabel(), 0, 10, '…') }}
+                            </div>
+                            @endif
+                        @endforeach
+
+                        {{-- Eventos de agenda --}}
+                        @foreach($evsDia as $ev)
+                            @if($mostrados < $maxMostrar)
+                            @php $cor = $coresTipo[$ev->tipo] ?? '#2563a8'; $mostrados++; @endphp
+                            <div style="font-size:10px;font-weight:600;color:#fff;background:{{ $cor }};
+                                        border-radius:3px;padding:1px 5px;white-space:nowrap;
+                                        overflow:hidden;text-overflow:ellipsis;"
+                                 title="{{ $ev->titulo }}">
+                                {{ mb_strimwidth($ev->titulo, 0, 16, '…') }}
+                            </div>
+                            @endif
+                        @endforeach
+
+                        @if($totalDia > $maxMostrar)
                         <div style="font-size:10px;color:var(--muted);font-weight:600;padding:0 2px;">
-                            +{{ $qtd - 3 }} mais
+                            +{{ $totalDia - $maxMostrar }} mais
                         </div>
                         @endif
                     </div>
@@ -323,15 +526,47 @@
             </div>
         </div>
 
-        {{-- Legenda --}}
-        <div style="display:flex;gap:10px;flex-wrap:wrap;padding:8px 16px 12px;border-top:1px solid var(--border);">
-            @foreach($coresTipo as $tipo => $cor)
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:#64748b;">
-                <span style="width:10px;height:10px;border-radius:2px;background:{{ $cor }};display:inline-block;"></span>
-                {{ $tipo }}
-            </span>
+        {{-- Detalhe de prazos e audiências do dia selecionado --}}
+        @if($diaSelecionado)
+        @php
+            $prazSel = $prazosMes->get($diaSelecionado, collect());
+            $audSel  = $audienciasMes->get($diaSelecionado, collect());
+        @endphp
+        @if($prazSel->isNotEmpty() || $audSel->isNotEmpty())
+        <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">
+                Prazos e Audiências — {{ \Carbon\Carbon::parse($diaSelecionado)->format('d/m/Y') }}
+            </div>
+            @foreach($prazSel->sortByDesc('prazo_fatal') as $pz)
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:{{ $pz->prazo_fatal ? '#fff1f2' : '#fff7ed' }};border-left:3px solid {{ $pz->prazo_fatal ? '#f43f5e' : '#f97316' }};">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:600;color:var(--text);">
+                        {{ $pz->titulo }}
+                        @if($pz->prazo_fatal)<span style="font-size:10px;background:#fecdd3;color:#e11d48;padding:1px 6px;border-radius:10px;margin-left:6px;font-weight:700;">FATAL</span>@endif
+                    </div>
+                    @if($pz->processo)<div style="font-size:12px;color:var(--muted);margin-top:2px;">Processo {{ $pz->processo->numero }}</div>@endif
+                </div>
+                <span style="font-size:11px;font-weight:700;color:{{ $pz->prazo_fatal ? '#e11d48' : '#ea580c' }};white-space:nowrap;">
+                    {{ ucfirst($pz->status) }}
+                </span>
+            </div>
+            @endforeach
+            @foreach($audSel as $au)
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:#eff6ff;border-left:3px solid #3b82f6;">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:600;color:var(--text);">
+                        {{ $au->tipoLabel() }} — {{ $au->data_hora->format('H:i') }}
+                    </div>
+                    @if($au->processo)<div style="font-size:12px;color:var(--muted);margin-top:2px;">Processo {{ $au->processo->numero }}</div>@endif
+                </div>
+                @if($au->processo)
+                <a href="{{ route('processos.show', $au->processo_id) }}" style="font-size:11px;color:#2563eb;white-space:nowrap;text-decoration:none;">ver</a>
+                @endif
+            </div>
             @endforeach
         </div>
+        @endif
+        @endif
 
         @if($diaSelecionado)
         <div style="padding:0 16px 4px;display:flex;align-items:center;gap:8px;">
@@ -351,6 +586,13 @@
         {{-- LISTA (sempre visível; no calendário mostra o dia sel) --}}
         {{-- ══════════════════════════════════════════════════════ --}}
         @if(!$vistaCalendario || $diaSelecionado)
+        <div class="agenda-list-head">
+            <div>
+                <strong>{{ $diaSelecionado ? 'Eventos do dia selecionado' : 'Próximos eventos' }}</strong>
+                <span>{{ $so_pendentes ? 'Mostrando compromissos pendentes.' : 'Incluindo eventos concluídos.' }}</span>
+            </div>
+            <span>{{ $eventos->total() }} registro(s)</span>
+        </div>
         <div class="table-wrap">
             <table style="border-collapse:collapse;width:100%;">
                 <thead>

@@ -8,14 +8,23 @@ use Illuminate\Support\Facades\Log;
 class TjspService
 {
     const API_URL  = 'https://api-publica.datajud.cnj.jus.br/api_publica_tjsp/_search';
-    const API_KEY  = 'APIKey cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
-
     /**
      * Consulta andamentos de um processo no DATAJUD/CNJ
      */
     public function consultarProcesso(string $numero): array
     {
         try {
+            $apiKey = config('services.datajud.key');
+            if (!$apiKey) {
+                return [
+                    'sucesso' => false,
+                    'erro'    => 'DATAJUD_API_KEY nao configurada.',
+                ];
+            }
+            if (!str_starts_with($apiKey, 'APIKey ')) {
+                $apiKey = 'APIKey ' . $apiKey;
+            }
+
             // Limpar número do processo
             $numeroLimpo = preg_replace('/[^0-9]/', '', $numero);
 
@@ -34,7 +43,7 @@ class TjspService
             try {
                 $response = Http::timeout(15)
                     ->withHeaders([
-                        'Authorization' => self::API_KEY,
+                        'Authorization' => $apiKey,
                         'Content-Type'  => 'application/json',
                     ])
                     ->post(self::API_URL, [

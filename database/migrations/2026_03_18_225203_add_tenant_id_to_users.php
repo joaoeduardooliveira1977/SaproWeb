@@ -9,20 +9,32 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up()
-{
-    Schema::table('users', function (Blueprint $table) {
-        $table->unsignedBigInteger('tenant_id')->nullable();
-    });
-}
+    public function up(): void
+    {
+        foreach (['users', 'usuarios'] as $tableName) {
+            if (!Schema::hasTable($tableName) || Schema::hasColumn($tableName, 'tenant_id')) {
+                continue;
+            }
+
+            Schema::table($tableName, function (Blueprint $table) {
+                $table->unsignedBigInteger('tenant_id')->nullable()->index();
+            });
+        }
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        foreach (['users', 'usuarios'] as $tableName) {
+            if (!Schema::hasTable($tableName) || !Schema::hasColumn($tableName, 'tenant_id')) {
+                continue;
+            }
+
+            Schema::table($tableName, function (Blueprint $table) {
+                $table->dropColumn('tenant_id');
+            });
+        }
     }
 };

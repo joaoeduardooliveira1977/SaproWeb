@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Admin — SAPRO</title>
+    <title>Super Admin — Software Jur�dico</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; min-height: 100vh; }
@@ -36,7 +36,7 @@
 
 <div class="topbar">
     <div class="topbar-title">
-        ⚖️ SAPRO
+        ⚖️ Software Jur�dico
         <span class="topbar-badge">SUPER ADMIN</span>
     </div>
     <a href="{{ route('dashboard') }}" class="btn btn-blue" style="color:#93c5fd;background:rgba(255,255,255,.1);">

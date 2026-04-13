@@ -146,7 +146,7 @@ class AssinaturaDigital extends Component
             'descricao'    => $this->descricao ?: null,
             'processo_id'  => $this->processo_id ?: null,
             'documento_id' => $this->documento_id ?: null,
-            'criado_por'   => Auth::id(),
+            'criado_por'   => Auth::guard('usuarios')->id(),
             'arquivo_path' => $arquivoPatch,
             'arquivo_nome' => $arquivoNome,
             'deadline_at'  => $this->deadline_at ?: null,

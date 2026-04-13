@@ -32,6 +32,11 @@ class AIService
         return $this->driver->gerar($prompt, $maxTokens);
     }
 
+    public function perguntar(string $prompt, int $maxTokens = 1024): ?string
+    {
+        return $this->gerar($prompt, $maxTokens);
+    }
+
     /**
      * Geração multi-turn com system prompt separado.
      *

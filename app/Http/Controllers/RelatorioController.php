@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\{Processo, Pessoa, Agenda, Custa, Andamento};
+use App\Models\{Processo, Pessoa, Agenda, Custa, TipoAcao};
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
@@ -18,11 +18,14 @@ class RelatorioController extends Controller
             ->join('pessoa_tipos as pt', 'pt.pessoa_id', '=', 'p.id')
             ->where('pt.tipo', 'Cliente')
             ->where('p.ativo', true)
+            ->where('p.tenant_id', tenant_id())
             ->orderBy('p.nome')
             ->select('p.id', 'p.nome')
             ->get();
 
-        return view('relatorios.index', compact('clientes'));
+        $tiposAcao = TipoAcao::orderBy('descricao')->get(['id', 'descricao']);
+
+        return view('relatorios.index', compact('clientes', 'tiposAcao'));
     }
 
     // ── Helpers ────────────────────────────────────────────────
@@ -56,6 +59,22 @@ class RelatorioController extends Controller
         return $pdf->download($nome);
     }
 
+    // ── CSV helper ────────────────────────────────────────────
+
+    private function csv(array $cabecalho, array $linhas, string $nome): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $arquivo = $nome . '_' . now()->format('Ymd_Hi') . '.csv';
+        return response()->streamDownload(function () use ($cabecalho, $linhas) {
+            $f = fopen('php://output', 'w');
+            fputs($f, "\xEF\xBB\xBF"); // BOM para Excel reconhecer UTF-8
+            fputcsv($f, $cabecalho, ';');
+            foreach ($linhas as $linha) {
+                fputcsv($f, array_values((array) $linha), ';');
+            }
+            fclose($f);
+        }, $arquivo, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     // ── 1. Processos por Fase ──────────────────────────────────
 
     public function processosPorFase(Request $request)
@@ -79,6 +98,19 @@ class RelatorioController extends Controller
             })
             ->filter(fn($f) => $f['total'] > 0)
             ->values();
+
+        if ($request->formato === 'csv') {
+            $linhas = [];
+            foreach ($fases as $grupo) {
+                foreach ($grupo['processos'] as $p) {
+                    $linhas[] = [
+                        $grupo['fase'], $p->numero, $p->status,
+                        $p->cliente?->nome ?? '', $p->advogado?->nome ?? '',
+                    ];
+                }
+            }
+            return $this->csv(['Fase', 'Número', 'Status', 'Cliente', 'Advogado'], $linhas, 'processos_por_fase');
+        }
 
         return $this->pdf('pdf.processos-por-fase', [
             'fases'  => $fases,
@@ -111,6 +143,19 @@ class RelatorioController extends Controller
             })
             ->filter(fn($a) => $a['total'] > 0)
             ->values();
+
+        if ($request->formato === 'csv') {
+            $linhas = [];
+            foreach ($advogados as $grupo) {
+                foreach ($grupo['processos'] as $p) {
+                    $linhas[] = [
+                        $grupo['advogado'], $p->numero, $p->status,
+                        $p->cliente?->nome ?? '', $p->fase?->descricao ?? '',
+                    ];
+                }
+            }
+            return $this->csv(['Advogado', 'Número', 'Status', 'Cliente', 'Fase'], $linhas, 'processos_por_advogado');
+        }
 
         return $this->pdf('pdf.processos-por-advogado', [
             'advogados' => $advogados,
@@ -294,8 +339,21 @@ class RelatorioController extends Controller
             ]);
 
         $clienteNome = $clienteId
-            ? (DB::table('pessoas')->where('id', $clienteId)->value('nome') ?? 'Todos')
+            ? (DB::table('pessoas')->where('id', $clienteId)->where('tenant_id', tenant_id())->value('nome') ?? 'Todos')
             : 'Todos os Clientes';
+
+        if ($request->formato === 'csv') {
+            $linhas = $parcelas->map(fn($r) => [
+                $r['cliente'], $r['processo'], $r['honorario'], $r['tipo'],
+                'Parcela ' . $r['parcela'],
+                number_format($r['valor'], 2, ',', '.'),
+                $r['vencimento'], $r['atraso'] ?? '', $r['status'],
+            ])->toArray();
+            return $this->csv(
+                ['Cliente','Processo','Honorário','Tipo','Parcela','Valor','Vencimento','Atraso','Status'],
+                $linhas, 'honorarios_em_aberto'
+            );
+        }
 
         return $this->pdf('pdf.honorarios-em-aberto', [
             'parcelas'    => $parcelas,
@@ -334,6 +392,29 @@ class RelatorioController extends Controller
         $totalAReceber = $recebimentos->where('recebido', false)->sum('valor');
         $totalPago     = $pagamentos->where('pago', true)->sum('valor_pago');
         $totalAPagar   = $pagamentos->where('pago', false)->sum('valor');
+
+        if ($request->formato === 'csv') {
+            $linhas = [];
+            foreach ($recebimentos as $r) {
+                $linhas[] = [
+                    'Receita', $r->data, $r->processo_numero ?? '', $r->cliente_nome ?? '',
+                    $r->descricao, number_format($r->recebido ? $r->valor_recebido : $r->valor, 2, ',', '.'),
+                    $r->recebido ? 'Recebido' : 'Pendente',
+                ];
+            }
+            foreach ($pagamentos as $p) {
+                $linhas[] = [
+                    'Despesa', $p->data, $p->processo_numero ?? '', $p->cliente_nome ?? '',
+                    $p->descricao, number_format($p->pago ? $p->valor_pago : $p->valor, 2, ',', '.'),
+                    $p->pago ? 'Pago' : 'Pendente',
+                ];
+            }
+            usort($linhas, fn($a, $b) => $a[1] <=> $b[1]);
+            return $this->csv(
+                ['Tipo','Data','Processo','Cliente','Descrição','Valor','Status'],
+                $linhas, 'financeiro_periodo'
+            );
+        }
 
         return $this->pdf('pdf.financeiro-periodo', [
             'recebimentos'  => $recebimentos,
@@ -417,6 +498,100 @@ class RelatorioController extends Controller
             'dataIniFmt' => $ini->format('d/m/Y'),
             'dataFimFmt' => $fim->format('d/m/Y'),
         ], 'Produtividade por Advogado');
+    }
+
+    // ── 12. Processos por Tipo de Ação ────────────────────────
+
+    public function processosPorTipoAcao(Request $request)
+    {
+        $status = $request->status ?? 'Ativo';
+
+        $tipos = TipoAcao::orderBy('descricao')->get()->map(function ($tipo) use ($status) {
+            $processos = Processo::with(['cliente', 'advogado', 'fase'])
+                ->where('tipo_acao_id', $tipo->id)
+                ->when($status !== 'Todos', fn($q) => $q->where('status', $status))
+                ->orderBy('numero')
+                ->get();
+            return [
+                'tipo'      => $tipo->descricao,
+                'total'     => $processos->count(),
+                'processos' => $processos,
+            ];
+        })->filter(fn($t) => $t['total'] > 0)->values();
+
+        if ($request->formato === 'csv') {
+            $linhas = [];
+            foreach ($tipos as $grupo) {
+                foreach ($grupo['processos'] as $p) {
+                    $linhas[] = [
+                        $grupo['tipo'], $p->numero, $p->status,
+                        $p->cliente?->nome ?? '', $p->advogado?->nome ?? '',
+                        $p->fase?->descricao ?? '',
+                    ];
+                }
+            }
+            return $this->csv(
+                ['Tipo de Ação', 'Número', 'Status', 'Cliente', 'Advogado', 'Fase'],
+                $linhas, 'processos_por_tipo_acao'
+            );
+        }
+
+        return $this->pdf('pdf.processos-por-tipo-acao', [
+            'tipos'  => $tipos,
+            'status' => $status,
+            'total'  => $tipos->sum('total'),
+        ], 'Processos por Tipo de Ação');
+    }
+
+    // ── 13. Lista Geral de Processos ──────────────────────────
+
+    public function listaGeral(Request $request)
+    {
+        $status    = $request->status    ?? 'Ativo';
+        $clienteId = $request->cliente_id ? (int) $request->cliente_id : null;
+        $tipoId    = $request->tipo_acao_id ? (int) $request->tipo_acao_id : null;
+
+        $processos = Processo::with(['cliente', 'advogado', 'fase', 'tipoAcao', 'risco'])
+            ->when($status !== 'Todos', fn($q) => $q->where('status', $status))
+            ->when($clienteId, fn($q) => $q->where('cliente_id', $clienteId))
+            ->when($tipoId,    fn($q) => $q->where('tipo_acao_id', $tipoId))
+            ->orderBy('numero')
+            ->get();
+
+        $clienteNome = $clienteId
+            ? (Pessoa::find($clienteId)?->nome ?? 'Todos')
+            : 'Todos os Clientes';
+
+        $tipoNome = $tipoId
+            ? (TipoAcao::find($tipoId)?->descricao ?? 'Todos')
+            : 'Todos os Tipos';
+
+        if ($request->formato === 'csv') {
+            $linhas = $processos->map(fn($p) => [
+                $p->numero,
+                $p->status,
+                $p->cliente?->nome ?? '',
+                $p->advogado?->nome ?? '',
+                $p->tipoAcao?->descricao ?? '',
+                $p->fase?->descricao ?? '',
+                $p->risco?->descricao ?? '',
+                $p->vara ?? '',
+                $p->data_distribuicao?->format('d/m/Y') ?? '',
+                $p->valor_causa ? number_format($p->valor_causa, 2, ',', '.') : '',
+            ])->toArray();
+            return $this->csv(
+                ['Número','Status','Cliente','Advogado','Tipo de Ação','Fase','Risco','Vara','Distribuição','Valor da Causa'],
+                $linhas, 'lista_geral_processos'
+            );
+        }
+
+        return $this->pdf('pdf.lista-geral-processos', [
+            'processos'   => $processos,
+            'status'      => $status,
+            'clienteNome' => $clienteNome,
+            'tipoNome'    => $tipoNome,
+            'total'       => $processos->count(),
+        ], 'Lista Geral de Processos');
     }
 
     // ── 6. Aniversários de Clientes ────────────────────────────

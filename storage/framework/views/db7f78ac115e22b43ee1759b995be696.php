@@ -1,5 +1,4 @@
-<?php $__env->startSection('page-title', 'Pessoas'); ?>
-<?php $__env->startSection('breadcrumb'); ?><span class="current">Pessoas</span><?php $__env->stopSection(); ?>
+<?php $__env->startSection('page-title', 'Clientes'); ?>
 <?php $__env->startSection('content'); ?>
 <?php
 $__split = function ($name, $params = []) {

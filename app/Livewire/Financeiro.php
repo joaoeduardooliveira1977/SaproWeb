@@ -8,7 +8,7 @@ use App\Models\{Apontamento, Pagamento, Recebimento, Fornecedor, OrigemRecebimen
 use Illuminate\Support\Facades\Auth;
 
 /**
- * SAPRO — Módulo Financeiro por Processo
+ * Software Jur�dico — Módulo Financeiro por Processo
  * Gerencia Apontamentos, Pagamentos e Recebimentos.
  */
 class Financeiro extends Component
@@ -178,7 +178,7 @@ class Financeiro extends Component
             'data_vencimento' => $this->data_vencimento  ?: null,
             'data_pagamento'  => $this->data_pagamento   ?: null,
             'pago'            => $this->pago,
-            'usuario_id'      => Auth::id(),
+            'usuario_id'      => Auth::guard('usuarios')->id(),
         ];
 
         $this->registroId
@@ -198,7 +198,7 @@ class Financeiro extends Component
             'numero_doc'       => $this->numero_doc         ?: null,
             'data_recebimento' => $this->data_recebimento   ?: null,
             'recebido'         => $this->recebido,
-            'usuario_id'       => Auth::id(),
+            'usuario_id'       => Auth::guard('usuarios')->id(),
         ];
 
         $this->registroId
@@ -215,7 +215,7 @@ class Financeiro extends Component
             'descricao'   => $this->descricao,
             'horas'       => $this->toDecimal($this->horas),
             'valor'       => $this->toDecimal($this->valor),
-            'usuario_id'  => Auth::id(),
+            'usuario_id'  => Auth::guard('usuarios')->id(),
         ];
 
         $this->registroId

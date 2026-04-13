@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasTable('aasp_publicacoes') || Schema::hasColumn('aasp_publicacoes', 'processo_id')) {
+            return;
+        }
+
         Schema::table('aasp_publicacoes', function (Blueprint $table) {
             $table->foreignId('processo_id')->nullable()->after('codigo_aasp')
                   ->constrained('processos')->nullOnDelete();
@@ -17,9 +21,12 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (!Schema::hasTable('aasp_publicacoes') || !Schema::hasColumn('aasp_publicacoes', 'processo_id')) {
+            return;
+        }
+
         Schema::table('aasp_publicacoes', function (Blueprint $table) {
-            $table->dropForeign(['processo_id']);
-            $table->dropColumn('processo_id');
+            $table->dropConstrainedForeignId('processo_id');
         });
     }
 };

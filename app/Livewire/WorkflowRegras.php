@@ -185,7 +185,7 @@ class WorkflowRegras extends Component
             $regra->update($dados);
             $regra->acoes()->delete();
         } else {
-            $dados['tenant_id']       = Auth::user()->tenant_id;
+            $dados['tenant_id']       = Auth::guard('usuarios')->user()?->tenant_id;
             $dados['execucoes_total'] = 0;
             $regra = WorkflowRegra::create($dados);
         }

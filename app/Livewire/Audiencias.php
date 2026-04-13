@@ -151,7 +151,7 @@ class Audiencias extends Component
             Audiencia::findOrFail($this->audienciaId)->update($dados);
             $this->dispatch('toast', message: 'Audiência atualizada.', type: 'success');
         } else {
-            $dados['criado_por'] = Auth::id();
+            $dados['criado_por'] = Auth::guard('usuarios')->id();
             Audiencia::create($dados);
             $this->dispatch('toast', message: 'Audiência cadastrada.', type: 'success');
         }

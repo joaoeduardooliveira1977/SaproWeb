@@ -1,7 +1,7 @@
 {
   "id": "/dashboard",
-  "name": "Sistema JurÃ­dico SAPRO",
-  "short_name": "SAPRO",
+  "name": "Software Jurídico",
+  "short_name": "Software Jurídico",
   "description": "Sistema de Acompanhamento de Processos",
   "start_url": "/dashboard",
   "display": "standalone",

@@ -43,7 +43,7 @@
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
     <div>
         <h1 style="font-size:26px;font-weight:800;color:var(--text);margin:0;">Central Financeira</h1>
-        <p style="font-size:13px;color:var(--muted);margin-top:4px;">Controle financeiro, honorários, inadimplência e relatórios com visual premium integrado ao padrão do sistema.</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:4px;">Controle financeiro, honorários, inadimplência e relatórios em uma visão rápida da operação.</p>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <a href="{{ route('financeiro') }}"
@@ -51,11 +51,11 @@
             + Registrar Receita
         </a>
         <a href="{{ route('financeiro') }}"
-            style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:linear-gradient(135deg,#059669,#16a34a);color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">
+            style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:var(--primary);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
             + Registrar Despesa
         </a>
         <a href="{{ route('relatorios.index') }}"
-            style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:linear-gradient(135deg,#1d4ed8,#2563a8);color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">
+            style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#fff;border:1.5px solid var(--border);color:var(--text);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">
             Ver Relatórios
         </a>
     </div>
@@ -119,7 +119,7 @@
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <a href="{{ route('inadimplencia') }}"
-                style="padding:9px 18px;background:linear-gradient(135deg,#059669,#16a34a);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
+                style="padding:9px 18px;background:var(--primary);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
                 Cobrar Cliente
             </a>
             <a href="{{ route('financeiro') }}"
@@ -134,12 +134,12 @@
     </div>
 
     {{-- Painel Executivo --}}
-    <div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);border-radius:16px;padding:28px;color:#fff;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#93c5fd;margin-bottom:8px;">PAINEL EXECUTIVO</div>
-        <div style="font-size:34px;font-weight:800;letter-spacing:-1px;margin-bottom:8px;">
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;color:var(--text);">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px;">Painel Executivo</div>
+        <div style="font-size:30px;font-weight:800;letter-spacing:-1px;margin-bottom:8px;color:var(--primary);">
             R$ {{ number_format($honorariosPend + $aReceber, 2, ',', '.') }}
         </div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:20px;line-height:1.5;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5;">
             Total atual em honorários pendentes, com carteira {{ $inadimplentes === 0 ? 'estável e sem clientes inadimplentes' : 'com ' . $inadimplentes . ' clientes inadimplentes' }} no momento.
         </div>
 
@@ -153,9 +153,9 @@
             ];
             @endphp
             @foreach($submetricas as $sm)
-            <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:14px;">
-                <div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:4px;">{{ $sm['val'] }}</div>
-                <div style="font-size:11px;color:#94a3b8;">{{ $sm['label'] }}</div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px;">{{ $sm['val'] }}</div>
+                <div style="font-size:11px;color:var(--muted);">{{ $sm['label'] }}</div>
             </div>
             @endforeach
         </div>
@@ -170,46 +170,52 @@
             'label'  => 'A Receber',
             'val'    => 'R$ ' . number_format($aReceber, 2, ',', '.'),
             'tag'    => $titulosAtivos . ' títulos ativos',
-            'bg'     => 'linear-gradient(135deg,#059669,#16a34a)',
+            'cor'    => '#059669',
+            'icon_bg'=> '#f0fdf4',
             'route'  => route('financeiro.consolidado'),
-            'svg'    => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+            'svg'    => '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
         ],
         [
             'label'  => 'Recebido no Mês',
             'val'    => 'R$ ' . number_format($recebidoMes, 2, ',', '.'),
             'tag'    => $recebidoMes == 0 ? 'início de ciclo' : 'registrado este mês',
-            'bg'     => 'linear-gradient(135deg,#1d4ed8,#2563a8)',
+            'cor'    => '#2563a8',
+            'icon_bg'=> '#eff6ff',
             'route'  => route('financeiro.consolidado'),
-            'svg'    => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>',
+            'svg'    => '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>',
         ],
         [
             'label'  => 'Clientes Inadimplentes',
             'val'    => $inadimplentes,
             'tag'    => $inadimplentes === 0 ? 'nenhum risco agora' : 'atenção imediata',
-            'bg'     => 'linear-gradient(135deg,#dc2626,#b91c1c)',
+            'cor'    => '#dc2626',
+            'icon_bg'=> '#fef2f2',
             'route'  => route('inadimplencia'),
-            'svg'    => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+            'svg'    => '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
         ],
         [
             'label'  => 'Honorários Pendentes',
             'val'    => 'R$ ' . number_format($honorariosPend, 2, ',', '.'),
             'tag'    => $cobrancasAberto . ' cobranças aguardando',
-            'bg'     => 'linear-gradient(135deg,#d97706,#b45309)',
+            'cor'    => '#d97706',
+            'icon_bg'=> '#fffbeb',
             'route'  => route('honorarios'),
-            'svg'    => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+            'svg'    => '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
         ],
     ];
     @endphp
     @foreach($kpis as $k)
     <a href="{{ $k['route'] }}" style="text-decoration:none;">
-        <div style="background:{{ $k['bg'] }};border-radius:14px;padding:22px 18px;color:#fff;box-shadow:0 4px 15px rgba(0,0,0,.15);transition:transform .15s,box-shadow .15s;"
-            onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,.2)'"
-            onmouseout="this.style.transform='';this.style.boxShadow='0 4px 15px rgba(0,0,0,.15)'">
-            <div style="margin-bottom:14px;">{!! $k['svg'] !!}</div>
-            <div style="font-size:24px;font-weight:800;margin-bottom:4px;letter-spacing:-1px;">{{ $k['val'] }}</div>
-            <div style="font-size:13px;color:rgba(255,255,255,.8);margin-bottom:10px;">{{ $k['label'] }}</div>
-            <div style="display:inline-block;background:rgba(0,0,0,.2);padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;">
-                {{ $k['tag'] }}
+        <div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;transition:border-color .15s,transform .15s;"
+            onmouseover="this.style.borderColor='{{ $k['cor'] }}';this.style.transform='translateY(-2px)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+            <div style="width:40px;height:40px;border-radius:8px;background:{{ $k['icon_bg'] }};color:{{ $k['cor'] }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">{!! $k['svg'] !!}</div>
+            <div style="min-width:0;">
+                <div style="font-size:20px;font-weight:800;color:{{ $k['cor'] }};line-height:1.1;margin-bottom:3px;">{{ $k['val'] }}</div>
+                <div style="font-size:12px;color:var(--text);font-weight:700;margin-bottom:4px;">{{ $k['label'] }}</div>
+                <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    {{ $k['tag'] }}
+                </div>
             </div>
         </div>
     </a>
@@ -292,11 +298,11 @@
             @endphp
             @foreach($modulos as $m)
             <a href="{{ $m['route'] }}" style="text-decoration:none;">
-                <div style="background:{{ $m['bg'] }};border:1.5px solid {{ $m['cor'] }}22;border-radius:12px;padding:18px;transition:all .15s;position:relative;"
+                <div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:16px;transition:border-color .15s,transform .15s;position:relative;"
                     onmouseover="this.style.borderColor='{{ $m['cor'] }}';this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.borderColor='{{ $m['cor'] }}22';this.style.transform=''">
+                    onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-                        <div style="color:{{ $m['cor'] }};">{!! $m['svg'] !!}</div>
+                        <div style="width:38px;height:38px;border-radius:8px;background:{{ $m['bg'] }};color:{{ $m['cor'] }};display:flex;align-items:center;justify-content:center;">{!! $m['svg'] !!}</div>
                         <span style="background:{{ $m['badge_bg'] }};color:#fff;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:800;">{{ $m['badge'] }}</span>
                     </div>
                     <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:5px;">{{ $m['label'] }}</div>
@@ -322,7 +328,7 @@
                 <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">Nenhum recebimento registrado</div>
                 <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Comece registrando o primeiro pagamento para alimentar os indicadores da central financeira.</div>
                 <a href="{{ route('financeiro') }}"
-                    style="display:inline-block;padding:10px 20px;background:linear-gradient(135deg,#059669,#16a34a);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
+                    style="display:inline-block;padding:10px 20px;background:var(--primary);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
                     Registrar Agora
                 </a>
             </div>

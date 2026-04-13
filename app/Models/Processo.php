@@ -15,10 +15,10 @@ class Processo extends Model
 	protected $table = 'processos';
 
     protected $fillable = [
-        'numero', 'data_distribuicao', 'extrajudicial', 'cliente_id', 'parte_contraria',
-        'parte_contraria_id', 'autor_reu', 'unidade', 'advogado_id', 'juiz_id',
-        'tipo_acao_id', 'tipo_processo_id', 'fase_id', 'assunto_id', 'risco_id',
-        'secretaria_id', 'reparticao_id', 'vara', 'valor_causa', 'valor_risco',
+        'tenant_id', 'numero', 'data_distribuicao', 'extrajudicial', 'cliente_id', 'parte_contraria',
+        'parte_contraria_id', 'autor_reu', 'unidade', 'advogado_id',
+        'tipo_acao_id', 'tipo_processo_id', 'fase_id', 'risco_id',
+        'reparticao_id', 'vara', 'valor_causa', 'valor_risco',
         'observacoes', 'status', 'criado_por',
         'analise_ia', 'analise_ia_em',
         'score', 'resumo_ia', 'monitoramento_ativo', 'frequencia_monitoramento',
@@ -56,11 +56,6 @@ class Processo extends Model
         return $this->belongsToMany(Pessoa::class, 'processo_advogado', 'processo_id', 'advogado_id');
     }
 
-    public function juiz(): BelongsTo
-    {
-        return $this->belongsTo(Pessoa::class, 'juiz_id');
-    }
-
     public function tipoAcao(): BelongsTo
     {
         return $this->belongsTo(TipoAcao::class, 'tipo_acao_id');
@@ -76,19 +71,9 @@ class Processo extends Model
         return $this->belongsTo(Fase::class, 'fase_id');
     }
 
-    public function assunto(): BelongsTo
-    {
-        return $this->belongsTo(Assunto::class, 'assunto_id');
-    }
-
     public function risco(): BelongsTo
     {
         return $this->belongsTo(GrauRisco::class, 'risco_id');
-    }
-
-    public function secretaria(): BelongsTo
-    {
-        return $this->belongsTo(Secretaria::class, 'secretaria_id');
     }
 
     public function reparticao(): BelongsTo

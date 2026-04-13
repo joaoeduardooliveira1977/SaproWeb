@@ -11,7 +11,7 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        // Guard principal do SAPRO
+        // Guard principal do Software Jurídico
         'usuarios' => [
             'driver' => 'session',
             'provider' => 'usuarios',

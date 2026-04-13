@@ -26,6 +26,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('indices_monetarios');
+        // Tabela criada pela migration 2024_01_01_000001_create_tabelas_dominio.
+        // Esta migration apenas cobre instalacoes antigas em que ela ainda nao existia.
     }
 };

@@ -35,9 +35,16 @@
                                  'processos.numero', 'processos.id as processo_id', 'pessoas.nome as cliente_nome')
                         ->orderByDesc('andamentos.created_at')
                         ->limit(5)->get();
+
+    $itensAtencao = [
+        ['label' => 'Prazos vencidos', 'valor' => $prazosVencidos, 'route' => route('prazos'), 'cor' => '#dc2626', 'bg' => '#fef2f2'],
+        ['label' => 'Prazos em 7 dias', 'valor' => $prazos7dias, 'route' => route('prazos'), 'cor' => '#d97706', 'bg' => '#fffbeb'],
+        ['label' => 'Sem atualização', 'valor' => $processosParados, 'route' => route('processos'), 'cor' => '#7c3aed', 'bg' => '#f5f3ff'],
+        ['label' => 'Audiências amanhã', 'valor' => $audienciasAmanha, 'route' => route('audiencias'), 'cor' => '#2563a8', 'bg' => '#eff6ff'],
+    ];
 @endphp
 
-<div>
+<div style="display:flex;flex-direction:column;">
 
 {{-- ── Cabeçalho ── --}}
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
@@ -56,147 +63,103 @@
             Novo Processo
         </a>
         <a href="{{ route('assistente') }}"
-            style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;transition:opacity .15s;"
+            style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#fff;color:#1d4ed8;border:1px solid var(--border);border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;transition:opacity .15s;"
             onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
             Resumo com IA
         </a>
     </div>
 </div>
 
-{{-- ── KPIs coloridos ── --}}
-<div class="hub-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
-    @php
-    $kpis = [
-        ['label'=>'Processos Ativos',     'val'=>$totalAtivos,      'bg'=>'linear-gradient(135deg,#1d4ed8,#2563a8)', 'route'=>route('processos'),
-         'svg'=>'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'],
-        ['label'=>'Prazos Hoje',          'val'=>$prazosHoje,       'bg'=>'linear-gradient(135deg,#7c3aed,#6d28d9)', 'route'=>route('prazos'),
-         'svg'=>'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'],
-        ['label'=>'Audiências na Semana', 'val'=>$audienciasSemana, 'bg'=>'linear-gradient(135deg,#059669,#16a34a)', 'route'=>route('audiencias'),
-         'svg'=>'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'],
-        ['label'=>'Procurações Vencendo', 'val'=>$procuracoesVenc,  'bg'=>'linear-gradient(135deg,#dc2626,#b91c1c)', 'route'=>route('procuracoes'),
-         'svg'=>'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'],
-    ];
-    @endphp
-    @foreach($kpis as $k)
-    <a href="{{ $k['route'] }}" style="text-decoration:none;">
-        <div style="background:{{ $k['bg'] }};border-radius:14px;padding:22px 20px;color:#fff;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 15px rgba(0,0,0,.15);"
-            onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,.2)'"
-            onmouseout="this.style.transform='';this.style.boxShadow='0 4px 15px rgba(0,0,0,.15)'">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
-                {!! $k['svg'] !!}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-            <div style="font-size:32px;font-weight:800;margin-bottom:4px;letter-spacing:-1px;">{{ $k['val'] }}</div>
-            <div style="font-size:13px;color:rgba(255,255,255,.8);font-weight:500;">{{ $k['label'] }}</div>
+{{-- ── Atenção necessária ── --}}
+<div style="background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;">
+        <div>
+            <div style="font-size:16px;font-weight:800;color:var(--text);">Atenção necessária</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px;">Priorize o que pode exigir uma providência hoje.</div>
         </div>
-    </a>
-    @endforeach
-</div>
-
-{{-- ── Resumo Inteligente ── --}}
-<div style="background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;">
-    <div style="display:flex;align-items:flex-start;gap:16px;">
-        <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#1d4ed8,#7c3aed);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
-        </div>
-        <div style="flex:1;">
-            <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:6px;">Resumo Inteligente</div>
-            <div style="font-size:13px;color:var(--muted);line-height:1.7;">
-                @if($prazosVencidos > 0 || $prazosHoje > 0)
-                    Você tem <strong style="color:#dc2626;">{{ $prazosVencidos }} prazo(s) vencido(s)</strong>
-                    @if($prazos7dias > 0) e <strong style="color:#d97706;">{{ $prazos7dias }} prazo(s) nos próximos 7 dias</strong>@endif.
-                    @if($processosParados > 0) Além disso, <strong style="color:#7c3aed;">{{ $processosParados }} processo(s) estão parados</strong> há mais de 30 dias.@endif
-                @else
-                    Tudo em ordem! Nenhum prazo urgente ou vencido. 🎉
-                @endif
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:12px;color:var(--muted);">
-                @if($prazosHoje > 0)
-                <span style="display:flex;align-items:center;gap:5px;">
-                    <svg width="8" height="8" viewBox="0 0 24 24" fill="#dc2626" stroke="none"><circle cx="12" cy="12" r="10"/></svg>
-                    <strong style="color:#dc2626;">{{ $prazosHoje }} prazo(s)</strong>&nbsp;vencem hoje
-                </span>
-                @endif
-                @if($prazos7dias > 0)
-                <span style="display:flex;align-items:center;gap:5px;">
-                    <svg width="8" height="8" viewBox="0 0 24 24" fill="#d97706" stroke="none"><circle cx="12" cy="12" r="10"/></svg>
-                    <strong style="color:#d97706;">{{ $prazos7dias }}</strong>&nbsp;nesta semana
-                </span>
-                @endif
-                @if($audienciasAmanha > 0)
-                <span style="display:flex;align-items:center;gap:5px;">
-                    <svg width="8" height="8" viewBox="0 0 24 24" fill="#2563a8" stroke="none"><circle cx="12" cy="12" r="10"/></svg>
-                    <strong style="color:#2563a8;">{{ $audienciasAmanha }} audiência(s)</strong>&nbsp;amanhã
-                </span>
-                @endif
-                @if($processosParados > 0)
-                <span style="display:flex;align-items:center;gap:5px;">
-                    <svg width="8" height="8" viewBox="0 0 24 24" fill="#7c3aed" stroke="none"><circle cx="12" cy="12" r="10"/></svg>
-                    <strong style="color:#7c3aed;">{{ $processosParados }} processo(s)</strong>&nbsp;sem atualização
-                </span>
-                @endif
-            </div>
-        </div>
+        @if(collect($itensAtencao)->sum('valor') === 0)
+        <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;background:#f0fdf4;color:#15803d;font-size:12px;font-weight:700;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Tudo em ordem
+        </span>
+        @endif
     </div>
-</div>
-
-{{-- ── Operação ── --}}
-<div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div style="font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-            Operação
-        </div>
-        <a href="{{ route('processos') }}" style="font-size:12px;color:var(--primary);text-decoration:none;">Ver todos...</a>
-    </div>
-    <div class="hub-operacao" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
-        @php
-        $operacao = [
-            ['label'=>'Processos',  'sub'=>$totalAtivos.' ativos',                           'cor'=>'#1d4ed8','bg'=>'#eff6ff','route'=>route('processos')],
-            ['label'=>'Prazos',     'sub'=>$prazosHoje.' hoje / '.$prazos7dias.' sem.',       'cor'=>'#7c3aed','bg'=>'#f5f3ff','route'=>route('prazos')],
-            ['label'=>'Audiências', 'sub'=>$audienciasSemana.' nesta sem.',                   'cor'=>'#059669','bg'=>'#f0fdf4','route'=>route('audiencias')],
-            ['label'=>'Agenda',     'sub'=>'Compromissos',                                    'cor'=>'#d97706','bg'=>'#fffbeb','route'=>route('agenda')],
-        ];
-        @endphp
-        @foreach($operacao as $item)
-        <a href="{{ $item['route'] }}" style="text-decoration:none;display:flex;align-items:center;gap:10px;padding:16px;border-radius:8px;background:{{ $item['bg'] }};transition:opacity .15s;"
-            onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
-            <div style="width:14px;height:14px;border-radius:50%;background:{{ $item['cor'] }};flex-shrink:0;"></div>
-            <div>
-                <div style="font-size:14px;font-weight:600;color:{{ $item['cor'] }};">{{ $item['label'] }}</div>
-                <div style="font-size:12px;color:var(--muted);">{{ $item['sub'] }}</div>
-            </div>
+    <div class="hub-atencao" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        @foreach($itensAtencao as $item)
+        @php $semPendencia = (int) $item['valor'] === 0; @endphp
+        <a href="{{ $item['route'] }}" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border-radius:8px;background:{{ $semPendencia ? '#f8fafc' : $item['bg'] }};border:1px solid {{ $semPendencia ? '#e2e8f0' : 'transparent' }};">
+            <span style="display:flex;align-items:center;gap:9px;min-width:0;">
+                <span style="width:10px;height:10px;border-radius:50%;background:{{ $semPendencia ? '#94a3b8' : $item['cor'] }};flex-shrink:0;"></span>
+                <span style="font-size:13px;font-weight:700;color:{{ $semPendencia ? 'var(--muted)' : $item['cor'] }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $item['label'] }}</span>
+            </span>
+            <span style="font-size:18px;font-weight:800;color:{{ $semPendencia ? 'var(--muted)' : $item['cor'] }};">{{ $item['valor'] }}</span>
         </a>
         @endforeach
     </div>
 </div>
 
-{{-- ── Cadastro e Apoio ── --}}
-<div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div style="font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Cadastro e Apoio
+{{-- ── Resumo Inteligente ── --}}
+<div style="order:2;background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:flex-start;gap:12px;min-width:260px;flex:1;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#eff6ff;color:#1d4ed8;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+            </div>
+            <div>
+                <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:3px;">Resumo Inteligente</div>
+                <div style="font-size:13px;color:var(--muted);line-height:1.5;">
+                    @if($prazosVencidos > 0 || $prazosHoje > 0)
+                        {{ $prazosVencidos }} prazo(s) vencido(s), {{ $prazos7dias }} nos próximos 7 dias e {{ $processosParados }} processo(s) sem atualização.
+                    @else
+                        Tudo em ordem. Nenhum prazo urgente ou vencido.
+                    @endif
+                </div>
+            </div>
         </div>
-        <a href="{{ route('pessoas') }}" style="font-size:12px;color:var(--primary);text-decoration:none;">Ver todos...</a>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+            @if($processosParados > 0)
+            <a href="{{ route('processos') }}" class="btn btn-outline btn-sm">Ver processos parados</a>
+            @endif
+            @if($prazos7dias > 0 || $prazosVencidos > 0)
+            <a href="{{ route('prazos') }}" class="btn btn-outline btn-sm">Ver prazos</a>
+            @endif
+            <a href="{{ route('assistente') }}" class="btn btn-primary btn-sm">Resumo com IA</a>
+        </div>
     </div>
-    <div class="hub-operacao" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+</div>
+
+{{-- ── Acessos rápidos ── --}}
+<div style="order:1;background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+        <div>
+            <div style="font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                Acessos rápidos
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px;">Principais áreas de trabalho e apoio do escritório.</div>
+        </div>
+    </div>
+    <div class="hub-acessos" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
         @php
-        $cadastro = [
-            ['label'=>'Pessoas',         'sub'=>'Partes e clientes',          'cor'=>'#2563a8','bg'=>'#eff6ff','route'=>route('pessoas')],
-            ['label'=>'Correspondentes', 'sub'=>'Jurídicos',                  'cor'=>'#0891b2','bg'=>'#f0f9ff','route'=>route('correspondentes')],
-            ['label'=>'Procurações',     'sub'=>$procuracoesVenc.' vencendo', 'cor'=>'#dc2626','bg'=>'#fef2f2','route'=>route('procuracoes')],
-            ['label'=>'Documentos',      'sub'=>'Arquivos do processo',       'cor'=>'#7c3aed','bg'=>'#f5f3ff','route'=>route('documentos')],
+        $acessosRapidos = [
+            ['label'=>'Processos',        'sub'=>$totalAtivos.' ativos',                       'cor'=>'#1d4ed8','route'=>route('processos')],
+            ['label'=>'Prazos',           'sub'=>$prazosHoje.' hoje / '.$prazos7dias.' sem.',   'cor'=>'#dc2626','route'=>route('prazos')],
+            ['label'=>'Audiências',       'sub'=>$audienciasSemana.' nesta sem.',               'cor'=>'#059669','route'=>route('audiencias')],
+            ['label'=>'Agenda',           'sub'=>'Compromissos',                                'cor'=>'#d97706','route'=>route('agenda')],
+            ['label'=>'Pessoas',          'sub'=>'Partes e clientes',                           'cor'=>'#2563a8','route'=>route('pessoas')],
+            ['label'=>'Correspondentes',  'sub'=>'Jurídicos',                                   'cor'=>'#0891b2','route'=>route('correspondentes')],
+            ['label'=>'Procurações',      'sub'=>$procuracoesVenc.' vencendo',                  'cor'=>'#dc2626','route'=>route('procuracoes')],
+            ['label'=>'Documentos',       'sub'=>'Arquivos do processo',                        'cor'=>'#7c3aed','route'=>route('documentos')],
         ];
         @endphp
-        @foreach($cadastro as $item)
-        <a href="{{ $item['route'] }}" style="text-decoration:none;display:flex;align-items:center;gap:10px;padding:16px;border-radius:8px;background:{{ $item['bg'] }};transition:opacity .15s;"
-            onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
-            <div style="width:14px;height:14px;border-radius:50%;background:{{ $item['cor'] }};flex-shrink:0;"></div>
-            <div>
-                <div style="font-size:14px;font-weight:600;color:{{ $item['cor'] }};">{{ $item['label'] }}</div>
-                <div style="font-size:12px;color:var(--muted);">{{ $item['sub'] }}</div>
+        @foreach($acessosRapidos as $item)
+        <a href="{{ $item['route'] }}" style="text-decoration:none;display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:8px;background:#f8fafc;border:1px solid var(--border);transition:all .15s;"
+            onmouseover="this.style.borderColor='{{ $item['cor'] }}';this.style.background='#fff'" onmouseout="this.style.borderColor='var(--border)';this.style.background='#f8fafc'">
+            <div style="width:10px;height:10px;border-radius:50%;background:{{ $item['cor'] }};flex-shrink:0;"></div>
+            <div style="min-width:0;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $item['label'] }}</div>
+                <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $item['sub'] }}</div>
             </div>
         </a>
         @endforeach
@@ -204,7 +167,7 @@
 </div>
 
 {{-- ── Linha: Prazos Urgentes + Últimas Movimentações ── --}}
-<div class="hub-bottom hub-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+<div class="hub-bottom hub-grid-2" style="order:3;display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
 
     {{-- Prazos Urgentes --}}
     <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;">
@@ -291,13 +254,13 @@
 
 <style>
 @media (max-width: 1024px) {
-    .hub-kpis              { grid-template-columns: repeat(2, 1fr) !important; }
-    .hub-operacao          { grid-template-columns: repeat(2, 1fr) !important; }
+    .hub-atencao           { grid-template-columns: repeat(2, 1fr) !important; }
+    .hub-acessos           { grid-template-columns: repeat(2, 1fr) !important; }
     .hub-bottom, .hub-grid-2 { grid-template-columns: 1fr !important; }
 }
 @media (max-width: 640px) {
-    .hub-kpis     { grid-template-columns: 1fr 1fr !important; }
-    .hub-operacao { grid-template-columns: 1fr 1fr !important; }
+    .hub-atencao  { grid-template-columns: 1fr !important; }
+    .hub-acessos  { grid-template-columns: 1fr 1fr !important; }
 }
 </style>
 @endsection

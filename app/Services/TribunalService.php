@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\Log;
 class TribunalService
 {
     const BASE_URL = 'https://api-publica.datajud.cnj.jus.br';
-    const API_KEY  = 'APIKey cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
-
     const TRIBUNAIS = [
         '8.26' => ['nome' => 'TJSP',  'endpoint' => 'api_publica_tjsp'],
         '8.19' => ['nome' => 'TJMG',  'endpoint' => 'api_publica_tjmg'],
@@ -54,6 +52,14 @@ class TribunalService
     public function consultarProcesso(string $numero): array
     {
         try {
+            $apiKey = config('services.datajud.key');
+            if (!$apiKey) {
+                return ['sucesso' => false, 'erro' => 'DATAJUD_API_KEY nao configurada.'];
+            }
+            if (!str_starts_with($apiKey, 'APIKey ')) {
+                $apiKey = 'APIKey ' . $apiKey;
+            }
+
             $numeroLimpo = preg_replace('/[^0-9]/', '', $numero);
 
             if (strlen($numeroLimpo) < 15) {
@@ -77,7 +83,7 @@ class TribunalService
             try {
                 $response = Http::timeout(15)
                     ->withHeaders([
-                        'Authorization' => self::API_KEY,
+                        'Authorization' => $apiKey,
                         'Content-Type'  => 'application/json',
                     ])
                     ->post($url, [

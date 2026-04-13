@@ -109,7 +109,7 @@ class Monitoramento extends Component
             return;
         }
 
-        $userId = Auth::id();
+        $userId = Auth::guard('usuarios')->id();
 
         foreach ($linhas as $numero) {
             $lote = LoteVerificacao::create([
@@ -277,8 +277,10 @@ $feedQuery = Processo::with(['cliente', 'andamentos' => fn($q) => $q->latest()->
     ->when($this->filtroStatus, fn($q) => $q->where('status', $this->filtroStatus))
     ->when($this->filtroPrazo !== 'todos', fn($q) => $q->where('score', $this->filtroPrazo))
     ->when($this->buscaFeed, fn($q) => $q
-        ->where('numero', 'ilike', "%{$this->buscaFeed}%")
-        ->orWhereHas('cliente', fn($c) => $c->where('nome', 'ilike', "%{$this->buscaFeed}%"))
+        ->where(fn($sub) => $sub
+            ->where('numero', 'ilike', "%{$this->buscaFeed}%")
+            ->orWhereHas('cliente', fn($c) => $c->where('nome', 'ilike', "%{$this->buscaFeed}%"))
+        )
     )
     ->when($this->filtroNumero, fn($q) => $q->where('numero', 'ilike', "%{$this->filtroNumero}%"))
     ->when($this->filtroAdvogado, fn($q) => $q->where('advogado_id', $this->filtroAdvogado))
@@ -323,10 +325,7 @@ $feedQuery = Processo::with(['cliente', 'andamentos' => fn($q) => $q->latest()->
         ->latest()
         ->paginate(20 * $this->pagina);
 
-    $notificacoes = Notificacao::where(function ($q) use ($userId) {
-            $q->where('usuario_id', $userId)
-              ->orWhereNull('usuario_id');
-        })
+    $notificacoes = Notificacao::paraUsuario($userId)
         ->latest()
         ->limit(50)
         ->get();

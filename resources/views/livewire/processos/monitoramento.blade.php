@@ -1,4 +1,4 @@
-<div>
+<div class="datajud-page">
 
 {{-- ══════════════════════════════════════════════════════════════
      POLLING condicional
@@ -11,7 +11,7 @@
 {{-- ══════════════════════════════════════════════════════════════
      LAYOUT PRINCIPAL: grade 2 colunas
 ══════════════════════════════════════════════════════════════ --}}
-<div style="display:grid;grid-template-columns:1fr 300px;gap:0;align-items:flex-start;">
+<div class="datajud-layout" style="display:grid;grid-template-columns:1fr 300px;gap:0;align-items:flex-start;">
 
     {{-- ── Coluna principal ───────────────────────────────────── --}}
     <div style="min-width:0;padding-right:16px;">
@@ -21,24 +21,98 @@
             <a href="{{ route('processos') }}"
                style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);text-decoration:none;margin-bottom:6px;opacity:.65;transition:opacity .15s,color .15s;"
                onmouseover="this.style.opacity='1';this.style.color='#059669'" onmouseout="this.style.opacity='.65';this.style.color='var(--muted)'">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                <svg width="11" height="11" style="width:11px;height:11px;min-width:11px;min-height:11px;max-width:11px;max-height:11px;display:block;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
                 Processos
             </a>
-            <h2 style="font-size:21px;font-weight:700;color:#0f2540;margin:0 0 2px;">Monitoramento Inteligente</h2>
-            <p style="font-size:13px;color:#64748b;margin:0;">Acompanhamento em tempo real de andamentos e alertas</p>
+            <h2 style="font-size:24px;font-weight:800;color:var(--text);margin:0 0 4px;">Monitoramento DATAJUD</h2>
+            <p style="font-size:13px;color:var(--muted);margin:0;">Consulte andamentos, verifique processos em lote e acompanhe alertas importantes.</p>
+        </div>
+
+        @php
+            if (($totalCriticos ?? 0) > 0) {
+                $acaoRecomendada = [
+                    'label' => 'Comece pelos processos críticos',
+                    'desc' => 'Há processos que podem exigir providência imediata.',
+                    'aba' => 'feed',
+                    'cor' => '#dc2626',
+                    'bg' => '#fef2f2',
+                ];
+            } elseif (($notificacoesNaoLidas ?? 0) > 0) {
+                $acaoRecomendada = [
+                    'label' => 'Revise as notificações pendentes',
+                    'desc' => 'Existem avisos não lidos que podem afetar a rotina.',
+                    'aba' => 'feed',
+                    'cor' => '#d97706',
+                    'bg' => '#fffbeb',
+                ];
+            } elseif (($monitorados->count() ?? 0) === 0) {
+                $acaoRecomendada = [
+                    'label' => 'Ative o primeiro monitoramento',
+                    'desc' => 'Escolha processos relevantes para acompanhamento recorrente.',
+                    'aba' => 'monitoramentos',
+                    'cor' => '#7c3aed',
+                    'bg' => '#f5f3ff',
+                ];
+            } else {
+                $acaoRecomendada = [
+                    'label' => 'Consulte os processos no DATAJUD',
+                    'desc' => 'Rode uma consulta para buscar novas movimentações.',
+                    'aba' => 'lote',
+                    'cor' => '#059669',
+                    'bg' => '#f0fdf4',
+                ];
+            }
+        @endphp
+
+        {{-- Guia rápido --}}
+        <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;">
+                <div style="min-width:260px;flex:1;">
+                    <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;">O que fazer nesta tela?</div>
+                    <div style="font-size:13px;color:var(--muted);line-height:1.6;">
+                        Use o DATAJUD para encontrar novas movimentações dos processos. Comece por alertas e andamentos, ou faça uma consulta quando quiser verificar vários processos de uma vez.
+                    </div>
+                    <button wire:click="$set('aba','{{ $acaoRecomendada['aba'] }}')"
+                        style="display:flex;align-items:flex-start;gap:10px;text-align:left;margin-top:14px;background:{{ $acaoRecomendada['bg'] }};border:1.5px solid {{ $acaoRecomendada['cor'] }}33;border-radius:10px;padding:12px;cursor:pointer;width:100%;">
+                        <span style="width:10px;height:10px;border-radius:50%;background:{{ $acaoRecomendada['cor'] }};flex-shrink:0;margin-top:4px;"></span>
+                        <span>
+                            <span style="display:block;font-size:12px;font-weight:800;color:{{ $acaoRecomendada['cor'] }};margin-bottom:3px;">Próxima ação recomendada</span>
+                            <span style="display:block;font-size:13px;font-weight:700;color:var(--text);">{{ $acaoRecomendada['label'] }}</span>
+                            <span style="display:block;font-size:11px;color:var(--muted);line-height:1.4;margin-top:3px;">{{ $acaoRecomendada['desc'] }}</span>
+                        </span>
+                    </button>
+                </div>
+                <div class="datajud-guide-actions" style="display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:10px;flex:1.4;min-width:420px;">
+                    <button wire:click="$set('aba','feed')"
+                        style="text-align:left;background:{{ $aba === 'feed' ? '#eff6ff' : '#fff' }};border:1.5px solid {{ $aba === 'feed' ? '#2563a8' : 'var(--border)' }};border-radius:10px;padding:12px;cursor:pointer;">
+                        <div style="font-size:12px;font-weight:800;color:#2563a8;margin-bottom:4px;">1. Ver alertas</div>
+                        <div style="font-size:11px;color:var(--muted);line-height:1.4;">Abra o feed para priorizar processos críticos e novos andamentos.</div>
+                    </button>
+                    <button wire:click="$set('aba','lote')"
+                        style="text-align:left;background:{{ $aba === 'lote' ? '#f0fdf4' : '#fff' }};border:1.5px solid {{ $aba === 'lote' ? '#059669' : 'var(--border)' }};border-radius:10px;padding:12px;cursor:pointer;">
+                        <div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:4px;">2. Consultar processos</div>
+                        <div style="font-size:11px;color:var(--muted);line-height:1.4;">Verifique todos os ativos ou cole uma lista de números CNJ.</div>
+                    </button>
+                    <button wire:click="$set('aba','monitoramentos')"
+                        style="text-align:left;background:{{ $aba === 'monitoramentos' ? '#f5f3ff' : '#fff' }};border:1.5px solid {{ $aba === 'monitoramentos' ? '#7c3aed' : 'var(--border)' }};border-radius:10px;padding:12px;cursor:pointer;">
+                        <div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:4px;">3. Monitorar casos</div>
+                        <div style="font-size:11px;color:var(--muted);line-height:1.4;">Ative acompanhamento nos processos que precisam de vigilância.</div>
+                    </button>
+                </div>
+            </div>
         </div>
 
         {{-- STAT CARDS --}}
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+        <div class="datajud-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">
 
             {{-- Card 1: Processos Críticos --}}
             <div wire:click="setFiltroFeed('critico')"
-                 style="background:linear-gradient(135deg,#fee2e2,#fecaca);border-radius:12px;padding:14px 16px;cursor:pointer;
-                        border:1.5px solid transparent;transition:border-color .15s,transform .15s;box-shadow:0 1px 4px rgba(0,0,0,.06);"
+                 style="background:#fff;border-radius:10px;padding:16px;cursor:pointer;
+                        border:1.5px solid var(--border);transition:border-color .15s,transform .15s;"
                  onmouseover="this.style.borderColor='#ef4444';this.style.transform='translateY(-2px)'"
-                 onmouseout="this.style.borderColor='transparent';this.style.transform='translateY(0)'">
-                <div style="width:32px;height:32px;border-radius:10px;background:#ef4444;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
-                    <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24">
+                 onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+                <div style="width:32px;height:32px;border-radius:8px;background:#fef2f2;color:#dc2626;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                         <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                     </svg>
@@ -48,44 +122,44 @@
             </div>
 
             {{-- Card 2: Prazos / Notif não lidas --}}
-            <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:12px;padding:14px 16px;cursor:default;
-                        border:1.5px solid transparent;transition:border-color .15s,transform .15s;box-shadow:0 1px 4px rgba(0,0,0,.06);"
+            <div style="background:#fff;border-radius:10px;padding:16px;cursor:default;
+                        border:1.5px solid var(--border);transition:border-color .15s,transform .15s;"
                  onmouseover="this.style.borderColor='#f59e0b';this.style.transform='translateY(-2px)'"
-                 onmouseout="this.style.borderColor='transparent';this.style.transform='translateY(0)'">
-                <div style="width:32px;height:32px;border-radius:10px;background:#f59e0b;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
-                    <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24">
+                 onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+                <div style="width:32px;height:32px;border-radius:8px;background:#fffbeb;color:#d97706;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
                     </svg>
                 </div>
                 <div style="font-size:24px;font-weight:700;color:#1e293b;line-height:1;">{{ $notificacoesNaoLidas }}</div>
-                <div style="font-size:11px;color:#64748b;margin-top:3px;font-weight:500;">Prazos Críticos</div>
+                <div style="font-size:11px;color:#64748b;margin-top:3px;font-weight:500;">Avisos Pendentes</div>
             </div>
 
            
 
  {{-- Card 3: Novos Andamentos --}}
-            <div style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-radius:12px;padding:14px 16px;cursor:default;
-                        border:1.5px solid transparent;transition:border-color .15s,transform .15s;box-shadow:0 1px 4px rgba(0,0,0,.06);"
+            <div style="background:#fff;border-radius:10px;padding:16px;cursor:default;
+                        border:1.5px solid var(--border);transition:border-color .15s,transform .15s;"
                  onmouseover="this.style.borderColor='#10b981';this.style.transform='translateY(-2px)'"
-                 onmouseout="this.style.borderColor='transparent';this.style.transform='translateY(0)'">
-                <div style="width:32px;height:32px;border-radius:10px;background:#10b981;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
-                    <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24">
+                 onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+                <div style="width:32px;height:32px;border-radius:8px;background:#f0fdf4;color:#059669;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <polyline points="9,11 12,14 22,4"/>
                         <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
                     </svg>
                 </div>
                 <div style="font-size:24px;font-weight:700;color:#1e293b;line-height:1;">{{ $feedQuery->total() }}</div>
-                <div style="font-size:11px;color:#64748b;margin-top:3px;font-weight:500;">Novos Andamentos</div>
+                <div style="font-size:11px;color:#64748b;margin-top:3px;font-weight:500;">Andamentos no Feed</div>
             </div>
 
             {{-- Card 4: Monitorados Ativos --}}
             <div wire:click="$set('aba','monitoramentos')"
-                 style="background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-radius:12px;padding:14px 16px;cursor:pointer;
-                        border:1.5px solid transparent;transition:border-color .15s,transform .15s;box-shadow:0 1px 4px rgba(0,0,0,.06);"
+                 style="background:#fff;border-radius:10px;padding:16px;cursor:pointer;
+                        border:1.5px solid var(--border);transition:border-color .15s,transform .15s;"
                  onmouseover="this.style.borderColor='#3b82f6';this.style.transform='translateY(-2px)'"
-                 onmouseout="this.style.borderColor='transparent';this.style.transform='translateY(0)'">
-                <div style="width:32px;height:32px;border-radius:10px;background:#3b82f6;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
-                    <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24">
+                 onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+                <div style="width:32px;height:32px;border-radius:8px;background:#eff6ff;color:#2563a8;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
                     </svg>
                 </div>
@@ -96,29 +170,13 @@
         </div>{{-- fim stat cards --}}
 
         {{-- TOOLBAR --}}
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;justify-content:flex-start;margin-bottom:14px;gap:10px;flex-wrap:wrap;">
             <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:#64748b;">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                 </svg>
                 <span>Última atualização: {{ \Carbon\Carbon::parse($ultimaAtualizacao)->diffForHumans() }}</span>
             </div>
-            <button wire:click="atualizarAgora" wire:loading.attr="disabled"
-                    style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:8px;
-                           font-size:12px;font-weight:600;background:#059669;color:#fff;border:none;cursor:pointer;
-                           transition:background .15s;"
-                    onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
-                <svg wire:loading.remove wire:target="atualizarAgora" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-                </svg>
-                <svg wire:loading wire:target="atualizarAgora" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite;">
-                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                </svg>
-                <span wire:loading.remove wire:target="atualizarAgora">Atualizar Andamentos Agora</span>
-                <span wire:loading wire:target="atualizarAgora">Atualizando...</span>
-            </button>
-
-
         </div>
 
      
@@ -126,10 +184,9 @@
         {{-- ABAS --}}
         <div style="display:flex;align-items:center;border-bottom:2px solid #e2e8f0;margin-bottom:16px;">
             @foreach([
-                'feed'           => 'Feed de Andamentos',
-                'lote'           => 'Verificar em Lote',
-                'monitoramentos' => 'Monitoramentos',
-                'historico'      => 'Histórico',
+                'feed'           => 'Alertas e Andamentos',
+                'lote'           => 'Consultar no DATAJUD',
+                'monitoramentos' => 'Processos Monitorados',
             ] as $tab => $label)
                 <button wire:click="$set('aba','{{ $tab }}')"
                         style="padding:9px 18px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;white-space:nowrap;
@@ -142,18 +199,67 @@
             
 
             <div style="flex:1;"></div>
-            <button wire:click="toggleFiltros"
+            <button wire:click="$set('aba','historico')"
                 style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;
-                       font-size:12px;font-weight:600;cursor:pointer;
-                       border:1.5px solid {{ $painelFiltros ? '#1D9E75' : '#e2e8f0' }};
-                       background:{{ $painelFiltros ? '#EAF3DE' : '#fff' }};
-                       color:{{ $painelFiltros ? '#059669' : '#64748b' }};">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg>
-                Outros Filtros
+                       font-size:12px;font-weight:600;cursor:pointer;margin-right:8px;
+                       border:1.5px solid {{ $aba === 'historico' ? '#2563a8' : '#e2e8f0' }};
+                       background:{{ $aba === 'historico' ? '#eff6ff' : '#fff' }};
+                       color:{{ $aba === 'historico' ? '#2563a8' : '#64748b' }};">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Histórico
             </button>
+            @if($aba === 'feed')
+                <button wire:click="toggleFiltros"
+                    style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;
+                           font-size:12px;font-weight:600;cursor:pointer;
+                           border:1.5px solid {{ $painelFiltros ? '#1D9E75' : '#e2e8f0' }};
+                           background:{{ $painelFiltros ? '#EAF3DE' : '#fff' }};
+                           color:{{ $painelFiltros ? '#059669' : '#64748b' }};">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg>
+                    Outros Filtros
+                </button>
+            @endif
         </div>
 
-@if($painelFiltros)
+        @php
+            $dicasPorAba = [
+                'feed' => [
+                    'titulo' => 'Priorize o que exige atenção',
+                    'texto' => 'Use os chips de criticidade para começar pelos processos com maior risco. Os filtros avançados aparecem apenas nesta aba.',
+                    'cor' => '#2563a8',
+                    'bg' => '#eff6ff',
+                ],
+                'lote' => [
+                    'titulo' => 'Escolha uma forma de consulta',
+                    'texto' => 'Use “Consultar todos” para uma varredura ampla ou “Consultar lista” quando quiser verificar apenas processos específicos.',
+                    'cor' => '#059669',
+                    'bg' => '#f0fdf4',
+                ],
+                'monitoramentos' => [
+                    'titulo' => 'Acompanhe só os casos relevantes',
+                    'texto' => 'Mantenha aqui os processos que precisam de vigilância recorrente. O restante pode ser consultado sob demanda.',
+                    'cor' => '#7c3aed',
+                    'bg' => '#f5f3ff',
+                ],
+                'historico' => [
+                    'titulo' => 'Consulte o passado quando precisar',
+                    'texto' => 'O histórico fica separado para pesquisa e conferência, sem competir com os alertas do dia.',
+                    'cor' => '#2563a8',
+                    'bg' => '#eff6ff',
+                ],
+            ];
+            $dicaAba = $dicasPorAba[$aba] ?? $dicasPorAba['feed'];
+        @endphp
+
+        <div style="display:flex;align-items:flex-start;gap:10px;background:{{ $dicaAba['bg'] }};border:1px solid {{ $dicaAba['cor'] }}22;border-left:3px solid {{ $dicaAba['cor'] }};border-radius:10px;padding:11px 13px;margin:-4px 0 16px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:{{ $dicaAba['cor'] }};flex-shrink:0;margin-top:5px;"></span>
+            <span>
+                <span style="display:block;font-size:12px;font-weight:800;color:{{ $dicaAba['cor'] }};margin-bottom:2px;">{{ $dicaAba['titulo'] }}</span>
+                <span style="display:block;font-size:12px;color:#475569;line-height:1.45;">{{ $dicaAba['texto'] }}</span>
+            </span>
+        </div>
+
+@if($aba === 'feed' && $painelFiltros)
 
 <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin-top:10px;">
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px;">
@@ -265,6 +371,7 @@
                 $andamento   = $processo->andamentos->first();
                 $dataAndamen = $andamento ? \Carbon\Carbon::parse($andamento->created_at) : null;
                 $grupoData   = $dataAndamen ? $dataAndamen->toDateString() : null;
+                $diasSemAnd  = $dataAndamen ? (int) $dataAndamen->diffInDays(now()) : null;
 
                 // ── Detecção de tipo de andamento ──────────────────
                 $tipoAndamento = 'outro';
@@ -384,17 +491,30 @@
                             </div>
                         @elseif($processo->resumo_ia)
                             <div style="font-size:12px;color:#475569;line-height:1.5;">{{ Str::limit($processo->resumo_ia, 80) }}</div>
+                        @else
+                            <span style="font-size:11px;color:#94a3b8;">sem atualização registrada</span>
                         @endif
                     </div>
 
-                    {{-- Cliente + seta (canto direito) --}}
-                    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;padding-top:2px;">
-                        <span style="font-size:11px;color:#64748b;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;">
-                            {{ $processo->cliente->nome ?? '—' }}
+                    {{-- Cliente + dias sem atualização + seta (canto direito) --}}
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;padding-top:2px;">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span style="font-size:11px;color:#64748b;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;">
+                                {{ $processo->cliente->nome ?? '—' }}
+                            </span>
+                            <svg width="14" height="14" style="width:14px;height:14px;min-width:14px;min-height:14px;max-width:14px;max-height:14px;display:block;flex-shrink:0;" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </div>
+                        @if($diasSemAnd !== null && $diasSemAnd >= 7)
+                        @php
+                            $diasBg  = $diasSemAnd >= 30 ? '#fee2e2' : ($diasSemAnd >= 14 ? '#fef3c7' : '#f1f5f9');
+                            $diasTxt = $diasSemAnd >= 30 ? '#991b1b' : ($diasSemAnd >= 14 ? '#92400e' : '#64748b');
+                        @endphp
+                        <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:{{ $diasBg }};color:{{ $diasTxt }};white-space:nowrap;">
+                            {{ $diasSemAnd }}d sem mov.
                         </span>
-                        <svg width="14" height="14" fill="none" stroke="#94a3b8" stroke-width="2.5" viewBox="0 0 24 24">
-                            <polyline points="9 18 15 12 9 6"/>
-                        </svg>
+                        @endif
                     </div>
 
                 </div>
@@ -419,95 +539,88 @@
              ABA 2 — VERIFICAR EM LOTE
         ══════════════════════════════════════════════ --}}
         @if($aba === 'lote')
-        <div style="max-width:680px;">
+        <div style="max-width:860px;">
 
-            {{-- Card: Verificar todos --}}
-            <div style="background:linear-gradient(135deg,#1a3a5c,#0f2540);border-radius:12px;
-                        padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;
-                        justify-content:space-between;gap:16px;">
-                <div>
-                    <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">
-                        Verificar todos os processos ativos
+            <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+                    <div style="display:flex;gap:12px;align-items:flex-start;min-width:260px;flex:1;">
+                        <div style="width:40px;height:40px;border-radius:8px;background:#f0fdf4;color:#059669;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px;">Consultar todos os processos ativos</div>
+                            <div style="font-size:12px;color:var(--muted);line-height:1.5;">
+                                Use quando quiser consultar todos os {{ $totalAtivos ?? 0 }} processos ativos no DATAJUD. A busca roda em segundo plano e a fila aparece abaixo.
+                            </div>
+                        </div>
                     </div>
-                    <div style="font-size:12px;color:#94a3b8;">
-                        Consulta automaticamente todos os {{ $totalAtivos ?? 0 }} processos
-                        ativos no DATAJUD sem precisar digitar nada.
-                    </div>
-                </div>
-                <button wire:click="verificarTodos"
-                    wire:loading.attr="disabled"
-                    wire:confirm="Isso vai verificar todos os processos ativos no DATAJUD. Pode demorar alguns minutos. Continuar?"
-                    style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;
-                           border-radius:9px;font-size:13px;font-weight:700;
-                           background:#1D9E75;color:#fff;border:none;cursor:pointer;
-                           white-space:nowrap;transition:background .15s;flex-shrink:0;"
-                    onmouseover="this.style.background='#15803d'"
-                    onmouseout="this.style.background='#1D9E75'">
-                    <svg wire:loading.remove wire:target="verificarTodos"
-                         width="14" height="14" fill="none" stroke="currentColor"
-                         stroke-width="2.5" viewBox="0 0 24 24">
-                        <polyline points="23 4 23 10 17 10"/>
-                        <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
-                    </svg>
-                    <svg wire:loading wire:target="verificarTodos"
-                         width="14" height="14" fill="none" stroke="currentColor"
-                         stroke-width="2.5" viewBox="0 0 24 24"
-                         style="animation:spin 1s linear infinite;">
-                        <path d="M21 12a9 9 0 11-6.219-8.56"/>
-                    </svg>
-                    <span wire:loading.remove wire:target="verificarTodos">Verificar Todos no DATAJUD</span>
-                    <span wire:loading wire:target="verificarTodos">Enviando...</span>
-                </button>
-            </div>
-
-            {{-- Área de drop --}}
-            <div style="border:2px dashed #e2e8f0;border-radius:10px;padding:32px;text-align:center;
-                        background:#f8fafc;margin-bottom:20px;">
-                <svg width="32" height="32" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 10px;display:block;">
-                    <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
-                    <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>
-                </svg>
-                <p style="font-size:13px;color:#64748b;margin:0 0 10px;">Arraste planilha <strong>.xlsx</strong> ou <strong>.csv</strong></p>
-                <input type="file" wire:model="fileLote" accept=".xlsx,.csv"
-                       style="font-size:12px;color:#64748b;cursor:pointer;">
-                <div wire:loading wire:target="fileLote" style="font-size:12px;color:#059669;margin-top:6px;">Carregando arquivo...</div>
-            </div>
-
-            {{-- Separador --}}
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-                <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-                <span style="font-size:12px;color:#64748b;white-space:nowrap;">ou cole os números abaixo</span>
-                <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-            </div>
-
-            {{-- Textarea --}}
-            <textarea wire:model="numerosBrutos"
-                      style="width:100%;height:160px;border:1.5px solid #e2e8f0;border-radius:8px;
-                             padding:10px 12px;font-family:monospace;font-size:12px;resize:vertical;
-                             background:#fff;color:#1e293b;line-height:1.6;box-sizing:border-box;"
-                      placeholder="0001234-56.2023.8.26.0001&#10;0002345-67.2023.8.26.0001&#10;..."></textarea>
-
-            <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
-                <button wire:click="verificarLote" wire:loading.attr="disabled"
-                        style="display:inline-flex;align-items:center;gap:8px;padding:9px 20px;border-radius:8px;
-                               font-size:13px;font-weight:600;background:#059669;color:#fff;border:none;cursor:pointer;
-                               transition:background .15s;"
-                        onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
-                    <span wire:loading.remove wire:target="verificarLote" style="display:contents;">
-                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <button wire:click="verificarTodos"
+                        wire:loading.attr="disabled"
+                        wire:confirm="Isso vai verificar todos os processos ativos no DATAJUD. Pode demorar alguns minutos. Continuar?"
+                        style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;background:#059669;color:#fff;border:none;cursor:pointer;white-space:nowrap;transition:background .15s;flex-shrink:0;"
+                        onmouseover="this.style.background='#047857'"
+                        onmouseout="this.style.background='#059669'">
+                        <svg wire:loading.remove wire:target="verificarTodos" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
                         </svg>
-                        Verificar via DATAJUD
-                    </span>
-                    <span wire:loading wire:target="verificarLote" style="display:contents;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                             style="animation:spin 1s linear infinite;">
+                        <svg wire:loading wire:target="verificarTodos" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite;">
                             <path d="M21 12a9 9 0 11-6.219-8.56"/>
                         </svg>
-                        Verificando...
-                    </span>
-                </button>
-                <span style="font-size:11px;color:#94a3b8;">Máx. 500 processos por vez</span>
+                        <span wire:loading.remove wire:target="verificarTodos">Consultar todos</span>
+                        <span wire:loading wire:target="verificarTodos">Enviando...</span>
+                    </button>
+                </div>
+            </div>
+
+            <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+                    <div>
+                        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px;">Consultar uma lista específica</div>
+                        <div style="font-size:12px;color:var(--muted);line-height:1.5;">Use quando quiser consultar apenas alguns números CNJ. Você pode importar uma planilha ou colar um processo por linha.</div>
+                    </div>
+                    <span style="font-size:11px;color:#64748b;background:#f8fafc;border:1px solid var(--border);border-radius:99px;padding:4px 10px;font-weight:700;">Máx. 500 por vez</span>
+                </div>
+
+                <div class="datajud-lote-grid" style="display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:stretch;">
+                    <label style="border:2px dashed #dbe3ec;border-radius:10px;padding:18px;text-align:center;background:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;min-height:150px;">
+                        <svg width="30" height="30" fill="none" stroke="#64748b" stroke-width="1.7" viewBox="0 0 24 24" style="margin-bottom:10px;">
+                            <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+                            <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>
+                        </svg>
+                        <span style="font-size:13px;color:var(--text);font-weight:700;margin-bottom:4px;">Importar planilha</span>
+                        <span style="font-size:11px;color:var(--muted);line-height:1.4;">Arquivos .xlsx ou .csv</span>
+                        <input type="file" wire:model="fileLote" accept=".xlsx,.csv" style="margin-top:12px;font-size:12px;color:#64748b;cursor:pointer;max-width:210px;">
+                        <span wire:loading wire:target="fileLote" style="font-size:12px;color:#059669;margin-top:8px;">Carregando arquivo...</span>
+                    </label>
+
+                    <div style="display:flex;flex-direction:column;">
+                        <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Ou cole os números CNJ</label>
+                        <textarea wire:model="numerosBrutos"
+                                  style="width:100%;height:150px;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px;font-family:monospace;font-size:12px;resize:vertical;background:#fff;color:#1e293b;line-height:1.6;box-sizing:border-box;"
+                                  placeholder="0001234-56.2023.8.26.0001&#10;0002345-67.2023.8.26.0001&#10;..."></textarea>
+                        <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;">
+                            <button wire:click="verificarLote" wire:loading.attr="disabled"
+                                    style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;background:#059669;color:#fff;border:none;cursor:pointer;transition:background .15s;"
+                                    onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
+                                <span wire:loading.remove wire:target="verificarLote" style="display:contents;">
+                                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+                                    </svg>
+                                    Consultar lista
+                                </span>
+                                <span wire:loading wire:target="verificarLote" style="display:contents;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;">
+                                        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                                    </svg>
+                                    Enviando...
+                                </span>
+                            </button>
+                            <span style="font-size:11px;color:var(--muted);">A fila de consulta será exibida abaixo.</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {{-- Tabela da fila --}}
@@ -519,7 +632,7 @@
                         <span style="font-size:11px;color:#059669;font-weight:500;margin-left:6px;">
                             <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#059669;
                                          animation:pulse 1.5s infinite;margin-right:3px;"></span>
-                            atualizando...
+                            consultando...
                         </span>
                     @endif
                 </div>
@@ -572,54 +685,59 @@
         ══════════════════════════════════════════════ --}}
         @if($aba === 'monitoramentos')
 
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <div style="font-size:14px;font-weight:600;color:#0f2540;">
-                {{ $monitorados->count() }} processo(s) monitorado(s)
+        <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+                <div style="min-width:260px;flex:1;">
+                    <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;">Processos em vigilância</div>
+                    <div style="font-size:12px;color:var(--muted);line-height:1.5;">
+                        {{ $monitorados->count() }} processo(s) com acompanhamento recorrente. Use esta área para manter só os casos que precisam de atenção contínua.
+                    </div>
+                </div>
+                <button wire:click="abrirModalMonitoramento"
+                        style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;
+                               font-size:13px;font-weight:700;background:#059669;color:#fff;border:none;cursor:pointer;
+                               transition:background .15s;flex-shrink:0;"
+                        onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Adicionar processo
+                </button>
             </div>
-            <button wire:click="abrirModalMonitoramento"
-                    style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;
-                           font-size:13px;font-weight:600;background:#059669;color:#fff;border:none;cursor:pointer;
-                           transition:background .15s;"
-                    onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Adicionar
-            </button>
         </div>
 
         @forelse($monitorados as $proc)
             @php
                 $scoreColorsM = [
-                    'critico' => ['border'=>'#ef4444','iconBg'=>'#fee2e2','iconTxt'=>'#991b1b'],
-                    'atencao' => ['border'=>'#f59e0b','iconBg'=>'#fef3c7','iconTxt'=>'#92400e'],
-                    'normal'  => ['border'=>'#10b981','iconBg'=>'#d1fae5','iconTxt'=>'#065f46'],
+                    'critico' => ['border'=>'#ef4444','iconBg'=>'#fef2f2','iconTxt'=>'#dc2626','label'=>'Crítico'],
+                    'atencao' => ['border'=>'#f59e0b','iconBg'=>'#fffbeb','iconTxt'=>'#d97706','label'=>'Atenção'],
+                    'normal'  => ['border'=>'#10b981','iconBg'=>'#f0fdf4','iconTxt'=>'#059669','label'=>'Normal'],
                 ];
                 $sc3 = $scoreColorsM[$proc->score] ?? $scoreColorsM['normal'];
                 $freqLabel = ['6h'=>'a cada 6h','12h'=>'a cada 12h','diario'=>'diário'][$proc->frequencia_monitoramento] ?? 'diário';
             @endphp
-            <div style="background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px;
-                        border-left:4px solid {{ $sc3['border'] }};border-top:1.5px solid #f1f5f9;
-                        border-right:1.5px solid #f1f5f9;border-bottom:1.5px solid #f1f5f9;
-                        box-shadow:0 1px 3px rgba(0,0,0,.06);
-                        display:flex;align-items:center;gap:12px;">
+            <div style="background:#fff;border:1.5px solid var(--border);border-left:4px solid {{ $sc3['border'] }};border-radius:12px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;">
 
                 {{-- Ícone --}}
-                <div style="width:38px;height:38px;border-radius:10px;background:{{ $sc3['iconBg'] }};
+                <div style="width:40px;height:40px;border-radius:8px;background:{{ $sc3['iconBg'] }};
                             display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="16" height="16" fill="none" stroke="{{ $sc3['iconTxt'] }}" stroke-width="2" viewBox="0 0 24 24">
+                    <svg width="17" height="17" fill="none" stroke="{{ $sc3['iconTxt'] }}" stroke-width="2" viewBox="0 0 24 24">
                         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
                 </div>
 
                 {{-- Info --}}
                 <div style="flex:1;min-width:0;">
-                    <div style="font-size:13px;font-weight:700;color:#0f2540;font-family:monospace;">{{ $proc->numero_processo }}</div>
-                    <div style="font-size:12px;color:#64748b;">{{ $proc->processo->cliente->nome ?? '—' }}</div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                        <span style="font-size:13px;font-weight:800;color:#0f2540;font-family:monospace;">{{ $proc->numero_processo }}</span>
+                        <span style="font-size:10px;font-weight:800;color:{{ $sc3['iconTxt'] }};background:{{ $sc3['iconBg'] }};border-radius:99px;padding:2px 8px;">{{ $sc3['label'] }}</span>
+                        <span style="font-size:10px;font-weight:800;color:{{ $proc->ativo ? '#059669' : '#64748b' }};background:{{ $proc->ativo ? '#f0fdf4' : '#f1f5f9' }};border-radius:99px;padding:2px 8px;">{{ $proc->ativo ? 'Ativo' : 'Pausado' }}</span>
+                    </div>
+                    <div style="font-size:12px;color:#64748b;font-weight:600;">{{ $proc->processo->cliente->nome ?? 'Cliente não informado' }}</div>
                     @if($proc->processo->vara ?? null)
                         <div style="font-size:11px;color:#94a3b8;">{{ $proc->processo->vara }}</div>
                     @endif
-                    <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;">
                         <svg width="11" height="11" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                         </svg>
@@ -628,12 +746,16 @@
                             <span style="font-size:11px;color:#94a3b8;">
                                 · atualizado {{ \Carbon\Carbon::parse($proc->ultimo_andamento_data)->diffForHumans() }}
                             </span>
+                        @else
+                            <span style="font-size:11px;color:#94a3b8;">sem atualização registrada</span>
                         @endif
                     </div>
                 </div>
 
                 {{-- Toggle --}}
-                <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+                    <span style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;">Monitoramento</span>
+                    <div style="display:flex;align-items:center;gap:10px;">
                     @if($proc->ativo)
                         <span style="width:8px;height:8px;border-radius:50%;background:#059669;
                                      animation:pulse 1.5s cubic-bezier(0,0,.2,1) infinite;display:inline-block;"></span>
@@ -648,6 +770,7 @@
                                      width:18px;height:18px;border-radius:50%;background:#fff;
                                      transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25);"></span>
                     </button>
+                    </div>
                 </div>
 
             </div>
@@ -656,8 +779,8 @@
                 <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 14px;display:block;opacity:.4;">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <p style="font-size:13px;margin:0;color:#64748b;">Nenhum processo em monitoramento.</p>
-                <p style="font-size:12px;color:#94a3b8;margin:4px 0 0;">Clique em "Adicionar" para começar.</p>
+                <p style="font-size:13px;margin:0;color:#64748b;font-weight:700;">Nenhum processo em monitoramento.</p>
+                <p style="font-size:12px;color:#94a3b8;margin:4px 0 0;">Clique em "Adicionar processo" para começar pelos casos mais importantes.</p>
             </div>
         @endforelse
 
@@ -740,7 +863,24 @@
         ══════════════════════════════════════════════ --}}
         @if($aba === 'historico')
 
-        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px;">
+        <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+                <div style="min-width:260px;flex:1;">
+                    <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;">Histórico de movimentações</div>
+                    <div style="font-size:12px;color:var(--muted);line-height:1.5;">
+                        {{ $historico->total() }} registro(s) encontrado(s). Use esta área para pesquisa e conferência de andamentos já recebidos.
+                    </div>
+                </div>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#64748b;background:#f8fafc;border:1px solid var(--border);border-radius:99px;padding:5px 10px;">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Mais recentes primeiro
+                </span>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px;">
             @foreach([
                 'todos'      => 'Todos',
                 'sentencas'  => 'Sentenças',
@@ -749,9 +889,9 @@
                 'decisoes'   => 'Decisões',
             ] as $val => $lbl)
                 <button wire:click="setFiltroHistorico('{{ $val }}')"
-                        style="padding:5px 14px;border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;
+                        style="padding:6px 13px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;
                                border:1.5px solid {{ $filtroHistorico===$val ? '#059669' : '#e2e8f0' }};
-                               background:{{ $filtroHistorico===$val ? '#d1fae5' : 'transparent' }};
+                               background:{{ $filtroHistorico===$val ? '#f0fdf4' : '#fff' }};
                                color:{{ $filtroHistorico===$val ? '#065f46' : '#64748b' }};">
                     {{ $lbl }}
                 </button>
@@ -784,24 +924,32 @@
                 <div style="position:relative;margin-bottom:14px;">
                     <div style="position:absolute;left:-23px;top:15px;width:10px;height:10px;border-radius:50%;
                                 background:{{ $dotColor }};border:2px solid #fff;box-shadow:0 0 0 2px {{ $dotColor }}40;"></div>
-                    <div style="background:#fff;border-radius:10px;padding:12px 14px;
-                                border:1.5px solid #f1f5f9;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+                    <div style="background:#fff;border-radius:12px;padding:14px 16px;border:1.5px solid var(--border);border-left:3px solid {{ $bt['txt'] }};">
                         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
                             <div style="flex:1;min-width:0;">
-                                <div style="font-size:12px;font-weight:700;font-family:monospace;color:#0f2540;">
+                                <div style="font-size:12px;font-weight:800;font-family:monospace;color:#0f2540;">
                                     {{ optional($item->processo)->numero ?? '—' }}
                                 </div>
-                                <div style="font-size:11px;color:#64748b;margin-bottom:4px;">
+                                <div style="font-size:11px;color:#64748b;margin-bottom:6px;font-weight:600;">
                                     {{ optional(optional($item->processo)->cliente)->nome ?? '—' }}
                                 </div>
                                 <div style="font-size:12px;color:#334155;line-height:1.5;">
                                     {{ Str::limit($item->descricao ?? $item->texto ?? '—', 120) }}
                                 </div>
+                                @if($item->processo)
+                                    <button wire:click="abrirProcesso({{ $item->processo->id }})"
+                                            style="margin-top:10px;display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #e2e8f0;color:#2563a8;border-radius:7px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer;">
+                                        Abrir processo
+                                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </button>
+                                @endif
                             </div>
                             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
                                 <span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:99px;
                                              background:{{ $bt['bg'] }};color:{{ $bt['txt'] }};">{{ $bt['label'] }}</span>
-                                <span style="font-size:10px;color:#94a3b8;">
+                                <span style="font-size:10px;color:#94a3b8;font-weight:700;">
                                     {{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y H:i') }}
                                 </span>
                             </div>
@@ -836,7 +984,7 @@
     {{-- ══════════════════════════════════════════════════════════════
          PAINEL DE NOTIFICAÇÕES (coluna direita)
     ══════════════════════════════════════════════════════════════ --}}
-    <div style="width:300px;flex-shrink:0;background:#fff;border-left:1.5px solid #e2e8f0;
+    <div class="datajud-sidebar" style="width:300px;flex-shrink:0;background:#fff;border-left:1.5px solid #e2e8f0;
                 position:sticky;top:0;height:calc(100vh - 52px);overflow-y:auto;
                 display:flex;flex-direction:column;margin-right:-24px;margin-top:-24px;margin-bottom:-24px;">
 
@@ -845,7 +993,7 @@
 
         {{-- Header --}}
         <div style="padding:16px;border-bottom:1.5px solid #e2e8f0;display:flex;align-items:center;gap:8px;flex-shrink:0;">
-            <span style="font-size:14px;font-weight:700;color:#0f2540;flex:1;">Notificações</span>
+            <span style="font-size:14px;font-weight:800;color:var(--text);flex:1;">Avisos Recentes</span>
             @if($notificacoesNaoLidas > 0)
                 <span style="background:#ef4444;color:#fff;font-size:11px;font-weight:700;
                              padding:2px 7px;border-radius:99px;min-width:20px;text-align:center;">
@@ -855,7 +1003,7 @@
             <button wire:click="atualizarAgora"
                     style="background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;border-radius:6px;
                            display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s;"
-                    title="Atualizar"
+                    title="Recarregar notificações"
                     onmouseover="this.style.color='#059669';this.style.background='#f0fdf4'"
                     onmouseout="this.style.color='#94a3b8';this.style.background='none'">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -868,14 +1016,14 @@
         <div style="flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px;">
             @php
                 $estilosPorTipo = [
-                    'critico'   => ['bg'=>'#fee2e2','border'=>'#fca5a5','iconBg'=>'rgba(239,68,68,.15)','txt'=>'#7f1d1d','label'=>'Crítico'],
-                    'decisao'   => ['bg'=>'#fee2e2','border'=>'#fca5a5','iconBg'=>'rgba(239,68,68,.15)','txt'=>'#7f1d1d','label'=>'Decisão'],
-                    'prazo'     => ['bg'=>'#fef3c7','border'=>'#fde68a','iconBg'=>'rgba(245,158,11,.15)','txt'=>'#78350f','label'=>'Prazo'],
-                    'atencao'   => ['bg'=>'#fef3c7','border'=>'#fde68a','iconBg'=>'rgba(245,158,11,.15)','txt'=>'#78350f','label'=>'Atenção'],
-                    'andamento' => ['bg'=>'#d1fae5','border'=>'#6ee7b7','iconBg'=>'rgba(16,185,129,.15)','txt'=>'#064e3b','label'=>'Andamento'],
-                    'normal'    => ['bg'=>'#d1fae5','border'=>'#6ee7b7','iconBg'=>'rgba(16,185,129,.15)','txt'=>'#064e3b','label'=>'Normal'],
+                    'critico'   => ['bg'=>'#fff','border'=>'#e2e8f0','iconBg'=>'#fef2f2','txt'=>'#dc2626','label'=>'Crítico'],
+                    'decisao'   => ['bg'=>'#fff','border'=>'#e2e8f0','iconBg'=>'#fef2f2','txt'=>'#dc2626','label'=>'Decisão'],
+                    'prazo'     => ['bg'=>'#fff','border'=>'#e2e8f0','iconBg'=>'#fffbeb','txt'=>'#d97706','label'=>'Prazo'],
+                    'atencao'   => ['bg'=>'#fff','border'=>'#e2e8f0','iconBg'=>'#fffbeb','txt'=>'#d97706','label'=>'Atenção'],
+                    'andamento' => ['bg'=>'#fff','border'=>'#e2e8f0','iconBg'=>'#f0fdf4','txt'=>'#059669','label'=>'Andamento'],
+                    'normal'    => ['bg'=>'#fff','border'=>'#e2e8f0','iconBg'=>'#f0fdf4','txt'=>'#059669','label'=>'Normal'],
                 ];
-                $estiloPadrao = ['bg'=>'#dbeafe','border'=>'#93c5fd','iconBg'=>'rgba(59,130,246,.15)','txt'=>'#1e3a8a','label'=>'Informativo'];
+                $estiloPadrao = ['bg'=>'#fff','border'=>'#e2e8f0','iconBg'=>'#eff6ff','txt'=>'#2563a8','label'=>'Informativo'];
 
                 // Agrupar por tipo, preservando a primeira notificação de cada grupo
                 $grupos = [];
@@ -898,7 +1046,7 @@
                 @endphp
 
                 {{-- Card do grupo --}}
-                <div style="background:{{ $st['bg'] }};border:1px solid {{ $st['border'] }};border-radius:10px;overflow:hidden;">
+                <div style="background:#fff;border:1px solid {{ $st['border'] }};border-left:3px solid {{ $st['txt'] }};border-radius:10px;overflow:hidden;">
 
                     {{-- Cabeçalho do grupo (clicável para expandir) --}}
                     <div onclick="
@@ -919,7 +1067,7 @@
                             <span style="font-size:12px;font-weight:700;color:{{ $st['txt'] }};">{{ $st['label'] }}</span>
                             @if($total > 1)
                                 <span style="display:inline-block;margin-left:5px;font-size:10px;font-weight:700;
-                                             padding:1px 6px;border-radius:99px;background:{{ $st['txt'] }};color:{{ $st['bg'] }};">
+                                             padding:1px 6px;border-radius:99px;background:#f8fafc;color:{{ $st['txt'] }};border:1px solid {{ $st['txt'] }}33;">
                                     {{ $total }}
                                 </span>
                             @endif
@@ -996,6 +1144,30 @@
 <style>
 @keyframes spin  { to { transform: rotate(360deg); } }
 @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.5; transform:scale(1.4); } }
+.datajud-page svg { flex-shrink: 0; }
+.datajud-page svg[width="11"] { width: 11px !important; height: 11px !important; max-width: 11px !important; max-height: 11px !important; }
+.datajud-page svg[width="12"] { width: 12px !important; height: 12px !important; max-width: 12px !important; max-height: 12px !important; }
+.datajud-page svg[width="13"] { width: 13px !important; height: 13px !important; max-width: 13px !important; max-height: 13px !important; }
+.datajud-page svg[width="14"] { width: 14px !important; height: 14px !important; max-width: 14px !important; max-height: 14px !important; }
+.datajud-page svg[width="15"] { width: 15px !important; height: 15px !important; max-width: 15px !important; max-height: 15px !important; }
+.datajud-page svg[width="16"] { width: 16px !important; height: 16px !important; max-width: 16px !important; max-height: 16px !important; }
+.datajud-page svg[width="17"] { width: 17px !important; height: 17px !important; max-width: 17px !important; max-height: 17px !important; }
+.datajud-page svg[width="18"] { width: 18px !important; height: 18px !important; max-width: 18px !important; max-height: 18px !important; }
+.datajud-page svg[width="28"] { width: 28px !important; height: 28px !important; max-width: 28px !important; max-height: 28px !important; }
+.datajud-page svg[width="30"] { width: 30px !important; height: 30px !important; max-width: 30px !important; max-height: 30px !important; }
+.datajud-page svg[width="40"] { width: 40px !important; height: 40px !important; max-width: 40px !important; max-height: 40px !important; }
+@media (max-width: 1180px) {
+    .datajud-layout { grid-template-columns: 1fr !important; }
+    .datajud-sidebar { width: auto !important; position: static !important; height: auto !important; margin: 20px 0 0 0 !important; border-left: 1.5px solid var(--border) !important; border-radius: 16px !important; }
+}
+@media (max-width: 900px) {
+    .datajud-kpis { grid-template-columns: repeat(2, 1fr) !important; }
+    .datajud-guide-actions { min-width: 100% !important; grid-template-columns: 1fr !important; }
+    .datajud-lote-grid { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 560px) {
+    .datajud-kpis { grid-template-columns: 1fr !important; }
+}
 </style>
 
 </div>
@@ -1042,14 +1214,3 @@
         </div>
 
 --}}
-
-
-
-
-
-
-
-
-
-
-

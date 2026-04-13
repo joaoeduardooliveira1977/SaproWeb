@@ -55,7 +55,7 @@ public function username(): string
     // ── Helpers de perfil ──────────────────────────
     public function isAdmin(): bool
     {
-        return $this->perfil === 'admin';
+        return in_array($this->perfil, ['admin', 'administrador', 'super_admin'], true);
     }
 
     public function isAdvogado(): bool
@@ -75,16 +75,16 @@ public function username(): string
 
     public function temModulo(string $modulo): bool
     {
-        if ($this->perfil === 'admin') return true;
+        if ($this->isAdmin()) return true;
         $permissoes = \App\Http\Middleware\VerificarPerfil::PERMISSOES[$this->perfil] ?? [];
-        return in_array($modulo, $permissoes);
+        return $permissoes === '*' || in_array($modulo, $permissoes, true);
     }
 
     public function temAcao(string $acao): bool
     {
-        if ($this->perfil === 'admin') return true;
+        if ($this->isAdmin()) return true;
         $acoes = \App\Http\Middleware\VerificarPerfil::ACOES[$this->perfil] ?? [];
-        return in_array($acao, $acoes);
+        return $acoes === '*' || in_array($acao, $acoes, true);
     }
 
     public function getNomeAttribute(): string

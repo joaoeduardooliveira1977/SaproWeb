@@ -29,7 +29,7 @@
 <div class="header">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
-            <div class="header-logo">⚖ SAPRO — Gestão Jurídica</div>
+            <div class="header-logo">⚖ Software Jur�dico</div>
             <div class="header-sub">Sistema de Acompanhamento de Processos</div>
         </div>
         <div style="text-align:right;font-size:9px;color:#93c5fd;">
@@ -48,7 +48,7 @@
 <div class="corpo">{{ $corpo }}</div>
 
 <div class="footer">
-    <span>SAPRO — Sistema de Acompanhamento de Processos</span>
+    <span>Software Jur�dico</span>
     <span>{{ now()->format('d/m/Y H:i') }}</span>
 </div>
 

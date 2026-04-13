@@ -13,17 +13,23 @@ return new class extends Migration
 
 public function up(): void
 {
+    if (!Schema::hasTable('processos') || Schema::hasColumn('processos', 'parte_contraria_id')) {
+        return;
+    }
+
     Schema::table('processos', function (Blueprint $table) {
-        $table->unsignedBigInteger('parte_contraria_id')->nullable();
-        $table->foreign('parte_contraria_id')->references('id')->on('pessoas')->nullOnDelete();
+        $table->foreignId('parte_contraria_id')->nullable()->constrained('pessoas')->nullOnDelete();
     });
 }
 
 public function down(): void
 {
+    if (!Schema::hasTable('processos') || !Schema::hasColumn('processos', 'parte_contraria_id')) {
+        return;
+    }
+
     Schema::table('processos', function (Blueprint $table) {
-        $table->dropForeign(['parte_contraria_id']);
-        $table->dropColumn('parte_contraria_id');
+        $table->dropConstrainedForeignId('parte_contraria_id');
     });
 }
 

@@ -24,10 +24,7 @@ class NotificacoesBell extends Component
         $usuarioId = auth('usuarios')->id();
 
         Notificacao::where('id', $id)
-            ->where(function ($q) use ($usuarioId) {
-                $q->where('usuario_id', $usuarioId)
-                  ->orWhereNull('usuario_id');
-            })
+            ->paraUsuario($usuarioId)
             ->update(['lida' => true]);
     }
 
@@ -35,10 +32,7 @@ class NotificacoesBell extends Component
     {
         $usuarioId = auth('usuarios')->id();
 
-        Notificacao::where(function ($q) use ($usuarioId) {
-                $q->where('usuario_id', $usuarioId)
-                  ->orWhereNull('usuario_id');
-            })
+        Notificacao::paraUsuario($usuarioId)
             ->where('lida', false)
             ->update(['lida' => true]);
     }
@@ -47,10 +41,7 @@ class NotificacoesBell extends Component
     {
         $usuarioId = auth('usuarios')->id();
 
-        $notificacoes = Notificacao::where(function ($q) use ($usuarioId) {
-                $q->where('usuario_id', $usuarioId)
-                  ->orWhereNull('usuario_id');
-            })
+        $notificacoes = Notificacao::paraUsuario($usuarioId)
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sapro-v2';
+const CACHE_NAME = 'software-juridico-v2';
 
 // Recursos estáticos que ficam em cache
 const PRECACHE = [

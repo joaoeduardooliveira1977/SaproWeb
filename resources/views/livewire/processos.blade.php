@@ -12,15 +12,11 @@
 {{-- ── Cabeçalho ── --}}
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
     <div>
-        <a href="{{ route('processos.hub') }}"
-           style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:6px;"
-           onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-            Voltar
-        </a>
-        <h2 style="font-size:20px;font-weight:700;color:var(--text);margin:0;">Processos</h2>
+        <h1 style="font-size:24px;font-weight:800;color:var(--primary);margin:0;">Processos</h1>
         <p style="font-size:13px;color:var(--muted);margin:2px 0 0;">
             {{ $processos->total() }} processo{{ $processos->total() !== 1 ? 's' : '' }} encontrado{{ $processos->total() !== 1 ? 's' : '' }}
+            <span style="color:#cbd5e1;margin:0 6px;">|</span>
+            <a href="{{ route('processos.hub') }}" style="color:var(--primary);text-decoration:none;font-weight:600;">Voltar para central</a>
         </p>
     </div>
     <div style="display:flex;gap:8px;">
@@ -39,11 +35,76 @@
     </div>
 </div>
 
+{{-- ── Visão rápida ── --}}
+<div class="metricas-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+
+    {{-- Card 1: Total Ativos --}}
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6l9-3 9 3v6c0 5.25-3.75 9.74-9 11-5.25-1.26-9-5.75-9-11V6Z"/>
+                <path d="M12 8v4M12 16h.01"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:22px;font-weight:800;color:var(--text);line-height:1.1;">{{ number_format($totalAtivos) }}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">em andamento</div>
+        </div>
+    </div>
+
+    {{-- Card 2: Valor Total --}}
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:9px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+        </div>
+        <div style="min-width:0;">
+            @php
+                $vf = $valorTotal >= 1000000
+                    ? 'R$ ' . number_format($valorTotal/1000000, 1, ',', '.') . 'M'
+                    : ($valorTotal >= 1000 ? 'R$ ' . number_format($valorTotal/1000, 0, ',', '.') . 'K' : 'R$ ' . number_format($valorTotal, 0, ',', '.'));
+            @endphp
+            <div style="font-size:20px;font-weight:800;color:var(--text);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="R$ {{ number_format($valorTotal, 2, ',', '.') }}">{{ $vf }}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">valor em litigio</div>
+        </div>
+    </div>
+
+    {{-- Card 3: Risco Alto --}}
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:9px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:22px;font-weight:800;color:#ea580c;line-height:1.1;">{{ number_format($riscoAlto) }}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">risco alto</div>
+        </div>
+    </div>
+
+    {{-- Card 4: Parados --}}
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:9px;background:#fefce8;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-size:22px;font-weight:800;color:#ca8a04;line-height:1.1;">{{ number_format($parados) }}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">sem mov. 30d</div>
+        </div>
+    </div>
+
+</div>
+
 {{-- ── Analista IA ── --}}
 @if(tenant_pode('ia'))
-<div style="background:linear-gradient(135deg,#0f2540,#1a3a5c);border-radius:12px;padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
-    <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+<div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
+    <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:#eff6ff;color:#1d4ed8;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
             <path d="M18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/>
         </svg>
@@ -53,8 +114,8 @@
         wire:keydown.enter="perguntarIA"
         type="text"
         placeholder="Pergunte sobre os processos... Ex: processos de risco alto, vencendo essa semana, processos do Dr. Carlos"
-        style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 16px;color:#fff;font-size:13px;outline:none;"
-        onfocus="this.style.borderColor='rgba(147,197,253,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.2)'">
+        style="flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px 16px;color:var(--text);font-size:13px;outline:none;"
+        onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
     <button wire:click="perguntarIA" wire:loading.attr="disabled" wire:target="perguntarIA"
         style="background:#2563a8;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:background .15s;"
         onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563a8'">
@@ -197,71 +258,6 @@
 
 {{-- ── Conteúdo ── --}}
 <div>
-
-        {{-- Metricas --}}
-        <div class="metricas-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
-
-            {{-- Card 1: Total Ativos --}}
-            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 6l9-3 9 3v6c0 5.25-3.75 9.74-9 11-5.25-1.26-9-5.75-9-11V6Z"/>
-                        <path d="M12 8v4M12 16h.01"/>
-                    </svg>
-                </div>
-                <div>
-                    <div style="font-size:22px;font-weight:800;color:var(--text);line-height:1.1;">{{ number_format($totalAtivos) }}</div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">em andamento</div>
-                </div>
-            </div>
-
-            {{-- Card 2: Valor Total --}}
-            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;border-radius:9px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                    </svg>
-                </div>
-                <div style="min-width:0;">
-                    @php
-                        $vf = $valorTotal >= 1000000
-                            ? 'R$ ' . number_format($valorTotal/1000000, 1, ',', '.') . 'M'
-                            : ($valorTotal >= 1000 ? 'R$ ' . number_format($valorTotal/1000, 0, ',', '.') . 'K' : 'R$ ' . number_format($valorTotal, 0, ',', '.'));
-                    @endphp
-                    <div style="font-size:20px;font-weight:800;color:var(--text);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="R$ {{ number_format($valorTotal, 2, ',', '.') }}">{{ $vf }}</div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">valor em litigio</div>
-                </div>
-            </div>
-
-            {{-- Card 3: Risco Alto --}}
-            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;border-radius:9px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
-                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                </div>
-                <div>
-                    <div style="font-size:22px;font-weight:800;color:#ea580c;line-height:1.1;">{{ number_format($riscoAlto) }}</div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">risco alto</div>
-                </div>
-            </div>
-
-            {{-- Card 4: Parados --}}
-            <div style="background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;border-radius:9px;background:#fefce8;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                </div>
-                <div>
-                    <div style="font-size:22px;font-weight:800;color:#ca8a04;line-height:1.1;">{{ number_format($parados) }}</div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">sem mov. 30d</div>
-                </div>
-            </div>
-
-        </div>
 
         {{-- Tabela --}}
         <div class="card" style="padding:0;overflow:hidden;">

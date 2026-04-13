@@ -1,28 +1,66 @@
 <div>
+@verbatim
+<style>
+.inadimplencia-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.inadimplencia-kpi {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+.inadimplencia-filter-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+}
+.inadimplencia-filter-card .filter-bar {
+  gap: 6px;
+}
+.inadimplencia-filter-card input,
+.inadimplencia-filter-card select {
+  padding: 7px 9px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+@media (max-width: 1100px) {
+  .inadimplencia-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .inadimplencia-kpis { grid-template-columns: 1fr; }
+}
+</style>
+@endverbatim
 
   {{-- KPIs --}}
-  <div class="stat-grid">
-    <div class="stat-card" style="border-left-color:#dc2626">
+  <div class="inadimplencia-kpis">
+    <div class="inadimplencia-kpi">
       <div class="stat-icon"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
       <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Clientes Inadimplentes</div>
       <div style="font-size:26px;font-weight:800;color:#dc2626;margin-top:4px">{{ $kpis->clientes_inadimplentes ?? 0 }}</div>
     </div>
-    <div class="stat-card" style="border-left-color:#f97316">
+    <div class="inadimplencia-kpi">
       <div class="stat-icon"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="#f97316" stroke-width="2" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></div>
       <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Parcelas em Atraso</div>
       <div style="font-size:26px;font-weight:800;color:#f97316;margin-top:4px">{{ $kpis->total_parcelas ?? 0 }}</div>
     </div>
-    <div class="stat-card" style="border-left-color:var(--primary)">
+    <div class="inadimplencia-kpi">
       <div class="stat-icon"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
       <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Total Devido</div>
       <div style="font-size:22px;font-weight:800;color:var(--primary);margin-top:4px">R$ {{ number_format($kpis->total_valor ?? 0, 0, ',', '.') }}</div>
     </div>
-    <div class="stat-card" style="border-left-color:#d97706">
+    <div class="inadimplencia-kpi">
       <div class="stat-icon"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
       <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Média de Atraso</div>
       <div style="font-size:26px;font-weight:800;color:#d97706;margin-top:4px">{{ $kpis->media_dias ?? 0 }}d</div>
     </div>
-    <div class="stat-card" style="border-left-color:#991b1b">
+    <div class="inadimplencia-kpi">
       <div class="stat-icon"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="#991b1b" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
       <div style="font-size:11px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.5px">Crítico (+30 dias)</div>
       <div style="font-size:20px;font-weight:800;color:#991b1b;margin-top:4px">R$ {{ number_format($kpis->valor_critico ?? 0, 0, ',', '.') }}</div>
@@ -30,7 +68,7 @@
   </div>
 
   {{-- Filtros --}}
-  <div class="card" style="margin-bottom:16px">
+  <div class="inadimplencia-filter-card">
     <div class="filter-bar">
       <div style="position:relative;flex:1;min-width:180px;">
         <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;"><svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
@@ -86,7 +124,7 @@
           $parcelas = $parcelasPorCliente[$cliente->cliente_id] ?? [];
         @endphp
 
-        <div class="card" style="padding:0;border-left:4px solid {{ $leftBorder }};overflow:hidden"
+        <div class="card" style="padding:0;border:1.5px solid {{ $leftBorder }};overflow:hidden"
              x-data="{ open: false }">
 
           {{-- Cabeçalho cliente --}}

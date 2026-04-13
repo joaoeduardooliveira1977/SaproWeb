@@ -69,7 +69,7 @@
             </div>
 
             @if(!$p['atual'])
-            <a href="mailto:comercial@sapro.com.br?subject=Upgrade para {{ $p['nome'] }}"
+            <a href="mailto:comercial@softwarejuridico.com.br?subject=Upgrade para {{ $p['nome'] }}"
                 style="display:block;text-align:center;padding:12px;background:{{ $p['cor'] }};color:#fff;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;">
                 Escolher {{ $p['nome'] }}
             </a>
@@ -83,7 +83,7 @@
     </div>
 
     <div style="text-align:center;margin-top:32px;font-size:13px;color:var(--muted);">
-        Dúvidas? Entre em contato: <a href="mailto:comercial@sapro.com.br" style="color:var(--primary);">comercial@sapro.com.br</a>
+        Dúvidas? Entre em contato: <a href="mailto:comercial@softwarejuridico.com.br" style="color:var(--primary);">comercial@softwarejuridico.com.br</a>
     </div>
 </div>
 @endsection

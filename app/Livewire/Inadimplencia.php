@@ -71,7 +71,7 @@ class Inadimplencia extends Component
         Cobranca::create([
             'parcela_id'  => $this->parcelaIdContato,
             'cliente_id'  => $this->clienteIdContato,
-            'usuario_id'  => Auth::id(),
+            'usuario_id'  => Auth::guard('usuarios')->id(),
             'tipo'        => $this->tipoContato,
             'data'        => today(),
             'descricao'   => $this->descContato ?: null,
@@ -159,7 +159,7 @@ class Inadimplencia extends Component
                     Cobranca::create([
                         'parcela_id'  => $parcela->id,
                         'cliente_id'  => $this->clienteIdEmail,
-                        'usuario_id'  => Auth::id(),
+                        'usuario_id'  => Auth::guard('usuarios')->id(),
                         'tipo'        => 'email',
                         'data'        => today(),
                         'descricao'   => 'E-mail de cobrança automático enviado pelo sistema.',

@@ -162,7 +162,8 @@ class Prazos extends Component
 
     public function salvar(): void
     {
-        abort_unless(Auth::user()->temAcao('prazos.editar'), 403, 'Sem permissão.');
+        $usuario = Auth::guard('usuarios')->user();
+        abort_unless($usuario?->temAcao('prazos.editar'), 403, 'Sem permissão.');
         $this->validate();
 
         $dados = [
@@ -177,7 +178,7 @@ class Prazos extends Component
             'processo_id'    => $this->processo_id ?: null,
             'responsavel_id' => $this->responsavel_id ?: null,
             'observacoes'    => trim($this->observacoes) ?: null,
-            'criado_por'     => Auth::id(),
+            'criado_por'     => Auth::guard('usuarios')->id(),
         ];
 
         if ($this->prazoid) {
@@ -195,6 +196,7 @@ class Prazos extends Component
 
     public function marcarCumprido(int $id): void
     {
+        abort_unless(Auth::guard('usuarios')->user()?->temAcao('prazos.editar'), 403, 'Sem permissão.');
         Prazo::findOrFail($id)->update([
             'status'           => 'cumprido',
             'data_cumprimento' => today(),
@@ -204,12 +206,14 @@ class Prazos extends Component
 
     public function marcarPerdido(int $id): void
     {
+        abort_unless(Auth::guard('usuarios')->user()?->temAcao('prazos.editar'), 403, 'Sem permissão.');
         Prazo::findOrFail($id)->update(['status' => 'perdido']);
         $this->dispatch('toast', message: 'Prazo marcado como perdido.', type: 'success');
     }
 
     public function reabrir(int $id): void
     {
+        abort_unless(Auth::guard('usuarios')->user()?->temAcao('prazos.editar'), 403, 'Sem permissão.');
         Prazo::findOrFail($id)->update([
             'status'           => 'aberto',
             'data_cumprimento' => null,
@@ -223,7 +227,7 @@ class Prazos extends Component
 
     public function excluir(): void
     {
-        abort_unless(Auth::user()->temAcao('prazos.excluir'), 403, 'Sem permissão.');
+        abort_unless(Auth::guard('usuarios')->user()?->temAcao('prazos.excluir'), 403, 'Sem permissão.');
         if ($this->confirmarExcluir) {
             Prazo::findOrFail($this->confirmarExcluir)->delete();
             $this->confirmarExcluir = null;
@@ -343,7 +347,7 @@ class Prazos extends Component
             ->map(fn($p) => '- '.$p->titulo.' (vence '.$p->data_prazo->format('d/m/Y').')'.($p->prazo_fatal ? ' [FATAL]' : ''))
             ->join("\n");
 
-        $contexto = "Você é um assistente jurídico do sistema SAPRO. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
 
 Dados dos prazos:
 - Total em aberto: {$totalAbertos}

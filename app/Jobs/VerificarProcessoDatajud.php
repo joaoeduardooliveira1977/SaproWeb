@@ -40,9 +40,16 @@ class VerificarProcessoDatajud implements ShouldQueue
 
 	Log::info("DATAJUD iniciando", ['numero' => $this->processoNumero]);
 
+            $numeroLimpo = preg_replace('/\D/', '', $this->processoNumero);
             $tribunal = $this->detectarTribunal($this->processoNumero);
             $endpoint = "https://api-publica.datajud.cnj.jus.br/api_publica_{$tribunal}/_search";
-            $apiKey   = 'APIKey ' . config('services.datajud.key');
+            $apiKey   = config('services.datajud.key');
+            if (!$apiKey) {
+                throw new \RuntimeException('DATAJUD_API_KEY nao configurada.');
+            }
+            if (!str_starts_with($apiKey, 'APIKey ')) {
+                $apiKey = 'APIKey ' . $apiKey;
+            }
 
             $response = Http::withHeaders([
                 'Authorization' => $apiKey,
@@ -50,7 +57,7 @@ class VerificarProcessoDatajud implements ShouldQueue
             ])->post($endpoint, [
                 'query' => [
                     'match' => [
-                        'numeroProcesso' => $this->processoNumero,
+                        'numeroProcesso' => $numeroLimpo,
                     ],
                 ],
             ]);
@@ -69,7 +76,7 @@ class VerificarProcessoDatajud implements ShouldQueue
             $dadosProcesso = $hits[0]['_source'] ?? [];
             $movimentos    = $dadosProcesso['movimentos'] ?? [];
 
-            $processo = Processo::where('numero', 'like', '%' . preg_replace('/\D/', '', $this->processoNumero) . '%')->first();
+            $processo = Processo::whereRaw("regexp_replace(numero, '[^0-9]', '', 'g') = ?", [$numeroLimpo])->first();
 
 
 Log::info("DATAJUD DEBUG", [

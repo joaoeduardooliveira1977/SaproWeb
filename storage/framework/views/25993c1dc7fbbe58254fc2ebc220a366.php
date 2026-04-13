@@ -1,4 +1,4 @@
-<div>
+<div class="prazos-page">
 <style>
     .urgencia-normal   { border-left-color: #16a34a; }
     .urgencia-alerta   { border-left-color: #ca8a04; }
@@ -23,6 +23,91 @@
 </style>
 
 <style>
+    .prazos-page svg[width="9"] { width: 9px; height: 9px; }
+    .prazos-page svg[width="11"] { width: 11px; height: 11px; }
+    .prazos-page svg[width="12"] { width: 12px; height: 12px; }
+    .prazos-page svg[width="13"] { width: 13px; height: 13px; }
+    .prazos-page svg[width="14"] { width: 14px; height: 14px; }
+    .prazos-page svg[width="16"] { width: 16px; height: 16px; }
+    .prazos-page svg[width="18"] { width: 18px; height: 18px; }
+    .prazos-page svg[width="20"] { width: 20px; height: 20px; }
+    .prazos-page svg[width="36"] { width: 36px; height: 36px; }
+
+    .prazos-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+    .prazos-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--primary);
+        margin: 0;
+    }
+    .prazos-subtitle {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 3px;
+        line-height: 1.5;
+    }
+    .prazos-header-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+    .prazos-guide {
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+        display: grid;
+        grid-template-columns: minmax(220px, .9fr) repeat(3, minmax(160px, 1fr));
+        gap: 12px;
+        align-items: center;
+    }
+    .prazos-guide-title {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    .prazos-guide-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .prazos-guide h2 {
+        font-size: 15px;
+        margin: 0 0 3px;
+        color: var(--text);
+    }
+    .prazos-guide p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+    }
+    .prazos-guide-step {
+        border-left: 3px solid var(--border);
+        padding-left: 10px;
+    }
+    .prazos-guide-step strong {
+        display: block;
+        font-size: 12px;
+        color: var(--text);
+        margin-bottom: 3px;
+    }
     .prazos-grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -73,20 +158,20 @@
     .prazos-filter-bar {
         background: var(--white);
         border: 1.5px solid var(--border);
-        border-radius: 12px;
-        padding: 14px 16px;
+        border-radius: 10px;
+        padding: 10px 12px;
         display: flex;
-        gap: 8px;
+        gap: 6px;
         align-items: center;
         flex-wrap: wrap;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
     }
     .prazos-filter-bar input,
     .prazos-filter-bar select {
-        padding: 8px 11px;
+        padding: 7px 9px;
         border: 1.5px solid var(--border);
-        border-radius: 8px;
-        font-size: 13px;
+        border-radius: 7px;
+        font-size: 12px;
         background: var(--white);
         color: var(--text);
         outline: none;
@@ -96,13 +181,13 @@
     .prazos-filter-bar select:focus { border-color: var(--primary-light); }
     .prazos-filter-busca {
         flex: 1;
-        min-width: 180px;
-        padding-left: 34px !important;
+        min-width: 220px;
+        padding-left: 30px !important;
     }
     .prazos-filter-busca-wrap {
         position: relative;
-        flex: 1;
-        min-width: 180px;
+        flex: 0 1 320px;
+        min-width: 220px;
     }
     .prazos-filter-busca-wrap svg {
         position: absolute;
@@ -111,18 +196,26 @@
         transform: translateY(-50%);
         pointer-events: none;
     }
-    .prazos-filter-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+    .prazos-filter-actions { margin-left: 0; display: flex; gap: 6px; align-items: center; }
+    .prazos-filter-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text);
+        margin-right: 4px;
+        white-space: nowrap;
+    }
     .ia-bar {
-        background: linear-gradient(135deg, #0f2540 0%, #1a3a5c 100%);
-        border-radius: 12px;
-        padding: 14px 18px;
-        margin-bottom: 20px;
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
         display: flex;
         align-items: center;
         gap: 12px;
     }
     .ia-bar-label {
-        color: #93c5fd;
+        color: #1d4ed8;
         font-size: 12px;
         font-weight: 700;
         text-transform: uppercase;
@@ -136,27 +229,27 @@
         flex: 1;
         padding: 8px 14px;
         border-radius: 8px;
-        border: 1.5px solid rgba(147,197,253,.25);
-        background: rgba(255,255,255,.08);
-        color: #fff;
+        border: 1.5px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
         font-size: 13px;
         outline: none;
     }
-    .ia-bar-input::placeholder { color: rgba(255,255,255,.4); }
-    .ia-bar-input:focus { border-color: rgba(147,197,253,.6); }
+    .ia-bar-input::placeholder { color: var(--muted); }
+    .ia-bar-input:focus { border-color: var(--primary); }
     .ia-bar-btn {
         padding: 8px 14px;
         border-radius: 8px;
-        border: 1.5px solid rgba(147,197,253,.3);
-        background: rgba(255,255,255,.1);
-        color: #bfdbfe;
+        border: 1.5px solid var(--border);
+        background: var(--white);
+        color: var(--primary);
         font-size: 12px;
         font-weight: 600;
         cursor: pointer;
         white-space: nowrap;
         transition: background .15s;
     }
-    .ia-bar-btn:hover { background: rgba(255,255,255,.18); }
+    .ia-bar-btn:hover { background: #eff6ff; }
     .ia-resposta {
         background: #f0f9ff;
         border: 1.5px solid #bae6fd;
@@ -170,17 +263,54 @@
         align-items: flex-start;
         gap: 10px;
     }
+    .prazos-list-card {
+        padding: 0;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+    .prazos-list-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+        background: #f8fafc;
+        flex-wrap: wrap;
+    }
+    .prazos-list-head strong {
+        font-size: 14px;
+        color: var(--text);
+    }
+    .prazos-list-head span {
+        font-size: 12px;
+        color: var(--muted);
+    }
+    .prazo-row {
+        border-left: 4px solid transparent;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+        background: var(--white);
+        transition: background .15s;
+    }
+    .prazo-row:hover { background: #f8fafc; }
 </style>
 
 <style>
+    @media (max-width: 1180px) {
+        .prazos-guide { grid-template-columns: 1fr 1fr; }
+    }
     @media (max-width: 900px) {
         .prazos-filter-bar { gap: 6px; }
         .prazos-filter-bar select,
         .prazos-filter-bar input[type=date] { min-width: unset; width: 100%; }
         .prazos-filter-busca-wrap { min-width: 100%; }
+        .prazos-filter-actions { width: 100%; }
     }
     @media (max-width: 768px) {
         .prazos-metricas { grid-template-columns: repeat(2, 1fr); }
+        .prazos-guide { grid-template-columns: 1fr; }
+        .prazos-header-actions { justify-content: flex-start; }
     }
 </style>
 
@@ -193,23 +323,16 @@
 
 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$embed): ?>
 
-<a href="<?php echo e(route('processos.hub')); ?>"
-   style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:8px;"
-   onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <polyline points="15 18 9 12 15 6"/>
-    </svg>
-    Voltar
-</a>
-
-
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-    
-
-
-
-
-    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+<div class="prazos-header">
+    <div>
+        <h1 class="prazos-title">Prazos</h1>
+        <div class="prazos-subtitle">
+            Gestão e controle de prazos processuais
+            <span style="color:#cbd5e1;margin:0 6px;">|</span>
+            <a href="<?php echo e(route('processos.hub')); ?>" style="color:var(--primary);text-decoration:none;font-weight:600;">Voltar para central</a>
+        </div>
+    </div>
+    <div class="prazos-header-actions">
         <button class="btn btn-sm btn-secondary-outline"
                 wire:click="exportarPdf" wire:loading.attr="disabled" title="Exportar PDF">
             <span wire:loading.remove wire:target="exportarPdf" style="display:flex;align-items:center;gap:5px;">
@@ -232,7 +355,96 @@
         </button>
     </div>
 </div>
+<div class="prazos-guide">
+    <div class="prazos-guide-title">
+        <div class="prazos-guide-icon">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div>
+            <h2>O que olhar primeiro?</h2>
+            <p>Comece pelos vencidos, depois pelos que vencem hoje e finalize pelos fatais dos próximos dias.</p>
+        </div>
+    </div>
+    <div class="prazos-guide-step" style="border-left-color:#dc2626;">
+        <strong>1. Prazos vencidos</strong>
+        <p>Regularize ou marque como perdido quando não houver providência possível.</p>
+    </div>
+    <div class="prazos-guide-step" style="border-left-color:#ca8a04;">
+        <strong>2. Vencem hoje</strong>
+        <p>Use este grupo como pauta de trabalho do dia.</p>
+    </div>
+    <div class="prazos-guide-step" style="border-left-color:#9d174d;">
+        <strong>3. Prazos fatais</strong>
+        <p>Confirme responsável, processo vinculado e data limite.</p>
+    </div>
+</div>
 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?> 
+
+
+<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$embed): ?>
+<div class="prazos-metricas">
+
+    
+    <div class="prazos-metric-card" wire:click="$set('filtroStatus','aberto')" title="Filtrar: Em aberto">
+        <div class="prazos-metric-icon" style="background:#eff6ff;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+        </div>
+        <div>
+            <div class="prazos-metric-num" style="color:#2563eb;"><?php echo e($totalAbertos); ?></div>
+            <div class="prazos-metric-lbl">Prazos em aberto</div>
+        </div>
+    </div>
+
+    
+    <div class="prazos-metric-card" title="Vencem hoje">
+        <div class="prazos-metric-icon" style="background:#fefce8;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+        </div>
+        <div>
+            <div class="prazos-metric-num" style="color:#ca8a04;"><?php echo e($vencendoHoje); ?></div>
+            <div class="prazos-metric-lbl">Vencem hoje</div>
+        </div>
+    </div>
+
+    
+    <div class="prazos-metric-card" title="Vencidos não cumpridos">
+        <div class="prazos-metric-icon" style="background:#fef2f2;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        </div>
+        <div>
+            <div class="prazos-metric-num" style="color:#dc2626;"><?php echo e($vencidos); ?></div>
+            <div class="prazos-metric-lbl">Vencidos (não cumpridos)</div>
+        </div>
+    </div>
+
+    
+    <div class="prazos-metric-card" wire:click="$set('filtroTipo','Prazo Fatal')" title="Filtrar: Prazo Fatal">
+        <div class="prazos-metric-icon" style="background:#fdf2f8;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9d174d" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+        <div>
+            <div class="prazos-metric-num" style="color:#9d174d;"><?php echo e($fatais); ?></div>
+            <div class="prazos-metric-lbl">Prazos fatais (próx. 5 dias)</div>
+        </div>
+    </div>
+
+</div>
+<?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($embed): ?>
 <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
@@ -294,6 +506,7 @@
 
 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$embed): ?>
 <div class="prazos-filter-bar">
+    <span class="prazos-filter-label">Filtrar prazos</span>
 
     
     <div class="prazos-filter-busca-wrap">
@@ -306,7 +519,7 @@
     </div>
 
     
-    <select wire:model.live="filtroStatus" style="min-width:130px;">
+    <select wire:model.live="filtroStatus" style="width:112px;">
         <option value="aberto">Em aberto</option>
         <option value="cumprido">Cumpridos</option>
         <option value="perdido">Perdidos</option>
@@ -314,7 +527,7 @@
     </select>
 
     
-    <select wire:model.live="filtroTipo" style="min-width:130px;">
+    <select wire:model.live="filtroTipo" style="width:132px;">
         <option value="">Todos os tipos</option>
         <option value="Prazo">Prazo</option>
         <option value="Prazo Fatal">Prazo Fatal</option>
@@ -324,7 +537,7 @@
     </select>
 
     
-    <select wire:model.live="filtroResponsavel" style="min-width:130px;">
+    <select wire:model.live="filtroResponsavel" style="width:130px;">
         <option value="">Responsável</option>
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $usuarios; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <option value="<?php echo e($u->id); ?>"><?php echo e($u->nome); ?></option>
@@ -332,7 +545,7 @@
     </select>
 
     
-    <select wire:model.live="filtroProcesso" style="min-width:160px;">
+    <select wire:model.live="filtroProcesso" style="width:150px;">
         <option value="">Todos os processos</option>
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $processos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <option value="<?php echo e($p->id); ?>"><?php echo e($p->numero); ?></option>
@@ -340,14 +553,14 @@
     </select>
 
     
-    <input type="date" wire:model.live="filtroDataIni" title="De" style="width:130px;">
-    <input type="date" wire:model.live="filtroDataFim" title="Até" style="width:130px;">
+    <input type="date" wire:model.live="filtroDataIni" title="De" style="width:118px;">
+    <input type="date" wire:model.live="filtroDataFim" title="Até" style="width:118px;">
 
     
     <div class="prazos-filter-actions">
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($filtroBusca || $filtroTipo || $filtroResponsavel || $filtroProcesso || $filtroDataIni || $filtroDataFim || $filtroStatus !== 'aberto'): ?>
         <button wire:click="$set('filtroBusca',''); $set('filtroTipo',''); $set('filtroResponsavel',''); $set('filtroProcesso',''); $set('filtroDataIni',''); $set('filtroDataFim',''); $set('filtroStatus','aberto')"
-            style="padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;"
+            style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;"
             onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
             onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
             <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -364,75 +577,8 @@
     
     <div>
 
-        
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$embed): ?>
-        <div class="prazos-metricas">
 
-            
-            <div class="prazos-metric-card" wire:click="$set('filtroStatus','aberto')" title="Filtrar: Em aberto">
-                <div class="prazos-metric-icon" style="background:#eff6ff;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                </div>
-                <div>
-                    <div class="prazos-metric-num" style="color:#2563eb;"><?php echo e($totalAbertos); ?></div>
-                    <div class="prazos-metric-lbl">Prazos em aberto</div>
-                </div>
-            </div>
-
-            
-            <div class="prazos-metric-card" title="Vencem hoje">
-                <div class="prazos-metric-icon" style="background:#fefce8;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                </div>
-                <div>
-                    <div class="prazos-metric-num" style="color:#ca8a04;"><?php echo e($vencendoHoje); ?></div>
-                    <div class="prazos-metric-lbl">Vencem hoje</div>
-                </div>
-            </div>
-
-            
-            <div class="prazos-metric-card" title="Vencidos não cumpridos">
-                <div class="prazos-metric-icon" style="background:#fef2f2;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                </div>
-                <div>
-                    <div class="prazos-metric-num" style="color:#dc2626;"><?php echo e($vencidos); ?></div>
-                    <div class="prazos-metric-lbl">Vencidos (não cumpridos)</div>
-                </div>
-            </div>
-
-            
-            <div class="prazos-metric-card" wire:click="$set('filtroTipo','Prazo Fatal')" title="Filtrar: Prazo Fatal">
-                <div class="prazos-metric-icon" style="background:#fdf2f8;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9d174d" stroke-width="2">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                        <line x1="12" y1="9" x2="12" y2="13"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                </div>
-                <div>
-                    <div class="prazos-metric-num" style="color:#9d174d;"><?php echo e($fatais); ?></div>
-                    <div class="prazos-metric-lbl">Prazos fatais (próx. 5 dias)</div>
-                </div>
-            </div>
-
-        </div>
-        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?> 
-        
-
-
-<div class="card" style="padding:0;overflow:hidden;">
+<div class="card prazos-list-card">
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($prazos->isEmpty()): ?>
         <div class="empty-state">
             <div class="empty-state-icon"><svg aria-hidden="true" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
@@ -440,13 +586,19 @@
             <div class="empty-state-sub">Ajuste os filtros ou clique em <strong>+ Novo Prazo</strong> para cadastrar.</div>
         </div>
     <?php else: ?>
+        <div class="prazos-list-head">
+            <div>
+                <strong>Prazos encontrados</strong>
+                <span>Use a lista como fila de acompanhamento.</span>
+            </div>
+            <span><?php echo e($prazos->total()); ?> registro(s)</span>
+        </div>
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $prazos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $prazo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <?php
             $urg = $prazo->urgencia();
             $dias = $prazo->diasRestantes();
         ?>
-        <div style="border-left:4px solid transparent;padding:14px 18px;border-bottom:1px solid var(--border);"
-             class="urgencia-<?php echo e($urg); ?>">
+        <div class="prazo-row urgencia-<?php echo e($urg); ?>">
             <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
 
                 
@@ -584,6 +736,8 @@
             </div>
         </div>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+</div>
 
     </div>
     

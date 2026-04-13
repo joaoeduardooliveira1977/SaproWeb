@@ -61,7 +61,7 @@ class ProcessoChecklist extends Component
                 $this->novaResponsavel ?: null,
                 $this->novaDataLimite ?: null,
                 $ordem,
-                Auth::id(),
+                Auth::guard('usuarios')->id(),
             ]
         );
 

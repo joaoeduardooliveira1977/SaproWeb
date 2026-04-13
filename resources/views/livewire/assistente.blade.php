@@ -40,7 +40,7 @@
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div style="width: 44px; height: 44px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center;"><svg aria-hidden="true" width="22" height="22" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><line x1="12" y1="3" x2="12" y2="7"/><circle cx="8" cy="15" r="1" fill="white"/><circle cx="16" cy="15" r="1" fill="white"/></svg></div>
                     <div>
-                        <div style="font-weight: 700; font-size: 16px; color: var(--primary);">Assistente Jurídico SAPRO</div>
+                        <div style="font-weight: 700; font-size: 16px; color: var(--primary);">Assistente Jurídico Software Jur�dico</div>
                         <div style="font-size: 12px; color: var(--success); display: flex; align-items: center; gap: 4px;">
                             <span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block;"></span>
                             Online — powered by Google Gemini
@@ -145,7 +145,7 @@
             </div>
 
             <div style="font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center;">
-                Os dados são consultados em tempo real do banco de dados do SAPRO
+                Os dados são consultados em tempo real do banco de dados do Software Jur�dico
             </div>
         </div>
     </div>

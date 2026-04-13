@@ -37,19 +37,6 @@
             </div>
         </div>
     </div>
-    <div style="display:flex;gap:8px;">
-        <a href="{{ route('processos') }}" class="btn btn-outline btn-sm" style="display:flex;align-items:center;gap:5px;">
-            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Cancelar
-        </a>
-        <button wire:click="salvar" wire:loading.attr="disabled" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
-            <span wire:loading.remove wire:target="salvar" style="display:flex;align-items:center;gap:6px;">
-                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                Salvar Processo
-            </span>
-            <span wire:loading wire:target="salvar">Salvando…</span>
-        </button>
-    </div>
 </div>
 
 {{-- ── Barra de progresso / etapas ── --}}
@@ -171,7 +158,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 {{-- Número CNJ --}}
                 <div class="form-field">
                     <label class="lbl">Número do Processo <span style="color:var(--danger);">*</span></label>
-                    <input wire:model.live.debounce.400ms="numero" type="text"
+                    <input wire:model.live="numero" type="text"
                         placeholder="0000000-00.0000.8.26.0001"
                         style="{{ $inp }}border-color:{{ $numeroValido ? 'var(--success)' : 'var(--border)' }};">
                     @error('numero')
@@ -197,11 +184,11 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;">
                     <div class="form-field">
                         <label class="lbl">Data de Distribuição</label>
-                        <input wire:model="data_distribuicao" type="date" style="{{ $inp }}">
+                        <input wire:model.live="data_distribuicao" type="date" style="{{ $inp }}">
                     </div>
                     <div style="padding-bottom:2px;">
                         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:9px 12px;border:1.5px solid {{ $extrajudicial ? 'var(--warning)' : 'var(--border)' }};border-radius:8px;font-size:13px;background:{{ $extrajudicial ? '#fffbeb' : 'var(--white)' }};white-space:nowrap;">
-                            <input wire:model="extrajudicial" wire:change="$refresh" type="checkbox" id="extrajudicial"
+                            <input wire:model.live="extrajudicial" wire:change="$refresh" type="checkbox" id="extrajudicial"
                                 style="width:15px;height:15px;cursor:pointer;accent-color:var(--warning);margin:0;flex-shrink:0;">
                             Extrajudicial
                         </label>
@@ -219,7 +206,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                     <div class="form-field">
                         <label class="lbl">Autor ou Réu</label>
-                        <select wire:model="autorReu" style="{{ $sel }}">
+                        <select wire:model.live="autorReu" style="{{ $sel }}">
                             <option value="">— Selecione —</option>
                             <option value="Autor">Autor</option>
                             <option value="Réu">Réu</option>
@@ -227,7 +214,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                     </div>
                     <div class="form-field">
                         <label class="lbl">Unidade</label>
-                        <input wire:model="unidade" type="text" placeholder="Ex: 001" style="{{ $inp }}">
+                        <input wire:model.live="unidade" type="text" placeholder="Ex: 001" style="{{ $inp }}">
                     </div>
                 </div>
 
@@ -247,7 +234,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                             </button>
                         </div>
                         @else
-                        <input type="text" wire:model.live.debounce.300ms="parteContrariaBusca"
+                        <input type="text" wire:model.live="parteContrariaBusca"
                             placeholder="Nome (busca no cadastro ou texto livre)..."
                             style="{{ $inp }}"
                             autocomplete="off">
@@ -281,7 +268,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 {{-- Repartição/Fórum --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Repartição / Fórum</label>
-                    <select wire:model="reparticao_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
+                    <select wire:model.live="reparticao_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
                         <option value="">— Selecione —</option>
                         @foreach($reparticoes as $r)
                             <option value="{{ $r->id }}">{{ $r->descricao }}</option>
@@ -292,30 +279,8 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 {{-- Vara --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Vara</label>
-                    <input wire:model="vara" type="text" style="{{ $inp }}" placeholder="Ex: 3ª Vara Cível"
+                    <input wire:model.live="vara" type="text" style="{{ $inp }}" placeholder="Ex: 3ª Vara Cível"
                         {{ $disJ ? 'disabled' : '' }}>
-                </div>
-
-                {{-- Secretaria — oculto mas preservado --}}
-                <div class="form-field" style="display:none;">
-                    <label class="lbl">Secretaria</label>
-                    <select wire:model="secretaria_id" style="{{ $sel }}">
-                        <option value="">— Selecione —</option>
-                        @foreach($secretarias as $s)
-                            <option value="{{ $s->id }}">{{ $s->descricao }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- Juiz — oculto mas preservado --}}
-                <div class="form-field" style="display:none;">
-                    <label class="lbl">Juiz</label>
-                    <select wire:model="juiz_id" style="{{ $sel }}">
-                        <option value="">— Selecione —</option>
-                        @foreach($juizes as $j)
-                            <option value="{{ $j->id }}">{{ $j->nome }}</option>
-                        @endforeach
-                    </select>
                 </div>
 
             </div>
@@ -367,7 +332,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 {{-- Situação/Fase --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Situação / Fase</label>
-                    <select wire:model="fase_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
+                    <select wire:model.live="fase_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
                         <option value="">— Selecione —</option>
                         @foreach($fases as $f)
                             <option value="{{ $f->id }}">{{ $f->descricao }}</option>
@@ -378,7 +343,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 {{-- Grau de Risco --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Grau de Risco</label>
-                    <select wire:model="risco_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
+                    <select wire:model.live="risco_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
                         <option value="">— Selecione —</option>
                         @foreach($riscos as $r)
                             <option value="{{ $r->id }}">{{ $r->descricao }}</option>
@@ -433,7 +398,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                         @endif
                         @endforeach
                     </div>
-                    <select wire:model="tipo_acao_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
+                    <select wire:model.live="tipo_acao_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
                         <option value="">— Selecione —</option>
                         @foreach($tiposAcao as $t)
                             <option value="{{ $t->id }}">{{ $t->descricao }}</option>
@@ -444,7 +409,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 {{-- Tipo de Processo --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Tipo de Processo</label>
-                    <select wire:model="tipo_processo_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
+                    <select wire:model.live="tipo_processo_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
                         <option value="">— Selecione —</option>
                         @foreach($tiposProcesso as $t)
                             <option value="{{ $t->id }}">{{ $t->descricao }}</option>
@@ -455,22 +420,11 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 {{-- Status — oculto, sempre salva 'Ativo' --}}
                 <div class="form-field" style="display:none;">
                     <label class="lbl">Status</label>
-                    <select wire:model="status" style="{{ $sel }}">
+                    <select wire:model.live="status" style="{{ $sel }}">
                         <option value="Ativo">Ativo</option>
                         <option value="Suspenso">Suspenso</option>
                         <option value="Arquivado">Arquivado</option>
                         <option value="Encerrado">Encerrado</option>
-                    </select>
-                </div>
-
-                {{-- Assunto — oculto --}}
-                <div class="form-field" style="display:none;grid-column:1/-1;">
-                    <label class="lbl">Assunto</label>
-                    <select wire:model="assunto_id" style="{{ $sel }}">
-                        <option value="">— Selecione —</option>
-                        @foreach($assuntos as $a)
-                            <option value="{{ $a->id }}">{{ $a->descricao }}</option>
-                        @endforeach
                     </select>
                 </div>
 
@@ -488,7 +442,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                     <label class="lbl">Valor da Causa</label>
                     <div style="position:relative;">
                         <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);font-weight:600;">R$</span>
-                        <input wire:model="valor_causa" type="text" placeholder="0,00"
+                        <input wire:model.live="valor_causa" type="text" placeholder="0,00"
                             style="{{ $inp }}padding-left:32px;">
                     </div>
                 </div>
@@ -496,7 +450,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                     <label class="lbl">Valor em Risco</label>
                     <div style="position:relative;">
                         <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);font-weight:600;">R$</span>
-                        <input wire:model="valor_risco" type="text" placeholder="0,00"
+                        <input wire:model.live="valor_risco" type="text" placeholder="0,00"
                             style="{{ $inp }}padding-left:32px;">
                     </div>
                 </div>
@@ -509,7 +463,7 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 Observações
             </div>
-            <textarea wire:model="observacoes" rows="4" placeholder="Informações adicionais sobre o processo..."
+            <textarea wire:model.live="observacoes" rows="4" placeholder="Informações adicionais sobre o processo..."
                 style="{{ $inp }}resize:vertical;font-family:inherit;"></textarea>
         </div>
 
@@ -589,7 +543,6 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
             </div>
         </div>
 
-        {{-- Botão salvar fixo --}}
         <button wire:click="salvar" wire:loading.attr="disabled"
             class="btn btn-primary"
             style="width:100%;justify-content:center;padding:12px;display:flex;align-items:center;gap:6px;">
@@ -597,29 +550,19 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 Salvar Processo
             </span>
-            <span wire:loading wire:target="salvar">Salvando…</span>
+            <span wire:loading wire:target="salvar">Salvando...</span>
         </button>
+        <a href="{{ route('processos') }}" class="btn btn-outline"
+            style="width:100%;justify-content:center;padding:12px;display:flex;align-items:center;gap:6px;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Cancelar
+        </a>
 
     </div>
     {{-- /coluna resumo --}}
 
 </div>
 {{-- /grid --}}
-
-{{-- ── Barra de ações (rodapé) ── --}}
-<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;padding:16px;background:var(--white);border:1px solid var(--border);border-radius:10px;">
-    <a href="{{ route('processos') }}" class="btn btn-outline" style="display:flex;align-items:center;gap:5px;">
-        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        Cancelar
-    </a>
-    <button wire:click="salvar" wire:loading.attr="disabled" class="btn btn-primary" style="display:flex;align-items:center;gap:6px;min-width:150px;justify-content:center;">
-        <span wire:loading.remove wire:target="salvar" style="display:flex;align-items:center;gap:6px;">
-            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            Salvar Processo
-        </span>
-        <span wire:loading wire:target="salvar">Salvando…</span>
-    </button>
-</div>
 
 @push('styles')
 <style>

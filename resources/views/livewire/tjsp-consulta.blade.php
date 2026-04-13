@@ -206,13 +206,13 @@
                     @if($processoDoResultado)
                     <div style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #86efac;padding:4px 12px;border-radius:8px;">
                         <svg width="12" height="12" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        <span style="font-size:12px;color:#166534;font-weight:600;">Cadastrado no SAPRO</span>
+                        <span style="font-size:12px;color:#166534;font-weight:600;">Cadastrado no Software Jur�dico</span>
                         <a href="/processos/{{ $processoDoResultado->id }}" style="font-size:12px;color:#2563a8;font-weight:700;text-decoration:none;">ver →</a>
                     </div>
                     @else
                     <div style="display:inline-flex;align-items:center;gap:6px;background:#fffbeb;border:1px solid #fde68a;padding:4px 12px;border-radius:8px;">
                         <svg width="12" height="12" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <span style="font-size:12px;color:#92400e;font-weight:500;">Não cadastrado no SAPRO</span>
+                        <span style="font-size:12px;color:#92400e;font-weight:500;">Não cadastrado no Software Jur�dico</span>
                     </div>
                     @endif
                 </div>
@@ -224,6 +224,11 @@
                             <svg width="13" height="13" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                             {{ $andamentosSalvos }} importado(s)
                         </span>
+                        <a href="{{ route('processos.show', $processoDoResultado->id) }}"
+                           style="background:#eff6ff;color:#1d4ed8;border:1.5px solid #bfdbfe;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
+                            Abrir processo
+                            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </a>
                         @else
                         <button wire:click="salvarAndamentos" wire:loading.attr="disabled" wire:target="salvarAndamentos"
                             style="background:#16a34a;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(22,163,74,.25);">
@@ -265,6 +270,11 @@
                         <span class="tjsp-badge" style="background:#dbeafe;color:#1e40af;">{{ $resultadoConsulta['tribunal'] }}</span>
                         @endif
                         <span style="font-size:12px;color:var(--muted);font-family:monospace;">{{ $resultadoConsulta['numero'] }}</span>
+                        @if($andamentosNovosSet[$idx] ?? false)
+                        <span class="tjsp-badge" style="background:#dcfce7;color:#15803d;">✦ Novo</span>
+                        @else
+                        <span class="tjsp-badge" style="background:#f1f5f9;color:#94a3b8;">Existente</span>
+                        @endif
                     </div>
                     <p style="font-size:13px;color:var(--text);line-height:1.6;margin:0;">{{ $a['descricao'] }}</p>
                 </div>
@@ -341,6 +351,7 @@
                 @php $bloqueado = $consultando || $verificacao?->emAndamento() || $totalFiltrado === 0; @endphp
                 <button wire:click="iniciarVerificacao"
                     wire:loading.attr="disabled" wire:target="iniciarVerificacao"
+                    wire:confirm="Verificar {{ $totalFiltrado }} processo(s) no DATAJUD? A operação roda em segundo plano e pode levar alguns minutos."
                     @if($bloqueado) disabled @endif
                     style="width:100%;padding:9px 16px;background:{{ $bloqueado ? '#94a3b8' : 'linear-gradient(135deg,#16a34a,#15803d)' }};color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:{{ $bloqueado ? 'not-allowed' : 'pointer' }};white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:{{ $bloqueado ? 'none' : '0 2px 8px rgba(22,163,74,.25)' }};">
                     <span wire:loading.remove wire:target="iniciarVerificacao">

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -156,7 +157,7 @@ class Documentos extends Component
                         $nomeOriginal,
                         $arq->getMimeType(),
                         $arq->getSize(),
-                        auth()->user()->nome ?? 'Sistema',
+                        Auth::guard('usuarios')->user()?->nome ?? 'Sistema',
                     ]
                 );
 
@@ -201,7 +202,7 @@ class Documentos extends Component
             'titulo'         => $this->titulo,
             'descricao'      => $this->descricao ?: null,
             'data_documento' => $this->data_documento ?: null,
-            'uploaded_by'    => auth()->user()->nome ?? 'Sistema',
+            'uploaded_by'    => Auth::guard('usuarios')->user()?->nome ?? 'Sistema',
         ];
 
         // Upload do arquivo
@@ -350,7 +351,7 @@ class Documentos extends Component
             ? number_format($resumo->total_tamanho / 1024 / 1024, 1) . ' MB'
             : '0 MB';
 
-        $contexto = "Você é um assistente jurídico do sistema SAPRO. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
 
 Dados do arquivo de documentos:
 - Total de documentos: {$resumo->total}

@@ -28,7 +28,6 @@ class Minuta extends Model
     {
         $cliente  = $processo->cliente;
         $advogado = $processo->advogado;
-        $juiz     = $processo->juiz;
 
         $endCliente = implode(', ', array_filter([
             $cliente?->logradouro,
@@ -65,7 +64,6 @@ class Minuta extends Model
             '{{cliente_cep}}'                => $cliente?->cep ?? '',
             '{{advogado_nome}}'              => $advogado?->nome ?? '',
             '{{advogado_oab}}'               => $advogado?->oab ?? '',
-            '{{juiz_nome}}'                  => $juiz?->nome ?? '',
             '{{data_atual}}'                 => $dataExtenso,
             '{{data_atual_curta}}'           => $hoje->format('d/m/Y'),
         ];

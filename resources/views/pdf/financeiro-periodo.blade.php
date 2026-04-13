@@ -1,4 +1,4 @@
-@extends('pdf.layout')
+﻿@extends('pdf.layout')
 
 @section('content')
 
@@ -6,31 +6,16 @@
     <span><strong>Período:</strong> {{ $data_ini }} a {{ $data_fim }}</span>
 </div>
 
-{{-- Resumo --}}
-<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-    <div style="flex:1;background:#dcfce7;border-radius:6px;padding:12px;min-width:120px;">
-        <div style="font-size:9px;color:#166534;font-weight:bold;text-transform:uppercase;">Recebido</div>
-        <div style="font-size:16px;font-weight:bold;color:#166534;margin-top:4px;">R$ {{ number_format($totalRecebido, 2, ',', '.') }}</div>
-    </div>
-    <div style="flex:1;background:#dbeafe;border-radius:6px;padding:12px;min-width:120px;">
-        <div style="font-size:9px;color:#1d4ed8;font-weight:bold;text-transform:uppercase;">A Receber</div>
-        <div style="font-size:16px;font-weight:bold;color:#1d4ed8;margin-top:4px;">R$ {{ number_format($totalAReceber, 2, ',', '.') }}</div>
-    </div>
-    <div style="flex:1;background:#fee2e2;border-radius:6px;padding:12px;min-width:120px;">
-        <div style="font-size:9px;color:#dc2626;font-weight:bold;text-transform:uppercase;">Pago</div>
-        <div style="font-size:16px;font-weight:bold;color:#dc2626;margin-top:4px;">R$ {{ number_format($totalPago, 2, ',', '.') }}</div>
-    </div>
-    <div style="flex:1;background:#fef3c7;border-radius:6px;padding:12px;min-width:120px;">
-        <div style="font-size:9px;color:#d97706;font-weight:bold;text-transform:uppercase;">A Pagar</div>
-        <div style="font-size:16px;font-weight:bold;color:#d97706;margin-top:4px;">R$ {{ number_format($totalAPagar, 2, ',', '.') }}</div>
-    </div>
-    <div style="flex:1;background:{{ $saldo >= 0 ? '#1a3a5c' : '#7f1d1d' }};border-radius:6px;padding:12px;min-width:120px;">
-        <div style="font-size:9px;color:#93c5fd;font-weight:bold;text-transform:uppercase;">Saldo (recebido - pago)</div>
-        <div style="font-size:16px;font-weight:bold;color:#fff;margin-top:4px;">R$ {{ number_format($saldo, 2, ',', '.') }}</div>
-    </div>
-</div>
+<table class="summary-grid">
+    <tr>
+        <td><div class="summary-card" style="border-left-color:#16a34a;"><div class="summary-label">Recebido</div><div class="summary-value" style="color:#166534;">R$ {{ number_format($totalRecebido, 2, ',', '.') }}</div></div></td>
+        <td><div class="summary-card" style="border-left-color:#2563a8;"><div class="summary-label">A receber</div><div class="summary-value" style="color:#1d4ed8;">R$ {{ number_format($totalAReceber, 2, ',', '.') }}</div></div></td>
+        <td><div class="summary-card" style="border-left-color:#dc2626;"><div class="summary-label">Pago</div><div class="summary-value" style="color:#dc2626;">R$ {{ number_format($totalPago, 2, ',', '.') }}</div></div></td>
+        <td><div class="summary-card" style="border-left-color:#d97706;"><div class="summary-label">A pagar</div><div class="summary-value" style="color:#d97706;">R$ {{ number_format($totalAPagar, 2, ',', '.') }}</div></div></td>
+        <td><div class="summary-card" style="border-left-color:{{ $saldo >= 0 ? '#16a34a' : '#dc2626' }};"><div class="summary-label">Saldo</div><div class="summary-value" style="color:{{ $saldo >= 0 ? '#166534' : '#dc2626' }};">R$ {{ number_format($saldo, 2, ',', '.') }}</div><div class="summary-note">recebido - pago</div></div></td>
+    </tr>
+</table>
 
-{{-- Recebimentos --}}
 @if($recebimentos->isNotEmpty())
 <div class="section-title">Recebimentos ({{ $recebimentos->count() }})</div>
 <table>
@@ -59,8 +44,7 @@
                 @endif
             </td>
             <td style="text-align:center;">
-                <span class="badge {{ $r->recebido ? 'badge-ok' : '' }}"
-                    style="{{ !$r->recebido ? 'background:#dbeafe;color:#1d4ed8;' : '' }}">
+                <span class="badge {{ $r->recebido ? 'badge-ok' : '' }}" style="{{ !$r->recebido ? 'background:#dbeafe;color:#1d4ed8;' : '' }}">
                     {{ $r->recebido ? 'Recebido' : 'Pendente' }}
                 </span>
             </td>
@@ -70,7 +54,6 @@
 </table>
 @endif
 
-{{-- Pagamentos --}}
 @if($pagamentos->isNotEmpty())
 <div class="section-title" style="margin-top:16px;">Pagamentos / Despesas ({{ $pagamentos->count() }})</div>
 <table>

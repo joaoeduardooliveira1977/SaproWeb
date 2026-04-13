@@ -49,13 +49,10 @@ class ProcessoForm extends Component
     // Classificação
     public array   $advogados_selecionados = [];
     public ?int    $advogado_id            = null; // legado — mantido
-    public ?int    $juiz_id               = null;
     public ?int    $tipo_acao_id          = null;
     public ?int    $tipo_processo_id      = null;
     public ?int    $fase_id               = null;
-    public ?int    $assunto_id            = null;
     public ?int    $risco_id              = null;
-    public ?int    $secretaria_id         = null;
     public ?int    $reparticao_id         = null;
     public string  $vara                  = '';
     public string  $valor_causa           = '';
@@ -230,6 +227,22 @@ class ProcessoForm extends Component
 
     // ── Mount ─────────────────────────────────────
 
+    private function normalizarDecimal(string $valor): string
+    {
+        $valor = trim(str_replace(['R$', ' '], '', $valor));
+
+        if ($valor === '') {
+            return '0';
+        }
+
+        if (str_contains($valor, ',')) {
+            $valor = str_replace('.', '', $valor);
+            $valor = str_replace(',', '.', $valor);
+        }
+
+        return is_numeric($valor) ? $valor : '0';
+    }
+
     public function mount(?int $processoId = null): void
     {
         $this->processoId = $processoId;
@@ -260,13 +273,10 @@ class ProcessoForm extends Component
             $this->advogados_selecionados = $processo->advogados->pluck('id')->toArray();
             $this->advogado_id            = $processo->advogado_id; // legado
 
-            $this->juiz_id          = $processo->juiz_id;
             $this->tipo_acao_id     = $processo->tipo_acao_id;
             $this->tipo_processo_id = $processo->tipo_processo_id;
             $this->fase_id          = $processo->fase_id;
-            $this->assunto_id       = $processo->assunto_id;
             $this->risco_id         = $processo->risco_id;
-            $this->secretaria_id    = $processo->secretaria_id;
             $this->reparticao_id    = $processo->reparticao_id;
             $this->vara             = $processo->vara ?? '';
             $this->valor_causa      = $processo->valor_causa ?? '';
@@ -290,12 +300,17 @@ class ProcessoForm extends Component
             return;
         }
 
+        $uniqueNumero = \Illuminate\Validation\Rule::unique('processos', 'numero')
+            ->ignore($this->processoId);
+
         $this->validate([
-            'numero'     => 'required|string|max:50',
-            'cliente_id' => 'required|integer',
+            'numero'            => ['required', 'string', 'max:30', $uniqueNumero],
+            'cliente_id'        => 'required|integer',
             'data_distribuicao' => 'nullable|date',
         ], [
-            'numero.required'     => 'O número do processo é obrigatório.',
+            'numero.required' => 'O número do processo é obrigatório.',
+            'numero.max'      => 'O número do processo não pode exceder 30 caracteres.',
+            'numero.unique'   => 'Já existe outro processo com este número.',
             'cliente_id.required' => 'O cliente é obrigatório.',
         ]);
 
@@ -308,36 +323,62 @@ class ProcessoForm extends Component
             'extrajudicial'      => $this->extrajudicial,
             'cliente_id'         => $this->cliente_id,
             'parte_contraria'    => $parteContraria,
-            'parte_contraria_id' => $this->parteContrariaId,
+            'parte_contraria_id' => $this->parteContrariaId ?: null,
             'autor_reu'         => $this->autorReu ?: null,
             'unidade'           => $this->unidade ?: null,
-            'juiz_id'           => $this->juiz_id,
-            'tipo_acao_id'      => $this->tipo_acao_id,
-            'tipo_processo_id'  => $this->tipo_processo_id,
-            'fase_id'           => $this->fase_id,
-            'assunto_id'        => $this->assunto_id,
-            'risco_id'          => $this->risco_id,
-            'secretaria_id'     => $this->secretaria_id,
-            'reparticao_id'     => $this->reparticao_id,
+            'advogado_id'        => $this->advogado_id ?: null,
+            'tipo_acao_id'      => $this->tipo_acao_id ?: null,
+            'tipo_processo_id'  => $this->tipo_processo_id ?: null,
+            'fase_id'           => $this->fase_id ?: null,
+            'risco_id'          => $this->risco_id ?: null,
+            'reparticao_id'     => $this->reparticao_id ?: null,
             'vara'              => $this->vara ?: null,
-            'valor_causa'       => $this->valor_causa ?: null,
-            'valor_risco'       => $this->valor_risco ?: null,
+            'valor_causa'       => $this->normalizarDecimal($this->valor_causa),
+            'valor_risco'       => $this->normalizarDecimal($this->valor_risco),
             'observacoes'       => $this->observacoes ?: null,
-            'status'            => 'Ativo',
+            'status'            => $this->status,
         ];
 
         if ($this->processoId) {
-            $processo = Processo::findOrFail($this->processoId);
-            $processo->update($dados);
-            $this->dispatch('toast', message: 'Processo atualizado com sucesso!', type: 'success');
+            $processo = Processo::withoutGlobalScopes()->findOrFail($this->processoId);
+
+            $processo->fill($dados);
+            $alterado = $processo->isDirty();
+
+            $advogadosAtuais = $processo->advogados()->pluck('pessoas.id')->map(fn ($id) => (int) $id)->sort()->values()->all();
+            $advogadosNovos = collect($this->advogados_selecionados)->map(fn ($id) => (int) $id)->sort()->values()->all();
+            $advogadosAlterados = $advogadosAtuais !== $advogadosNovos;
+
+            if (! $alterado && ! $advogadosAlterados) {
+                $this->dispatch('toast', message: 'Nenhuma alteração detectada.', type: 'info');
+                return;
+            }
+
+            if ($alterado) {
+                $processo->save();
+            }
+
+            if ($advogadosAlterados) {
+                $processo->advogados()->sync($this->advogados_selecionados);
+            }
+
+            \Illuminate\Support\Facades\Log::info('ProcessoForm::salvar', [
+                'processoId'   => $this->processoId,
+                'alterado'     => $alterado,
+                'advogadosAlterados' => $advogadosAlterados,
+                'changes'      => array_keys($processo->getChanges()),
+                'fase_id'      => $this->fase_id,
+                'status'       => $this->status,
+            ]);
+
+            $this->dispatch('toast', message: "Processo #{$this->processoId} atualizado!", type: 'success');
         } else {
-            $dados['criado_por'] = Auth::id();
+            $dados['criado_por'] = Auth::guard('usuarios')->id();
+            $dados['tenant_id'] = tenant_id() ?? Auth::guard('usuarios')->user()?->tenant_id;
             $processo = Processo::create($dados);
+            $processo->advogados()->sync($this->advogados_selecionados);
             $this->dispatch('toast', message: 'Processo cadastrado com sucesso!', type: 'success');
         }
-
-        // Sincronizar advogados na tabela pivot
-        $processo->advogados()->sync($this->advogados_selecionados);
 
         $this->redirect(route('processos.show', $processo->id));
     }
@@ -347,19 +388,16 @@ class ProcessoForm extends Component
     public function render()
     {
         $advogados     = Pessoa::doTipo('Advogado')->orderBy('nome')->get();
-        $juizes        = Pessoa::doTipo('Juiz')->orderBy('nome')->get();
         $fases         = \App\Models\Fase::orderBy('descricao')->get();
         $riscos        = DB::table('graus_risco')->orderBy('descricao')->get();
         $tiposAcao     = DB::table('tipos_acao')->orderBy('descricao')->get();
         $tiposProcesso = DB::table('tipos_processo')->orderBy('descricao')->get();
-        $assuntos      = DB::table('assuntos')->orderBy('descricao')->get();
-        $secretarias   = DB::table('secretarias')->orderBy('descricao')->get();
         $reparticoes   = DB::table('reparticoes')->orderBy('descricao')->get();
 
         return view('livewire.processo-form', compact(
-            'advogados', 'juizes', 'fases',
-            'riscos', 'tiposAcao', 'tiposProcesso', 'assuntos',
-            'secretarias', 'reparticoes'
+            'advogados', 'fases',
+            'riscos', 'tiposAcao', 'tiposProcesso',
+            'reparticoes'
         ));
     }
 }

@@ -260,8 +260,8 @@ class AaspPublicacoes extends Component
         // ── Capa ──
         $html .= "<div class='capa'>";
         $html .= "<div class='capa-escritorio'>Escritório de Advocacia Ferreira</div>";
-       // $html .= "<div class='capa-logo'>SAPRO</div>";
-        $html .= "<div class='capa-sub'>Sistema Jurídico</div>";
+       // $html .= "<div class='capa-logo'>Software Jur�dico</div>";
+        $html .= "<div class='capa-sub'>Software Jur�dico</div>";
         $html .= "<div class='capa-titulo'>Publicações AASP</div>";
         $html .= "<div class='capa-data'>{$dataFmt}</div>";
         $html .= "<div class='capa-stats'>{$totalPubs} publicação(ões) &nbsp;&nbsp;|&nbsp;&nbsp; {$totalAdvs} advogado(s)</div>";
@@ -318,7 +318,7 @@ class AaspPublicacoes extends Component
         }
 
         // ── Rodapé ──
-        $html .= "<div class='rodape'>Gerado pelo Sistema Jurídico SAPRO &nbsp;·&nbsp; {$geradoEm} &nbsp;·&nbsp; Publicações AASP referentes a {$dataFmt}</div>";
+        $html .= "<div class='rodape'>Gerado pelo Software Jur�dico &nbsp;·&nbsp; {$geradoEm} &nbsp;·&nbsp; Publicações AASP referentes a {$dataFmt}</div>";
 
         $html .= "</body></html>";
 
@@ -363,7 +363,7 @@ class AaspPublicacoes extends Component
         <div style='font-family:Arial,Helvetica,sans-serif;max-width:680px;margin:0 auto;background:#f1f5f9;'>
 
         <div style='background:#1a3a5c;padding:28px 36px 24px;border-radius:8px 8px 0 0;'>
-            <div style='color:#93c5fd;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;'>Sistema Jurídico SAPRO</div>
+            <div style='color:#93c5fd;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;'>Software Jur�dico</div>
             <div style='color:#fff;font-size:24px;font-weight:700;line-height:1.2;'>Publicações AASP &mdash; {$dataFmt}</div>
         </div>
 
@@ -460,7 +460,7 @@ class AaspPublicacoes extends Component
         $corpo .= "
         </div>
         <div style='background:#e2e8f0;border:1px solid #cbd5e1;border-top:none;padding:14px 36px;border-radius:0 0 8px 8px;text-align:center;'>
-            <span style='font-size:11px;color:#64748b;'>Gerado pelo Sistema Jurídico SAPRO &nbsp;·&nbsp; {$geradoEm} &nbsp;·&nbsp; Publicações AASP referentes a {$dataFmt}</span>
+            <span style='font-size:11px;color:#64748b;'>Gerado pelo Software Jur�dico &nbsp;·&nbsp; {$geradoEm} &nbsp;·&nbsp; Publicações AASP referentes a {$dataFmt}</span>
         </div>
 
         </div>";
@@ -648,7 +648,10 @@ class AaspPublicacoes extends Component
 
     private function queryPublicacoes()
     {
-        $q = AaspPublicacao::query()->orderBy('data', 'desc')->orderBy('id', 'desc');
+        $q = AaspPublicacao::query()
+            ->with('processo')
+            ->orderBy('data', 'desc')
+            ->orderBy('id', 'desc');
 
         if ($this->filtroData) {
             $q->whereDate('data', $this->filtroData);

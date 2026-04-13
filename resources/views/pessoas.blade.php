@@ -1,6 +1,5 @@
 @extends('layouts.app')
-@section('page-title', 'Pessoas')
-@section('breadcrumb')<span class="current">Pessoas</span>@endsection
+@section('page-title', 'Clientes')
 @section('content')
 @livewire('pessoas')
 @endsection

@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('tenants')) {
+            return;
+        }
+
         Schema::create('tenants', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
@@ -22,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tenants');
+        // A tabela pode ter sido criada por uma migration anterior.
     }
 };

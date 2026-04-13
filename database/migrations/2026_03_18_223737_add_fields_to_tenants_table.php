@@ -12,10 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tenants', function (Blueprint $table) {
-        $table->string('nome')->nullable();
-        $table->string('email')->unique()->nullable();
-        $table->string('plano')->default('basico');
-        $table->boolean('ativo')->default(true);
+            if (!Schema::hasColumn('tenants', 'nome')) {
+                $table->string('nome')->nullable();
+            }
+            if (!Schema::hasColumn('tenants', 'email')) {
+                $table->string('email')->unique()->nullable();
+            }
+            if (!Schema::hasColumn('tenants', 'plano')) {
+                $table->string('plano')->default('basico');
+            }
+            if (!Schema::hasColumn('tenants', 'ativo')) {
+                $table->boolean('ativo')->default(true);
+            }
     	});
     }
 

@@ -13,13 +13,6 @@ class VerificarPerfil
 	'admin'         => '*',
     	'administrador' => '*',  // ← adicionar esta linha
     	'super_admin'   => '*',  // ← adicionar esta linha
-    	'advogado'      => [
-        'geral', 'processos', 'pessoas', 'documentos', 'minutas',
-
-	'admin' => '*', // acesso total
-
-        ],
-
 	'advogado' => [
             'geral', 'processos', 'pessoas', 'documentos', 'minutas',
             'financeiro', 'honorarios', 'relatorios',
@@ -42,6 +35,8 @@ class VerificarPerfil
     // Ações permitidas por perfil (para guards em Livewire)
     const ACOES = [
         'admin'       => '*',
+        'administrador' => '*',
+        'super_admin'   => '*',
         'advogado'    => ['processos.editar', 'processos.arquivar', 'pessoas.editar', 'pessoas.desativar', 'prazos.editar', 'prazos.excluir', 'agenda.editar', 'agenda.excluir'],
         'estagiario'  => ['processos.ver', 'pessoas.ver'],
         'financeiro'  => ['financeiro.editar'],
@@ -50,7 +45,7 @@ class VerificarPerfil
 
     public function handle(Request $request, Closure $next, string $modulo = null)
     {
-        $usuario = auth()->user();
+        $usuario = auth('usuarios')->user() ?? auth()->user();
 
         if (!$usuario) {
             return redirect()->route('login');
@@ -63,6 +58,7 @@ class VerificarPerfil
 
         // Verifica se está ativo
         if (isset($usuario->ativo) && !$usuario->ativo) {
+            auth('usuarios')->logout();
             auth()->logout();
             return redirect()->route('login')->with('error', 'Sua conta está desativada.');
         }
@@ -110,4 +106,3 @@ class VerificarPerfil
  return redirect()->route('dashboard')->with('error', 'Você não tem permissão para acessar este módulo.');
     }
 }
-                                                                                                                                                                                                                                                                                                                                                                  

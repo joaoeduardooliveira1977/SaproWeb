@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\{Agenda as AgendaModel, Processo};
+use App\Models\{Agenda as AgendaModel, Audiencia, Prazo, Processo};
 use Illuminate\Support\Facades\{Auth, DB};
 use Carbon\Carbon;
 
@@ -168,7 +168,7 @@ class Agenda extends Component
             'tipo'           => $this->tipo_evento,
             'urgente'        => $this->urgente,
             'processo_id'    => $this->processo_id ?: null,
-            'responsavel_id' => Auth::id(),
+            'responsavel_id' => Auth::guard('usuarios')->id(),
             'observacoes'    => $this->observacoes ?: null,
         ];
 
@@ -200,7 +200,7 @@ class Agenda extends Component
             ->map(fn($e) => '- ' . $e->titulo . ' (' . $e->data_hora->format('d/m H:i') . ') [' . $e->tipo . ']')
             ->join("\n");
 
-        $contexto = "Você é um assistente jurídico do sistema SAPRO. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
 
 Dados da agenda:
 - Total de eventos pendentes: {$total}
@@ -281,6 +281,23 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
             ->get()
             ->groupBy(fn($e) => $e->data_hora->format('Y-m-d'));
 
+        $prazosMes     = collect();
+        $audienciasMes = collect();
+
+        if ($this->vistaCalendario) {
+            $prazosMes = Prazo::with('processo:id,numero')
+                ->where('status', 'aberto')
+                ->whereBetween('data_prazo', [$inicioMes, $fimMes])
+                ->get()
+                ->groupBy(fn($p) => $p->data_prazo->format('Y-m-d'));
+
+            $audienciasMes = Audiencia::with('processo:id,numero')
+                ->where('status', 'agendada')
+                ->whereBetween('data_hora', [$inicioMes, $fimMes])
+                ->get()
+                ->groupBy(fn($a) => $a->data_hora->format('Y-m-d'));
+        }
+
         $responsaveis = DB::table('usuarios as u')
             ->join('pessoas as p', 'p.id', '=', 'u.pessoa_id')
             ->orderBy('p.nome')
@@ -302,13 +319,15 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
         }
 
         return view('livewire.agenda', [
-            'eventos'      => $eventos,
-            'eventosMes'   => $eventosMes,
-            'inicioMes'    => $inicioMes,
-            'processos'    => Processo::where('status', 'Ativo')->orderBy('numero')->get(),
-            'responsaveis' => $responsaveis,
-            'metricas'     => $metricas,
-            'tipoCounts'   => $tipoCounts,
+            'eventos'       => $eventos,
+            'eventosMes'    => $eventosMes,
+            'prazosMes'     => $prazosMes,
+            'audienciasMes' => $audienciasMes,
+            'inicioMes'     => $inicioMes,
+            'processos'     => Processo::where('status', 'Ativo')->orderBy('numero')->get(),
+            'responsaveis'  => $responsaveis,
+            'metricas'      => $metricas,
+            'tipoCounts'    => $tipoCounts,
         ]);
     }
 }

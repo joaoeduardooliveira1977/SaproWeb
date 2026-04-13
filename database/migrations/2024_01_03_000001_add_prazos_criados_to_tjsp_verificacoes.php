@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasTable('tjsp_verificacoes') || Schema::hasColumn('tjsp_verificacoes', 'prazos_criados')) {
+            return;
+        }
+
         Schema::table('tjsp_verificacoes', function (Blueprint $table) {
             $table->integer('prazos_criados')->default(0)->after('novos_total');
         });
@@ -15,6 +19,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (!Schema::hasTable('tjsp_verificacoes') || !Schema::hasColumn('tjsp_verificacoes', 'prazos_criados')) {
+            return;
+        }
+
         Schema::table('tjsp_verificacoes', function (Blueprint $table) {
             $table->dropColumn('prazos_criados');
         });

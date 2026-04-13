@@ -12,7 +12,10 @@ public function up(): void
 {
     Schema::table('notificacoes', function (Blueprint $table) {
         if (!Schema::hasColumn('notificacoes', 'user_id')) {
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('usuarios')->nullOnDelete();
+        }
+        if (!Schema::hasColumn('notificacoes', 'usuario_id')) {
+            $table->foreignId('usuario_id')->nullable()->constrained('usuarios')->nullOnDelete();
         }
         if (!Schema::hasColumn('notificacoes', 'tipo')) {
             $table->string('tipo')->default('informativo');
@@ -20,11 +23,23 @@ public function up(): void
         if (!Schema::hasColumn('notificacoes', 'titulo')) {
             $table->string('titulo')->nullable();
         }
+        if (!Schema::hasColumn('notificacoes', 'mensagem')) {
+            $table->text('mensagem')->nullable();
+        }
         if (!Schema::hasColumn('notificacoes', 'lida')) {
             $table->boolean('lida')->default(false);
         }
         if (!Schema::hasColumn('notificacoes', 'processo_id')) {
-            $table->foreignId('processo_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('processo_id')->nullable()->constrained('processos')->nullOnDelete();
+        }
+        if (!Schema::hasColumn('notificacoes', 'referencia_tipo')) {
+            $table->string('referencia_tipo', 50)->nullable();
+        }
+        if (!Schema::hasColumn('notificacoes', 'referencia_id')) {
+            $table->unsignedBigInteger('referencia_id')->nullable();
+        }
+        if (!Schema::hasColumn('notificacoes', 'link')) {
+            $table->string('link', 200)->nullable();
         }
     });
 }
@@ -32,11 +47,12 @@ public function up(): void
 public function down(): void
 {
     Schema::table('notificacoes', function (Blueprint $table) {
-        $table->dropColumnIfExists('user_id');
-        $table->dropColumnIfExists('tipo');
-        $table->dropColumnIfExists('titulo');
-        $table->dropColumnIfExists('lida');
-        $table->dropColumnIfExists('processo_id');
+        if (Schema::hasColumn('notificacoes', 'user_id')) {
+            $table->dropConstrainedForeignId('user_id');
+        }
+        if (Schema::hasColumn('notificacoes', 'processo_id')) {
+            $table->dropConstrainedForeignId('processo_id');
+        }
     });
 }
 

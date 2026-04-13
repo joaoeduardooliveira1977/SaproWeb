@@ -77,7 +77,7 @@ class RegistroController extends Controller
     private function enviarEmailBoasVindas(\App\Models\Tenant $tenant, \App\Models\Usuario $usuario, string $senha): void
     {
         $expiracao = $tenant->trial_expira_em->format('d/m/Y');
-        $sistNome  = config('app.name', 'SAPRO');
+        $sistNome  = config('app.name', 'Software Jur�dico');
         $url       = config('app.url', 'http://localhost:8000');
         $plano     = ucfirst($tenant->plano);
         $limite    = $tenant->limite_processos;
@@ -153,7 +153,7 @@ class RegistroController extends Controller
             <div style='background:#e2e8f0;padding:16px 32px;text-align:center;'>
                 <div style='font-size:12px;color:#64748b;'>
                     {$sistNome} — Este é um e-mail automático, não responda.<br>
-                    Dúvidas? Entre em contato: <a href='mailto:suporte@sapro.com.br' style='color:#2563a8;'>suporte@sapro.com.br</a>
+                    Dúvidas? Entre em contato: <a href='mailto:suporte@softwarejuridico.com.br' style='color:#2563a8;'>suporte@softwarejuridico.com.br</a>
                 </div>
             </div>
         </div>";

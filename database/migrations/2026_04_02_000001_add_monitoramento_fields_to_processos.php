@@ -29,14 +29,27 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('processos', function (Blueprint $table) {
-            $table->dropColumn([
+        if (!Schema::hasTable('processos')) {
+            return;
+        }
+
+        $columns = array_filter(
+            [
                 'score',
                 'resumo_ia',
                 'monitoramento_ativo',
                 'frequencia_monitoramento',
                 'ultima_verificacao_datajud',
-            ]);
+            ],
+            fn ($column) => Schema::hasColumn('processos', $column)
+        );
+
+        if ($columns === []) {
+            return;
+        }
+
+        Schema::table('processos', function (Blueprint $table) use ($columns) {
+            $table->dropColumn($columns);
         });
     }
 };

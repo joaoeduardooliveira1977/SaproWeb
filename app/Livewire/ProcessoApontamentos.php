@@ -95,7 +95,7 @@ class ProcessoApontamentos extends Component
             'valor'        => $this->valor !== '' ? (float) $this->valor : null,
             'data'         => $this->data,
             'advogado_id'  => $this->advogado_id ?: null,
-            'usuario_id'   => Auth::id(),
+            'usuario_id'   => Auth::guard('usuarios')->id(),
         ];
 
         if ($this->editandoId) {
@@ -151,6 +151,7 @@ class ProcessoApontamentos extends Component
             ->join('pessoa_tipos as pt', 'pt.pessoa_id', '=', 'p.id')
             ->where('pt.tipo', 'Advogado')
             ->where('p.ativo', true)
+            ->where('p.tenant_id', tenant_id())
             ->orderBy('p.nome')
             ->select('p.id', 'p.nome')
             ->get();
