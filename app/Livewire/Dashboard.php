@@ -208,10 +208,12 @@ class Dashboard extends Component
             ->map(fn($r) => ['dia' => strtoupper($r->dia), 'total' => (int)$r->total])
             ->toArray();
 
-        $audienciasSemanais = Audiencia::where('tenant_id', $tenantId)
-            ->where('data_hora', '>=', now()->startOfWeek())
-            ->where('data_hora', '<=', now()->endOfWeek())
-            ->count();
+        $audienciasSemanais = Audiencia::whereHas('processo', fn($q) => 
+        $q->where('tenant_id', $tenantId)
+    		)
+    		->where('data_hora', '>=', now()->startOfWeek())
+    		->where('data_hora', '<=', now()->endOfWeek())
+    		->count();
 
         // ── Honorários recebidos este mês ───────────────────────────
         $honorariosMes = (float) DB::table('recebimentos')
