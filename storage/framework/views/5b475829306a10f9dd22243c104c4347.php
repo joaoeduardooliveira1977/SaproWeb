@@ -482,9 +482,22 @@
             <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
             Dados Cadastrais
         </div>
+
+        
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+            <label style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;border:1.5px solid <?php echo e($tipoPessoa==='fisica' ? '#bfdbfe' : 'var(--border)'); ?>;background:<?php echo e($tipoPessoa==='fisica' ? '#dbeafe' : 'var(--white)'); ?>;color:<?php echo e($tipoPessoa==='fisica' ? '#1d4ed8' : 'var(--text)'); ?>;transition:all .15s;">
+                <input type="radio" wire:model.live="tipoPessoa" value="fisica" style="accent-color:#1d4ed8;margin:0;">
+                Pessoa Física
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;border:1.5px solid <?php echo e($tipoPessoa==='juridica' ? '#d1fae5' : 'var(--border)'); ?>;background:<?php echo e($tipoPessoa==='juridica' ? '#dcfce7' : 'var(--white)'); ?>;color:<?php echo e($tipoPessoa==='juridica' ? '#15803d' : 'var(--text)'); ?>;transition:all .15s;">
+                <input type="radio" wire:model.live="tipoPessoa" value="juridica" style="accent-color:#15803d;margin:0;">
+                Pessoa Jurídica
+            </label>
+        </div>
+
         <div class="form-field" style="margin-bottom:12px;">
-            <label class="lbl">Nome Completo *</label>
-            <input type="text" wire:model="nome" placeholder="Nome completo" style="<?php echo e($inp); ?>">
+            <label class="lbl"><?php echo e($tipoPessoa === 'juridica' ? 'Razão Social' : 'Nome Completo'); ?> *</label>
+            <input type="text" wire:model="nome" placeholder="<?php echo e($tipoPessoa === 'juridica' ? 'Razão Social' : 'Nome completo'); ?>" style="<?php echo e($inp); ?>">
             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['nome'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -496,8 +509,10 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
             <div class="form-field">
-                <label class="lbl">CPF / CNPJ</label>
-                <input type="text" wire:model="cpf_cnpj" placeholder="000.000.000-00" style="<?php echo e($inp); ?>">
+                <label class="lbl"><?php echo e($tipoPessoa === 'juridica' ? 'CNPJ' : 'CPF'); ?></label>
+                <input type="text" wire:model="cpf_cnpj"
+                    placeholder="<?php echo e($tipoPessoa === 'juridica' ? '00.000.000/0000-00' : '000.000.000-00'); ?>"
+                    style="<?php echo e($inp); ?>">
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['cpf_cnpj'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -507,14 +522,22 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
+            
             <div class="form-field">
-                <label class="lbl">RG</label>
-                <input type="text" wire:model="rg" placeholder="Número do RG" style="<?php echo e($inp); ?>">
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($tipoPessoa === 'fisica'): ?>
+                    <label class="lbl">RG</label>
+                    <input type="text" wire:model="rg" placeholder="Número do RG" style="<?php echo e($inp); ?>">
+                <?php else: ?>
+                    <label class="lbl">Inscrição Estadual <span style="font-weight:400;color:var(--muted);">(IE)</span></label>
+                    <input type="text" wire:model="inscricaoEstadual" placeholder="Número da IE" style="<?php echo e($inp); ?>">
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($tipoPessoa === 'fisica'): ?>
             <div class="form-field">
                 <label class="lbl">Data de Nascimento</label>
                 <input type="date" wire:model="data_nascimento" style="<?php echo e($inp); ?>">
             </div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             <div class="form-field">
                 <label class="lbl">OAB <span style="font-weight:400;color:var(--muted);">(se Advogado)</span></label>
                 <input type="text" wire:model="oab" placeholder="Número da OAB" style="<?php echo e($inp); ?>">
@@ -619,6 +642,43 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
         </div>
 
         
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(in_array('Cliente', $tipos_selecionados)): ?>
+        <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:16px;">
+            <label class="lbl" style="display:block;margin-bottom:4px;">
+                Advogado(s) Responsável(is)
+                <span style="font-size:11px;font-weight:400;color:var(--muted);">(opcional)</span>
+            </label>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Vincule um ou mais advogados responsáveis por este cliente.</div>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['advogados_ids'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><span style="color:var(--danger);font-size:11px;display:block;margin-bottom:8px;"><?php echo e($message); ?></span><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($advogadosDisponiveis->isEmpty()): ?>
+                <div style="font-size:13px;color:var(--muted);padding:8px 12px;background:#f8fafc;border:1.5px dashed var(--border);border-radius:8px;">
+                    Nenhum advogado cadastrado. <a href="<?php echo e(route('pessoas')); ?>?novo=cliente" style="color:var(--primary);">Cadastre primeiro um advogado.</a>
+                </div>
+            <?php else: ?>
+                <div style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;padding:4px 0;">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $advogadosDisponiveis; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $adv): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php $marcado = in_array((string)$adv->id, $advogados_ids); ?>
+                    <label style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px;border:1.5px solid <?php echo e($marcado ? '#bbf7d0' : 'var(--border)'); ?>;background:<?php echo e($marcado ? '#f0fdf4' : 'var(--white)'); ?>;transition:all .15s;">
+                        <input type="checkbox"
+                            wire:model.live="advogados_ids"
+                            value="<?php echo e($adv->id); ?>"
+                            style="width:15px;height:15px;accent-color:#16a34a;margin:0;flex-shrink:0;cursor:pointer;">
+                        <span style="font-weight:<?php echo e($marcado ? '600' : '400'); ?>;color:<?php echo e($marcado ? '#15803d' : 'var(--text)'); ?>;"><?php echo e($adv->nome); ?></span>
+                    </label>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        </div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+        
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($administradoras->count() > 0): ?>
         <div style="border-top:1px solid var(--border);padding-top:16px;">
             <label class="lbl" style="display:block;margin-bottom:6px;">Administradora <span style="font-weight:400;color:var(--muted);">(se condomínio)</span></label>
@@ -629,6 +689,107 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                 <option value="<?php echo e($adm->id); ?>"><?php echo e($adm->nome); ?></option>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </select>
+        </div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+        
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(in_array('Cliente', $tipos_selecionados) && !$pessoaId): ?>
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                Honorário <span style="color:var(--danger);">*</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;">
+                <div>
+                    <label class="lbl" style="display:block;margin-bottom:4px;">Tipo *</label>
+                    <select wire:model="honorarioTipo" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
+                        <option value="fixo_mensal">Fixo Mensal</option>
+                        <option value="exito">Êxito</option>
+                        <option value="hora">Por Hora</option>
+                        <option value="ato_diligencia">Ato / Diligência</option>
+                    </select>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['honorarioTipo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><span style="color:var(--danger);font-size:11px;"><?php echo e($message); ?></span><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </div>
+                <div>
+                    <label class="lbl" style="display:block;margin-bottom:4px;">Valor (R$) *</label>
+                    <input type="text" wire:model="honorarioValor" placeholder="0,00" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['honorarioValor'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><span style="color:var(--danger);font-size:11px;"><?php echo e($message); ?></span><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </div>
+                <div>
+                    <label class="lbl" style="display:block;margin-bottom:4px;">Descrição *</label>
+                    <input type="text" wire:model="honorarioDescricao" placeholder="Ex: Honorário advocatício" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['honorarioDescricao'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><span style="color:var(--danger);font-size:11px;"><?php echo e($message); ?></span><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </div>
+                <div>
+                    <label class="lbl" style="display:block;margin-bottom:4px;">Data Início *</label>
+                    <input type="date" wire:model="honorarioDataInicio" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['honorarioDataInicio'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><span style="color:var(--danger);font-size:11px;"><?php echo e($message); ?></span><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </div>
+                <div>
+                    <label class="lbl" style="display:block;margin-bottom:4px;">Nº de Parcelas</label>
+                    <input type="number" wire:model="honorarioParcelas" min="1" max="120" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                </div>
+            </div>
+        </div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+        
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($podeVerContrato && in_array('Cliente', $tipos_selecionados)): ?>
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 12 18 15 15"/></svg>
+                Contrato / Validação
+                <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;">Restrito</span>
+            </div>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($contratoAtual): ?>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;margin-bottom:8px;font-size:12px;color:#15803d;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Contrato anexado: <strong><?php echo e($contratoAtualNome); ?></strong>
+                <a href="/storage/<?php echo e($contratoAtual); ?>" target="_blank" style="margin-left:auto;color:#15803d;font-weight:600;">Visualizar</a>
+            </div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            <div>
+                <label class="lbl" style="display:block;margin-bottom:4px;"><?php echo e($contratoAtual ? 'Substituir contrato' : 'Anexar contrato assinado'); ?> <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
+                <input type="file" wire:model="contratoArquivo"
+                    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);box-sizing:border-box;cursor:pointer;">
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['contratoArquivo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><span style="color:var(--danger);font-size:11px;"><?php echo e($message); ?></span><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                <div wire:loading wire:target="contratoArquivo" style="font-size:11px;color:var(--muted);margin-top:4px;">Carregando...</div>
+            </div>
         </div>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 

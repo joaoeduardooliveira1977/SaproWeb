@@ -235,7 +235,7 @@
         </div>
         <div>
             <div style="font-size:22px;font-weight:800;color:#ca8a04;line-height:1.1;"><?php echo e($metricas['semana']); ?></div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">proximos 7 dias</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;">próximos 7 dias</div>
         </div>
     </div>
 
@@ -287,7 +287,7 @@
         </svg>
     </div>
     <input wire:model="perguntaIA" wire:keydown.enter="perguntarIA" type="text"
-        placeholder="Pergunte sobre a agenda... Ex: quantos eventos urgentes, prazos desta semana, audiencias de amanha"
+        placeholder="Pergunte sobre a agenda... Ex: quantos eventos urgentes, prazos desta semana, audiências de amanhã"
         style="flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-size:13px;outline:none;"
         onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
     <button wire:click="perguntarIA" wire:loading.attr="disabled" wire:target="perguntarIA"
@@ -671,7 +671,15 @@
                     <tr>
                         <td colspan="8" style="text-align:center;color:var(--muted);padding:48px;">
                             <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;display:block;opacity:.3;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            <div style="font-size:14px;font-weight:500;"><?php echo e($diaSelecionado ? 'Nenhum evento neste dia.' : 'Nenhum evento encontrado.'); ?></div>
+                            <div style="font-size:14px;font-weight:700;color:var(--text);"><?php echo e($diaSelecionado ? 'Nenhum evento neste dia.' : 'Nenhum evento encontrado.'); ?></div>
+                            <div style="font-size:12px;color:var(--muted);margin:6px auto 14px;max-width:420px;line-height:1.5;">
+                                <?php echo e($diaSelecionado ? 'Use este dia para registrar audiência, reunião, prazo interno ou compromisso do escritório.' : 'Crie o primeiro compromisso ou ajuste os filtros para ampliar o período pesquisado.'); ?>
+
+                            </div>
+                            <button type="button" wire:click="novoEvento" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
+                                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                Novo evento
+                            </button>
                         </td>
                     </tr>
                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>

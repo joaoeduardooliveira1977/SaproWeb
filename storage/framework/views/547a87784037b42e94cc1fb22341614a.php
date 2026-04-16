@@ -525,7 +525,7 @@
     $isAdvogado = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado']);
     $isFinanc   = in_array($perfil, ['admin', 'administrador', 'super_admin', 'financeiro']);
     $hubAtivo   = '';
-    $rotasProcessos  = ['processos','processos.novo','processos.editar','processos.show','documentos','minutas','assinatura-digital','audiencias','prazos','sla','agenda','processos.hub'];
+    $rotasProcessos  = ['processos','processos.kanban','processos.novo','processos.editar','processos.show','documentos','minutas','assinatura-digital','audiencias','prazos','sla','agenda','processos.hub','processos.monitoramento'];
     $rotasCadastros  = ['cadastros.hub','correspondentes','procuracoes','administradoras','tabelas'];
     $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','financeiro.hub'];
     $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','ferramentas.hub','workflow.regras'];

@@ -28,6 +28,10 @@
             </span>
             <span wire:loading wire:target="exportarCsv">Gerando...</span>
         </button>
+        <a href="{{ route('processos.kanban') }}" class="btn btn-outline btn-sm" style="display:flex;align-items:center;gap:6px;" title="Visualização Kanban">
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="18" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
+            Kanban
+        </a>
         <a href="{{ route('processos.novo') }}" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
             <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Novo Processo

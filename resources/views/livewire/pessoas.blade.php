@@ -474,25 +474,48 @@
             <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
             Dados Cadastrais
         </div>
+
+        {{-- Tipo de Pessoa --}}
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+            <label style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;border:1.5px solid {{ $tipoPessoa==='fisica' ? '#bfdbfe' : 'var(--border)' }};background:{{ $tipoPessoa==='fisica' ? '#dbeafe' : 'var(--white)' }};color:{{ $tipoPessoa==='fisica' ? '#1d4ed8' : 'var(--text)' }};transition:all .15s;">
+                <input type="radio" wire:model.live="tipoPessoa" value="fisica" style="accent-color:#1d4ed8;margin:0;">
+                Pessoa Física
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;border:1.5px solid {{ $tipoPessoa==='juridica' ? '#d1fae5' : 'var(--border)' }};background:{{ $tipoPessoa==='juridica' ? '#dcfce7' : 'var(--white)' }};color:{{ $tipoPessoa==='juridica' ? '#15803d' : 'var(--text)' }};transition:all .15s;">
+                <input type="radio" wire:model.live="tipoPessoa" value="juridica" style="accent-color:#15803d;margin:0;">
+                Pessoa Jurídica
+            </label>
+        </div>
+
         <div class="form-field" style="margin-bottom:12px;">
-            <label class="lbl">Nome Completo *</label>
-            <input type="text" wire:model="nome" placeholder="Nome completo" style="{{ $inp }}">
+            <label class="lbl">{{ $tipoPessoa === 'juridica' ? 'Razão Social' : 'Nome Completo' }} *</label>
+            <input type="text" wire:model="nome" placeholder="{{ $tipoPessoa === 'juridica' ? 'Razão Social' : 'Nome completo' }}" style="{{ $inp }}">
             @error('nome')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
             <div class="form-field">
-                <label class="lbl">CPF / CNPJ</label>
-                <input type="text" wire:model="cpf_cnpj" placeholder="000.000.000-00" style="{{ $inp }}">
+                <label class="lbl">{{ $tipoPessoa === 'juridica' ? 'CNPJ' : 'CPF' }}</label>
+                <input type="text" wire:model="cpf_cnpj"
+                    placeholder="{{ $tipoPessoa === 'juridica' ? '00.000.000/0000-00' : '000.000.000-00' }}"
+                    style="{{ $inp }}">
                 @error('cpf_cnpj')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
             </div>
+            {{-- RG (Física) ou IE (Jurídica) --}}
             <div class="form-field">
-                <label class="lbl">RG</label>
-                <input type="text" wire:model="rg" placeholder="Número do RG" style="{{ $inp }}">
+                @if($tipoPessoa === 'fisica')
+                    <label class="lbl">RG</label>
+                    <input type="text" wire:model="rg" placeholder="Número do RG" style="{{ $inp }}">
+                @else
+                    <label class="lbl">Inscrição Estadual <span style="font-weight:400;color:var(--muted);">(IE)</span></label>
+                    <input type="text" wire:model="inscricaoEstadual" placeholder="Número da IE" style="{{ $inp }}">
+                @endif
             </div>
+            @if($tipoPessoa === 'fisica')
             <div class="form-field">
                 <label class="lbl">Data de Nascimento</label>
                 <input type="date" wire:model="data_nascimento" style="{{ $inp }}">
             </div>
+            @endif
             <div class="form-field">
                 <label class="lbl">OAB <span style="font-weight:400;color:var(--muted);">(se Advogado)</span></label>
                 <input type="text" wire:model="oab" placeholder="Número da OAB" style="{{ $inp }}">
@@ -581,6 +604,36 @@
             @endforeach
         </div>
 
+        {{-- Advogados responsáveis (obrigatório quando Cliente) --}}
+        @if(in_array('Cliente', $tipos_selecionados))
+        <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:16px;">
+            <label class="lbl" style="display:block;margin-bottom:4px;">
+                Advogado(s) Responsável(is)
+                <span style="font-size:11px;font-weight:400;color:var(--muted);">(opcional)</span>
+            </label>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Vincule um ou mais advogados responsáveis por este cliente.</div>
+            @error('advogados_ids')<span style="color:var(--danger);font-size:11px;display:block;margin-bottom:8px;">{{ $message }}</span>@enderror
+            @if($advogadosDisponiveis->isEmpty())
+                <div style="font-size:13px;color:var(--muted);padding:8px 12px;background:#f8fafc;border:1.5px dashed var(--border);border-radius:8px;">
+                    Nenhum advogado cadastrado. <a href="{{ route('pessoas') }}?novo=cliente" style="color:var(--primary);">Cadastre primeiro um advogado.</a>
+                </div>
+            @else
+                <div style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;padding:4px 0;">
+                    @foreach($advogadosDisponiveis as $adv)
+                    @php $marcado = in_array((string)$adv->id, $advogados_ids); @endphp
+                    <label style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px;border:1.5px solid {{ $marcado ? '#bbf7d0' : 'var(--border)' }};background:{{ $marcado ? '#f0fdf4' : 'var(--white)' }};transition:all .15s;">
+                        <input type="checkbox"
+                            wire:model.live="advogados_ids"
+                            value="{{ $adv->id }}"
+                            style="width:15px;height:15px;accent-color:#16a34a;margin:0;flex-shrink:0;cursor:pointer;">
+                        <span style="font-weight:{{ $marcado ? '600' : '400' }};color:{{ $marcado ? '#15803d' : 'var(--text)' }};">{{ $adv->nome }}</span>
+                    </label>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+        @endif
+
         {{-- Administradora --}}
         @if($administradoras->count() > 0)
         <div style="border-top:1px solid var(--border);padding-top:16px;">
@@ -592,6 +645,72 @@
                 <option value="{{ $adm->id }}">{{ $adm->nome }}</option>
                 @endforeach
             </select>
+        </div>
+        @endif
+
+        {{-- Honorário (obrigatório para novo Cliente) --}}
+        @if(in_array('Cliente', $tipos_selecionados) && !$pessoaId)
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                Honorário <span style="color:var(--danger);">*</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;">
+                <div>
+                    <label class="lbl" style="display:block;margin-bottom:4px;">Tipo *</label>
+                    <select wire:model="honorarioTipo" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
+                        <option value="fixo_mensal">Fixo Mensal</option>
+                        <option value="exito">Êxito</option>
+                        <option value="hora">Por Hora</option>
+                        <option value="ato_diligencia">Ato / Diligência</option>
+                    </select>
+                    @error('honorarioTipo')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
+                </div>
+                <div>
+                    <label class="lbl" style="display:block;margin-bottom:4px;">Valor (R$) *</label>
+                    <input type="text" wire:model="honorarioValor" placeholder="0,00" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                    @error('honorarioValor')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
+                </div>
+                <div>
+                    <label class="lbl" style="display:block;margin-bottom:4px;">Descrição *</label>
+                    <input type="text" wire:model="honorarioDescricao" placeholder="Ex: Honorário advocatício" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                    @error('honorarioDescricao')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
+                </div>
+                <div>
+                    <label class="lbl" style="display:block;margin-bottom:4px;">Data Início *</label>
+                    <input type="date" wire:model="honorarioDataInicio" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                    @error('honorarioDataInicio')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
+                </div>
+                <div>
+                    <label class="lbl" style="display:block;margin-bottom:4px;">Nº de Parcelas</label>
+                    <input type="number" wire:model="honorarioParcelas" min="1" max="120" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- Documento de Validação (só admin/financeiro) --}}
+        @if($podeVerContrato && in_array('Cliente', $tipos_selecionados))
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 12 18 15 15"/></svg>
+                Contrato / Validação
+                <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;">Restrito</span>
+            </div>
+            @if($contratoAtual)
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;margin-bottom:8px;font-size:12px;color:#15803d;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Contrato anexado: <strong>{{ $contratoAtualNome }}</strong>
+                <a href="/storage/{{ $contratoAtual }}" target="_blank" style="margin-left:auto;color:#15803d;font-weight:600;">Visualizar</a>
+            </div>
+            @endif
+            <div>
+                <label class="lbl" style="display:block;margin-bottom:4px;">{{ $contratoAtual ? 'Substituir contrato' : 'Anexar contrato assinado' }} <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
+                <input type="file" wire:model="contratoArquivo"
+                    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);box-sizing:border-box;cursor:pointer;">
+                @error('contratoArquivo')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
+                <div wire:loading wire:target="contratoArquivo" style="font-size:11px;color:var(--muted);margin-top:4px;">Carregando...</div>
+            </div>
         </div>
         @endif
 

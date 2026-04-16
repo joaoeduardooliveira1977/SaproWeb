@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{HasMany, BelongsToMany};
+use Illuminate\Support\Facades\DB;
 use App\Models\Traits\BelongsToTenant;
 
 class Pessoa extends Model
@@ -13,10 +14,11 @@ class Pessoa extends Model
     protected $table = 'pessoas';
 
     protected $fillable = [
-        'nome', 'cpf_cnpj', 'rg', 'data_nascimento',
+        'nome', 'tipo_pessoa', 'cpf_cnpj', 'rg', 'inscricao_estadual', 'data_nascimento',
         'telefone', 'celular', 'email',
         'logradouro', 'cidade', 'estado', 'cep',
         'oab', 'observacoes', 'ativo', 'administradora_id',
+        'contrato_arquivo', 'contrato_arquivo_original', 'contrato_validado_em', 'contrato_validado_por',
     ];
 
     protected $casts = [
@@ -61,6 +63,29 @@ class Pessoa extends Model
     }
 
     // ── Relacionamentos ────────────────────────────
+
+    /** Advogados responsáveis por este cliente */
+    public function advogadosResponsaveis(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Pessoa::class,
+            'cliente_advogado',
+            'cliente_id',
+            'advogado_id'
+        );
+    }
+
+    /** Clientes vinculados a este advogado */
+    public function clientesVinculados(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Pessoa::class,
+            'cliente_advogado',
+            'advogado_id',
+            'cliente_id'
+        );
+    }
+
     public function processosComoCliente(): HasMany
     {
         return $this->hasMany(Processo::class, 'cliente_id');

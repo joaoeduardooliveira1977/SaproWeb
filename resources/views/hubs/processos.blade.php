@@ -144,6 +144,7 @@
         @php
         $acessosRapidos = [
             ['label'=>'Processos',        'sub'=>$totalAtivos.' ativos',                       'cor'=>'#1d4ed8','route'=>route('processos')],
+            ['label'=>'Kanban',           'sub'=>'Fases por arrastar',                          'cor'=>'#0891b2','route'=>route('processos.kanban')],
             ['label'=>'Prazos',           'sub'=>$prazosHoje.' hoje / '.$prazos7dias.' sem.',   'cor'=>'#dc2626','route'=>route('prazos')],
             ['label'=>'Audiências',       'sub'=>$audienciasSemana.' nesta sem.',               'cor'=>'#059669','route'=>route('audiencias')],
             ['label'=>'Agenda',           'sub'=>'Compromissos',                                'cor'=>'#d97706','route'=>route('agenda')],

@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('page-title', 'Procurações')
-@section('breadcrumb')<a href="{{ route('pessoas') }}">Pessoas</a> <span class="sep">›</span> <span class="current">Procurações</span>@endsection
 
 @section('content')
 <div>

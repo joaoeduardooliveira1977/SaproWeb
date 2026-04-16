@@ -4,12 +4,13 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\{Pessoa, Administradora};
-use Illuminate\Support\Facades\{Auth, DB};
+use Livewire\WithFileUploads;
+use App\Models\{Pessoa, Administradora, Honorario};
+use Illuminate\Support\Facades\{Auth, DB, Storage};
 
 class Pessoas extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     public string $busca = '';
     public string $tipo  = '';
@@ -32,21 +33,36 @@ class Pessoas extends Component
     // Formulário (modal)
     public bool   $modalAberto = false;
     public ?int   $pessoaId    = null;
-    public string $nome             = '';
-    public string $cpf_cnpj         = '';
-    public string $rg               = '';
-    public string $data_nascimento  = '';
-    public string $telefone         = '';
-    public string $celular          = '';
-    public string $email            = '';
-    public string $logradouro       = '';
-    public string $cidade           = '';
-    public string $estado           = '';
-    public string $cep              = '';
-    public string $oab              = '';
-    public string $observacoes      = '';
-    public array  $tipos_selecionados = [];
-    public ?int   $administradoraId = null;
+    public string $tipoPessoa        = 'fisica'; // fisica | juridica
+    public string $nome              = '';
+    public string $cpf_cnpj          = '';
+    public string $rg                = '';  // Pessoa Física
+    public string $inscricaoEstadual = '';  // Pessoa Jurídica
+    public string $data_nascimento   = '';
+    public string $telefone          = '';
+    public string $celular           = '';
+    public string $email             = '';
+    public string $logradouro        = '';
+    public string $cidade            = '';
+    public string $estado            = '';
+    public string $cep               = '';
+    public string $oab               = '';
+    public string $observacoes       = '';
+    public array  $tipos_selecionados   = [];
+    public array  $advogados_ids        = [];
+    public ?int   $administradoraId     = null;
+
+    // ── Honorário (obrigatório para Cliente) ──────────────
+    public string  $honorarioTipo       = 'fixo_mensal';
+    public string  $honorarioValor      = '';
+    public string  $honorarioDescricao  = '';
+    public string  $honorarioDataInicio = '';
+    public int     $honorarioParcelas   = 1;
+
+    // ── Documento de Validação (contrato assinado) ────────
+    public         $contratoArquivo     = null; // upload
+    public ?string $contratoAtual       = null; // path existente no banco
+    public ?string $contratoAtualNome   = null;
 
     public const TIPOS = ['Cliente', 'Advogado', 'Juiz', 'Parte Contrária', 'Usuário'];
 
@@ -60,11 +76,21 @@ class Pessoas extends Component
 
     protected function rules(): array
     {
+        $isCliente = in_array('Cliente', $this->tipos_selecionados);
+
         return [
-            'nome'     => 'required|string|max:150',
-            'cpf_cnpj' => 'nullable|string|max:18|unique:pessoas,cpf_cnpj' . ($this->pessoaId ? ",{$this->pessoaId}" : ''),
-            'email'    => 'nullable|email|max:150',
+            'nome'               => 'required|string|max:150',
+            'cpf_cnpj'           => 'nullable|string|max:18|unique:pessoas,cpf_cnpj' . ($this->pessoaId ? ",{$this->pessoaId}" : ''),
+            'email'              => 'nullable|email|max:150',
             'tipos_selecionados' => 'required|array|min:1',
+            'advogados_ids'      => 'nullable|array',
+            // Honorário obrigatório para novos clientes
+            'honorarioTipo'       => $isCliente && !$this->pessoaId ? 'required|string' : 'nullable|string',
+            'honorarioValor'      => $isCliente && !$this->pessoaId ? 'required|numeric|min:0.01' : 'nullable|numeric',
+            'honorarioDescricao'  => $isCliente && !$this->pessoaId ? 'required|string|max:200' : 'nullable|string',
+            'honorarioDataInicio' => $isCliente && !$this->pessoaId ? 'required|date' : 'nullable|date',
+            // Contrato de validação
+            'contratoArquivo'    => 'nullable|file|max:20480',
         ];
     }
 
@@ -72,6 +98,12 @@ class Pessoas extends Component
         'nome.required'                => 'O nome é obrigatório.',
         'tipos_selecionados.required'  => 'Selecione ao menos um tipo.',
         'tipos_selecionados.min'       => 'Selecione ao menos um tipo.',
+        'honorarioTipo.required'       => 'Selecione o tipo de honorário.',
+        'honorarioValor.required'      => 'Informe o valor do honorário.',
+        'honorarioValor.min'           => 'O valor deve ser maior que zero.',
+        'honorarioDescricao.required'  => 'Descreva o honorário.',
+        'honorarioDataInicio.required' => 'Informe a data de início do honorário.',
+        'contratoArquivo.max'          => 'O contrato não pode passar de 20 MB.',
     ];
 
     public function updatingBusca(): void { $this->resetPage(); }
@@ -85,21 +117,26 @@ class Pessoas extends Component
 
         if ($id) {
             $p = Pessoa::findOrFail($id);
-            $this->nome            = $p->nome;
-            $this->cpf_cnpj        = $p->cpf_cnpj ?? '';
-            $this->rg              = $p->rg ?? '';
-            $this->data_nascimento = $p->data_nascimento?->format('Y-m-d') ?? '';
-            $this->telefone        = $p->telefone ?? '';
-            $this->celular         = $p->celular ?? '';
-            $this->email           = $p->email ?? '';
-            $this->logradouro      = $p->logradouro ?? '';
-            $this->cidade          = $p->cidade ?? '';
-            $this->estado          = $p->estado ?? '';
-            $this->cep             = $p->cep ?? '';
-            $this->oab             = $p->oab ?? '';
-            $this->observacoes     = $p->observacoes ?? '';
-            $this->tipos_selecionados = $p->listaTipos();
-            $this->administradoraId = $p->administradora_id;
+            $this->tipoPessoa          = $p->tipo_pessoa ?? 'fisica';
+            $this->nome                = $p->nome;
+            $this->cpf_cnpj            = $p->cpf_cnpj ?? '';
+            $this->rg                  = $p->rg ?? '';
+            $this->inscricaoEstadual   = $p->inscricao_estadual ?? '';
+            $this->data_nascimento     = $p->data_nascimento?->format('Y-m-d') ?? '';
+            $this->telefone            = $p->telefone ?? '';
+            $this->celular             = $p->celular ?? '';
+            $this->email               = $p->email ?? '';
+            $this->logradouro          = $p->logradouro ?? '';
+            $this->cidade              = $p->cidade ?? '';
+            $this->estado              = $p->estado ?? '';
+            $this->cep                 = $p->cep ?? '';
+            $this->oab                 = $p->oab ?? '';
+            $this->observacoes         = $p->observacoes ?? '';
+            $this->tipos_selecionados  = $p->listaTipos();
+            $this->administradoraId    = $p->administradora_id;
+            $this->advogados_ids       = $p->advogadosResponsaveis()->pluck('pessoas.id')->map(fn($id) => (string) $id)->toArray();
+            $this->contratoAtual       = $p->contrato_arquivo;
+            $this->contratoAtualNome   = $p->contrato_arquivo_original;
         }
     }
 
@@ -115,10 +152,14 @@ class Pessoas extends Component
         abort_unless($usuario?->temAcao('pessoas.editar'), 403, 'Sem permissão.');
         $this->validate();
 
+        $isCliente = in_array('Cliente', $this->tipos_selecionados);
+
         $dados = [
+            'tipo_pessoa'    => $this->tipoPessoa,
             'nome'           => $this->nome,
             'cpf_cnpj'       => $this->cpf_cnpj ?: null,
-            'rg'             => $this->rg ?: null,
+            'rg'             => $this->tipoPessoa === 'fisica' ? ($this->rg ?: null) : null,
+            'inscricao_estadual' => $this->tipoPessoa === 'juridica' ? ($this->inscricaoEstadual ?: null) : null,
             'data_nascimento'=> $this->data_nascimento ?: null,
             'telefone'       => $this->telefone ?: null,
             'celular'        => $this->celular ?: null,
@@ -127,10 +168,21 @@ class Pessoas extends Component
             'cidade'         => $this->cidade ?: null,
             'estado'         => $this->estado ?: null,
             'cep'            => $this->cep ?: null,
-            'oab'             => $this->oab ?: null,
-            'observacoes'     => $this->observacoes ?: null,
+            'oab'            => $this->oab ?: null,
+            'observacoes'    => $this->observacoes ?: null,
             'administradora_id' => $this->administradoraId ?: null,
         ];
+
+        // Upload do contrato de validação
+        if ($this->contratoArquivo) {
+            if ($this->contratoAtual) {
+                Storage::disk('public')->delete($this->contratoAtual);
+            }
+            $dados['contrato_arquivo']          = $this->contratoArquivo->store('contratos', 'public');
+            $dados['contrato_arquivo_original'] = $this->contratoArquivo->getClientOriginalName();
+            $dados['contrato_validado_em']      = now();
+            $dados['contrato_validado_por']     = $usuario->nome ?? 'Sistema';
+        }
 
         if ($this->pessoaId) {
             $pessoa = Pessoa::findOrFail($this->pessoaId);
@@ -142,6 +194,40 @@ class Pessoas extends Component
         }
 
         $pessoa->sincronizarTipos($this->tipos_selecionados);
+
+        // Sincronizar advogados responsáveis (somente para clientes)
+        if ($isCliente) {
+            $pessoa->advogadosResponsaveis()->sync(array_filter($this->advogados_ids));
+        } else {
+            $pessoa->advogadosResponsaveis()->detach();
+        }
+
+        // Criar honorário para novos clientes
+        if ($isCliente && !$this->pessoaId) {
+            $valorNum = (float) str_replace(['.', ','], ['', '.'], $this->honorarioValor);
+            $honorario = Honorario::create([
+                'cliente_id'     => $pessoa->id,
+                'tipo'           => $this->honorarioTipo,
+                'descricao'      => $this->honorarioDescricao,
+                'valor_contrato' => $valorNum,
+                'total_parcelas' => max(1, $this->honorarioParcelas),
+                'data_inicio'    => $this->honorarioDataInicio,
+                'status'         => 'ativo',
+            ]);
+            // Gerar parcelas
+            for ($i = 1; $i <= $honorario->total_parcelas; $i++) {
+                DB::table('honorario_parcelas')->insert([
+                    'honorario_id'   => $honorario->id,
+                    'numero_parcela' => $i,
+                    'valor'          => round($valorNum / $honorario->total_parcelas, 2),
+                    'vencimento'     => \Carbon\Carbon::parse($this->honorarioDataInicio)->addMonthsNoOverflow($i - 1)->format('Y-m-d'),
+                    'status'         => 'pendente',
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
+                ]);
+            }
+        }
+
         $usuario->registrarAuditoria($acao, 'pessoas', $pessoa->id, null, ['nome' => $this->nome, 'tipos' => $this->tipos_selecionados]);
 
         $this->fecharModal();
@@ -168,7 +254,7 @@ class Pessoas extends Component
         $juizes    = Pessoa::ativos()->doTipo('Juiz')->count();
         $partes    = Pessoa::ativos()->doTipo('Parte Contrária')->count();
 
-        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
 
 Dados do cadastro de pessoas:
 - Total de pessoas ativas: {$total}
@@ -267,7 +353,7 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
             return;
         }
 
-        $prompt = "Você é um assistente jurídico do sistema Software Jur�dico. Gere um perfil completo e objetivo deste cliente.
+        $prompt = "Você é um assistente jurídico do sistema Software Jur�dico. Gere um perfil completo e objetivo deste cliente.
 
 DADOS DO CLIENTE:
 - Nome: {$pessoa->nome}
@@ -322,13 +408,23 @@ Use linguagem profissional e objetiva.";
 
     private function limparFormulario(): void
     {
-        $this->pessoaId = null;
-        $this->nome = $this->cpf_cnpj = $this->rg = $this->data_nascimento = '';
-        $this->telefone = $this->celular = $this->email = '';
-        $this->logradouro = $this->cidade = $this->estado = $this->cep = '';
-        $this->oab = $this->observacoes = '';
+        $this->pessoaId          = null;
+        $this->tipoPessoa        = 'fisica';
+        $this->nome              = $this->cpf_cnpj = $this->rg = $this->inscricaoEstadual = $this->data_nascimento = '';
+        $this->telefone          = $this->celular = $this->email = '';
+        $this->logradouro        = $this->cidade = $this->estado = $this->cep = '';
+        $this->oab               = $this->observacoes = '';
         $this->tipos_selecionados = [];
-        $this->administradoraId = null;
+        $this->advogados_ids      = [];
+        $this->administradoraId   = null;
+        $this->honorarioTipo      = 'fixo_mensal';
+        $this->honorarioValor     = '';
+        $this->honorarioDescricao = '';
+        $this->honorarioDataInicio = '';
+        $this->honorarioParcelas  = 1;
+        $this->contratoArquivo    = null;
+        $this->contratoAtual      = null;
+        $this->contratoAtualNome  = null;
         $this->resetErrorBag();
     }
 
@@ -381,7 +477,10 @@ Use linguagem profissional e objetiva.";
             ->groupBy('pessoa_id')
             ->map(fn($g) => $g->pluck('tipo')->toArray());
 
-        $administradoras = Administradora::ativas()->orderBy('nome')->get();
+        $administradoras      = Administradora::ativas()->orderBy('nome')->get();
+        $advogadosDisponiveis = Pessoa::ativos()->doTipo('Advogado')->orderBy('nome')->get(['id','nome']);
+        $usuario              = Auth::guard('usuarios')->user();
+        $podeVerContrato      = $usuario && ($usuario->isAdmin() || $usuario->perfil === 'financeiro');
 
         // Métricas
         $totalPessoas  = Pessoa::ativos()->count();
@@ -396,15 +495,17 @@ Use linguagem profissional e objetiva.";
         }
 
         return view('livewire.pessoas', [
-            'pessoas'          => $pessoas,
-            'tiposPorPessoa'   => $tiposPorPessoa,
-            'tiposDisponiveis' => self::TIPOS,
-            'administradoras'  => $administradoras,
-            'totalPessoas'     => $totalPessoas,
-            'totalClientes'    => $totalClientes,
-            'totalAdvogados'   => $totalAdvogados,
-            'totalPartes'      => $totalPartes,
-            'tipoCounts'       => $tipoCounts,
+            'pessoas'              => $pessoas,
+            'tiposPorPessoa'       => $tiposPorPessoa,
+            'tiposDisponiveis'     => self::TIPOS,
+            'administradoras'      => $administradoras,
+            'advogadosDisponiveis' => $advogadosDisponiveis,
+            'podeVerContrato'      => $podeVerContrato,
+            'totalPessoas'         => $totalPessoas,
+            'totalClientes'        => $totalClientes,
+            'totalAdvogados'       => $totalAdvogados,
+            'totalPartes'          => $totalPartes,
+            'tipoCounts'           => $tipoCounts,
         ]);
     }
 }

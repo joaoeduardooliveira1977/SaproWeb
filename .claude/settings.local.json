@@ -60,7 +60,12 @@
       "Bash(cmd /c \"dir c:\\\\projetos\\\\saproweb-base\\\\storage\\\\logs\\\\\" 2>&1)",
       "Bash(cmd /c \"type c:\\\\projetos\\\\saproweb-base\\\\composer.lock 2>nul\")",
       "Bash(cmd /c \"findstr /i QUEUE c:\\\\projetos\\\\saproweb-base\\\\.env\")",
-      "Bash(python3 -c \"import sys,json; pkgs=json.load\\(sys.stdin\\).get\\('packages',[]\\); [print\\(p['name'],p['version']\\) for p in pkgs if 'livewire' in p['name']]\")"
+      "Bash(python3 -c \"import sys,json; pkgs=json.load\\(sys.stdin\\).get\\('packages',[]\\); [print\\(p['name'],p['version']\\) for p in pkgs if 'livewire' in p['name']]\")",
+      "Bash(\"C:/laragon/bin/php/php-8.3.16-nts-Win32-vs16-x64/php.exe\" artisan *)",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l app/Livewire/Pessoas.php)",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l app/Models/Pessoa.php)",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l app/Livewire/PastaCliente.php)",
+      "Bash(grep -n \"honorario_tipo\\\\|tipo_honorario\\\\|honorario_id\" c:/projetos/saproweb-base/database/migrations/*.php)"
     ]
   }
 }

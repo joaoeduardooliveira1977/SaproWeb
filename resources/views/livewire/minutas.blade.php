@@ -53,18 +53,92 @@
                 @error('corpo') <span style="font-size:12px;color:#dc2626;">{{ $message }}</span> @enderror
             </div>
 
-            {{-- Placeholders de referência --}}
-            <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:12px;">
-                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Placeholders disponíveis — clique para copiar</div>
-                <div style="display:flex;flex-wrap:wrap;gap:4px;">
-                    @foreach(\App\Livewire\Minutas::$placeholders as $ph => $desc)
-                    <button type="button"
-                        data-ph="{{ $ph }}"
-                        onclick="navigator.clipboard.writeText(this.dataset.ph).then(() => { this.style.background='#dcfce7'; setTimeout(()=>this.style.background='',1000); })"
-                        title="{{ $desc }}"
-                        style="padding:3px 8px;background:#e2e8f0;border:none;border-radius:4px;font-size:11px;font-family:monospace;cursor:pointer;color:#334155;transition:background .2s;">
-                        {{ $ph }}
-                    </button>
+            {{-- Placeholders de referência — inserção direta no cursor --}}
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-top:8px;">
+                <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Clique para inserir no texto
+                </div>
+
+                @php
+                $grupos = [
+                    [
+                        'label' => '📄 Processo',
+                        'cor'   => '#2563eb',
+                        'bg'    => '#eff6ff',
+                        'border'=> '#bfdbfe',
+                        'itens' => [
+                            'Número'             => '{{processo_numero}}',
+                            'Vara'               => '{{processo_vara}}',
+                            'Data Distribuição'  => '{{processo_data_distribuicao}}',
+                            'Tipo de Ação'       => '{{processo_tipo_acao}}',
+                            'Fase'               => '{{processo_fase}}',
+                            'Valor da Causa'     => '{{processo_valor_causa}}',
+                            'Parte Contrária'    => '{{parte_contraria}}',
+                        ],
+                    ],
+                    [
+                        'label' => '👤 Cliente',
+                        'cor'   => '#16a34a',
+                        'bg'    => '#f0fdf4',
+                        'border'=> '#bbf7d0',
+                        'itens' => [
+                            'Nome'      => '{{cliente_nome}}',
+                            'CPF/CNPJ'  => '{{cliente_cpf_cnpj}}',
+                            'RG'        => '{{cliente_rg}}',
+                            'E-mail'    => '{{cliente_email}}',
+                            'Telefone'  => '{{cliente_telefone}}',
+                            'Celular'   => '{{cliente_celular}}',
+                            'Endereço'  => '{{cliente_endereco}}',
+                            'Cidade'    => '{{cliente_cidade}}',
+                            'Estado'    => '{{cliente_estado}}',
+                        ],
+                    ],
+                    [
+                        'label' => '⚖️ Advogado',
+                        'cor'   => '#7c3aed',
+                        'bg'    => '#f5f3ff',
+                        'border'=> '#ddd6fe',
+                        'itens' => [
+                            'Nome do Advogado' => '{{advogado_nome}}',
+                            'OAB'              => '{{advogado_oab}}',
+                            'Nome do Juiz'     => '{{juiz_nome}}',
+                        ],
+                    ],
+                    [
+                        'label' => '📅 Datas',
+                        'cor'   => '#d97706',
+                        'bg'    => '#fffbeb',
+                        'border'=> '#fde68a',
+                        'itens' => [
+                            'Data Atual'       => '{{data_atual}}',
+                            'Data Atual Curta' => '{{data_atual_curta}}',
+                        ],
+                    ],
+                ];
+                @endphp
+
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    @foreach($grupos as $grupo)
+                    <div>
+                        <div style="font-size:11px;font-weight:700;color:{{ $grupo['cor'] }};margin-bottom:6px;">
+                            {{ $grupo['label'] }}
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:5px;">
+                            @foreach($grupo['itens'] as $label => $placeholder)
+                            <button
+                                type="button"
+                                onclick="minutasInserirPlaceholder('{{ $placeholder }}')"
+                                style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:{{ $grupo['bg'] }};border:1px solid {{ $grupo['border'] }};border-radius:99px;font-size:12px;font-weight:500;color:{{ $grupo['cor'] }};cursor:pointer;transition:all .15s;"
+                                onmouseover="this.style.opacity='.7'"
+                                onmouseout="this.style.opacity='1'"
+                                title="Inserir: {{ $placeholder }}">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                {{ $label }}
+                            </button>
+                            @endforeach
+                        </div>
+                    </div>
                     @endforeach
                 </div>
             </div>
@@ -81,6 +155,23 @@
         </div>
     </div>
     @endif
+
+    {{-- Script de inserção de placeholder no cursor --}}
+    <script>
+    function minutasInserirPlaceholder(placeholder) {
+        const textarea = document.querySelector('textarea[wire\\:model="corpo"]')
+                      || document.querySelector('textarea[wire\\:model\\.live="corpo"]')
+                      || document.querySelector('textarea');
+        if (!textarea) return;
+        textarea.focus();
+        const start = textarea.selectionStart;
+        const end   = textarea.selectionEnd;
+        textarea.value = textarea.value.substring(0, start) + placeholder + textarea.value.substring(end);
+        textarea.selectionStart = textarea.selectionEnd = start + placeholder.length;
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        textarea.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    </script>
 
     {{-- ── Lista ── --}}
     @if($minutas->isEmpty())

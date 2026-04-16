@@ -64,6 +64,7 @@ use App\Http\Controllers\IAController;
     // ── Processos ───────────────────────────────────────────────
     Route::middleware('perfil:processos')->group(function () {
         Route::get('/processos',             fn() => view('processos'))->name('processos');
+        Route::get('/processos/kanban',      \App\Livewire\Processos\Kanban::class)->name('processos.kanban');
         Route::get('/processos/monitoramento', \App\Livewire\Processos\Monitoramento::class)->name('processos.monitoramento');
         Route::get('/processos/novo',        fn() => view('processo-form'))->name('processos.novo');
         Route::get('/processos/{id}/editar', fn($id) => view('processo-form', ['id' => $id]))->name('processos.editar');
