@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use App\Models\{Andamento, Documento, HonorarioParcela, Pessoa, Prazo, Processo};
-use Illuminate\Support\Facades\{Auth, DB, Storage};
+use App\Models\{Andamento, Documento, FinanceiroLancamento, HonorarioParcela, Pessoa, Prazo, Processo};
+use Illuminate\Support\Facades\{Auth, Storage};
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -12,7 +12,7 @@ class PastaCliente extends Component
     use WithFileUploads;
 
     public int    $clienteId;
-    public string $aba = 'processos'; // processos | prazos | honorarios | documentos | historico
+    public string $aba = 'processos'; // processos | prazos | honorarios | documentos | financeiro | historico
 
     // ── Upload de documento ───────────────────────────────────
     public bool    $modalDoc       = false;
@@ -24,14 +24,14 @@ class PastaCliente extends Component
     public         $docArquivo     = null;
 
     public const TIPOS_DOC = [
-        'contrato'       => 'Contrato',
-        'procuracao'     => 'Procuração',
-        'identidade'     => 'Identidade / CPF',
-        'comprovante'    => 'Comprovante',
-        'peticao'        => 'Petição',
-        'decisao'        => 'Decisão',
-        'certidao'       => 'Certidão',
-        'outro'          => 'Outro',
+        'contrato'           => 'Contrato',
+        'procuracao'         => 'Procuração',
+        'identidade'         => 'Identidade / CPF',
+        'comprovante'        => 'Comprovante',
+        'peticao'            => 'Petição',
+        'decisao'            => 'Decisão',
+        'certidao'           => 'Certidão',
+        'outro'              => 'Outro',
     ];
 
     public function mount(int $clienteId): void
@@ -105,9 +105,9 @@ class PastaCliente extends Component
         }
 
         if ($this->docId) {
-            DB::table('documentos')->where('id', $this->docId)->update(array_merge($dados, ['updated_at' => now()]));
+            Documento::findOrFail($this->docId)->update($dados);
         } else {
-            DB::table('documentos')->insert(array_merge($dados, ['created_at' => now(), 'updated_at' => now()]));
+            Documento::create($dados);
         }
 
         $this->fecharModalDoc();
@@ -163,8 +163,10 @@ class PastaCliente extends Component
         $totalHonorarios = $parcelas->sum('valor');
 
         // ── Documentos ───────────────────────────────────────────────
-        $documentos = Documento::whereIn('processo_id', $processosIds)
-            ->orWhere('cliente_id', $this->clienteId)
+        $documentos = Documento::where(function ($q) use ($processosIds) {
+                $q->whereIn('processo_id', $processosIds)
+                  ->orWhere('cliente_id', $this->clienteId);
+            })
             ->orderByDesc('created_at')
             ->take(30)
             ->get();
@@ -180,6 +182,29 @@ class PastaCliente extends Component
         $valorRisco = $processos->where('status', 'Ativo')->sum('valor_risco');
         $valorCausa = $processos->where('status', 'Ativo')->sum('valor_causa');
 
+        // ── Lançamentos financeiros (só carrega quando a aba está ativa) ──
+        $lancamentos = collect();
+        $totalLancamentosAtrasados = 0;
+        $lancamentosAReceber = 0;
+        $lancamentosRecebido = 0;
+
+        if ($this->aba === 'financeiro') {
+            FinanceiroLancamento::atualizarAtrasados();
+            $lancamentos = FinanceiroLancamento::with(['contrato'])
+                ->where('cliente_id', $this->clienteId)
+                ->whereNotIn('status', ['cancelado'])
+                ->orderBy('vencimento')
+                ->get();
+            $totalLancamentosAtrasados = $lancamentos->where('status', 'atrasado')->count();
+            $lancamentosAReceber = $lancamentos->whereIn('status', ['previsto', 'atrasado'])->sum('valor');
+            $lancamentosRecebido = $lancamentos->where('status', 'recebido')->sum('valor_pago');
+        } else {
+            // Contagem rápida de atrasados para o badge da aba (sem carregar tudo)
+            $totalLancamentosAtrasados = FinanceiroLancamento::where('cliente_id', $this->clienteId)
+                ->where('status', 'atrasado')
+                ->count();
+        }
+
         $tiposDoc = self::TIPOS_DOC;
 
         return view('livewire.pasta-cliente', compact(
@@ -187,6 +212,7 @@ class PastaCliente extends Component
             'prazos', 'totalPrazosVencidos', 'totalPrazosHoje',
             'parcelas', 'totalHonorarios',
             'documentos', 'historico',
+            'lancamentos', 'totalLancamentosAtrasados', 'lancamentosAReceber', 'lancamentosRecebido',
             'valorRisco', 'valorCausa',
             'tiposDoc'
         ));

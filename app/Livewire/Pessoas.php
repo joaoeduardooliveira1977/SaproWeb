@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
-use App\Models\{Pessoa, Administradora, Honorario};
+use App\Models\{Pessoa, Administradora, Documento, Honorario};
 use Illuminate\Support\Facades\{Auth, DB, Storage};
 
 class Pessoas extends Component
@@ -64,7 +64,7 @@ class Pessoas extends Component
     public ?string $contratoAtual       = null; // path existente no banco
     public ?string $contratoAtualNome   = null;
 
-    public const TIPOS = ['Cliente', 'Advogado', 'Juiz', 'Parte Contrária', 'Usuário'];
+    public const TIPOS = ['Cliente', 'Fornecedor', 'Advogado', 'Juiz', 'Parte Contrária', 'Usuário'];
 
     public function mount(): void
     {
@@ -174,6 +174,7 @@ class Pessoas extends Component
         ];
 
         // Upload do contrato de validação
+        $novoContrato = null;
         if ($this->contratoArquivo) {
             if ($this->contratoAtual) {
                 Storage::disk('public')->delete($this->contratoAtual);
@@ -182,6 +183,7 @@ class Pessoas extends Component
             $dados['contrato_arquivo_original'] = $this->contratoArquivo->getClientOriginalName();
             $dados['contrato_validado_em']      = now();
             $dados['contrato_validado_por']     = $usuario->nome ?? 'Sistema';
+            $novoContrato = $dados;
         }
 
         if ($this->pessoaId) {
@@ -191,6 +193,41 @@ class Pessoas extends Component
         } else {
             $pessoa = Pessoa::create($dados);
             $acao   = 'Criou pessoa';
+        }
+
+        // Sincronizar contrato de validação na tabela documentos
+        if ($novoContrato) {
+            $tenantId = $usuario?->tenant_id;
+            $docExistente = DB::table('documentos')
+                ->where('cliente_id', $pessoa->id)
+                ->where('tipo', 'contrato')
+                ->where('titulo', 'Contrato de Honorários')
+                ->first();
+
+            $docDados = [
+                'cliente_id'       => $pessoa->id,
+                'processo_id'      => null,
+                'tipo'             => 'contrato',
+                'titulo'           => 'Contrato de Honorários',
+                'descricao'        => null,
+                'arquivo'          => $novoContrato['contrato_arquivo'],
+                'arquivo_original' => $novoContrato['contrato_arquivo_original'],
+                'mime_type'        => $this->contratoArquivo->getMimeType(),
+                'tamanho'          => $this->contratoArquivo->getSize(),
+                'data_documento'   => now()->toDateString(),
+                'uploaded_by'      => $usuario->nome ?? 'Sistema',
+                'tenant_id'        => $tenantId,
+                'updated_at'       => now(),
+            ];
+
+            if ($docExistente) {
+                if ($docExistente->arquivo) {
+                    Storage::disk('public')->delete($docExistente->arquivo);
+                }
+                DB::table('documentos')->where('id', $docExistente->id)->update($docDados);
+            } else {
+                DB::table('documentos')->insert(array_merge($docDados, ['created_at' => now()]));
+            }
         }
 
         $pessoa->sincronizarTipos($this->tipos_selecionados);
@@ -426,6 +463,34 @@ Use linguagem profissional e objetiva.";
         $this->contratoAtual      = null;
         $this->contratoAtualNome  = null;
         $this->resetErrorBag();
+    }
+
+    public function removerContrato(): void
+    {
+        if ($this->contratoAtual) {
+            Storage::disk('public')->delete($this->contratoAtual);
+        }
+
+        Pessoa::where('id', $this->pessoaId)->update([
+            'contrato_arquivo'          => null,
+            'contrato_arquivo_original' => null,
+            'contrato_validado_em'      => null,
+            'contrato_validado_por'     => null,
+        ]);
+
+        Documento::where('cliente_id', $this->pessoaId)
+            ->where('tipo', 'contrato')
+            ->where('titulo', 'Contrato de Honorários')
+            ->get()
+            ->each(function ($doc) {
+                if ($doc->arquivo) Storage::disk('public')->delete($doc->arquivo);
+                $doc->delete();
+            });
+
+        $this->contratoAtual     = null;
+        $this->contratoAtualNome = null;
+
+        $this->dispatch('toast', message: 'Contrato removido.', type: 'success');
     }
 
     public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse

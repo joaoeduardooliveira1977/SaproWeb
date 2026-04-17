@@ -140,6 +140,21 @@
             </div>
         </div>
 
+        {{-- Andamento interno --}}
+        <div style="margin-top:14px;">
+            <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;border-radius:8px;border:1.5px solid {{ $interno ? '#fecaca' : '#e2e8f0' }};background:{{ $interno ? '#fef2f2' : '#f8fafc' }};transition:all .15s;user-select:none;">
+                <input type="checkbox" wire:model.live="interno" style="width:15px;height:15px;accent-color:#dc2626;cursor:pointer;flex-shrink:0;">
+                <div>
+                    <div style="font-size:13px;font-weight:600;color:{{ $interno ? '#dc2626' : 'var(--text)' }};">
+                        🔒 Andamento interno
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:1px;">
+                        Não aparece no portal do cliente nem nos relatórios externos. Apenas para uso interno do escritório.
+                    </div>
+                </div>
+            </label>
+        </div>
+
         {{-- Campo de anexo opcional --}}
         <div style="margin-top:16px;">
             <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">
@@ -242,9 +257,14 @@
                 @php
                     $docsAndamento = $docsPorAndamento->get($andamento->id, collect());
                 @endphp
-                <tr style="border-bottom:1px solid #f1f5f9; {{ $loop->even ? 'background:#fafafa;' : '' }}">
+                <tr style="border-bottom:1px solid #f1f5f9; {{ $loop->even ? 'background:#fafafa;' : '' }}{{ $andamento->interno ? 'opacity:.85;' : '' }}">
                     <td style="padding:12px 16px; font-size:13px; color:#334155; font-weight:600; white-space:nowrap;">
                         {{ $andamento->data->format('d/m/Y') }}
+                        @if($andamento->interno)
+                        <div style="margin-top:4px;">
+                            <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:#fee2e2;color:#dc2626;border:1px solid #fecaca;">🔒 Interno</span>
+                        </div>
+                        @endif
                     </td>
                     <td style="padding:12px 16px; font-size:13px; color:#475569; line-height:1.5;">
                         {{ $andamento->descricao }}

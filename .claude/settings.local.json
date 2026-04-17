@@ -65,7 +65,13 @@
       "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l app/Livewire/Pessoas.php)",
       "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l app/Models/Pessoa.php)",
       "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l app/Livewire/PastaCliente.php)",
-      "Bash(grep -n \"honorario_tipo\\\\|tipo_honorario\\\\|honorario_id\" c:/projetos/saproweb-base/database/migrations/*.php)"
+      "Bash(grep -n \"honorario_tipo\\\\|tipo_honorario\\\\|honorario_id\" c:/projetos/saproweb-base/database/migrations/*.php)",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l app/Livewire/Contratos.php)",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l app/Livewire/FinanceiroCentral.php)",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l app/Models/FinanceiroLancamento.php)",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe c:/projetos/saproweb-base/artisan make:migration add_interno_to_andamentos_table)",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe c:/projetos/saproweb-base/artisan migrate)",
+      "Bash(cmd /c \"php artisan tinker --execute=\\\\\"print_r\\(Schema::getColumnListing\\('custas_processuais'\\)\\);\\\\\"\")"
     ]
   }
 }

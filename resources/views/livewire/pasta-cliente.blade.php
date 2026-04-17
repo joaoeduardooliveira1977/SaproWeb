@@ -153,6 +153,13 @@
             Documentos
             <span class="pasta-tab-badge">{{ $documentos->count() }}</span>
         </button>
+        <button class="pasta-tab {{ $aba === 'financeiro' ? 'active' : '' }}" wire:click="$set('aba','financeiro')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            Financeiro
+            @if($totalLancamentosAtrasados > 0)
+            <span class="pasta-tab-badge" style="background:#fef2f2;color:#dc2626;">{{ $totalLancamentosAtrasados }}</span>
+            @endif
+        </button>
         <button class="pasta-tab {{ $aba === 'historico' ? 'active' : '' }}" wire:click="$set('aba','historico')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
             Histórico
@@ -342,6 +349,63 @@
                     </div>
                 </div>
                 @endforeach
+            @endif
+        @endif
+
+        {{-- ABA: Financeiro --}}
+        @if($aba === 'financeiro')
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;">
+                <div style="background:#eff6ff;border-radius:10px;padding:12px 14px;border-left:3px solid #2563eb;">
+                    <div style="font-size:10px;color:#2563eb;font-weight:600;">A Receber</div>
+                    <div style="font-size:16px;font-weight:800;color:#2563eb;">R$ {{ number_format($lancamentosAReceber, 2, ',', '.') }}</div>
+                </div>
+                <div style="background:#f0fdf4;border-radius:10px;padding:12px 14px;border-left:3px solid #16a34a;">
+                    <div style="font-size:10px;color:#16a34a;font-weight:600;">Recebido</div>
+                    <div style="font-size:16px;font-weight:800;color:#16a34a;">R$ {{ number_format($lancamentosRecebido, 2, ',', '.') }}</div>
+                </div>
+                @if($totalLancamentosAtrasados > 0)
+                <div style="background:#fef2f2;border-radius:10px;padding:12px 14px;border-left:3px solid #dc2626;">
+                    <div style="font-size:10px;color:#dc2626;font-weight:600;">Atrasados</div>
+                    <div style="font-size:16px;font-weight:800;color:#dc2626;">{{ $totalLancamentosAtrasados }}</div>
+                </div>
+                @endif
+            </div>
+
+            @if($lancamentos->isEmpty())
+                <div class="pasta-empty">
+                    Nenhum lançamento financeiro.
+                    <a href="{{ route('contratos') }}" style="color:var(--primary);font-weight:600;">Criar contrato</a>
+                </div>
+            @else
+                @foreach($lancamentos as $lanc)
+                @php
+                    $stCor = match($lanc->status) {
+                        'recebido' => ['#dcfce7','#16a34a'],
+                        'atrasado' => ['#fef2f2','#dc2626'],
+                        'cancelado'=> ['#f1f5f9','#94a3b8'],
+                        default    => ['#eff6ff','#2563eb'],
+                    };
+                @endphp
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $lanc->descricao }}</div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+                            Venc: {{ $lanc->vencimento->format('d/m/Y') }}
+                            @if($lanc->contrato) &bull; {{ $lanc->contrato->descricao }} @endif
+                            @if($lanc->numero_parcela) &bull; Parcela {{ $lanc->numero_parcela }}{{ $lanc->total_parcelas ? '/'.$lanc->total_parcelas : '' }} @endif
+                        </div>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;">
+                        <div style="font-size:13px;font-weight:700;color:var(--primary);">R$ {{ number_format($lanc->valor,2,',','.') }}</div>
+                        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;background:{{ $stCor[0] }};color:{{ $stCor[1] }};">{{ ucfirst($lanc->status) }}</span>
+                    </div>
+                </div>
+                @endforeach
+                <div style="margin-top:10px;text-align:center;">
+                    <a href="{{ route('financeiro.central') }}" style="font-size:12px;color:var(--primary);font-weight:600;text-decoration:none;">
+                        Ver todos no Financeiro Centralizado →
+                    </a>
+                </div>
             @endif
         @endif
 

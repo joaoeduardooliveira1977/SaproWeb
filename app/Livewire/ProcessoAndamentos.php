@@ -22,6 +22,7 @@ class ProcessoAndamentos extends Component
     // Formulário de andamento
     public string $data       = '';
     public string $descricao  = '';
+    public bool   $interno    = false;
     public ?int   $editandoId = null;
     public $arquivo = null; // arquivo opcional ao salvar andamento
 
@@ -73,6 +74,7 @@ class ProcessoAndamentos extends Component
         $this->editandoId        = $id;
         $this->data              = $andamento->data->format('Y-m-d');
         $this->descricao         = $andamento->descricao;
+        $this->interno           = (bool) $andamento->interno;
         $this->arquivo           = null;
         $this->mostrarFormulario = true;
     }
@@ -89,6 +91,7 @@ class ProcessoAndamentos extends Component
             Andamento::findOrFail($this->editandoId)->update([
                 'data'      => $this->data,
                 'descricao' => $this->descricao,
+                'interno'   => $this->interno,
             ]);
             $andamentoId = $this->editandoId;
         } else {
@@ -96,6 +99,7 @@ class ProcessoAndamentos extends Component
                 'processo_id' => $this->processoId,
                 'data'        => $this->data,
                 'descricao'   => $this->descricao,
+                'interno'     => $this->interno,
                 'usuario_id'  => Auth::guard('usuarios')->id(),
             ])->id;
         }
@@ -104,8 +108,8 @@ class ProcessoAndamentos extends Component
             $this->persistirArquivo($this->arquivo, $andamentoId);
         }
 
-        // Envia e-mail ao cliente somente em novos andamentos
-        if (! $this->editandoId) {
+        // Envia e-mail ao cliente somente em novos andamentos públicos
+        if (! $this->editandoId && ! $this->interno) {
             $this->notificarClientePorEmail($this->data, $this->descricao);
             $this->detectarSugestaoPrazo($this->descricao, $this->data);
         }
@@ -200,12 +204,12 @@ class ProcessoAndamentos extends Component
 
         $numero   = $this->processo->numero ?? '—';
         $dataFmt  = \Carbon\Carbon::parse($data)->format('d/m/Y');
-        $sistNome = config('mail.from.name', 'Software Jur�dico');
+        $sistNome = config('mail.from.name', 'Software Jur�dico');
 
         $corpo = "
         <div style='font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;background:#f1f5f9;border-radius:8px;overflow:hidden;'>
             <div style='background:#1a3a5c;padding:24px 32px;'>
-                <div style='color:#93c5fd;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;'>Software Jur�dico — {$sistNome}</div>
+                <div style='color:#93c5fd;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;'>Software Jur�dico — {$sistNome}</div>
                 <div style='color:#fff;font-size:20px;font-weight:700;margin-top:8px;'>Atualização no seu processo</div>
             </div>
             <div style='background:#fff;padding:24px 32px;border:1px solid #e2e8f0;border-top:none;'>
@@ -442,6 +446,7 @@ Seja objetivo e use linguagem jurídica profissional.";
         $this->editandoId = null;
         $this->data       = now()->format('Y-m-d');
         $this->descricao  = '';
+        $this->interno    = false;
         $this->arquivo    = null;
     }
 

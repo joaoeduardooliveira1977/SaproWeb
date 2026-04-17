@@ -701,7 +701,14 @@
             <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;margin-bottom:8px;font-size:12px;color:#15803d;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                 Contrato anexado: <strong>{{ $contratoAtualNome }}</strong>
-                <a href="/storage/{{ $contratoAtual }}" target="_blank" style="margin-left:auto;color:#15803d;font-weight:600;">Visualizar</a>
+                <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+                    <a href="/storage/{{ $contratoAtual }}" target="_blank" style="color:#15803d;font-weight:600;">Visualizar</a>
+                    <button type="button" wire:click="removerContrato"
+                        wire:confirm="Remover o contrato anexado?"
+                        style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:11px;font-weight:600;padding:0;">
+                        Remover
+                    </button>
+                </div>
             </div>
             @endif
             <div>

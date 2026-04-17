@@ -410,10 +410,20 @@ TWILIO_CANAL_PADRAO=whatsapp</pre>
         </div>
         <div class="form-field">
           <label class="lbl">Mensagem *</label>
-          <textarea wire:model="tplMensagem" rows="6"
+          <textarea id="tplMensagemArea" wire:model="tplMensagem" rows="6"
             style="width:100%;resize:vertical;font-family:monospace;font-size:12px;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);color:var(--text);"
-            placeholder="Olá {{nome}}, sua audiência está marcada para {{data}}..."></textarea>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Use <code>{{nome}}</code>, <code>{{processo}}</code>, <code>{{data}}</code> como variáveis.</div>
+            placeholder="Olá @{{nome}}, sua audiência está marcada para @{{data}}..."></textarea>
+          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+            <span style="font-size:11px;color:var(--muted);">Inserir variável:</span>
+            @php $tplVars = ['nome'=>'Nome','processo'=>'Processo','data'=>'Data','prazo'=>'Prazo','valor'=>'Valor']; @endphp
+            @foreach($tplVars as $chave => $label)
+            @php $varStr = '{{'.$chave.'}}'; @endphp
+            <button type="button" onclick="inserirVariavel('{{ $varStr }}')"
+              style="font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--primary);cursor:pointer;font-family:monospace;">
+              {{ $varStr }}
+            </button>
+            @endforeach
+          </div>
           @error('tplMensagem') <span class="invalid-feedback">{{ $message }}</span> @enderror
         </div>
       </div>
@@ -504,3 +514,18 @@ TWILIO_CANAL_PADRAO=whatsapp</pre>
   @endif
 
 </div>
+
+<script>
+function inserirVariavel(variavel) {
+    const el = document.getElementById('tplMensagemArea');
+    if (!el) return;
+    const start = el.selectionStart;
+    const end   = el.selectionEnd;
+    const antes = el.value.substring(0, start);
+    const depois = el.value.substring(end);
+    el.value = antes + variavel + depois;
+    el.selectionStart = el.selectionEnd = start + variavel.length;
+    el.focus();
+    el.dispatchEvent(new Event('input'));
+}
+</script>

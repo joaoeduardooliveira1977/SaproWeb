@@ -263,14 +263,14 @@ class RelatorioController extends Controller
         $tipo      = $request->tipo ?? 'todos'; // todos | judiciais | extrajudiciais
 
         $query = Processo::with(['cliente', 'andamentos' => function ($q) use ($ini, $fim) {
-            $q->whereBetween('data', [$ini->toDateString(), $fim->toDateString()])
+            $q->publico()->whereBetween('data', [$ini->toDateString(), $fim->toDateString()])
               ->orderBy('data');
         }])
         ->when($clienteId, fn ($q) => $q->where('cliente_id', $clienteId))
         ->when($tipo === 'judiciais',      fn ($q) => $q->whereNotNull('numero')->where('numero', '!=', ''))
         ->when($tipo === 'extrajudiciais', fn ($q) => $q->where(fn ($i) => $i->whereNull('numero')->orWhere('numero', '')))
         ->whereHas('andamentos', function ($q) use ($ini, $fim) {
-            $q->whereBetween('data', [$ini->toDateString(), $fim->toDateString()]);
+            $q->publico()->whereBetween('data', [$ini->toDateString(), $fim->toDateString()]);
         })
         ->orderBy('numero');
 

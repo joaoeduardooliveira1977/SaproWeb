@@ -189,7 +189,7 @@ class PortalDashboard extends Component
             ->take(5)
             ->get();
 
-        $ultimosAndamentos = \App\Models\Andamento::with('processo')
+        $ultimosAndamentos = \App\Models\Andamento::publico()->with('processo')
             ->whereIn('processo_id', $processosIds)
             ->orderByDesc('data')
             ->take(6)
@@ -223,7 +223,8 @@ class PortalDashboard extends Component
                 ->first();
 
             if ($processoDetalhe) {
-                $andamentos = \App\Models\Andamento::where('processo_id', $this->processoAberto)
+                $andamentos = \App\Models\Andamento::publico()
+                    ->where('processo_id', $this->processoAberto)
                     ->orderByDesc('data')
                     ->get();
 

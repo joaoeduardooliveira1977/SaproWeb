@@ -231,7 +231,7 @@
             <div style="font-size:16px;font-weight:800;color:var(--text);">Módulos Financeiros</div>
             <a href="{{ route('financeiro.consolidado') }}" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:600;">Ver consolidado →</a>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;" class="fin-hub-modulos">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;" class="fin-hub-modulos">
             @php
             $modulos = [
                 [
@@ -263,6 +263,16 @@
                     'badge_bg' => '#d97706',
                     'route'    => route('honorarios'),
                     'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+                ],
+                [
+                    'label'    => 'Contratos',
+                    'desc'     => 'Contratos de honorários, consultoria e avulsos com geração automática de lançamentos.',
+                    'cor'      => '#7c3aed',
+                    'bg'       => '#faf5ff',
+                    'badge'    => \App\Models\Contrato::where('status','ativo')->count(),
+                    'badge_bg' => '#7c3aed',
+                    'route'    => route('contratos'),
+                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
                 ],
                 [
                     'label'    => 'Inadimplência',

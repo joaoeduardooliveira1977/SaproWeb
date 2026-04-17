@@ -11,10 +11,12 @@ return new class extends Migration
      */
 	public function up(): void
 	{
+		if (!Schema::hasColumn('aasp_publicacoes', 'processo_id')) {
     		Schema::table('aasp_publicacoes', function (Blueprint $table) {
         	$table->unsignedBigInteger('processo_id')->nullable()->index();
         	$table->foreign('processo_id')->references('id')->on('processos')->nullOnDelete();
-    	});
+    		});
+		}
 	}
 
 	public function down(): void

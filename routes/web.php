@@ -74,6 +74,11 @@ use App\Http\Controllers\IAController;
 	Route::get('/processos/{id}/resumo-ia', [ProcessoController::class, 'gerarResumo']);
     });
 
+    // ── Contratos ───────────────────────────────────────────────
+    Route::middleware('perfil:financeiro')->group(function () {
+        Route::get('/contratos', fn() => view('contratos'))->name('contratos');
+    });
+
     // ── Pessoas ─────────────────────────────────────────────────
     Route::middleware('perfil:pessoas')->group(function () {
         Route::get('/pessoas',                fn() => view('pessoas'))->name('pessoas');
@@ -93,6 +98,7 @@ use App\Http\Controllers\IAController;
     Route::middleware('perfil:financeiro')->group(function () {
         Route::get('/financeiro',             fn() => view('financeiro'))->name('financeiro');
         Route::get('/financeiro-consolidado', fn() => view('financeiro-consolidado'))->name('financeiro.consolidado');
+        Route::get('/financeiro-central',     fn() => view('financeiro-central'))->name('financeiro.central');
         Route::get('/honorarios',             fn() => view('honorarios'))->name('honorarios');
         Route::get('/inadimplencia',          fn() => view('inadimplencia'))->name('inadimplencia');
     });
