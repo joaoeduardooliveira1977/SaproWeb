@@ -14,6 +14,7 @@ class Contrato extends Model
 
     protected $fillable = [
         'tenant_id', 'cliente_id', 'tipo', 'descricao', 'observacoes',
+        'advogado_responsavel_id', 'processo_id',
         'forma_cobranca', 'valor', 'percentual_exito', 'dia_vencimento',
         'data_inicio', 'data_fim', 'status',
         'arquivo', 'arquivo_original',
@@ -32,6 +33,16 @@ class Contrato extends Model
     public function cliente(): BelongsTo
     {
         return $this->belongsTo(Pessoa::class, 'cliente_id');
+    }
+
+    public function advogadoResponsavel(): BelongsTo
+    {
+        return $this->belongsTo(Pessoa::class, 'advogado_responsavel_id');
+    }
+
+    public function processo(): BelongsTo
+    {
+        return $this->belongsTo(Processo::class, 'processo_id');
     }
 
     public function servicos(): HasMany

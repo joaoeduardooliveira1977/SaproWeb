@@ -209,6 +209,8 @@
                             <div style="font-size:11px;color:var(--muted);margin-top:2px;">
                                 Início {{ $c->data_inicio->format('d/m/Y') }}
                                 @if($c->data_fim) · Fim {{ $c->data_fim->format('d/m/Y') }}@endif
+                                @if($c->advogadoResponsavel) · Adv. {{ $c->advogadoResponsavel->nome }}@endif
+                                @if($c->processo) · Proc. {{ $c->processo->numero }}@endif
                                 · {{ $c->servicos->count() }} serviço(s)
                             </div>
                         </td>
@@ -330,13 +332,42 @@
             {{-- Cliente --}}
             <div>
                 <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Cliente <span style="color:var(--danger);">*</span></label>
-                <select wire:model="clienteId" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
+                <select wire:model.live="clienteId" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
                     <option value="0">— Selecione o cliente —</option>
                     @foreach($clientes as $cl)
                     <option value="{{ $cl->id }}">{{ $cl->nome }}</option>
                     @endforeach
                 </select>
                 @error('clienteId')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                    <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Advogado responsável <span style="color:var(--danger);">*</span></label>
+                    <select wire:model="advogadoResponsavelId" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
+                        <option value="0">— Selecione o advogado —</option>
+                        @foreach($advogados as $advogado)
+                        <option value="{{ $advogado->id }}">{{ $advogado->nome }}</option>
+                        @endforeach
+                    </select>
+                    @error('advogadoResponsavelId')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Processo vinculado</label>
+                    <select wire:model="processoContratoId" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
+                        <option value="0">— Contrato independente —</option>
+                        @foreach($processosContrato as $processoContrato)
+                        <option value="{{ $processoContrato->id }}">{{ $processoContrato->numero }} — {{ $processoContrato->titulo }}</option>
+                        @endforeach
+                    </select>
+                    <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+                        @if($clienteId && empty($processosContrato))
+                        Este cliente não possui processos ativos no momento.
+                        @else
+                        Opcional. O contrato pode seguir sem vínculo com processo.
+                        @endif
+                    </div>
+                </div>
             </div>
 
             {{-- Tipo + Forma de cobrança --}}
@@ -481,7 +512,7 @@
         <div style="padding:24px;display:flex;flex-direction:column;gap:20px;">
 
             {{-- Resumo --}}
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
                 <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;">
                     <div style="font-size:11px;color:var(--muted);">Tipo</div>
                     <div style="font-size:13px;font-weight:700;color:var(--text);margin-top:2px;">{{ $tiposLabels[$detalhe->tipo] ?? $detalhe->tipo }}</div>
@@ -496,6 +527,14 @@
                         {{ $detalhe->data_inicio->format('d/m/Y') }}
                         @if($detalhe->data_fim) → {{ $detalhe->data_fim->format('d/m/Y') }} @else → indeterminado @endif
                     </div>
+                </div>
+                <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;">
+                    <div style="font-size:11px;color:var(--muted);">Advogado responsável</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text);margin-top:2px;">{{ $detalhe->advogadoResponsavel?->nome ?? 'Não definido' }}</div>
+                </div>
+                <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;">
+                    <div style="font-size:11px;color:var(--muted);">Processo vinculado</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text);margin-top:2px;">{{ $detalhe->processo?->numero ?? 'Contrato independente' }}</div>
                 </div>
             </div>
 
@@ -546,7 +585,9 @@
                         @if($srv->tipo === 'exito' && $srv->percentual)
                             {{ number_format($srv->percentual, 0) }}%
                         @endif
+                        @if($srv->valor > 0 || $srv->tipo !== 'exito')
                         R$ {{ number_format($srv->valor, 2, ',', '.') }}
+                        @endif
                     </div>
                     <div style="display:flex;gap:5px;">
                         <button wire:click="abrirServico({{ $detalhe->id }}, {{ $srv->id }})"
@@ -645,10 +686,11 @@
         </div>
 
         <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+            @php $servicoCtx = $servicosContexto[$servicoTipo] ?? $servicosContexto['honorario']; @endphp
 
             <div>
                 <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Descrição *</label>
-                <input wire:model="servicoDescricao" type="text" placeholder="Ex: Defesa em processo trabalhista"
+                <input wire:model="servicoDescricao" type="text" placeholder="{{ $servicoCtx['placeholder'] }}"
                     style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
                 @error('servicoDescricao')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
             </div>
@@ -661,9 +703,10 @@
                         <option value="{{ $val }}">{{ $label }}</option>
                         @endforeach
                     </select>
+                    <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;">{{ $servicoCtx['descricao'] }}</div>
                 </div>
                 <div>
-                    <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Valor (R$) *</label>
+                    <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">{{ $servicoCtx['label_valor'] }}</label>
                     <input wire:model="servicoValor" type="text" placeholder="0,00"
                         style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
                     @error('servicoValor')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
@@ -675,6 +718,7 @@
                 <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Percentual de Êxito (%)</label>
                 <input wire:model="servicoPercentual" type="text" placeholder="Ex: 10"
                     style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                @error('servicoPercentual')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
             </div>
             @endif
 

@@ -32,12 +32,12 @@ class ContratoServico extends Model
     public static function tiposLabels(): array
     {
         return [
-            'honorario'   => 'Honorário',
-            'consultoria' => 'Consultoria',
+            'honorario'   => 'Parcela / Honorário Fixo',
+            'consultoria' => 'Mensalidade / Assessoria',
             'exito'       => 'Êxito (%)',
             'avulso'      => 'Serviço Avulso',
             'repasse'     => 'Repasse',
-            'outro'       => 'Outro',
+            'outro'       => 'Outro Ajuste',
         ];
     }
 }

@@ -47,12 +47,22 @@
 
 
 	<div class="card-actions">
+            @php
+                $usuarioAtual = auth('usuarios')->user();
+                $podeGerarContrato = $usuarioAtual && $usuarioAtual->temModulo('financeiro');
+            @endphp
             @if($processo->tjsp_ultima_consulta)
                 <span style="font-size:11px;color:var(--muted)">
                     <span style="display:inline-flex;align-items:center;gap:4px;"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg> DATAJUD: {{ \Carbon\Carbon::parse($processo->tjsp_ultima_consulta)->format('d/m/Y H:i') }}</span>
                 </span>
             @endif
             <a href="{{ route('tjsp') }}" class="btn btn-secondary btn-sm" title="Consultar andamentos no DATAJUD" style="display:inline-flex;align-items:center;gap:5px;"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg> DATAJUD</a>
+            @if($podeGerarContrato)
+            <a href="{{ route('contratos', ['novo' => 1, 'origem' => 'processo', 'processo' => $processo->id]) }}" class="btn btn-secondary btn-sm" style="display:inline-flex;align-items:center;gap:5px;" title="Criar contrato já vinculado a este processo">
+                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                Gerar contrato
+            </a>
+            @endif
             <a href="{{ route('processos.editar', $processo->id) }}" class="btn btn-primary btn-sm">Editar</a>
             <a href="{{ route('processos') }}" class="btn btn-secondary btn-sm">&larr; Voltar</a>
         </div>
@@ -201,6 +211,67 @@
                 <span class="card-title" style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Checklist de Tarefas</span>
             </div>
             @livewire('processo-checklist', ['processoId' => $processo->id])
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+            <div class="card-header">
+                <span class="card-title" style="display:flex;align-items:center;gap:7px;">
+                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Contratos vinculados
+                </span>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    @if($podeGerarContrato)
+                    <a href="{{ route('contratos', ['novo' => 1, 'origem' => 'processo', 'processo' => $processo->id]) }}" class="btn btn-secondary btn-sm">Novo contrato</a>
+                    @endif
+                    <a href="{{ route('contratos') }}" class="btn btn-secondary btn-sm">Abrir módulo</a>
+                </div>
+            </div>
+
+            @if($contratosVinculados->isEmpty())
+            <div class="empty-state" style="padding:28px 18px;">
+                <div class="empty-state-icon">
+                    <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div class="empty-state-title">Nenhum contrato vinculado</div>
+                <div class="empty-state-sub">Este processo ainda não possui contratos relacionados.</div>
+            </div>
+            @else
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                @foreach($contratosVinculados as $contrato)
+                <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:#fff;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                        <div style="min-width:0;flex:1;">
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <div style="font-size:14px;font-weight:700;color:var(--text);">{{ $contrato->descricao }}</div>
+                                <span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:{{ $contrato->status === 'ativo' ? '#dcfce7' : '#f1f5f9' }};color:{{ $contrato->status === 'ativo' ? '#166534' : '#64748b' }};">
+                                    {{ ucfirst($contrato->status) }}
+                                </span>
+                                @if($contrato->validado)
+                                <span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:#eff6ff;color:#1d4ed8;">Validado</span>
+                                @endif
+                            </div>
+                            <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;">
+                                {{ $contrato->tipo_label }} · {{ $contrato->forma_label }}
+                                · Adv. {{ $contrato->advogadoResponsavel?->nome ?? 'Não definido' }}
+                                · {{ $contrato->servicos->count() }} serviço(s)
+                            </div>
+                            <div style="font-size:12px;color:var(--muted);margin-top:4px;">
+                                Início {{ $contrato->data_inicio?->format('d/m/Y') ?? '—' }}
+                                @if($contrato->data_fim) · Fim {{ $contrato->data_fim->format('d/m/Y') }} @else · Vigência indeterminada @endif
+                            </div>
+                        </div>
+                        <div style="text-align:right;min-width:140px;">
+                            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.04em;">Valor</div>
+                            <div style="font-size:16px;font-weight:800;color:var(--primary);margin-top:4px;">R$ {{ number_format($contrato->valor, 2, ',', '.') }}</div>
+                            <a href="{{ route('contratos', ['detalhe' => $contrato->id]) }}" class="btn btn-secondary btn-sm" style="margin-top:10px;display:inline-flex;align-items:center;gap:5px;">
+                                Abrir contrato
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
         </div>
 
         {{-- Rentabilidade --}}

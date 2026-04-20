@@ -106,6 +106,11 @@ class Processo extends Model
         return $this->hasMany(Audiencia::class, 'processo_id')->orderByDesc('data_hora');
     }
 
+    public function contratos(): HasMany
+    {
+        return $this->hasMany(Contrato::class, 'processo_id')->orderByDesc('created_at');
+    }
+
     // ── Scopes ─────────────────────────────────────
     public function scopeAtivos($query)
     {

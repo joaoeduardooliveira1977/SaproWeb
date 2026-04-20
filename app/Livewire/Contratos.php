@@ -29,6 +29,8 @@ class Contratos extends Component
 
     // Campos do contrato
     public int    $clienteId     = 0;
+    public int    $advogadoResponsavelId = 0;
+    public int    $processoContratoId = 0;
     public string $tipo          = 'honorario_processo';
     public string $descricao     = '';
     public string $observacoes   = '';
@@ -74,6 +76,8 @@ class Contratos extends Component
     // ── Dados auxiliares ──────────────────────────────────────
     public array  $clientes    = [];
     public array  $processos   = [];
+    public array  $processosContrato = [];
+    public array  $advogados   = [];
     public array  $indicadores = []; // pessoas que podem receber repasse
 
     public function mount(): void
@@ -83,6 +87,9 @@ class Contratos extends Component
 
         $usuario = Auth::guard('usuarios')->user();
         $this->podeValidar = $usuario && ($usuario->isAdmin() || $usuario->perfil === 'financeiro');
+
+        $this->prepararContratoInicial();
+        $this->prepararDetalheInicial();
     }
 
     private function carregarAuxiliares(): void
@@ -92,6 +99,14 @@ class Contratos extends Component
             FROM pessoas p
             JOIN pessoa_tipos pt ON pt.pessoa_id = p.id
             WHERE pt.tipo = 'Cliente' AND p.ativo = true
+            ORDER BY p.nome
+        ");
+
+        $this->advogados = DB::select("
+            SELECT p.id, p.nome
+            FROM pessoas p
+            JOIN pessoa_tipos pt ON pt.pessoa_id = p.id
+            WHERE pt.tipo = 'Advogado' AND p.ativo = true
             ORDER BY p.nome
         ");
 
@@ -107,6 +122,192 @@ class Contratos extends Component
             WHERE p.status = 'Ativo'
             ORDER BY p.numero
         ");
+
+        $this->processosContrato = [];
+    }
+
+    public function updatedClienteId(): void
+    {
+        $this->carregarOpcoesDoCliente();
+    }
+
+    private function prepararContratoInicial(): void
+    {
+        if (!request()->boolean('novo') && !request()->boolean('novo_contrato')) {
+            return;
+        }
+
+        $processoId = (int) request()->integer('processo');
+        if ($processoId > 0) {
+            $this->abrirContratoDoProcesso($processoId);
+            return;
+        }
+
+        $clienteId = (int) request()->integer('cliente');
+        if ($clienteId > 0) {
+            $this->abrirModal();
+            $this->clienteId = $clienteId;
+            $this->carregarOpcoesDoCliente();
+        }
+    }
+
+    private function prepararDetalheInicial(): void
+    {
+        $contratoId = (int) request()->integer('detalhe');
+
+        if ($contratoId > 0) {
+            $this->abrirDetalhe($contratoId);
+        }
+    }
+
+    public function updatedServicoTipo(): void
+    {
+        if ($this->servicoTipo !== 'exito') {
+            $this->servicoPercentual = '';
+        }
+
+        if (!$this->servicoDescricao || str_starts_with($this->servicoDescricao, 'Serviço:')) {
+            $this->servicoDescricao = $this->descricaoServicoPadrao($this->servicoTipo);
+        }
+    }
+
+    private function tipoServicoPadraoParaContrato(Contrato $contrato): string
+    {
+        return match ($contrato->forma_cobranca) {
+            'mensal_recorrente' => 'consultoria',
+            'exito'             => 'exito',
+            'avulso'            => 'avulso',
+            default             => 'honorario',
+        };
+    }
+
+    private function descricaoServicoPadrao(string $tipo): string
+    {
+        return match ($tipo) {
+            'consultoria' => 'Serviço: mensalidade de assessoria',
+            'exito'       => 'Serviço: honorários de êxito',
+            'avulso'      => 'Serviço: atendimento avulso',
+            'repasse'     => 'Serviço: repasse financeiro',
+            'outro'       => 'Serviço: ajuste complementar',
+            default       => 'Serviço: parcela de honorários',
+        };
+    }
+
+    private function contextoTiposServico(): array
+    {
+        return [
+            'honorario' => [
+                'descricao'   => 'Use para entrada, parcelas ou honorários fixos do contrato.',
+                'label_valor' => 'Valor da parcela (R$) *',
+                'placeholder' => 'Ex: Entrada contratual ou Parcela 1/3',
+            ],
+            'consultoria' => [
+                'descricao'   => 'Use para contratos mensais ou assessoria recorrente.',
+                'label_valor' => 'Valor mensal (R$) *',
+                'placeholder' => 'Ex: Mensalidade de assessoria jurídica',
+            ],
+            'exito' => [
+                'descricao'   => 'Use para honorários condicionados ao ganho. Informe o percentual e, se quiser, um valor-base estimado.',
+                'label_valor' => 'Valor-base estimado (R$)',
+                'placeholder' => 'Ex: Honorários sobre êxito da ação',
+            ],
+            'avulso' => [
+                'descricao'   => 'Use para serviços pontuais cobrados uma única vez.',
+                'label_valor' => 'Valor do serviço (R$) *',
+                'placeholder' => 'Ex: Elaboração de parecer ou reunião extraordinária',
+            ],
+            'repasse' => [
+                'descricao'   => 'Use apenas se o contrato precisar registrar um serviço ligado a repasse específico.',
+                'label_valor' => 'Valor do repasse (R$) *',
+                'placeholder' => 'Ex: Repasse operacional',
+            ],
+            'outro' => [
+                'descricao'   => 'Use para ajustes complementares fora dos tipos principais.',
+                'label_valor' => 'Valor do ajuste (R$) *',
+                'placeholder' => 'Ex: Complemento de honorários',
+            ],
+        ];
+    }
+
+    private function abrirContratoDoProcesso(int $processoId): void
+    {
+        $processo = Processo::with(['cliente', 'advogado', 'tipoAcao'])->find($processoId);
+
+        if (!$processo) {
+            return;
+        }
+
+        $this->abrirModal();
+        $this->clienteId = (int) $processo->cliente_id;
+        $this->carregarOpcoesDoCliente();
+        $this->processoContratoId = (int) $processo->id;
+
+        $advogadoId = (int) ($processo->advogado_id ?? 0);
+        if ($advogadoId > 0) {
+            $this->advogadoResponsavelId = $advogadoId;
+        } elseif (count($this->advogados) === 1) {
+            $this->advogadoResponsavelId = (int) $this->advogados[0]->id;
+        }
+
+        $tipoAcao = $processo->tipoAcao?->descricao;
+        $this->descricao = $tipoAcao
+            ? "Contrato de honorários - {$tipoAcao} ({$processo->numero})"
+            : "Contrato de honorários - processo {$processo->numero}";
+
+        if (!$this->observacoes) {
+            $clienteNome = $processo->cliente?->nome;
+            $this->observacoes = $clienteNome
+                ? "Contrato gerado a partir do processo {$processo->numero} do cliente {$clienteNome}."
+                : "Contrato gerado a partir do processo {$processo->numero}.";
+        }
+    }
+
+    private function carregarOpcoesDoCliente(): void
+    {
+        if (!$this->clienteId) {
+            $this->processosContrato = [];
+            $this->processoContratoId = 0;
+            return;
+        }
+
+        $this->processosContrato = DB::select("
+            SELECT id, numero, COALESCE(parte_contraria, numero) AS titulo
+            FROM processos
+            WHERE cliente_id = ? AND status = 'Ativo'
+            ORDER BY numero
+        ", [$this->clienteId]);
+
+        $processoIds = array_map(static fn ($processo) => (int) $processo->id, $this->processosContrato);
+
+        if ($this->processoContratoId && !in_array($this->processoContratoId, $processoIds, true)) {
+            $this->processoContratoId = 0;
+        }
+
+        $advogadosCliente = DB::select("
+            SELECT p.id, p.nome
+            FROM cliente_advogado ca
+            JOIN pessoas p ON p.id = ca.advogado_id
+            WHERE ca.cliente_id = ? AND p.ativo = true
+            ORDER BY p.nome
+        ", [$this->clienteId]);
+
+        if (!empty($advogadosCliente)) {
+            $this->advogados = $advogadosCliente;
+        } else {
+            $this->advogados = DB::select("
+                SELECT p.id, p.nome
+                FROM pessoas p
+                JOIN pessoa_tipos pt ON pt.pessoa_id = p.id
+                WHERE pt.tipo = 'Advogado' AND p.ativo = true
+                ORDER BY p.nome
+            ");
+        }
+
+        $advogadoIds = array_map(static fn ($advogado) => (int) $advogado->id, $this->advogados);
+
+        if ($this->advogadoResponsavelId && !in_array($this->advogadoResponsavelId, $advogadoIds, true)) {
+            $this->advogadoResponsavelId = 0;
+        }
     }
 
     // ── Abrir / fechar modal contrato ─────────────────────────
@@ -119,8 +320,10 @@ class Contratos extends Component
         if ($id) {
             $c = Contrato::with('servicos')->findOrFail($id);
             $this->clienteId      = $c->cliente_id;
+            $this->advogadoResponsavelId = (int) ($c->advogado_responsavel_id ?? 0);
             $this->tipo           = $c->tipo;
             $this->descricao      = $c->descricao;
+            $this->processoContratoId = (int) ($c->processo_id ?? 0);
             $this->observacoes    = $c->observacoes ?? '';
             $this->formaCobranca  = $c->forma_cobranca;
             $this->valor          = number_format($c->valor, 2, ',', '.');
@@ -131,10 +334,13 @@ class Contratos extends Component
             $this->status         = $c->status;
             $this->arquivoAtual   = $c->arquivo;
             $this->arquivoNome    = $c->arquivo_original;
+            $this->carregarOpcoesDoCliente();
         } else {
             $this->clienteId      = 0;
+            $this->advogadoResponsavelId = 0;
             $this->tipo           = 'honorario_processo';
             $this->descricao      = '';
+            $this->processoContratoId = 0;
             $this->observacoes    = '';
             $this->formaCobranca  = 'parcelado';
             $this->valor          = '';
@@ -145,6 +351,7 @@ class Contratos extends Component
             $this->status         = 'ativo';
             $this->arquivoAtual   = null;
             $this->arquivoNome    = null;
+            $this->processosContrato = [];
         }
 
         $this->modal = true;
@@ -162,6 +369,7 @@ class Contratos extends Component
     {
         $this->validate([
             'clienteId'    => 'required|integer|min:1',
+            'advogadoResponsavelId' => 'required|integer|min:1',
             'tipo'         => 'required|string',
             'descricao'    => 'required|string|max:300',
             'formaCobranca'=> 'required|string',
@@ -170,6 +378,7 @@ class Contratos extends Component
             'arquivo'      => 'nullable|file|max:20480',
         ], [
             'clienteId.min'    => 'Selecione o cliente.',
+            'advogadoResponsavelId.min' => 'Selecione o advogado responsável.',
             'descricao.required' => 'A descrição é obrigatória.',
             'valor.required'   => 'Informe o valor.',
             'dataInicio.required' => 'Informe a data de início.',
@@ -179,8 +388,10 @@ class Contratos extends Component
 
         $dados = [
             'cliente_id'     => $this->clienteId,
+            'advogado_responsavel_id' => $this->advogadoResponsavelId,
             'tipo'           => $this->tipo,
             'descricao'      => $this->descricao,
+            'processo_id'    => $this->processoContratoId ?: null,
             'observacoes'    => $this->observacoes ?: null,
             'forma_cobranca' => $this->formaCobranca,
             'valor'          => $valorNum,
@@ -268,11 +479,12 @@ class Contratos extends Component
             $this->servicoProcessoId = $s->processo_id ?? 0;
             $this->servicoObs        = $s->observacoes ?? '';
         } else {
-            $this->servicoDescricao  = '';
-            $this->servicoTipo       = 'honorario';
+            $contrato = Contrato::find($contratoId);
+            $this->servicoTipo       = $contrato ? $this->tipoServicoPadraoParaContrato($contrato) : 'honorario';
+            $this->servicoDescricao  = $this->descricaoServicoPadrao($this->servicoTipo);
             $this->servicoValor      = '';
             $this->servicoPercentual = '';
-            $this->servicoProcessoId = 0;
+            $this->servicoProcessoId = (int) ($contrato->processo_id ?? 0);
             $this->servicoObs        = '';
         }
 
@@ -290,15 +502,19 @@ class Contratos extends Component
     public function salvarServico(): void
     {
         $this->validate([
-            'servicoDescricao' => 'required|string|max:300',
-            'servicoTipo'      => 'required|string',
-            'servicoValor'     => 'required',
+            'servicoDescricao'  => 'required|string|max:300',
+            'servicoTipo'       => 'required|string',
+            'servicoValor'      => $this->servicoTipo === 'exito' ? 'nullable' : 'required',
+            'servicoPercentual' => $this->servicoTipo === 'exito' ? 'required' : 'nullable',
         ], [
             'servicoDescricao.required' => 'A descrição é obrigatória.',
             'servicoValor.required'     => 'Informe o valor.',
+            'servicoPercentual.required' => 'Informe o percentual de êxito.',
         ]);
 
-        $valor = (float) str_replace(['.', ','], ['', '.'], $this->servicoValor);
+        $valor = $this->servicoValor !== ''
+            ? (float) str_replace(['.', ','], ['', '.'], $this->servicoValor)
+            : 0.0;
         $perc  = $this->servicoPercentual ? (float) str_replace(',', '.', $this->servicoPercentual) : null;
 
         $dados = [
@@ -457,7 +673,7 @@ class Contratos extends Component
     // ── Render ────────────────────────────────────────────────
     public function render(): \Illuminate\View\View
     {
-        $contratos = Contrato::with(['cliente', 'servicos'])
+        $contratos = Contrato::with(['cliente', 'servicos', 'advogadoResponsavel', 'processo'])
             ->when($this->busca, fn($q) => $q->whereHas('cliente', fn($c) =>
                 $c->where('nome', 'ilike', "%{$this->busca}%")
             )->orWhere('descricao', 'ilike', "%{$this->busca}%"))
@@ -473,7 +689,7 @@ class Contratos extends Component
 
         $detalhe = null;
         if ($this->contratoDetalhe) {
-            $detalhe = Contrato::with(['cliente', 'servicos.processo', 'repasses.indicador'])
+            $detalhe = Contrato::with(['cliente', 'advogadoResponsavel', 'processo', 'servicos.processo', 'repasses.indicador'])
                 ->find($this->contratoDetalhe);
         }
 
@@ -485,6 +701,7 @@ class Contratos extends Component
             'tiposLabels'   => Contrato::tiposLabels(),
             'formasLabels'  => Contrato::formasLabels(),
             'servicosTipos' => ContratoServico::tiposLabels(),
+            'servicosContexto' => $this->contextoTiposServico(),
             'detalhe'       => $detalhe,
         ]);
     }

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Processo, Prazo};
 use App\Services\AIService;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\{DB, Schema};
 
 
 class ProcessoController extends Controller
@@ -45,15 +45,17 @@ class ProcessoController extends Controller
 
 // ──  ───────────────────────────────────────────
 
-	public function show(int $id)
+    public function show(int $id)
     {
-        $processo = Processo::with([
+        $relacoes = [
             'cliente', 'advogado',
             'tipoAcao', 'tipoProcesso', 'fase',
             'risco', 'reparticao',
             'agenda', 'andamentos.usuario.pessoa',
             'audiencias.juiz', 'audiencias.advogado',
-        ])->findOrFail($id);
+        ];
+
+        $processo = Processo::with($relacoes)->findOrFail($id);
 
         $prazos = Prazo::with('responsavel')
             ->where('processo_id', $id)
@@ -67,6 +69,14 @@ class ProcessoController extends Controller
             WHERE d.processo_id = ?
             ORDER BY d.created_at DESC
         ", [$id]);
+
+        $contratosVinculados = collect();
+        if (Schema::hasColumn('contratos', 'processo_id')) {
+            $contratosVinculados = \App\Models\Contrato::with(['advogadoResponsavel', 'servicos'])
+                ->where('processo_id', $id)
+                ->orderByDesc('created_at')
+                ->get();
+        }
 
         // ── Rentabilidade ───────────────────────────────────────────
         $rentabilidade = [
@@ -159,7 +169,7 @@ class ProcessoController extends Controller
 
         $timeline = $timeline->sortByDesc('data')->values();
 
-        return view('processo-show', compact('processo', 'prazos', 'documentos', 'timeline', 'rentabilidade'));
+        return view('processo-show', compact('processo', 'prazos', 'documentos', 'timeline', 'rentabilidade', 'contratosVinculados'));
     }
 
     public function andamentos(int $id)
