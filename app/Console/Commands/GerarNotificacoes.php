@@ -20,6 +20,7 @@ class GerarNotificacoes extends Command
     {
         $this->processarPrazos();
         $this->processarHonorarios();
+        $this->processarLancamentosAtrasados();
         $this->processarProcessosSemAndamento();
         $this->enviarEmailsResumo();
 
@@ -30,8 +31,9 @@ class GerarNotificacoes extends Command
 
     private function processarPrazos(): void
     {
-        // Prazos que vencem em 1, 5 ou 15 dias
+        // Prazos que vencem hoje, em 1, 5 ou 15 dias
         $marcos = [
+            0  => 'prazo_hoje',
             1  => 'prazo_vencendo',
             5  => 'prazo_vencendo',
             15 => 'prazo_vencendo',
@@ -46,7 +48,12 @@ class GerarNotificacoes extends Command
                 ->get();
 
             foreach ($prazos as $prazo) {
-                $tipoReal = $prazo->prazo_fatal ? 'prazo_fatal' : $tipo;
+                $tipoReal = match(true) {
+                    $prazo->prazo_fatal && $dias === 0 => 'prazo_fatal',
+                    $prazo->prazo_fatal               => 'prazo_fatal',
+                    $dias === 0                        => 'prazo_hoje',
+                    default                            => $tipo,
+                };
 
                 if (Notificacao::jaExiste($tipoReal, 'prazo', $prazo->id)) {
                     continue;
@@ -55,9 +62,12 @@ class GerarNotificacoes extends Command
                 $cliente = $prazo->processo?->cliente?->nome ?? '';
                 $proc    = $prazo->processo?->numero ?? '';
 
-                $titulo = $prazo->prazo_fatal
-                    ? "🚨 PRAZO FATAL em {$dias} dia(s): {$prazo->titulo}"
-                    : "⏳ Prazo em {$dias} dia(s): {$prazo->titulo}";
+                $titulo = match(true) {
+                    $prazo->prazo_fatal && $dias === 0 => "🚨 PRAZO FATAL HOJE: {$prazo->titulo}",
+                    $prazo->prazo_fatal               => "🚨 PRAZO FATAL em {$dias} dia(s): {$prazo->titulo}",
+                    $dias === 0                        => "🔔 Prazo vence HOJE: {$prazo->titulo}",
+                    default                            => "⏳ Prazo em {$dias} dia(s): {$prazo->titulo}",
+                };
 
                 $mensagem = "Vence em " . $prazo->data_prazo->format('d/m/Y');
                 if ($proc)    $mensagem .= " | Processo: {$proc}";
@@ -131,6 +141,38 @@ class GerarNotificacoes extends Command
                 'referencia_tipo' => 'honorario_parcela',
                 'referencia_id'   => $parcela->id,
                 'link'            => '/honorarios',
+            ]);
+        }
+    }
+
+    // ── Lançamentos financeiros atrasados (novo módulo) ──────────
+
+    private function processarLancamentosAtrasados(): void
+    {
+        $lancamentos = DB::table('financeiro_lancamentos as fl')
+            ->join('pessoas as p', 'p.id', '=', 'fl.cliente_id')
+            ->where('fl.status', 'atrasado')
+            ->where('fl.tipo', 'receita')
+            ->select('fl.id', 'fl.descricao', 'fl.valor', 'fl.vencimento', 'p.nome as cliente_nome')
+            ->get();
+
+        foreach ($lancamentos as $lanc) {
+            if (Notificacao::jaExiste('lancamento_atrasado', 'financeiro_lancamento', $lanc->id)) {
+                continue;
+            }
+
+            $diasAtraso = Carbon::parse($lanc->vencimento)->diffInDays(today());
+
+            Notificacao::create([
+                'usuario_id'      => null,
+                'tipo'            => 'lancamento_atrasado',
+                'titulo'          => "💰 Recebimento atrasado: {$lanc->cliente_nome}",
+                'mensagem'        => "{$lanc->descricao} — R$ "
+                                     . number_format($lanc->valor, 2, ',', '.')
+                                     . " — {$diasAtraso} dia(s) em atraso",
+                'referencia_tipo' => 'financeiro_lancamento',
+                'referencia_id'   => $lanc->id,
+                'link'            => '/financeiro',
             ]);
         }
     }

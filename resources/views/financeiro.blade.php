@@ -1,7 +1,5 @@
 @extends('layouts.app')
-
 @section('page-title', 'Financeiro')
-@section('breadcrumb')Financeiro <span class="sep">›</span> <span class="current">Por Processo</span>@endsection
 @section('content')
 <div>
     <div style="margin-bottom:18px;">

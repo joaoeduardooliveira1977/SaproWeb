@@ -31,66 +31,62 @@
 </div>
 @else
 {{-- Filtros --}}
-<div class="card" style="padding:16px;margin-bottom:16px;">
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+<style>
+.aud-filter-bar { background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:12px; }
+.aud-filter-bar input,.aud-filter-bar select { padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:var(--white);color:var(--text);outline:none;transition:border-color .15s; }
+.aud-filter-bar input:focus,.aud-filter-bar select:focus { border-color:var(--primary-light); }
+.aud-busca-wrap { position:relative;flex:0 1 260px;min-width:180px; }
+.aud-busca-wrap svg { position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none; }
+.aud-busca-wrap input { width:100%;padding-left:28px;box-sizing:border-box; }
+</style>
+<div class="aud-filter-bar">
+    <div class="aud-busca-wrap">
+        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input wire:model.live.debounce.300ms="filtroBusca" type="text" placeholder="Processo, cliente...">
+    </div>
 
-        {{-- Busca com ícone --}}
-        <div style="flex:1;min-width:200px;position:relative;">
-            <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
-                style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input wire:model.live.debounce.300ms="filtroBusca" type="text" placeholder="Processo, cliente..."
-                style="width:100%;padding:8px 10px 8px 34px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
-        </div>
+    <select wire:model.live="filtroStatus" style="width:120px;">
+        <option value="">Todos status</option>
+        <option value="agendada">Agendada</option>
+        <option value="realizada">Realizada</option>
+        <option value="cancelada">Cancelada</option>
+        <option value="redesignada">Redesignada</option>
+    </select>
 
-        <select wire:model.live="filtroStatus"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:130px;">
-            <option value="">Todos os status</option>
-            <option value="agendada">Agendada</option>
-            <option value="realizada">Realizada</option>
-            <option value="cancelada">Cancelada</option>
-            <option value="redesignada">Redesignada</option>
-        </select>
+    <select wire:model.live="filtroTipo" style="width:150px;">
+        <option value="">Todos os tipos</option>
+        <option value="conciliacao">Conciliação</option>
+        <option value="instrucao">Instrução</option>
+        <option value="instrucao_julgamento">Instr. e Julgamento</option>
+        <option value="julgamento">Julgamento</option>
+        <option value="una">Una</option>
+        <option value="outra">Outra</option>
+    </select>
 
-        <select wire:model.live="filtroTipo"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);min-width:150px;">
-            <option value="">Todos os tipos</option>
-            <option value="conciliacao">Conciliação</option>
-            <option value="instrucao">Instrução</option>
-            <option value="instrucao_julgamento">Instrução e Julgamento</option>
-            <option value="julgamento">Julgamento</option>
-            <option value="una">Una</option>
-            <option value="outra">Outra</option>
-        </select>
+    <input wire:model.live="filtroDataIni" type="date" title="De" style="width:118px;">
+    <input wire:model.live="filtroDataFim" type="date" title="Até" style="width:118px;">
 
-        <input wire:model.live="filtroDataIni" type="date" title="De"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
-        <input wire:model.live="filtroDataFim" type="date" title="Até"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
+    @if($filtroBusca || $filtroStatus || $filtroTipo || $filtroDataIni || $filtroDataFim)
+    <button wire:click="$set('filtroBusca',''); $set('filtroStatus',''); $set('filtroTipo',''); $set('filtroDataIni',''); $set('filtroDataFim','')"
+        style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:none;color:var(--muted);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;">
+        <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Limpar
+    </button>
+    @endif
 
-        @if($filtroBusca || $filtroStatus || $filtroTipo || $filtroDataIni || $filtroDataFim)
-        <button wire:click="$set('filtroBusca',''); $set('filtroStatus',''); $set('filtroTipo',''); $set('filtroDataIni',''); $set('filtroDataFim','')"
-            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:none;color:var(--muted);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;">
-            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Limpar
+    <div style="display:flex;gap:6px;margin-left:auto;align-items:center;">
+        <button wire:click="exportarCsv" wire:loading.attr="disabled"
+            class="btn btn-sm btn-secondary-outline" title="Exportar CSV">
+            <span wire:loading.remove wire:target="exportarCsv" style="display:flex;align-items:center;gap:5px;">
+                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                CSV
+            </span>
+            <span wire:loading wire:target="exportarCsv">Gerando…</span>
         </button>
-        @endif
-
-        <div style="display:flex;gap:6px;margin-left:auto;">
-            <button wire:click="exportarCsv" wire:loading.attr="disabled"
-                class="btn btn-sm btn-secondary-outline" title="Exportar CSV">
-                <span wire:loading.remove wire:target="exportarCsv" style="display:flex;align-items:center;gap:5px;">
-                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    CSV
-                </span>
-                <span wire:loading wire:target="exportarCsv">Gerando…</span>
-            </button>
-            <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Nova Audiência
-            </button>
-        </div>
+        <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nova Audiência
+        </button>
     </div>
 </div>
 @endif

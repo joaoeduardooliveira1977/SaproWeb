@@ -30,6 +30,7 @@ class Honorarios extends Component
     // Form honorário
     public ?int $honorarioId = null;
     public ?int $processo_id = null;
+    public ?int $contrato_id = null;
     public int $cliente_id = 0;
     public string $tipo = 'fixo_mensal';
     public string $descricao = '';
@@ -51,6 +52,7 @@ class Honorarios extends Component
     // Dados auxiliares
     public array $processos = [];
     public array $clientes = [];
+    public array $contratos = [];
     public ?array $parcelasModal = null;
     public string $honorarioNome = '';
 
@@ -91,6 +93,7 @@ class Honorarios extends Component
     public function updatedClienteId(): void
     {
         $this->processo_id  = null;
+        $this->contrato_id  = null;
         $this->valorCausa   = '';
         $this->valorCalculado = 0;
 
@@ -100,6 +103,15 @@ class Honorarios extends Component
                 WHERE cliente_id = ? AND status = 'Ativo'
                 ORDER BY numero
             ", [$this->cliente_id]);
+
+            $this->contratos = DB::select("
+                SELECT id, descricao FROM contratos
+                WHERE cliente_id = ? AND status = 'ativo'
+                ORDER BY descricao
+            ", [$this->cliente_id]);
+        } else {
+            $this->processos = [];
+            $this->contratos = [];
         }
     }
 
@@ -152,8 +164,8 @@ class Honorarios extends Component
 
     public function novoHonorario(): void
     {
-        $this->reset(['honorarioId','processo_id','cliente_id','tipo','descricao',
-            'valor_contrato','percentual_exito','total_parcelas','data_fim','observacoes','processos',
+        $this->reset(['honorarioId','processo_id','contrato_id','cliente_id','tipo','descricao',
+            'valor_contrato','percentual_exito','total_parcelas','data_fim','observacoes','processos','contratos',
             'valorCausa','valorCalculado']);
         $this->tipo = 'fixo_mensal';
         $this->total_parcelas = 1;
@@ -170,6 +182,7 @@ class Honorarios extends Component
         $this->honorarioId     = $h->id;
         $this->cliente_id      = $h->cliente_id;
         $this->processo_id     = $h->processo_id;
+        $this->contrato_id     = $h->contrato_id ?? null;
         $this->tipo            = $h->tipo;
         $this->descricao       = $h->descricao;
         $this->valor_contrato  = $h->valor_contrato;
@@ -199,25 +212,25 @@ class Honorarios extends Component
         if ($this->honorarioId) {
             DB::update("
                 UPDATE honorarios SET
-                    cliente_id=?, processo_id=?, tipo=?, descricao=?, valor_contrato=?,
+                    cliente_id=?, processo_id=?, contrato_id=?, tipo=?, descricao=?, valor_contrato=?,
                     percentual_exito=?, total_parcelas=?, data_inicio=?, data_fim=?,
                     status=?, observacoes=?, updated_at=NOW()
                 WHERE id=?
             ", [
-                $this->cliente_id, $this->processo_id ?: null, $this->tipo, $this->descricao,
-                $valor, $perc, $this->total_parcelas, $this->data_inicio,
-                $this->data_fim ?: null, $this->status, $this->observacoes ?: null,
-                $this->honorarioId
+                $this->cliente_id, $this->processo_id ?: null, $this->contrato_id ?: null,
+                $this->tipo, $this->descricao, $valor, $perc, $this->total_parcelas,
+                $this->data_inicio, $this->data_fim ?: null, $this->status,
+                $this->observacoes ?: null, $this->honorarioId
             ]);
         } else {
             $id = DB::selectOne("
-                INSERT INTO honorarios (cliente_id, processo_id, tipo, descricao, valor_contrato,
+                INSERT INTO honorarios (cliente_id, processo_id, contrato_id, tipo, descricao, valor_contrato,
                     percentual_exito, total_parcelas, data_inicio, data_fim, status, observacoes, created_at, updated_at)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW()) RETURNING id
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW()) RETURNING id
             ", [
-                $this->cliente_id, $this->processo_id ?: null, $this->tipo, $this->descricao,
-                $valor, $perc, $this->total_parcelas, $this->data_inicio,
-                $this->data_fim ?: null, $this->status, $this->observacoes ?: null
+                $this->cliente_id, $this->processo_id ?: null, $this->contrato_id ?: null,
+                $this->tipo, $this->descricao, $valor, $perc, $this->total_parcelas,
+                $this->data_inicio, $this->data_fim ?: null, $this->status, $this->observacoes ?: null
             ])->id;
 
             // Gera parcelas automaticamente

@@ -40,50 +40,96 @@
         </h2>
         <p style="font-size:12px;color:var(--muted);margin:4px 0 0;">Todos os lançamentos: contratos, honorários e serviços avulsos.</p>
     </div>
-    <button wire:click="abrirModal()" class="btn btn-primary" style="display:flex;align-items:center;gap:6px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Novo Lançamento
-    </button>
+    <div style="display:flex;gap:8px;align-items:center;">
+        <button wire:click="exportarCsv" wire:loading.attr="disabled" class="btn btn-outline" style="display:flex;align-items:center;gap:6px;">
+            <span wire:loading.remove wire:target="exportarCsv" style="display:flex;align-items:center;gap:6px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                CSV
+            </span>
+            <span wire:loading wire:target="exportarCsv">Gerando…</span>
+        </button>
+        <button wire:click="abrirModal()" class="btn btn-primary" style="display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo Lançamento
+        </button>
+    </div>
 </div>
 
 {{-- ── Filtros ── --}}
-<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-    <input wire:model.live.debounce.300ms="busca" type="text" placeholder="Buscar cliente ou descrição..."
-        style="flex:1;min-width:200px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
-    <input wire:model.live="filtroMes" type="month"
-        style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
-    <select wire:model.live="filtroStatus" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
-        <option value="">Todos os status</option>
+<style>
+.fin-filter-bar { background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:16px; }
+.fin-filter-bar input,.fin-filter-bar select { padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:var(--white);color:var(--text);outline:none;transition:border-color .15s; }
+.fin-filter-bar input:focus,.fin-filter-bar select:focus { border-color:var(--primary-light); }
+</style>
+<div class="fin-filter-bar">
+    <div style="position:relative;flex:0 1 240px;min-width:160px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
+            style="position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none;">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input wire:model.live.debounce.300ms="busca" type="text" placeholder="Buscar cliente ou descrição..."
+            style="width:100%;padding-left:28px;box-sizing:border-box;">
+    </div>
+
+    <div style="display:flex;align-items:center;gap:2px;">
+        <button wire:click="mesAnterior" title="Mês anterior"
+            style="padding:7px 8px;border:1.5px solid var(--border);border-radius:7px 0 0 7px;background:var(--white);cursor:pointer;color:var(--muted);line-height:1;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <input wire:model.live="filtroMes" type="month"
+            style="width:130px;border-radius:0;border-left:none;border-right:none;">
+        <button wire:click="mesSeguinte" title="Próximo mês"
+            style="padding:7px 8px;border:1.5px solid var(--border);border-radius:0 7px 7px 0;background:var(--white);cursor:pointer;color:var(--muted);line-height:1;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+    </div>
+
+    <select wire:model.live="filtroStatus" style="width:120px;">
+        <option value="">Todos status</option>
         <option value="previsto">Previsto</option>
         <option value="recebido">Recebido</option>
         <option value="atrasado">Atrasado</option>
         <option value="cancelado">Cancelado</option>
     </select>
-    <select wire:model.live="filtroTipo" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
-        <option value="">Todos os tipos</option>
+
+    <select wire:model.live="filtroTipo" style="width:110px;">
+        <option value="">Todos tipos</option>
         <option value="receita">Receita</option>
         <option value="despesa">Despesa</option>
         <option value="repasse">Repasse</option>
     </select>
-    <select wire:model.live="filtroCliente" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);min-width:180px;">
+
+    <select wire:model.live="filtroCliente" style="width:170px;">
         <option value="">Todos os clientes</option>
         @foreach($clientes as $cl)
         <option value="{{ $cl->id }}">{{ $cl->nome }}</option>
         @endforeach
     </select>
+
+    @if($busca || $filtroStatus || $filtroTipo || $filtroMes !== now()->format('Y-m') || $filtroCliente)
+    <button wire:click="$set('busca',''); $set('filtroStatus',''); $set('filtroTipo',''); $set('filtroCliente',''); $set('filtroMes','{{ now()->format('Y-m') }}')"
+        style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Limpar
+    </button>
+    @endif
 </div>
 
 {{-- ── Tabela de lançamentos ── --}}
 <div style="background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden;">
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
         <thead>
+            @php
+            $thBase = "padding:11px 14px;font-weight:700;color:var(--muted);font-size:11px;white-space:nowrap;cursor:pointer;user-select:none;";
+            $seta = fn($col) => $ordenarPor === $col ? ($ordenarDir === 'asc' ? ' ↑' : ' ↓') : '';
+            @endphp
             <tr style="background:#f8fafc;border-bottom:1.5px solid var(--border);">
-                <th style="padding:11px 14px;text-align:left;font-weight:700;color:var(--muted);font-size:11px;white-space:nowrap;">Vencimento</th>
-                <th style="padding:11px 14px;text-align:left;font-weight:700;color:var(--muted);font-size:11px;">Cliente</th>
+                <th wire:click="ordenar('vencimento')" style="{{ $thBase }}text-align:left;">Vencimento{{ $seta('vencimento') }}</th>
+                <th wire:click="ordenar('cliente')"    style="{{ $thBase }}text-align:left;">Cliente{{ $seta('cliente') }}</th>
                 <th style="padding:11px 14px;text-align:left;font-weight:700;color:var(--muted);font-size:11px;">Descrição</th>
-                <th style="padding:11px 14px;text-align:left;font-weight:700;color:var(--muted);font-size:11px;">Origem</th>
-                <th style="padding:11px 14px;text-align:right;font-weight:700;color:var(--muted);font-size:11px;">Valor</th>
-                <th style="padding:11px 14px;text-align:center;font-weight:700;color:var(--muted);font-size:11px;">Status</th>
+                <th wire:click="ordenar('tipo')"       style="{{ $thBase }}text-align:left;">Tipo{{ $seta('tipo') }}</th>
+                <th wire:click="ordenar('valor')"      style="{{ $thBase }}text-align:right;">Valor{{ $seta('valor') }}</th>
+                <th wire:click="ordenar('status')"     style="{{ $thBase }}text-align:center;">Status{{ $seta('status') }}</th>
                 <th style="padding:11px 14px;text-align:right;font-weight:700;color:var(--muted);font-size:11px;"></th>
             </tr>
         </thead>
@@ -144,25 +190,31 @@
             <td style="padding:11px 14px;text-align:right;">
                 <div style="display:flex;gap:5px;justify-content:flex-end;">
                     @if(in_array($l->status, ['previsto','atrasado']))
-                    @if($l->tipo === 'repasse')
-                    <button wire:click="abrirPagamento({{ $l->id }})" title="Registrar pagamento do repasse"
-                        style="padding:5px 8px;border:1.5px solid #ede9fe;border-radius:6px;background:#faf5ff;cursor:pointer;color:#7c3aed;font-size:11px;font-weight:600;white-space:nowrap;">
-                        ✓ Pagar
-                    </button>
-                    @else
-                    <button wire:click="abrirPagamento({{ $l->id }})" title="Registrar recebimento"
-                        style="padding:5px 8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#f0fdf4;cursor:pointer;color:#16a34a;font-size:11px;font-weight:600;white-space:nowrap;">
-                        ✓ Receber
-                    </button>
-                    @endif
-                    <button wire:click="abrirModal({{ $l->id }})" title="Editar"
-                        style="padding:5px 7px;border:1.5px solid var(--border);border-radius:6px;background:var(--white);cursor:pointer;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button wire:click="cancelar({{ $l->id }})" wire:confirm="Cancelar este lançamento?" title="Cancelar"
-                        style="padding:5px 7px;border:1.5px solid #fecaca;border-radius:6px;background:#fef2f2;cursor:pointer;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
+                        @if($l->tipo === 'repasse')
+                        <button wire:click="abrirPagamento({{ $l->id }})" title="Registrar pagamento do repasse"
+                            style="padding:5px 8px;border:1.5px solid #ede9fe;border-radius:6px;background:#faf5ff;cursor:pointer;color:#7c3aed;font-size:11px;font-weight:600;white-space:nowrap;">
+                            ✓ Pagar
+                        </button>
+                        @else
+                        <button wire:click="abrirPagamento({{ $l->id }})" title="Registrar recebimento"
+                            style="padding:5px 8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#f0fdf4;cursor:pointer;color:#16a34a;font-size:11px;font-weight:600;white-space:nowrap;">
+                            ✓ Receber
+                        </button>
+                        @endif
+                        <button wire:click="abrirModal({{ $l->id }})" title="Editar"
+                            style="padding:5px 7px;border:1.5px solid var(--border);border-radius:6px;background:var(--white);cursor:pointer;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>
+                        <button wire:click="cancelar({{ $l->id }})" wire:confirm="Cancelar este lançamento?" title="Cancelar"
+                            style="padding:5px 7px;border:1.5px solid #fecaca;border-radius:6px;background:#fef2f2;cursor:pointer;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    @elseif($l->status === 'cancelado')
+                        <button wire:click="excluir({{ $l->id }})" wire:confirm="Excluir permanentemente este lançamento?" title="Excluir"
+                            style="padding:5px 7px;border:1.5px solid #fecaca;border-radius:6px;background:#fef2f2;cursor:pointer;display:flex;align-items:center;gap:4px;font-size:11px;color:#dc2626;font-weight:600;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                            Excluir
+                        </button>
                     @endif
                 </div>
             </td>

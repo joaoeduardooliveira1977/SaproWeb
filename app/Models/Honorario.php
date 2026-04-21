@@ -11,7 +11,7 @@ class Honorario extends Model
     protected $table = 'honorarios';
 
     protected $fillable = [
-        'processo_id', 'cliente_id', 'tipo', 'descricao',
+        'processo_id', 'contrato_id', 'cliente_id', 'tipo', 'descricao',
         'valor_contrato', 'percentual_exito', 'total_parcelas',
         'data_inicio', 'data_fim', 'status', 'observacoes',
     ];
@@ -31,6 +31,11 @@ class Honorario extends Model
     public function processo(): BelongsTo
     {
         return $this->belongsTo(Processo::class, 'processo_id');
+    }
+
+    public function contrato(): BelongsTo
+    {
+        return $this->belongsTo(Contrato::class, 'contrato_id');
     }
 
     public function parcelas(): HasMany

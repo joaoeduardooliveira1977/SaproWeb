@@ -145,11 +145,26 @@
                             <option value="{{ $p->id }}">{{ $p->numero }}{{ $p->vara ? ' — '.$p->vara : '' }}{{ $p->valor_causa ? ' · R$ '.number_format($p->valor_causa,2,',','.') : '' }}</option>
                         @endforeach
                     </select>
-                    @if($valorCausa)
-                    <div style="margin-top:6px;padding:8px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;font-size:12px;color:#1d4ed8;display:flex;align-items:center;gap:6px;">
-                        <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><path d="M3 6l9-3 9 3"/><path d="M3 18l4-8 4 8"/><path d="M13 18l4-8 4 8"/><line x1="2" y1="18" x2="9" y2="18"/><line x1="15" y1="18" x2="22" y2="18"/></svg> <span>Valor da causa: <strong>R$ {{ number_format((float)$valorCausa,2,',','.') }}</strong></span>
-                    </div>
-                    @endif
+                </div>
+                @endif
+
+                @if(count($contratos) > 0)
+                <div style="grid-column:1/-1;">
+                    <label style="font-size:12px;font-weight:600;color:var(--muted);">CONTRATO VINCULADO (opcional)</label>
+                    <select wire:model="contrato_id" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
+                        <option value="">Nenhum contrato</option>
+                        @foreach($contratos as $ct)
+                            <option value="{{ $ct->id }}">{{ $ct->descricao }}</option>
+                        @endforeach
+                    </select>
+                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">Indica que este honorário faz parte de um contrato existente.</div>
+                </div>
+                @endif
+
+                @if($valorCausa)
+                <div style="grid-column:1/-1;margin-top:2px;padding:8px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;font-size:12px;color:#1d4ed8;display:flex;align-items:center;gap:6px;">
+                    <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><path d="M3 6l9-3 9 3"/><path d="M3 18l4-8 4 8"/><path d="M13 18l4-8 4 8"/><line x1="2" y1="18" x2="9" y2="18"/><line x1="15" y1="18" x2="22" y2="18"/></svg>
+                    <span>Valor da causa: <strong>R$ {{ number_format((float)$valorCausa,2,',','.') }}</strong></span>
                 </div>
                 @endif
 

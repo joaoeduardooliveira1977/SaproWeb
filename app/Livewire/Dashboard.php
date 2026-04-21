@@ -215,7 +215,30 @@ class Dashboard extends Component
     		->where('data_hora', '<=', now()->endOfWeek())
     		->count();
 
-        // ── Honorários recebidos este mês ───────────────────────────
+        // ── Financeiro (novo módulo) ─────────────────────────────────
+        $mesAtual = now()->format('Y-m');
+
+        $finAReceberMes = (float) DB::table('financeiro_lancamentos')
+            ->where('tenant_id', $tenantId)
+            ->where('tipo', 'receita')
+            ->whereIn('status', ['previsto', 'atrasado'])
+            ->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$mesAtual])
+            ->sum('valor');
+
+        $finRecebidoMes = (float) DB::table('financeiro_lancamentos')
+            ->where('tenant_id', $tenantId)
+            ->where('tipo', 'receita')
+            ->where('status', 'recebido')
+            ->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$mesAtual])
+            ->sum('valor_pago');
+
+        $finAtrasadoTotal = (float) DB::table('financeiro_lancamentos')
+            ->where('tenant_id', $tenantId)
+            ->where('tipo', 'receita')
+            ->where('status', 'atrasado')
+            ->sum('valor');
+
+        // ── Honorários recebidos este mês (legado) ───────────────────
         $honorariosMes = (float) DB::table('recebimentos')
             ->join('processos', 'processos.id', '=', 'recebimentos.processo_id')
             ->where('processos.tenant_id', $tenantId)
@@ -274,7 +297,8 @@ class Dashboard extends Component
             'atividadeSemana', 'audienciasSemanais',
             'spark7',
             'honorariosMes', 'novosEstesMes', 'novosMesAnterior', 'tendenciaMensal',
-            'topClientes'
+            'topClientes',
+            'finAReceberMes', 'finRecebidoMes', 'finAtrasadoTotal'
         ));
     }
 }

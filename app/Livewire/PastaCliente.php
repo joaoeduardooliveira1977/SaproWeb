@@ -189,7 +189,6 @@ class PastaCliente extends Component
         $lancamentosRecebido = 0;
 
         if ($this->aba === 'financeiro') {
-            FinanceiroLancamento::atualizarAtrasados();
             $lancamentos = FinanceiroLancamento::with(['contrato'])
                 ->where('cliente_id', $this->clienteId)
                 ->whereNotIn('status', ['cancelado'])

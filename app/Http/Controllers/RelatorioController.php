@@ -594,6 +594,93 @@ class RelatorioController extends Controller
         ], 'Lista Geral de Processos');
     }
 
+    // ── 14. Relatório Financeiro Mensal ───────────────────────────
+
+    public function relatorioFinanceiroMensal(Request $request)
+    {
+        $mes       = $request->mes ?? now()->format('Y-m');
+        $clienteId = $request->cliente_id ? (int) $request->cliente_id : null;
+
+        [$ano, $numMes] = explode('-', $mes);
+
+        $mesesNomes = [
+            '01'=>'Janeiro','02'=>'Fevereiro','03'=>'Março','04'=>'Abril',
+            '05'=>'Maio','06'=>'Junho','07'=>'Julho','08'=>'Agosto',
+            '09'=>'Setembro','10'=>'Outubro','11'=>'Novembro','12'=>'Dezembro',
+        ];
+        $mesNome = ($mesesNomes[$numMes] ?? $numMes) . '/' . $ano;
+
+        $lancamentos = DB::table('financeiro_lancamentos as fl')
+            ->join('pessoas as p', 'p.id', '=', 'fl.cliente_id')
+            ->leftJoin('contratos as ct', 'ct.id', '=', 'fl.contrato_id')
+            ->whereRaw("TO_CHAR(fl.vencimento, 'YYYY-MM') = ?", [$mes])
+            ->whereNotIn('fl.status', ['cancelado'])
+            ->when($clienteId, fn($q) => $q->where('fl.cliente_id', $clienteId))
+            ->select(
+                'fl.id', 'fl.tipo', 'fl.descricao', 'fl.valor', 'fl.valor_pago',
+                'fl.status', 'fl.vencimento', 'fl.data_pagamento', 'fl.forma_pagamento',
+                'p.nome as cliente_nome',
+                'ct.descricao as contrato_desc'
+            )
+            ->orderBy('fl.tipo')
+            ->orderBy('fl.vencimento')
+            ->orderBy('p.nome')
+            ->get();
+
+        $receitas  = $lancamentos->where('tipo', 'receita');
+        $despesas  = $lancamentos->where('tipo', 'despesa');
+        $repassess = $lancamentos->where('tipo', 'repasse');
+
+        $totais = [
+            'receita_prevista' => $receitas->whereIn('status', ['previsto','atrasado'])->sum('valor'),
+            'receita_recebida' => $receitas->where('status', 'recebido')->sum('valor_pago'),
+            'receita_atrasada' => $receitas->where('status', 'atrasado')->sum('valor'),
+            'despesa_total'    => $despesas->sum('valor'),
+            'despesa_paga'     => $despesas->where('status', 'recebido')->sum('valor_pago'),
+            'repasse_total'    => $repassess->sum('valor'),
+        ];
+        $totais['saldo'] = $totais['receita_recebida'] - $totais['despesa_paga'];
+
+        $clienteNome = $clienteId
+            ? (DB::table('pessoas')->where('id', $clienteId)->value('nome') ?? 'Todos')
+            : 'Todos os Clientes';
+
+        if ($request->formato === 'csv') {
+            $linhas = $lancamentos->map(fn($l) => [
+                ucfirst($l->tipo),
+                $l->cliente_nome,
+                $l->descricao,
+                $l->contrato_desc ?? '',
+                Carbon::parse($l->vencimento)->format('d/m/Y'),
+                number_format($l->valor, 2, ',', '.'),
+                $l->valor_pago ? number_format($l->valor_pago, 2, ',', '.') : '',
+                $l->data_pagamento ? Carbon::parse($l->data_pagamento)->format('d/m/Y') : '',
+                $l->forma_pagamento ?? '',
+                match($l->status) {
+                    'previsto' => 'Previsto',
+                    'atrasado' => 'Atrasado',
+                    'recebido' => 'Recebido/Pago',
+                    default    => $l->status,
+                },
+            ])->toArray();
+            return $this->csv(
+                ['Tipo','Cliente','Descrição','Contrato','Vencimento','Valor','Valor Pago','Data Pgto','Forma Pgto','Status'],
+                $linhas,
+                'financeiro_mensal_' . str_replace('-', '_', $mes)
+            );
+        }
+
+        return $this->pdf('pdf.financeiro-mensal', [
+            'lancamentos' => $lancamentos,
+            'receitas'    => $receitas,
+            'despesas'    => $despesas,
+            'repassess'   => $repassess,
+            'totais'      => $totais,
+            'mesNome'     => $mesNome,
+            'clienteNome' => $clienteNome,
+        ], 'Relatório Financeiro — ' . $mesNome);
+    }
+
     // ── 6. Aniversários de Clientes ────────────────────────────
 
     public function aniversarios(Request $request)

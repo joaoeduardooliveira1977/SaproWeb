@@ -11,12 +11,14 @@ class ContratoServico extends Model
 
     protected $fillable = [
         'contrato_id', 'processo_id', 'descricao', 'tipo',
-        'valor', 'percentual', 'status', 'observacoes',
+        'valor', 'percentual', 'vencimento', 'numero_parcelas', 'status', 'observacoes',
     ];
 
     protected $casts = [
-        'valor'      => 'decimal:2',
-        'percentual' => 'decimal:2',
+        'valor'           => 'decimal:2',
+        'percentual'      => 'decimal:2',
+        'vencimento'      => 'date',
+        'numero_parcelas' => 'integer',
     ];
 
     public function contrato(): BelongsTo

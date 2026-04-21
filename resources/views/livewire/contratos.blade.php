@@ -732,6 +732,30 @@
                 </select>
             </div>
 
+            @if(!in_array($servicoTipo, ['exito', 'repasse']))
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                    <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">1º Vencimento *</label>
+                    <input wire:model="servicoVencimento" type="date"
+                        style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                    @error('servicoVencimento')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">
+                        Nº de Parcelas
+                        <span style="font-weight:400;color:var(--muted);">(vencimentos mensais)</span>
+                    </label>
+                    <input wire:model.live="servicoParcelas" type="number" min="1" max="120"
+                        style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                    @if(!$servicoId)
+                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">
+                        Gera {{ $servicoParcelas ?? 1 }} lançamento(s) no financeiro automaticamente.
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+
             <div>
                 <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Observações</label>
                 <textarea wire:model="servicoObs" rows="2" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>

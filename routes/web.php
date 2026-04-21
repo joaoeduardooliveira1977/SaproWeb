@@ -119,6 +119,7 @@ use App\Http\Controllers\IAController;
         Route::get('/produtividade-pdf',     [RelatorioController::class, 'produtividadeAdvogado'])->name('produtividade-pdf');
         Route::get('/por-tipo-acao',         [RelatorioController::class, 'processosPorTipoAcao'])->name('por-tipo-acao');
         Route::get('/lista-geral',           [RelatorioController::class, 'listaGeral'])->name('lista-geral');
+        Route::get('/financeiro-mensal',     [RelatorioController::class, 'relatorioFinanceiroMensal'])->name('financeiro-mensal');
     });
 
     // ── Analytics & Produtividade ────────────────────────────────

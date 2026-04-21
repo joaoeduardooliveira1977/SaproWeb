@@ -3,7 +3,7 @@
 <style>
 .inadimplencia-kpis {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -28,6 +28,9 @@
   padding: 7px 9px;
   border-radius: 7px;
   font-size: 12px;
+}
+@media (max-width: 1400px) {
+  .inadimplencia-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 1100px) {
   .inadimplencia-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -65,6 +68,18 @@
       <div style="font-size:11px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.5px">Crítico (+30 dias)</div>
       <div style="font-size:20px;font-weight:800;color:#991b1b;margin-top:4px">R$ {{ number_format($kpis->valor_critico ?? 0, 0, ',', '.') }}</div>
     </div>
+    <div class="inadimplencia-kpi" style="border-top:3px solid #7c3aed">
+      <div class="stat-icon"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div>
+      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Honorários</div>
+      <div style="font-size:18px;font-weight:800;color:#7c3aed;margin-top:4px">R$ {{ number_format($kpis->total_honorarios ?? 0, 0, ',', '.') }}</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:2px">módulo antigo</div>
+    </div>
+    <div class="inadimplencia-kpi" style="border-top:3px solid #16a34a">
+      <div class="stat-icon"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Contratos</div>
+      <div style="font-size:18px;font-weight:800;color:#16a34a;margin-top:4px">R$ {{ number_format($kpis->total_lancamentos ?? 0, 0, ',', '.') }}</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:2px">módulo novo</div>
+    </div>
   </div>
 
   {{-- Filtros --}}
@@ -85,6 +100,11 @@
         <option value="valor_desc">Maior valor primeiro</option>
         <option value="valor_asc">Menor valor primeiro</option>
         <option value="nome_asc">Nome (A–Z)</option>
+      </select>
+      <select wire:model.live="filtroFonte">
+        <option value="todos">Todas as origens</option>
+        <option value="honorarios">Só Honorários</option>
+        <option value="lancamentos">Só Contratos</option>
       </select>
       <button wire:click="exportarCsv" wire:loading.attr="disabled"
           class="btn btn-sm btn-secondary-outline" title="Exportar CSV">
@@ -140,7 +160,14 @@
                 @endif
               </div>
               <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px;font-size:12px;color:var(--muted)">
-                <span>{{ $cliente->qtd_parcelas }} parcela(s)</span>
+                <span>{{ $cliente->qtd_parcelas }} item(s)</span>
+                @if($cliente->tem_honorario && $cliente->tem_lancamento)
+                  <span style="background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;border-radius:4px;padding:0 6px;font-size:10px;font-weight:700;">Hon + Contratos</span>
+                @elseif($cliente->tem_lancamento)
+                  <span style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:4px;padding:0 6px;font-size:10px;font-weight:700;">Contratos</span>
+                @else
+                  <span style="background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;border-radius:4px;padding:0 6px;font-size:10px;font-weight:700;">Honorários</span>
+                @endif
                 <span>Maior atraso: <strong style="color:{{ $dCor }}">{{ $dias }} dias</strong></span>
                 @if($cliente->cliente_celular)
                   <span style="display:inline-flex;align-items:center;gap:3px;"><svg aria-hidden="true" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.67 19.79 19.79 0 01.1 2.14 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.34a16 16 0 006.29 6.29l.75-.75a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> {{ $cliente->cliente_celular }}</span>
@@ -196,9 +223,16 @@
                     @php
                       $d = $parc->dias_atraso;
                       $dCorPauta = $d <= 15 ? '#d97706' : ($d <= 30 ? '#f97316' : '#dc2626');
+                      $fonteLabel = $parc->fonte === 'lancamento' ? 'Contrato' : 'Honorário';
+                      $fonteBadge = $parc->fonte === 'lancamento'
+                          ? 'background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0'
+                          : 'background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe';
                     @endphp
                     <tr>
-                      <td style="font-weight:600">{{ $parc->numero_parcela }}ª</td>
+                      <td style="font-weight:600">
+                        @if($parc->numero_parcela) {{ $parc->numero_parcela }}ª @else — @endif
+                        <span style="{{ $fonteBadge }};border-radius:4px;padding:0 5px;font-size:10px;font-weight:700;margin-left:3px;">{{ $fonteLabel }}</span>
+                      </td>
                       <td style="color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $parc->honorario_desc }}</td>
                       <td>{{ \Carbon\Carbon::parse($parc->vencimento)->format('d/m/Y') }}</td>
                       <td style="text-align:right;font-weight:600">R$ {{ number_format($parc->valor, 2, ',', '.') }}</td>
@@ -208,7 +242,7 @@
                         <div style="display:flex;gap:4px;justify-content:flex-end">
                           <button wire:click="abrirContato({{ $parc->id }}, {{ $cliente->cliente_id }})"
                                   class="btn btn-primary btn-sm">Contato</button>
-                          <button wire:click="abrirPagamento({{ $parc->id }})"
+                          <button wire:click="abrirPagamento({{ $parc->id }}, '{{ $parc->fonte }}')"
                                   class="btn btn-success btn-sm">Pagar</button>
                         </div>
                       </td>

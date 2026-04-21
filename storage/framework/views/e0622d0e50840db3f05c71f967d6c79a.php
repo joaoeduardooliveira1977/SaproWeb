@@ -1,5 +1,4 @@
 <?php $__env->startSection('page-title', 'Financeiro'); ?>
-<?php $__env->startSection('breadcrumb'); ?>Financeiro <span class="sep">›</span> <span class="current">Por Processo</span><?php $__env->stopSection(); ?>
 <?php $__env->startSection('content'); ?>
 <div>
     <div style="margin-bottom:18px;">

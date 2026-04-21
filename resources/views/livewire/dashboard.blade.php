@@ -116,7 +116,7 @@
             </a>
 
             <a href="{{ route('financeiro') }}" style="text-decoration:none;">
-                <div class="dash-kpi-card" style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;"
+                <div class="dash-kpi-card" style="background:#fff;border-radius:12px;border:1px solid {{ $finAtrasadoTotal > 0 ? '#fca5a5' : '#e2e8f0' }};padding:16px;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;"
                     onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(0,0,0,.08)'"
                     onmouseout="this.style.transform='';this.style.boxShadow=''">
                     <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#16a34a;border-radius:12px 12px 0 0;"></div>
@@ -124,11 +124,16 @@
                         <div style="width:36px;height:36px;border-radius:10px;background:#dcfce7;display:flex;align-items:center;justify-content:center;">
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                         </div>
+                        @if($finAtrasadoTotal > 0)
+                        <span style="font-size:10px;font-weight:700;color:#dc2626;background:#fee2e2;padding:2px 6px;border-radius:4px;white-space:nowrap;">
+                            R$ {{ number_format($finAtrasadoTotal, 0, ',', '.') }} atrasado
+                        </span>
+                        @endif
                     </div>
-                    @php $recStr = number_format((float)$totalReceber, 0, ',', '.'); $recFs = strlen($recStr) > 8 ? '17' : '22'; @endphp
+                    @php $recStr = number_format($finAReceberMes, 0, ',', '.'); $recFs = strlen($recStr) > 8 ? '17' : '22'; @endphp
                     <div style="font-size:{{ $recFs }}px;font-weight:800;color:#14532d;letter-spacing:-1px;">R$ {{ $recStr }}</div>
-                    <div style="font-size:12px;color:#64748b;margin-top:2px;font-weight:500;">A receber</div>
-                    <span style="display:inline-block;margin-top:6px;padding:2px 8px;background:#dcfce7;color:#16a34a;border-radius:4px;font-size:10px;font-weight:700;">pendente</span>
+                    <div style="font-size:12px;color:#64748b;margin-top:2px;font-weight:500;">A receber no mês</div>
+                    <span style="display:inline-block;margin-top:6px;padding:2px 8px;background:#dcfce7;color:#16a34a;border-radius:4px;font-size:10px;font-weight:700;">{{ now()->locale('pt_BR')->isoFormat('MMMM') }}</span>
                 </div>
             </a>
 
@@ -142,10 +147,11 @@
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                         </div>
                     </div>
-                    @php $honStr = number_format($honorariosMes, 0, ',', '.'); $honFs = strlen($honStr) > 8 ? '15' : '20'; @endphp
+                    @php $honStr = number_format($finRecebidoMes, 0, ',', '.'); $honFs = strlen($honStr) > 8 ? '15' : '20'; @endphp
                     <div style="font-size:{{ $honFs }}px;font-weight:800;color:#0c4a6e;letter-spacing:-1px;">R$ {{ $honStr }}</div>
-                    <div style="font-size:12px;color:#64748b;margin-top:2px;font-weight:500;">Honorários recebidos</div>
-                    <span style="display:inline-block;margin-top:6px;padding:2px 8px;background:#e0f2fe;color:#0891b2;border-radius:4px;font-size:10px;font-weight:700;">{{ now()->locale('pt_BR')->isoFormat('MMMM') }}</span>
+                    <div style="font-size:12px;color:#64748b;margin-top:2px;font-weight:500;">Recebido no mês</div>
+                    @php $taxaReceb = $finAReceberMes + $finRecebidoMes > 0 ? round($finRecebidoMes / ($finAReceberMes + $finRecebidoMes) * 100) : 0; @endphp
+                    <span style="display:inline-block;margin-top:6px;padding:2px 8px;background:#e0f2fe;color:#0891b2;border-radius:4px;font-size:10px;font-weight:700;">{{ $taxaReceb }}% recebido</span>
                 </div>
             </a>
         </div>

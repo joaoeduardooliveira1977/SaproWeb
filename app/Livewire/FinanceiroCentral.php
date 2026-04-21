@@ -45,6 +45,10 @@ class FinanceiroCentral extends Component
     public string $formaPagamento  = 'pix';
     public string $pagamentoTipo   = 'receita';
 
+    // ── Ordenação ─────────────────────────────────────────────
+    public string $ordenarPor  = 'vencimento';
+    public string $ordenarDir  = 'asc';
+
     // ── Dados auxiliares ──────────────────────────────────────
     public array $clientes     = [];
     public array $fornecedores = [];
@@ -86,6 +90,31 @@ class FinanceiroCentral extends Component
     public function updatingFiltroTipo():    void { $this->resetPage(); }
     public function updatingFiltroMes():     void { $this->resetPage(); }
     public function updatingFiltroCliente(): void { $this->resetPage(); }
+
+    public function ordenar(string $coluna): void
+    {
+        if ($this->ordenarPor === $coluna) {
+            $this->ordenarDir = $this->ordenarDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->ordenarPor = $coluna;
+            $this->ordenarDir = 'asc';
+        }
+        $this->resetPage();
+    }
+
+    public function mesAnterior(): void
+    {
+        $this->filtroMes = \Carbon\Carbon::createFromFormat('Y-m', $this->filtroMes ?: now()->format('Y-m'))
+            ->subMonth()->format('Y-m');
+        $this->resetPage();
+    }
+
+    public function mesSeguinte(): void
+    {
+        $this->filtroMes = \Carbon\Carbon::createFromFormat('Y-m', $this->filtroMes ?: now()->format('Y-m'))
+            ->addMonth()->format('Y-m');
+        $this->resetPage();
+    }
 
     // ── Modal lançamento manual ───────────────────────────────
     public function abrirModal(?int $id = null): void
@@ -145,7 +174,6 @@ class FinanceiroCentral extends Component
             'descricao'   => $this->descricao,
             'valor'       => (float) str_replace(['.', ','], ['', '.'], $this->valor),
             'vencimento'  => $this->vencimento,
-            'status'      => 'previsto',
             'observacoes' => $this->observacoes ?: null,
         ];
 
@@ -155,7 +183,7 @@ class FinanceiroCentral extends Component
             $msg = 'Lançamento atualizado.';
         } else {
             DB::table('financeiro_lancamentos')
-                ->insert(array_merge($dados, ['created_at' => now(), 'updated_at' => now()]));
+                ->insert(array_merge($dados, ['status' => 'previsto', 'created_at' => now(), 'updated_at' => now()]));
             $msg = 'Lançamento criado!';
         }
 
@@ -163,11 +191,55 @@ class FinanceiroCentral extends Component
         $this->dispatch('toast', message: $msg, type: 'success');
     }
 
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $lancamentos = FinanceiroLancamento::with(['cliente', 'contrato'])
+            ->when($this->busca, fn($q) => $q->where(fn($s) => $s
+                ->where('descricao', 'ilike', "%{$this->busca}%")
+                ->orWhereHas('cliente', fn($c) => $c->where('nome', 'ilike', "%{$this->busca}%"))
+            ))
+            ->when($this->filtroStatus,  fn($q) => $q->where('status', $this->filtroStatus))
+            ->when($this->filtroTipo,    fn($q) => $q->where('tipo', $this->filtroTipo))
+            ->when($this->filtroCliente, fn($q) => $q->where('cliente_id', $this->filtroCliente))
+            ->when($this->filtroMes,     fn($q) => $q->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$this->filtroMes]))
+            ->orderBy('vencimento')
+            ->get();
+
+        $nome = 'financeiro_' . ($this->filtroMes ?: now()->format('Y-m')) . '.csv';
+
+        return response()->streamDownload(function () use ($lancamentos) {
+            $out = fopen('php://output', 'w');
+            fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM UTF-8
+            fputcsv($out, ['Vencimento','Cliente','Descrição','Tipo','Status','Valor','Valor Pago','Data Pagamento','Forma Pgto','Contrato'], ';');
+            foreach ($lancamentos as $l) {
+                fputcsv($out, [
+                    $l->vencimento->format('d/m/Y'),
+                    $l->cliente?->nome ?? '',
+                    $l->descricao,
+                    ucfirst($l->tipo),
+                    ucfirst($l->status),
+                    number_format($l->valor, 2, ',', '.'),
+                    $l->valor_pago ? number_format($l->valor_pago, 2, ',', '.') : '',
+                    $l->data_pagamento?->format('d/m/Y') ?? '',
+                    $l->forma_pagamento ?? '',
+                    $l->contrato?->descricao ?? '',
+                ], ';');
+            }
+            fclose($out);
+        }, $nome, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function cancelar(int $id): void
     {
         DB::table('financeiro_lancamentos')->where('id', $id)
             ->update(['status' => 'cancelado', 'updated_at' => now()]);
         $this->dispatch('toast', message: 'Lançamento cancelado.', type: 'success');
+    }
+
+    public function excluir(int $id): void
+    {
+        DB::table('financeiro_lancamentos')->where('id', $id)->delete();
+        $this->dispatch('toast', message: 'Lançamento excluído.', type: 'success');
     }
 
     // ── Modal: registrar recebimento ──────────────────────────
@@ -211,8 +283,6 @@ class FinanceiroCentral extends Component
     // ── Render ────────────────────────────────────────────────
     public function render(): \Illuminate\View\View
     {
-        FinanceiroLancamento::atualizarAtrasados();
-
         $lancamentos = FinanceiroLancamento::with(['cliente', 'contrato', 'processo'])
             ->when($this->busca, fn($q) => $q->where(fn($s) => $s
                 ->where('descricao', 'ilike', "%{$this->busca}%")
@@ -221,14 +291,23 @@ class FinanceiroCentral extends Component
             ->when($this->filtroStatus,  fn($q) => $q->where('status', $this->filtroStatus))
             ->when($this->filtroTipo,    fn($q) => $q->where('tipo', $this->filtroTipo))
             ->when($this->filtroCliente, fn($q) => $q->where('cliente_id', $this->filtroCliente))
-            ->when($this->filtroMes,     fn($q) => $q->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$this->filtroMes]))
-            ->orderBy('vencimento')
+            ->when($this->filtroMes,      fn($q) => $q->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$this->filtroMes]))
+            ->when($this->ordenarPor === 'cliente',
+                fn($q) => $q->leftJoin('pessoas', 'pessoas.id', '=', 'financeiro_lancamentos.cliente_id')
+                             ->orderBy('pessoas.nome', $this->ordenarDir)
+                             ->select('financeiro_lancamentos.*'),
+                fn($q) => $q->orderBy($this->ordenarPor, $this->ordenarDir)
+            )
             ->paginate(20);
 
-        // KPIs do mês filtrado
-        $base = FinanceiroLancamento::when($this->filtroMes, fn($q) =>
-            $q->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$this->filtroMes])
-        );
+        // KPIs respeitando todos os filtros ativos
+        $base = FinanceiroLancamento::query()
+            ->when($this->filtroMes,     fn($q) => $q->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$this->filtroMes]))
+            ->when($this->filtroCliente, fn($q) => $q->where('cliente_id', $this->filtroCliente))
+            ->when($this->busca,         fn($q) => $q->where(fn($s) => $s
+                ->where('descricao', 'ilike', "%{$this->busca}%")
+                ->orWhereHas('cliente', fn($c) => $c->where('nome', 'ilike', "%{$this->busca}%"))
+            ));
 
         $totalPrevisto  = (clone $base)->where('tipo', 'receita')->whereIn('status', ['previsto','atrasado'])->sum('valor');
         $totalRecebido  = (clone $base)->where('tipo', 'receita')->where('status', 'recebido')->sum('valor_pago');
@@ -238,9 +317,12 @@ class FinanceiroCentral extends Component
 
         $clientes     = $this->clientes;
         $fornecedores = $this->fornecedores;
+        $ordenarPor   = $this->ordenarPor;
+        $ordenarDir   = $this->ordenarDir;
 
         return view('livewire.financeiro-central', compact(
-            'lancamentos', 'totalPrevisto', 'totalRecebido', 'totalAtrasado', 'totalDespesa', 'totalRepasse', 'clientes', 'fornecedores'
+            'lancamentos', 'totalPrevisto', 'totalRecebido', 'totalAtrasado', 'totalDespesa', 'totalRepasse',
+            'clientes', 'fornecedores', 'ordenarPor', 'ordenarDir'
         ));
     }
 }

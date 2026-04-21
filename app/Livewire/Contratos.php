@@ -55,6 +55,8 @@ class Contratos extends Component
     public string $servicoPercentual = '';
     public int    $servicoProcessoId = 0;
     public string $servicoObs        = '';
+    public string $servicoVencimento  = '';
+    public int    $servicoParcelas    = 1;
 
     // ── Modal detalhe (visualizar contrato) ───────────────────
     public bool   $modalDetalhe    = false;
@@ -478,6 +480,8 @@ class Contratos extends Component
             $this->servicoPercentual = $s->percentual ? number_format($s->percentual, 2, ',', '.') : '';
             $this->servicoProcessoId = $s->processo_id ?? 0;
             $this->servicoObs        = $s->observacoes ?? '';
+            $this->servicoVencimento = $s->vencimento?->format('Y-m-d') ?? '';
+            $this->servicoParcelas   = $s->numero_parcelas ?? 1;
         } else {
             $contrato = Contrato::find($contratoId);
             $this->servicoTipo       = $contrato ? $this->tipoServicoPadraoParaContrato($contrato) : 'honorario';
@@ -486,6 +490,8 @@ class Contratos extends Component
             $this->servicoPercentual = '';
             $this->servicoProcessoId = (int) ($contrato->processo_id ?? 0);
             $this->servicoObs        = '';
+            $this->servicoVencimento = now()->format('Y-m-d');
+            $this->servicoParcelas   = 1;
         }
 
         $this->modalDetalhe = false;
@@ -501,15 +507,19 @@ class Contratos extends Component
 
     public function salvarServico(): void
     {
+        $semValor = in_array($this->servicoTipo, ['exito', 'repasse']);
         $this->validate([
             'servicoDescricao'  => 'required|string|max:300',
             'servicoTipo'       => 'required|string',
-            'servicoValor'      => $this->servicoTipo === 'exito' ? 'nullable' : 'required',
+            'servicoValor'      => $semValor ? 'nullable' : 'required',
             'servicoPercentual' => $this->servicoTipo === 'exito' ? 'required' : 'nullable',
+            'servicoVencimento' => $semValor ? 'nullable|date' : 'required|date',
+            'servicoParcelas'   => 'integer|min:1|max:120',
         ], [
-            'servicoDescricao.required' => 'A descrição é obrigatória.',
-            'servicoValor.required'     => 'Informe o valor.',
+            'servicoDescricao.required'  => 'A descrição é obrigatória.',
+            'servicoValor.required'      => 'Informe o valor.',
             'servicoPercentual.required' => 'Informe o percentual de êxito.',
+            'servicoVencimento.required' => 'Informe a data do primeiro vencimento.',
         ]);
 
         $valor = $this->servicoValor !== ''
@@ -518,24 +528,69 @@ class Contratos extends Component
         $perc  = $this->servicoPercentual ? (float) str_replace(',', '.', $this->servicoPercentual) : null;
 
         $dados = [
-            'contrato_id'  => $this->contratoIdServico,
-            'processo_id'  => $this->servicoProcessoId ?: null,
-            'descricao'    => $this->servicoDescricao,
-            'tipo'         => $this->servicoTipo,
-            'valor'        => $valor,
-            'percentual'   => $perc,
-            'observacoes'  => $this->servicoObs ?: null,
-            'status'       => 'ativo',
+            'contrato_id'     => $this->contratoIdServico,
+            'processo_id'     => $this->servicoProcessoId ?: null,
+            'descricao'       => $this->servicoDescricao,
+            'tipo'            => $this->servicoTipo,
+            'valor'           => $valor,
+            'percentual'      => $perc,
+            'vencimento'      => $this->servicoVencimento ?: null,
+            'numero_parcelas' => $this->servicoParcelas,
+            'observacoes'     => $this->servicoObs ?: null,
+            'status'          => 'ativo',
         ];
 
         if ($this->servicoId) {
-            DB::table('contrato_servicos')->where('id', $this->servicoId)->update(array_merge($dados, ['updated_at' => now()]));
+            DB::table('contrato_servicos')->where('id', $this->servicoId)
+                ->update(array_merge($dados, ['updated_at' => now()]));
         } else {
-            DB::table('contrato_servicos')->insert(array_merge($dados, ['created_at' => now(), 'updated_at' => now()]));
+            DB::table('contrato_servicos')
+                ->insert(array_merge($dados, ['created_at' => now(), 'updated_at' => now()]));
+
+            if (!$semValor && $this->servicoVencimento && $valor > 0) {
+                $this->gerarLancamentosServico($dados);
+            }
         }
 
         $this->fecharServico();
-        $this->dispatch('toast', message: 'Serviço salvo!', type: 'success');
+        $msg = $this->servicoId ? 'Serviço atualizado!' : 'Serviço salvo e lançamentos gerados!';
+        $this->dispatch('toast', message: $msg, type: 'success');
+    }
+
+    private function gerarLancamentosServico(array $servico): void
+    {
+        $contrato  = Contrato::findOrFail($servico['contrato_id']);
+        $tenantId  = Auth::guard('usuarios')->user()?->tenant_id;
+        $parcelas  = max(1, (int) $servico['numero_parcelas']);
+        $valorParc = round($servico['valor'] / $parcelas, 2);
+        $vencimento = \Carbon\Carbon::parse($servico['vencimento']);
+
+        $tipoLanc = $servico['tipo'] === 'consultoria' ? 'receita' : 'receita';
+
+        for ($i = 1; $i <= $parcelas; $i++) {
+            $venc = $parcelas === 1
+                ? $vencimento
+                : $vencimento->copy()->addMonths($i - 1);
+
+            DB::table('financeiro_lancamentos')->insert([
+                'tenant_id'       => $tenantId,
+                'cliente_id'      => $contrato->cliente_id,
+                'contrato_id'     => $contrato->id,
+                'processo_id'     => $servico['processo_id'] ?? null,
+                'tipo'            => $tipoLanc,
+                'descricao'       => $parcelas > 1
+                    ? $servico['descricao'] . " ({$i}/{$parcelas})"
+                    : $servico['descricao'],
+                'valor'           => $valorParc,
+                'vencimento'      => $venc->format('Y-m-d'),
+                'status'          => 'previsto',
+                'numero_parcela'  => $parcelas > 1 ? $i : null,
+                'total_parcelas'  => $parcelas > 1 ? $parcelas : null,
+                'observacoes'     => $servico['observacoes'] ?? null,
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]);
+        }
     }
 
     public function excluirServico(int $id): void

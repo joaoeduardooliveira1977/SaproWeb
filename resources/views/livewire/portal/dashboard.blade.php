@@ -23,6 +23,7 @@
         'processos'  => 'Processos',
         'documentos' => 'Documentos',
         'honorarios' => 'Honorários',
+        'financeiro' => 'Financeiro',
         'mensagens'  => 'Mensagens',
     ] as $key => $label)
     <button wire:click="trocarAba('{{ $key }}')"
@@ -405,11 +406,67 @@
 
     <div style="background:#fff;border:1px solid #dbeafe;border-left:4px solid #2563a8;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;">
         <div style="min-width:260px;flex:1;">
-            <div style="font-size:16px;font-weight:800;color:#1a3a5c;margin-bottom:4px;">Documentos liberados</div>
-            <div style="font-size:13px;color:#475569;line-height:1.5;">Aqui ficam os arquivos que o escritório disponibilizou para você consultar ou baixar.</div>
+            <div style="font-size:16px;font-weight:800;color:#1a3a5c;margin-bottom:4px;">Documentos</div>
+            <div style="font-size:13px;color:#475569;line-height:1.5;">Arquivos do escritório e documentos enviados por você.</div>
         </div>
-        <span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;">{{ $documentos->count() }} documento(s)</span>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;">{{ $documentos->count() }} documento(s)</span>
+            <button wire:click="abrirUpload"
+                style="display:inline-flex;align-items:center;gap:6px;background:#1a3a5c;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;">
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Enviar documento
+            </button>
+        </div>
     </div>
+
+    {{-- Modal upload --}}
+    @if($modalUpload)
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;">
+        <div style="background:#fff;border-radius:12px;width:100%;max-width:460px;box-shadow:0 20px 50px rgba(0,0,0,.2);overflow:hidden;">
+            <div style="background:#1a3a5c;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;">
+                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Enviar documento
+                </span>
+                <button wire:click="fecharUpload" style="background:none;border:none;color:#fff;cursor:pointer;line-height:1;opacity:.8;">
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div style="padding:22px 24px;">
+                <div style="margin-bottom:14px;">
+                    <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;">Título <span style="color:#dc2626;">*</span></label>
+                    <input wire:model="uploadTitulo" type="text" placeholder="Ex: RG, Comprovante de residência…"
+                        style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:14px;">
+                    @error('uploadTitulo') <span style="color:#dc2626;font-size:12px;">{{ $message }}</span> @enderror
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;">Observação (opcional)</label>
+                    <textarea wire:model="uploadDescricao" rows="2" placeholder="Informações adicionais sobre o arquivo…"
+                        style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:14px;resize:vertical;"></textarea>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;">Arquivo <span style="color:#dc2626;">*</span></label>
+                    <input wire:model="uploadArquivo" type="file"
+                        style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;background:#f8fafc;">
+                    <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Máximo 20 MB. PDF, imagens, Word, Excel aceitos.</div>
+                    @error('uploadArquivo') <span style="color:#dc2626;font-size:12px;">{{ $message }}</span> @enderror
+                    <div wire:loading wire:target="uploadArquivo" style="font-size:12px;color:#2563a8;margin-top:4px;">Carregando arquivo…</div>
+                </div>
+                <div style="display:flex;gap:10px;">
+                    <button wire:click="fecharUpload"
+                        style="flex:1;padding:10px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;font-size:14px;font-weight:600;color:#64748b;cursor:pointer;">
+                        Cancelar
+                    </button>
+                    <button wire:click="enviarDocumento" wire:loading.attr="disabled"
+                        style="flex:2;padding:10px;background:#1a3a5c;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+                        <span wire:loading.remove wire:target="enviarDocumento">Enviar documento</span>
+                        <span wire:loading wire:target="enviarDocumento">Enviando…</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     @if($documentos->isEmpty())
         <div class="card">
@@ -445,11 +502,15 @@
             <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">{!! $icone_svg !!}</span>
             <div style="flex:1;min-width:0;">
                 <div style="font-size:14px;font-weight:600;color:var(--primary);">{{ $doc->titulo }}</div>
-                <div style="font-size:12px;color:#64748b;margin-top:2px;">
-                    {{ ucfirst(str_replace('_',' ',$doc->tipo)) }}
-                    @if($doc->processo_numero) · Proc. {{ $doc->processo_numero }} @endif
-                    @if($doc->data_documento) · {{ \Carbon\Carbon::parse($doc->data_documento)->format('d/m/Y') }} @endif
-                    @if($tamanhoFmt) · {{ $tamanhoFmt }} @endif
+                <div style="font-size:12px;color:#64748b;margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    @if($doc->uploaded_by === 'cliente')
+                        <span style="background:#dcfce7;color:#16a34a;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;">Enviado por você</span>
+                    @else
+                        <span>{{ ucfirst(str_replace('_',' ',$doc->tipo)) }}</span>
+                    @endif
+                    @if($doc->processo_numero) <span>· Proc. {{ $doc->processo_numero }}</span> @endif
+                    @if($doc->data_documento) <span>· {{ \Carbon\Carbon::parse($doc->data_documento)->format('d/m/Y') }}</span> @endif
+                    @if($tamanhoFmt) <span>· {{ $tamanhoFmt }}</span> @endif
                 </div>
                 @if($doc->descricao)
                     <div style="font-size:12px;color:#94a3b8;margin-top:2px;">{{ $doc->descricao }}</div>
@@ -587,6 +648,91 @@
         </div>
     </div>
     @endif
+
+@endif
+
+{{-- ══════════════════════════════════════════════════════════ --}}
+{{-- ABA: FINANCEIRO                                           --}}
+{{-- ══════════════════════════════════════════════════════════ --}}
+@if($aba === 'financeiro')
+
+<div style="max-width:900px;margin:0 auto;">
+
+    {{-- KPIs --}}
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+        <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563a8;border-radius:10px;padding:14px 18px;">
+            <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">A Receber</div>
+            <div style="font-size:20px;font-weight:800;color:#2563a8;margin-top:4px;">R$ {{ number_format($resumoFinanceiro['a_receber'],2,',','.') }}</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #16a34a;border-radius:10px;padding:14px 18px;">
+            <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">Recebido</div>
+            <div style="font-size:20px;font-weight:800;color:#16a34a;margin-top:4px;">R$ {{ number_format($resumoFinanceiro['recebido'],2,',','.') }}</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #dc2626;border-radius:10px;padding:14px 18px;">
+            <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">Em Atraso</div>
+            <div style="font-size:20px;font-weight:800;color:#dc2626;margin-top:4px;">R$ {{ number_format($resumoFinanceiro['atrasado'],2,',','.') }}</div>
+        </div>
+    </div>
+
+    @if($lancamentosFinanceiro->isEmpty())
+    <div style="text-align:center;padding:48px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;">
+        <div style="font-size:14px;font-weight:600;color:#334155;">Nenhum lançamento financeiro</div>
+        <div style="font-size:12px;color:#64748b;margin-top:6px;">Os lançamentos do seu contrato aparecerão aqui.</div>
+    </div>
+    @else
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+                <tr style="background:#f8fafc;border-bottom:1.5px solid #e2e8f0;">
+                    <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;">Vencimento</th>
+                    <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;">Descrição</th>
+                    <th style="padding:10px 14px;text-align:right;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;">Valor</th>
+                    <th style="padding:10px 14px;text-align:center;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach($lancamentosFinanceiro as $lanc)
+            @php
+                $stBg  = match($lanc->status) { 'recebido'=>'#dcfce7', 'atrasado'=>'#fef2f2', default=>'#eff6ff' };
+                $stCor = match($lanc->status) { 'recebido'=>'#16a34a', 'atrasado'=>'#dc2626', default=>'#2563a8' };
+                $stLabel = match($lanc->status) { 'recebido'=>'Pago', 'atrasado'=>'Em atraso', 'previsto'=>'Em aberto', default=>ucfirst($lanc->status) };
+            @endphp
+            <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:11px 14px;white-space:nowrap;color:{{ $lanc->status==='atrasado' ? '#dc2626' : '#334155' }};font-weight:600;">
+                    {{ $lanc->vencimento->format('d/m/Y') }}
+                    @if($lanc->numero_parcela)
+                    <div style="font-size:10px;color:#94a3b8;font-weight:400;">Parcela {{ $lanc->numero_parcela }}{{ $lanc->total_parcelas ? '/'.$lanc->total_parcelas : '' }}</div>
+                    @endif
+                </td>
+                <td style="padding:11px 14px;color:#334155;">
+                    {{ $lanc->descricao }}
+                    @if($lanc->contrato)
+                    <div style="font-size:11px;color:#94a3b8;">{{ $lanc->contrato->descricao }}</div>
+                    @endif
+                </td>
+                <td style="padding:11px 14px;text-align:right;font-weight:700;color:#334155;">
+                    R$ {{ number_format($lanc->valor,2,',','.') }}
+                    @if($lanc->status==='recebido' && $lanc->valor_pago)
+                    <div style="font-size:10px;color:#94a3b8;font-weight:400;">Pago: R$ {{ number_format($lanc->valor_pago,2,',','.') }}</div>
+                    @endif
+                </td>
+                <td style="padding:11px 14px;text-align:center;">
+                    <span style="background:{{ $stBg }};color:{{ $stCor }};font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;">{{ $stLabel }}</span>
+                    @if($lanc->status==='atrasado')
+                    <button wire:click="trocarAba('mensagens')"
+                        style="display:block;margin:6px auto 0;font-size:10px;background:none;border:1px solid #e2e8f0;border-radius:6px;padding:3px 8px;color:#64748b;cursor:pointer;">
+                        Falar sobre
+                    </button>
+                    @endif
+                </td>
+            </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+</div>
 
 @endif
 

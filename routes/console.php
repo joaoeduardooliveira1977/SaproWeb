@@ -16,6 +16,9 @@ Schedule::command('notificacoes:whatsapp --tipo=prazo')->dailyAt('07:15');
 Schedule::command('notificacoes:whatsapp --tipo=audiencia')->dailyAt('07:15');
 Schedule::command('notificacoes:whatsapp --tipo=cobranca')->dailyAt('08:00');
 
+// Marca lançamentos financeiros vencidos como atrasados todo dia às 6h
+Schedule::command('financeiro:atualizar-atrasados')->dailyAt('06:00');
+
 // Atualiza índices monetários (IPCA, IGPM, SELIC, TR) todo dia 15 às 6h
 Schedule::command('indices:atualizar')->monthlyOn(15, '06:00');
 

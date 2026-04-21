@@ -66,10 +66,12 @@ class Notificacao extends Model
     public function cor(): string
     {
         return match($this->tipo) {
-            'prazo_fatal'             => '#fff1f2',
+            'prazo_fatal'            => '#fff1f2',
+            'prazo_hoje'             => '#fff7ed',
             'prazo_vencendo'         => '#fefce8',
             'prazo_vencido'          => '#fef2f2',
             'honorario_atrasado'     => '#f5f3ff',
+            'lancamento_atrasado'    => '#f0fdf4',
             'processo_sem_andamento' => '#f0fdf4',
             default                  => '#eff6ff',
         };

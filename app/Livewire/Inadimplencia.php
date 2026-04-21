@@ -15,11 +15,13 @@ class Inadimplencia extends Component
     public string $filtroCliente  = '';
     public string $filtroStatus   = '';  // atrasado | em_cobranca | inadimplente
     public string $filtroOrdem    = 'dias_desc';
+    public string $filtroFonte    = 'todos'; // todos | honorarios | lancamentos
 
     protected $queryString = [
         'filtroCliente' => ['except' => ''],
         'filtroStatus'  => ['except' => ''],
         'filtroOrdem'   => ['except' => 'dias_desc'],
+        'filtroFonte'   => ['except' => 'todos'],
     ];
 
     // ── Modal registrar contato ───────────────────────────────
@@ -42,6 +44,7 @@ class Inadimplencia extends Component
     // ── Modal pagamento rápido ────────────────────────────────
     public bool   $modalPagamento  = false;
     public ?int   $parcelaIdPag    = null;
+    public string $parcelaFonte    = 'honorario'; // honorario | lancamento
     public string $dataPagamento   = '';
     public string $valorPago       = '';
     public string $formaPagamento  = 'pix';
@@ -178,12 +181,17 @@ class Inadimplencia extends Component
 
     // ── Pagamento rápido ──────────────────────────────────────
 
-    public function abrirPagamento(int $parcelaId): void
+    public function abrirPagamento(int $id, string $fonte = 'honorario'): void
     {
-        $p = DB::selectOne("SELECT * FROM honorario_parcelas WHERE id = ?", [$parcelaId]);
+        if ($fonte === 'lancamento') {
+            $p = DB::selectOne("SELECT * FROM financeiro_lancamentos WHERE id = ?", [$id]);
+        } else {
+            $p = DB::selectOne("SELECT * FROM honorario_parcelas WHERE id = ?", [$id]);
+        }
         if (!$p) return;
 
-        $this->parcelaIdPag   = $parcelaId;
+        $this->parcelaIdPag   = $id;
+        $this->parcelaFonte   = $fonte;
         $this->valorPago      = number_format($p->valor, 2, '.', '');
         $this->dataPagamento  = now()->format('Y-m-d');
         $this->formaPagamento = 'pix';
@@ -198,17 +206,27 @@ class Inadimplencia extends Component
             'formaPagamento' => 'required|string',
         ]);
 
-        DB::update("
-            UPDATE honorario_parcelas SET
-                status = 'pago', data_pagamento = ?, valor_pago = ?,
-                forma_pagamento = ?, updated_at = NOW()
-            WHERE id = ?
-        ", [
-            $this->dataPagamento,
-            (float) $this->valorPago,
-            $this->formaPagamento,
-            $this->parcelaIdPag,
-        ]);
+        if ($this->parcelaFonte === 'lancamento') {
+            DB::table('financeiro_lancamentos')->where('id', $this->parcelaIdPag)->update([
+                'status'         => 'recebido',
+                'data_pagamento' => $this->dataPagamento,
+                'valor_pago'     => (float) $this->valorPago,
+                'forma_pagamento'=> $this->formaPagamento,
+                'updated_at'     => now(),
+            ]);
+        } else {
+            DB::update("
+                UPDATE honorario_parcelas SET
+                    status = 'pago', data_pagamento = ?, valor_pago = ?,
+                    forma_pagamento = ?, updated_at = NOW()
+                WHERE id = ?
+            ", [
+                $this->dataPagamento,
+                (float) $this->valorPago,
+                $this->formaPagamento,
+                $this->parcelaIdPag,
+            ]);
+        }
 
         $this->modalPagamento = false;
         $this->dispatch('toast', message: 'Pagamento registrado com sucesso.', type: 'success');
@@ -216,49 +234,68 @@ class Inadimplencia extends Component
 
     public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $where = "WHERE hp.status = 'atrasado'";
-        $params = [];
+        $diasWhere = match($this->filtroStatus) {
+            'atrasado'    => "AND dias_atraso BETWEEN 1 AND 15",
+            'em_cobranca' => "AND dias_atraso BETWEEN 16 AND 30",
+            'inadimplente'=> "AND dias_atraso > 30",
+            default       => '',
+        };
+        $clienteWhere = $this->filtroCliente
+            ? "AND p.nome ILIKE " . DB::connection()->getPdo()->quote('%' . $this->filtroCliente . '%')
+            : '';
 
-        if ($this->filtroCliente) {
-            $where .= " AND p.nome ILIKE ?";
-            $params[] = "%{$this->filtroCliente}%";
+        $unionParts = [];
+        if (in_array($this->filtroFonte, ['todos', 'honorarios'])) {
+            $unionParts[] = "
+                SELECT p.id AS cliente_id, p.nome, p.email, p.celular,
+                       'Honorários' AS fonte, hp.valor,
+                       (CURRENT_DATE - hp.vencimento)::int AS dias_atraso,
+                       hp.vencimento
+                FROM honorario_parcelas hp
+                JOIN honorarios h ON h.id = hp.honorario_id
+                JOIN pessoas p ON p.id = h.cliente_id
+                WHERE hp.status = 'atrasado' {$clienteWhere}
+            ";
         }
-        if ($this->filtroStatus === 'atrasado') {
-            $where .= " AND (CURRENT_DATE - hp.vencimento) BETWEEN 1 AND 15";
-        } elseif ($this->filtroStatus === 'em_cobranca') {
-            $where .= " AND (CURRENT_DATE - hp.vencimento) BETWEEN 16 AND 30";
-        } elseif ($this->filtroStatus === 'inadimplente') {
-            $where .= " AND (CURRENT_DATE - hp.vencimento) > 30";
+        if (in_array($this->filtroFonte, ['todos', 'lancamentos'])) {
+            $unionParts[] = "
+                SELECT p.id AS cliente_id, p.nome, p.email, p.celular,
+                       'Financeiro' AS fonte, fl.valor,
+                       (CURRENT_DATE - fl.vencimento)::int AS dias_atraso,
+                       fl.vencimento
+                FROM financeiro_lancamentos fl
+                JOIN pessoas p ON p.id = fl.cliente_id
+                WHERE fl.status = 'atrasado' AND fl.tipo = 'receita' {$clienteWhere}
+            ";
         }
 
-        $rows = \Illuminate\Support\Facades\DB::select("
-            SELECT
-                p.nome AS cliente_nome, p.email AS cliente_email, p.celular AS cliente_celular,
-                COUNT(hp.id) AS qtd_parcelas,
-                COALESCE(SUM(hp.valor), 0) AS total_devido,
-                MAX(CURRENT_DATE - hp.vencimento) AS max_dias,
-                MIN(hp.vencimento) AS primeira_vencimento
-            FROM honorario_parcelas hp
-            JOIN honorarios h ON h.id = hp.honorario_id
-            JOIN pessoas p ON p.id = h.cliente_id
-            {$where}
-            GROUP BY p.id, p.nome, p.email, p.celular
+        $union = implode(' UNION ALL ', $unionParts ?: ["SELECT NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL WHERE false"]);
+
+        $rows = DB::select("
+            SELECT nome AS cliente_nome, email AS cliente_email, celular AS cliente_celular,
+                   COUNT(*) AS qtd, COALESCE(SUM(valor),0) AS total_devido,
+                   MAX(dias_atraso) AS max_dias, MIN(vencimento) AS primeira_vencimento,
+                   string_agg(DISTINCT fonte, ', ') AS fontes
+            FROM ({$union}) u
+            WHERE 1=1 {$diasWhere}
+            GROUP BY cliente_id, nome, email, celular
             ORDER BY max_dias DESC
-        ", $params);
+        ");
 
         return response()->streamDownload(function () use ($rows) {
             $out = fopen('php://output', 'w');
             fputs($out, "\xEF\xBB\xBF");
-            fputcsv($out, ['Cliente','E-mail','Celular','Parcelas em Atraso','Total Devido','Maior Atraso (dias)','Primeira Vencimento'], ';');
+            fputcsv($out, ['Cliente','E-mail','Celular','Itens em Atraso','Total Devido','Maior Atraso (dias)','Primeira Vencimento','Origem'], ';');
             foreach ($rows as $r) {
                 fputcsv($out, [
                     $r->cliente_nome,
                     $r->cliente_email ?? '',
                     $r->cliente_celular ?? '',
-                    $r->qtd_parcelas,
+                    $r->qtd,
                     number_format($r->total_devido, 2, ',', '.'),
                     $r->max_dias,
                     $r->primeira_vencimento ? \Carbon\Carbon::parse($r->primeira_vencimento)->format('d/m/Y') : '',
+                    $r->fontes,
                 ], ';');
             }
             fclose($out);
@@ -269,94 +306,124 @@ class Inadimplencia extends Component
 
     public function render()
     {
-        // Atualiza status das parcelas vencidas
-        DB::update("
-            UPDATE honorario_parcelas SET status = 'atrasado'
-            WHERE status = 'pendente' AND vencimento < CURRENT_DATE
-        ");
+        // ── Filtro por faixa de dias ──────────────────────────
+        $diasWhere = match($this->filtroStatus) {
+            'atrasado'    => "AND dias_atraso BETWEEN 1 AND 15",
+            'em_cobranca' => "AND dias_atraso BETWEEN 16 AND 30",
+            'inadimplente'=> "AND dias_atraso > 30",
+            default       => '',
+        };
 
-        // KPIs
+        $clienteWhere = $this->filtroCliente
+            ? "AND p.nome ILIKE " . DB::connection()->getPdo()->quote('%' . $this->filtroCliente . '%')
+            : '';
+
+        // ── UNION: honorarios + lancamentos ──────────────────
+        $fonteHon = in_array($this->filtroFonte, ['todos', 'honorarios']);
+        $fonteLan = in_array($this->filtroFonte, ['todos', 'lancamentos']);
+
+        $unionParts = [];
+        if ($fonteHon) {
+            $unionParts[] = "
+                SELECT p.id AS cliente_id, p.nome, p.email, p.celular,
+                       'honorario' AS fonte,
+                       hp.id AS item_id, hp.valor, hp.vencimento,
+                       (CURRENT_DATE - hp.vencimento)::int AS dias_atraso,
+                       h.descricao AS item_desc,
+                       hp.numero_parcela AS numero
+                FROM honorario_parcelas hp
+                JOIN honorarios h ON h.id = hp.honorario_id
+                JOIN pessoas p ON p.id = h.cliente_id
+                WHERE hp.status = 'atrasado' {$clienteWhere}
+            ";
+        }
+        if ($fonteLan) {
+            $unionParts[] = "
+                SELECT p.id AS cliente_id, p.nome, p.email, p.celular,
+                       'lancamento' AS fonte,
+                       fl.id AS item_id, fl.valor, fl.vencimento,
+                       (CURRENT_DATE - fl.vencimento)::int AS dias_atraso,
+                       fl.descricao AS item_desc,
+                       NULL AS numero
+                FROM financeiro_lancamentos fl
+                JOIN pessoas p ON p.id = fl.cliente_id
+                WHERE fl.status = 'atrasado' AND fl.tipo = 'receita' {$clienteWhere}
+            ";
+        }
+
+        if (empty($unionParts)) {
+            return view('livewire.inadimplencia', [
+                'kpis' => (object)['clientes_inadimplentes'=>0,'total_parcelas'=>0,'total_valor'=>0,'media_dias'=>0,'valor_critico'=>0,'total_honorarios'=>0,'total_lancamentos'=>0],
+                'clientes' => [],
+                'parcelasPorCliente' => [],
+            ]);
+        }
+
+        $union = implode(' UNION ALL ', $unionParts);
+
+        // ── KPIs ─────────────────────────────────────────────
         $kpis = DB::selectOne("
             SELECT
-                COUNT(DISTINCT h.cliente_id)                                  AS clientes_inadimplentes,
-                COUNT(hp.id)                                                   AS total_parcelas,
-                COALESCE(SUM(hp.valor), 0)                                    AS total_valor,
-                COALESCE(AVG(CURRENT_DATE - hp.vencimento), 0)::int           AS media_dias,
-                COALESCE(SUM(CASE WHEN (CURRENT_DATE - hp.vencimento) > 30
-                    THEN hp.valor ELSE 0 END), 0)                             AS valor_critico
-            FROM honorario_parcelas hp
-            JOIN honorarios h ON h.id = hp.honorario_id
-            WHERE hp.status = 'atrasado'
+                COUNT(DISTINCT cliente_id)                                      AS clientes_inadimplentes,
+                COUNT(*)                                                         AS total_parcelas,
+                COALESCE(SUM(valor), 0)                                          AS total_valor,
+                COALESCE(AVG(dias_atraso), 0)::int                               AS media_dias,
+                COALESCE(SUM(CASE WHEN dias_atraso > 30 THEN valor ELSE 0 END),0) AS valor_critico,
+                COALESCE(SUM(CASE WHEN fonte='honorario'  THEN valor ELSE 0 END),0) AS total_honorarios,
+                COALESCE(SUM(CASE WHEN fonte='lancamento' THEN valor ELSE 0 END),0) AS total_lancamentos
+            FROM ({$union}) u
+            WHERE 1=1 {$diasWhere}
         ");
 
-        // Lista de clientes inadimplentes com suas parcelas
-        $where = "WHERE hp.status = 'atrasado'";
-        $params = [];
-
-        if ($this->filtroCliente) {
-            $where .= " AND p.nome ILIKE ?";
-            $params[] = "%{$this->filtroCliente}%";
-        }
-
-        if ($this->filtroStatus === 'atrasado') {
-            $where .= " AND (CURRENT_DATE - hp.vencimento) BETWEEN 1 AND 15";
-        } elseif ($this->filtroStatus === 'em_cobranca') {
-            $where .= " AND (CURRENT_DATE - hp.vencimento) BETWEEN 16 AND 30";
-        } elseif ($this->filtroStatus === 'inadimplente') {
-            $where .= " AND (CURRENT_DATE - hp.vencimento) > 30";
-        }
-
+        // ── Clientes agrupados ────────────────────────────────
         $order = match($this->filtroOrdem) {
             'valor_desc' => 'total_devido DESC',
             'valor_asc'  => 'total_devido ASC',
-            'nome_asc'   => 'p.nome ASC',
+            'nome_asc'   => 'nome ASC',
             default      => 'max_dias DESC',
         };
 
         $clientes = DB::select("
             SELECT
-                p.id                                    AS cliente_id,
-                p.nome                                  AS cliente_nome,
-                p.email                                 AS cliente_email,
-                p.celular                               AS cliente_celular,
-                COUNT(hp.id)                            AS qtd_parcelas,
-                COALESCE(SUM(hp.valor), 0)              AS total_devido,
-                MAX(CURRENT_DATE - hp.vencimento)       AS max_dias,
-                MIN(hp.vencimento)                      AS primeira_vencimento,
-                (SELECT COUNT(*) FROM cobrancas c WHERE c.cliente_id = p.id
+                cliente_id, nome AS cliente_nome, email AS cliente_email, celular AS cliente_celular,
+                COUNT(*)                    AS qtd_parcelas,
+                COALESCE(SUM(valor), 0)     AS total_devido,
+                MAX(dias_atraso)            AS max_dias,
+                MIN(vencimento)             AS primeira_vencimento,
+                COUNT(DISTINCT fonte)       AS qtd_fontes,
+                bool_or(fonte='honorario')  AS tem_honorario,
+                bool_or(fonte='lancamento') AS tem_lancamento,
+                (SELECT COUNT(*) FROM cobrancas c WHERE c.cliente_id = u2.cliente_id
                  AND c.created_at >= NOW() - INTERVAL '30 days') AS tentativas_recentes,
-                (SELECT c2.tipo FROM cobrancas c2 WHERE c2.cliente_id = p.id
-                 ORDER BY c2.created_at DESC LIMIT 1)   AS ultimo_contato_tipo,
-                (SELECT c2.created_at FROM cobrancas c2 WHERE c2.cliente_id = p.id
-                 ORDER BY c2.created_at DESC LIMIT 1)   AS ultimo_contato_em
-            FROM honorario_parcelas hp
-            JOIN honorarios h ON h.id = hp.honorario_id
-            JOIN pessoas p ON p.id = h.cliente_id
-            {$where}
-            GROUP BY p.id, p.nome, p.email, p.celular
+                (SELECT c2.tipo FROM cobrancas c2 WHERE c2.cliente_id = u2.cliente_id
+                 ORDER BY c2.created_at DESC LIMIT 1) AS ultimo_contato_tipo,
+                (SELECT c2.created_at FROM cobrancas c2 WHERE c2.cliente_id = u2.cliente_id
+                 ORDER BY c2.created_at DESC LIMIT 1) AS ultimo_contato_em
+            FROM ({$union}) u2
+            WHERE 1=1 {$diasWhere}
+            GROUP BY cliente_id, nome, email, celular
             ORDER BY {$order}
-        ", $params);
+        ");
 
-        // Parcelas por cliente (para detalhe)
+        // ── Itens por cliente ─────────────────────────────────
         $parcelasPorCliente = [];
         if (!empty($clientes)) {
             $ids = array_column($clientes, 'cliente_id');
-            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $inList = implode(',', array_map('intval', $ids));
 
-            $parcelas = DB::select("
-                SELECT
-                    hp.id, hp.numero_parcela, hp.valor, hp.vencimento,
-                    h.cliente_id, h.descricao as honorario_desc,
-                    (CURRENT_DATE - hp.vencimento) AS dias_atraso,
-                    (SELECT COUNT(*) FROM cobrancas c WHERE c.parcela_id = hp.id) AS tentativas
-                FROM honorario_parcelas hp
-                JOIN honorarios h ON h.id = hp.honorario_id
-                WHERE hp.status = 'atrasado' AND h.cliente_id IN ({$placeholders})
-                ORDER BY hp.vencimento ASC
-            ", $ids);
+            $itens = DB::select("
+                SELECT item_id AS id, fonte, numero AS numero_parcela, valor, vencimento,
+                       cliente_id, item_desc AS honorario_desc, dias_atraso,
+                       CASE WHEN fonte='honorario'
+                           THEN (SELECT COUNT(*) FROM cobrancas c WHERE c.parcela_id = item_id)
+                           ELSE 0 END AS tentativas
+                FROM ({$union}) u3
+                WHERE cliente_id IN ({$inList})
+                ORDER BY vencimento ASC
+            ");
 
-            foreach ($parcelas as $parc) {
-                $parcelasPorCliente[$parc->cliente_id][] = $parc;
+            foreach ($itens as $item) {
+                $parcelasPorCliente[$item->cliente_id][] = $item;
             }
         }
 

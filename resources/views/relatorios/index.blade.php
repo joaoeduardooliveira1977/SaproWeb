@@ -595,6 +595,40 @@
       </form>
     </div>
 
+    {{-- 14. Relatório Financeiro Mensal --}}
+    <div class="card">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f0fdf4;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M6 8h4M6 11h3"/><path d="M14 8l2 2-2 2"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Financeiro Mensal</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Receitas, despesas e saldo do mês — ideal para enviar ao contador.</div>
+      <form method="GET" action="{{ route('relatorios.financeiro-mensal') }}" target="_blank">
+        <div class="form-field">
+          <label class="lbl">Mês</label>
+          <input type="month" name="mes" value="{{ now()->format('Y-m') }}" style="min-height:36px;">
+        </div>
+        <div class="form-field">
+          <label class="lbl">Cliente (opcional)</label>
+          <select name="cliente_id">
+            <option value="">Todos os Clientes</option>
+            @foreach($clientes as $c)
+              <option value="{{ $c->id }}">{{ $c->nome }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            PDF
+          </button>
+          <button type="submit" name="formato" value="csv" class="btn btn-secondary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            CSV
+          </button>
+        </div>
+      </form>
+    </div>
+
   </div>
 </div>
 @endsection

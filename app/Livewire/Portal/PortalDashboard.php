@@ -2,15 +2,16 @@
 
 namespace App\Livewire\Portal;
 
-use App\Models\{Pessoa, Processo, Andamento, Agenda};
+use App\Models\{Pessoa, Processo, Andamento, Agenda, FinanceiroLancamento};
 use App\Services\PixService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\{DB, Session, Storage};
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class PortalDashboard extends Component
 {
+    use WithFileUploads;
     public ?Pessoa $pessoa         = null;
     public string  $aba            = 'inicio';
     public ?int    $processoAberto = null;  // processo em detalhe
@@ -30,6 +31,12 @@ class PortalDashboard extends Component
     public float  $pixValor       = 0;
     public string $pixDescricao   = '';
     public bool   $pixPago        = false;
+
+    // Upload de documento pelo cliente
+    public bool   $modalUpload     = false;
+    public string $uploadTitulo    = '';
+    public string $uploadDescricao = '';
+    public        $uploadArquivo   = null;
 
     public function mount(): void
     {
@@ -155,6 +162,72 @@ class PortalDashboard extends Component
         $this->aba = 'mensagens';
     }
 
+    // ── Upload de documento ───────────────────────────────────────
+
+    public function abrirUpload(): void
+    {
+        $this->uploadTitulo    = '';
+        $this->uploadDescricao = '';
+        $this->uploadArquivo   = null;
+        $this->resetErrorBag();
+        $this->modalUpload = true;
+    }
+
+    public function fecharUpload(): void
+    {
+        $this->modalUpload   = false;
+        $this->uploadArquivo = null;
+        $this->resetErrorBag();
+    }
+
+    public function enviarDocumento(): void
+    {
+        $this->validate([
+            'uploadTitulo'  => 'required|string|max:200',
+            'uploadArquivo' => 'required|file|max:20480',
+        ], [
+            'uploadTitulo.required'  => 'Informe um título para o documento.',
+            'uploadArquivo.required' => 'Selecione um arquivo.',
+            'uploadArquivo.max'      => 'O arquivo não pode passar de 20 MB.',
+        ]);
+
+        $caminho = $this->uploadArquivo->store('documentos', 'public');
+
+        DB::table('documentos')->insert([
+            'cliente_id'       => $this->pessoa->id,
+            'processo_id'      => null,
+            'tipo'             => 'documento_cliente',
+            'titulo'           => $this->uploadTitulo,
+            'descricao'        => $this->uploadDescricao ?: null,
+            'arquivo'          => $caminho,
+            'arquivo_original' => $this->uploadArquivo->getClientOriginalName(),
+            'mime_type'        => $this->uploadArquivo->getMimeType(),
+            'tamanho'          => $this->uploadArquivo->getSize(),
+            'data_documento'   => now()->toDateString(),
+            'portal_visivel'   => true,
+            'uploaded_by'      => 'cliente',
+            'tenant_id'        => $this->pessoa->tenant_id ?? null,
+            'created_at'       => now(),
+            'updated_at'       => now(),
+        ]);
+
+        // Avisa o escritório via mensagem interna
+        DB::table('portal_mensagens')->insert([
+            'pessoa_id'       => $this->pessoa->id,
+            'processo_id'     => null,
+            'usuario_id'      => null,
+            'mensagem'        => '📎 Enviei um documento: "' . $this->uploadTitulo . '". Por favor, confirme o recebimento.',
+            'de'              => 'cliente',
+            'lida_escritorio' => false,
+            'lida_cliente'    => true,
+            'created_at'      => now(),
+            'updated_at'      => now(),
+        ]);
+
+        $this->fecharUpload();
+        $this->aba = 'documentos';
+    }
+
     // ── Sair ─────────────────────────────────────────────────────
 
     public function sair(): void
@@ -255,7 +328,7 @@ class PortalDashboard extends Component
                 })
                 ->select('d.id', 'd.titulo', 'd.tipo', 'd.descricao', 'd.arquivo', 'd.arquivo_original',
                          'd.mime_type', 'd.tamanho', 'd.data_documento', 'd.created_at',
-                         'pr.numero as processo_numero')
+                         'd.uploaded_by', 'pr.numero as processo_numero')
                 ->orderByDesc('d.created_at')
                 ->get();
         }
@@ -275,6 +348,22 @@ class PortalDashboard extends Component
                 )
                 ->orderByDesc('hp.vencimento')
                 ->get();
+        }
+
+        // ── Financeiro (lançamentos do novo módulo) ──
+        $lancamentosFinanceiro = collect();
+        $resumoFinanceiro      = ['a_receber' => 0, 'recebido' => 0, 'atrasado' => 0];
+        if ($this->aba === 'financeiro') {
+            $lancamentosFinanceiro = FinanceiroLancamento::with(['contrato'])
+                ->where('cliente_id', $this->pessoa->id)
+                ->whereNotIn('status', ['cancelado'])
+                ->orderBy('vencimento')
+                ->get();
+            $resumoFinanceiro = [
+                'a_receber' => $lancamentosFinanceiro->whereIn('status', ['previsto', 'atrasado'])->sum('valor'),
+                'recebido'  => $lancamentosFinanceiro->where('status', 'recebido')->sum('valor_pago'),
+                'atrasado'  => $lancamentosFinanceiro->where('status', 'atrasado')->sum('valor'),
+            ];
         }
 
         // ── Mensagens ──
@@ -303,7 +392,8 @@ class PortalDashboard extends Component
         return view('livewire.portal.dashboard', compact(
             'stats', 'proximosEventos', 'ultimosAndamentos', 'prazosProximos',
             'processos', 'processoDetalhe', 'andamentos', 'prazosProcesso', 'docsAndamentos',
-            'documentos', 'honorarios', 'mensagens', 'processosFiltro'
+            'documentos', 'honorarios', 'mensagens', 'processosFiltro',
+            'lancamentosFinanceiro', 'resumoFinanceiro'
         ))->layout('portal.layout');
     }
 }
