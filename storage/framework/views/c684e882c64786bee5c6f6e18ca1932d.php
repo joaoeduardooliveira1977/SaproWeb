@@ -296,6 +296,16 @@
                     'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
                 ],
                 [
+                    'label'    => 'Controle de Horas',
+                    'desc'     => 'Apontamentos de tempo por processo e advogado, rankings e exportação CSV.',
+                    'cor'      => '#6366f1',
+                    'bg'       => '#eef2ff',
+                    'badge'    => 'Novo',
+                    'badge_bg' => '#6366f1',
+                    'route'    => route('horas'),
+                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+                ],
+                [
                     'label'    => 'Relatórios',
                     'desc'     => 'Exportações financeiras, visão por período e relatórios executivos.',
                     'cor'      => '#0891b2',

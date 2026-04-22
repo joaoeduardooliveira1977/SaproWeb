@@ -28,6 +28,9 @@ Schedule::command('datajud:verificar')->weekdays()->dailyAt('06:00');
 // Busca publicações AASP do dia automaticamente (dias úteis, 8h30)
 Schedule::command('aasp:buscar')->weekdays()->dailyAt('08:30');
 
+// Recalcula score de risco dos processos todo dia às 6h30
+Schedule::command('processos:calcular-score')->dailyAt('06:30');
+
 // Dispara gatilhos de workflow baseados em tempo (prazos vencendo/vencidos, inatividade)
 Schedule::command('workflow:verificar-agendados')
     ->dailyAt('07:30')

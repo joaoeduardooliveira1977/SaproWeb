@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\{Processo, Fase, GrauRisco};
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\{Artisan, Auth};
 
 class Processos extends Component
 {
@@ -15,18 +15,26 @@ class Processos extends Component
     public string  $status     = '';
     public string  $fase_id    = '';
     public string  $risco_id   = '';
+    public string  $filtroScore = '';
     public bool    $confirmandoExclusao = false;
     public ?int    $processoParaExcluir = null;
 
     public string  $perguntaIA = '';
     public ?string $respostaIA = null;
 
-    protected $queryString = ['busca', 'status', 'fase_id', 'risco_id'];
+    protected $queryString = ['busca', 'status', 'fase_id', 'risco_id', 'filtroScore'];
 
-    public function updatingBusca():   void { $this->resetPage(); }
-    public function updatingStatus():  void { $this->resetPage(); }
-    public function updatingFaseId():  void { $this->resetPage(); }
-    public function updatingRiscoId(): void { $this->resetPage(); }
+    public function updatingBusca():       void { $this->resetPage(); }
+    public function updatingStatus():      void { $this->resetPage(); }
+    public function updatingFaseId():      void { $this->resetPage(); }
+    public function updatingRiscoId():     void { $this->resetPage(); }
+    public function updatingFiltroScore(): void { $this->resetPage(); }
+
+    public function recalcularScore(): void
+    {
+        Artisan::call('processos:calcular-score', ['--tenant' => tenant_id()]);
+        $this->dispatch('toast', tipo: 'success', msg: 'Score de risco recalculado com sucesso.');
+    }
 
     public function confirmarArquivar(int $id): void
     {
@@ -90,7 +98,7 @@ class Processos extends Component
             ->map(fn($a) => $a->nome . ': ' . $a->processos_como_advogado_count)
             ->join(', ');
 
-        $contexto = "Você é um analista jurídico do sistema Software Jur�dico. Responda de forma objetiva e direta em português.
+        $contexto = "Você é um analista jurídico do sistema Software Jur�dico. Responda de forma objetiva e direta em português.
 
 Dados atuais do escritório:
 - Total processos ativos: {$totalAtivos}
@@ -177,10 +185,11 @@ Responda em 1-3 frases objetivas. Se a pergunta pedir para filtrar ou mostrar al
     public function render()
     {
         $processos = Processo::with(['cliente', 'advogado', 'fase', 'risco'])
-            ->when($this->busca,    fn($q) => $q->busca($this->busca))
-            ->when($this->status,   fn($q) => $q->where('status', $this->status))
-            ->when($this->fase_id,  fn($q) => $q->where('fase_id', $this->fase_id))
-            ->when($this->risco_id, fn($q) => $q->where('risco_id', $this->risco_id))
+            ->when($this->busca,       fn($q) => $q->busca($this->busca))
+            ->when($this->status,      fn($q) => $q->where('status', $this->status))
+            ->when($this->fase_id,     fn($q) => $q->where('fase_id', $this->fase_id))
+            ->when($this->risco_id,    fn($q) => $q->where('risco_id', $this->risco_id))
+            ->when($this->filtroScore, fn($q) => $q->where('score', $this->filtroScore))
             ->orderByDesc('created_at')
             ->paginate(15);
 

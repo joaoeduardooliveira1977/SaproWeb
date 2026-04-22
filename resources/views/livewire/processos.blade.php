@@ -210,15 +210,34 @@
             </select>
         </div>
 
-        {{-- Limpar --}}
+        {{-- Score de risco --}}
+        <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Score</label>
+            <select wire:model.live="filtroScore"
+                style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;cursor:pointer;">
+                <option value="">Todos</option>
+                <option value="critico">🔴 Crítico</option>
+                <option value="atencao">🟡 Atenção</option>
+                <option value="normal">🟢 Normal</option>
+            </select>
+        </div>
+
+        {{-- Limpar / Recalcular --}}
         <div>
             <label style="font-size:11px;font-weight:700;color:transparent;display:block;margin-bottom:6px;">.</label>
-            <button wire:click="$set('busca',''); $set('status',''); $set('fase_id',''); $set('risco_id','')"
-                style="width:100%;padding:8px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;font-weight:600;white-space:nowrap;transition:all .15s;"
-                onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
-                onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-                Limpar filtros
-            </button>
+            <div style="display:flex;gap:6px;">
+                <button wire:click="$set('busca',''); $set('status',''); $set('fase_id',''); $set('risco_id',''); $set('filtroScore','')"
+                    style="flex:1;padding:8px 10px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--muted);cursor:pointer;font-weight:600;white-space:nowrap;transition:all .15s;"
+                    onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+                    Limpar
+                </button>
+                <button wire:click="recalcularScore" title="Recalcular score de risco agora"
+                    style="padding:8px 10px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;font-size:12px;color:#16a34a;cursor:pointer;font-weight:600;white-space:nowrap;"
+                    wire:loading.attr="disabled" wire:target="recalcularScore">
+                    <svg aria-hidden="true" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -302,6 +321,11 @@
                                     <span title="Modificado hoje" style="padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;background:#dbeafe;color:#1d4ed8;letter-spacing:.2px;">hoje</span>
                                     @elseif($p->updated_at?->isYesterday())
                                     <span title="Modificado ontem" style="padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;background:#f1f5f9;color:#64748b;letter-spacing:.2px;">ontem</span>
+                                    @endif
+                                    @if($p->score === 'critico')
+                                    <span title="Score crítico" style="padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;background:#fee2e2;color:#dc2626;letter-spacing:.2px;">● crítico</span>
+                                    @elseif($p->score === 'atencao')
+                                    <span title="Score atenção" style="padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;background:#fef9c3;color:#92400e;letter-spacing:.2px;">● atenção</span>
                                     @endif
                                 </div>
                                 @if($p->parte_contraria)

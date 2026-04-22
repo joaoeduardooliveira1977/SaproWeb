@@ -9,7 +9,8 @@ class Tenant extends Model
 {
     protected $fillable = [
         'nome', 'slug', 'email', 'telefone', 'cnpj', 'logo',
-        'plano', 'trial_expira_em', 'ativo',
+        'endereco', 'cidade', 'oab',
+        'plano', 'trial_expira_em', 'ativo', 'onboarding_concluido',
         'limite_processos', 'limite_usuarios',
         'ia_habilitada', 'datajud_habilitado', 'whatsapp_habilitado',
         'timezone', 'gemini_api_key', 'configuracoes',
@@ -18,6 +19,7 @@ class Tenant extends Model
     protected $casts = [
         'trial_expira_em'      => 'datetime',
         'ativo'                => 'boolean',
+        'onboarding_concluido' => 'boolean',
         'ia_habilitada'        => 'boolean',
         'datajud_habilitado'   => 'boolean',
         'whatsapp_habilitado'  => 'boolean',

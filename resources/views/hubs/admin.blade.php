@@ -32,6 +32,7 @@
 
     $atalhos = [
         'usuarios' => ['titulo' => 'Usuários', 'desc' => 'Permissões, perfis e acessos internos.', 'valor' => $totalUsuarios, 'rota' => route('usuarios'), 'cor' => '#2563a8', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>'],
+        'perfis' => ['titulo' => 'Perfis de Acesso', 'desc' => 'Configure quais módulos cada perfil pode acessar.', 'valor' => 'Novo', 'rota' => route('admin.perfis'), 'cor' => '#6366f1', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'],
         'tabelas' => ['titulo' => 'Cadastros auxiliares', 'desc' => 'Fases, riscos, tipos e listas do sistema.', 'valor' => 'Base', 'rota' => route('tabelas'), 'cor' => '#7c3aed', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>'],
         'administradoras' => ['titulo' => 'Administradoras', 'desc' => 'Cadastros usados em clientes e condomínios.', 'valor' => \App\Models\Administradora::count(), 'rota' => route('administradoras'), 'cor' => '#059669', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>'],
         'indices' => ['titulo' => 'Índices de cálculo', 'desc' => 'INPC, IPCA, SELIC e índices financeiros.', 'valor' => 'Cálculo', 'rota' => route('indices'), 'cor' => '#0891b2', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>'],
@@ -42,7 +43,7 @@
     ];
 
     $grupos = [
-        ['titulo' => 'Acessos', 'desc' => 'Quem entra no sistema e o que o cliente pode consultar.', 'itens' => ['usuarios', 'portal']],
+        ['titulo' => 'Acessos', 'desc' => 'Quem entra no sistema e o que o cliente pode consultar.', 'itens' => ['usuarios', 'perfis', 'portal']],
         ['titulo' => 'Cadastros e base', 'desc' => 'Listas estruturais usadas nas rotinas do escritório.', 'itens' => ['tabelas', 'administradoras', 'indices']],
         ['titulo' => 'Comunicação', 'desc' => 'Canais de contato e mensagens automáticas.', 'itens' => ['whatsapp', 'mensagens']],
         ['titulo' => 'Controle', 'desc' => 'Rastreabilidade das alterações feitas no sistema.', 'itens' => ['auditoria']],

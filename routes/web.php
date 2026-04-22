@@ -42,6 +42,9 @@ use App\Http\Controllers\IAController;
 // ─── Área Autenticada ──────────────────────────
 	Route::middleware('auth:usuarios')->group(function () {
 
+    // ── Onboarding ─────────────────────────────────────────────
+    Route::get('/onboarding', \App\Livewire\Onboarding::class)->name('onboarding');
+
     // ── Geral (todos os perfis autenticados) ───────────────────
     	Route::middleware('perfil:geral')->group(function () {
         Route::get('/', fn() => view('dashboard'))->name('dashboard');
@@ -126,6 +129,7 @@ use App\Http\Controllers\IAController;
     Route::middleware('perfil:relatorios')->group(function () {
         Route::get('/analytics',     fn() => view('analytics'))->name('analytics');
         Route::get('/produtividade', fn() => view('produtividade'))->name('produtividade');
+        Route::get('/horas',         fn() => view('horas'))->name('horas');
     });
 
     // ── Ferramentas ─────────────────────────────────────────────
@@ -137,6 +141,8 @@ use App\Http\Controllers\IAController;
         Route::get('/monitoramento', \App\Livewire\Processos\Monitoramento::class)->name('monitoramento');
         Route::get('/conciliacao-bancaria', fn() => view('conciliacao-bancaria'))->name('conciliacao-bancaria');
         Route::get('/crm', fn() => view('crm'))->name('crm');
+        Route::get('/orcamentos', fn() => view('orcamentos'))->name('orcamentos');
+        Route::get('/orcamentos/{id}/pdf', [\App\Http\Controllers\RelatorioController::class, 'orcamentoPdf'])->name('orcamentos.pdf');
         Route::get('/workflow-regras', \App\Livewire\WorkflowRegras::class)->name('workflow.regras');
     });
 
@@ -147,6 +153,7 @@ use App\Http\Controllers\IAController;
         Route::get('/indices',         fn() => view('indices'))->name('indices');
         Route::get('/auditoria', fn() => view('auditoria'))->name('auditoria');
         Route::get('/usuarios', fn() => view('usuarios'))->name('usuarios');
+        Route::get('/admin/perfis', fn() => view('perfil-permissoes'))->name('admin.perfis');
         Route::get('/admin/portal-acesso',       fn() => view('portal-acesso'))->name('admin.portal-acesso');
         Route::get('/admin/portal-mensagens',    fn() => view('portal-mensagens'))->name('admin.portal-mensagens');
         Route::get('/admin/notificacoes-whatsapp', fn() => view('notificacoes-whatsapp'))->name('admin.notificacoes-whatsapp');

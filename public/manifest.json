@@ -1,8 +1,8 @@
 {
   "id": "/dashboard",
-  "name": "Software Jurídico",
-  "short_name": "Software Jurídico",
-  "description": "Sistema de Acompanhamento de Processos",
+  "name": "Software Juridico",
+  "short_name": "SaproWeb",
+  "description": "Sistema de Gestao para Escritorios de Advocacia",
   "start_url": "/dashboard",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],
@@ -42,6 +42,12 @@
       "name": "Agenda",
       "short_name": "Agenda",
       "url": "/agenda",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Inicio",
+      "url": "/",
       "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
     }
   ],

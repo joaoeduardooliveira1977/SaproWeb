@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\{Processo, Pessoa, Agenda, Custa, TipoAcao};
+use App\Models\{Orcamento, Processo, Pessoa, Agenda, Custa, TipoAcao};
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
@@ -713,5 +713,19 @@ class RelatorioController extends Controller
             'mes_nome'  => $meses[$mes],
             'total'     => $clientes->count(),
         ], 'Aniversários de Clientes — ' . $meses[$mes]);
+    }
+
+    // ── PDF Orçamento ──────────────────────────────────────────
+
+    public function orcamentoPdf(int $id)
+    {
+        $orc = Orcamento::findOrFail($id);
+
+        $escritorio = DB::table('tenants')->where('id', tenant_id())->value('nome') ?? 'Escritório';
+
+        return $this->pdf('pdf.orcamento', [
+            'orc'        => $orc,
+            'escritorio' => $escritorio,
+        ], "Proposta {$orc->numero}");
     }
 }

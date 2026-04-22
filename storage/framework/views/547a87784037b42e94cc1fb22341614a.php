@@ -195,7 +195,90 @@
         @supports (padding: env(safe-area-inset-bottom)) {
             .sidebar { padding-bottom: env(safe-area-inset-bottom); }
             .content { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+            .bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
         }
+
+        /* Bottom Navigation (mobile PWA) */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--sidebar);
+            border-top: 1px solid rgba(255,255,255,.1);
+            z-index: 200;
+            height: 60px;
+        }
+        .bottom-nav-inner {
+            display: flex;
+            height: 60px;
+            align-items: stretch;
+        }
+        .bottom-nav a {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            text-decoration: none;
+            color: rgba(255,255,255,.5);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .02em;
+            transition: color .15s;
+            position: relative;
+        }
+        .bottom-nav a.active { color: #fff; }
+        .bottom-nav a.active::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 20%; right: 20%;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 0 0 3px 3px;
+        }
+        .bottom-nav a svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; }
+        .bottom-nav .badge {
+            position: absolute;
+            top: 6px;
+            right: calc(50% - 18px);
+            background: #ef4444;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3px;
+        }
+        @media (max-width: 768px) {
+            .bottom-nav { display: block; }
+            .content { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+        }
+
+        /* Banner instalar PWA */
+        #pwa-install-banner {
+            display: none;
+            position: fixed;
+            bottom: 68px; left: 12px; right: 12px;
+            background: var(--sidebar);
+            color: #fff;
+            border-radius: 12px;
+            padding: 12px 16px;
+            align-items: center;
+            gap: 12px;
+            z-index: 300;
+            box-shadow: 0 8px 24px rgba(0,0,0,.3);
+            font-size: 13px;
+        }
+        #pwa-install-banner button {
+            border: none; cursor: pointer; border-radius: 7px;
+            padding: 7px 14px; font-size: 12px; font-weight: 700;
+        }
+        @media (min-width: 769px) { #pwa-install-banner { display: none !important; } }
 
         /* Stat Grid (auto-fit) */
         .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 20px; }
@@ -527,9 +610,9 @@
     $hubAtivo   = '';
     $rotasProcessos  = ['processos','processos.kanban','processos.novo','processos.editar','processos.show','documentos','minutas','assinatura-digital','audiencias','prazos','sla','agenda','processos.hub','processos.monitoramento'];
     $rotasCadastros  = ['cadastros.hub','correspondentes','procuracoes','administradoras','tabelas'];
-    $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','financeiro.hub'];
-    $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','ferramentas.hub','workflow.regras'];
-    $rotasAdmin      = ['usuarios','tabelas','administradoras','indices','auditoria','admin.portal-acesso','admin.portal-mensagens','admin.notificacoes-whatsapp','admin.hub'];
+    $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','horas','financeiro.hub'];
+    $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','orcamentos','ferramentas.hub','workflow.regras'];
+    $rotasAdmin      = ['usuarios','tabelas','administradoras','indices','auditoria','admin.perfis','admin.portal-acesso','admin.portal-mensagens','admin.notificacoes-whatsapp','admin.hub'];
     if (in_array($rota, $rotasProcessos))   $hubAtivo = 'processos';
     if (in_array($rota, $rotasFinanceiro))  $hubAtivo = 'financeiro';
     if (in_array($rota, $rotasFerramentas)) $hubAtivo = 'ferramentas';
@@ -1014,7 +1097,74 @@ if (isset($__slots)) unset($__slots);
             navigator.serviceWorker.register('/sw.js').catch(() => {});
         });
     }
+
+    // ── Banner instalar PWA ──
+    let _deferredInstall = null;
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        _deferredInstall = e;
+        const banner = document.getElementById('pwa-install-banner');
+        if (banner && !localStorage.getItem('pwa-dismissed')) {
+            banner.style.display = 'flex';
+        }
+    });
+    function instalarPwa() {
+        if (!_deferredInstall) return;
+        _deferredInstall.prompt();
+        _deferredInstall.userChoice.then(() => {
+            _deferredInstall = null;
+            document.getElementById('pwa-install-banner').style.display = 'none';
+        });
+    }
+    function dispensarPwa() {
+        localStorage.setItem('pwa-dismissed', '1');
+        document.getElementById('pwa-install-banner').style.display = 'none';
+    }
 </script>
+
+<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->guard('usuarios')->check()): ?>
+<div id="pwa-install-banner">
+    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;color:var(--accent);"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <div style="flex:1;line-height:1.4;">
+        <strong style="display:block;font-size:13px;">Instalar como app</strong>
+        <span style="font-size:11px;opacity:.8;">Acesse mais rápido pelo celular</span>
+    </div>
+    <button onclick="instalarPwa()" style="background:var(--accent);color:#fff;">Instalar</button>
+    <button onclick="dispensarPwa()" style="background:rgba(255,255,255,.1);color:#fff;">✕</button>
+</div>
+<?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+
+<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->guard('usuarios')->check()): ?>
+<nav class="bottom-nav" aria-label="Navegação principal">
+    <div class="bottom-nav-inner">
+        <a href="<?php echo e(route('dashboard')); ?>" class="<?php echo e($rota==='dashboard' ? 'active' : ''); ?>">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Início
+        </a>
+        <a href="<?php echo e(route('processos')); ?>" class="<?php echo e(in_array($rota, ['processos','processos.show','processos.kanban']) ? 'active' : ''); ?>">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Processos
+        </a>
+        <a href="<?php echo e(route('prazos')); ?>" class="<?php echo e($rota==='prazos' ? 'active' : ''); ?>" style="position:relative;">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Prazos
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($prazosHoje > 0): ?>
+            <span class="badge"><?php echo e($prazosHoje); ?></span>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        </a>
+        <a href="<?php echo e(route('agenda')); ?>" class="<?php echo e($rota==='agenda' ? 'active' : ''); ?>">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Agenda
+        </a>
+        <a href="<?php echo e(route('financeiro')); ?>" class="<?php echo e(in_array($rota, ['financeiro','honorarios','inadimplencia']) ? 'active' : ''); ?>">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            Financeiro
+        </a>
+    </div>
+</nav>
+<?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
 <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
 </body>
