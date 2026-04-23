@@ -14,7 +14,8 @@ if (!function_exists('tenant')) {
 if (!function_exists('tenant_id')) {
     function tenant_id(): ?int
     {
-        return tenant()?->id;
+        return tenant()?->id
+            ?? auth('usuarios')->user()?->tenant_id;
     }
 }
 

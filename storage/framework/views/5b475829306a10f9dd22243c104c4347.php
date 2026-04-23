@@ -273,9 +273,9 @@
 
                             <td style="padding:14px 16px;">
                                 <div style="display:flex;flex-wrap:wrap;gap:4px;">
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $tiposPorPessoa->get($p->id, []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tipoPessoa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $tiposPorPessoa->get($p->id, []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tipoLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <?php
-                                    $corTipo = match($tipoPessoa) {
+                                    $corTipo = match($tipoLabel) {
                                         'Cliente'         => ['#1d4ed8','#dbeafe'],
                                         'Advogado'        => ['#15803d','#dcfce7'],
                                         'Juiz'            => ['#b45309','#fef3c7'],
@@ -284,7 +284,7 @@
                                     };
                                     ?>
                                     <span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:<?php echo e($corTipo[1]); ?>;color:<?php echo e($corTipo[0]); ?>;">
-                                        <?php echo e($tipoPessoa); ?>
+                                        <?php echo e($tipoLabel); ?>
 
                                     </span>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -486,11 +486,11 @@
         
         <div style="display:flex;gap:10px;margin-bottom:14px;">
             <label style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;border:1.5px solid <?php echo e($tipoPessoa==='fisica' ? '#bfdbfe' : 'var(--border)'); ?>;background:<?php echo e($tipoPessoa==='fisica' ? '#dbeafe' : 'var(--white)'); ?>;color:<?php echo e($tipoPessoa==='fisica' ? '#1d4ed8' : 'var(--text)'); ?>;transition:all .15s;">
-                <input type="radio" wire:model.live="tipoPessoa" value="fisica" style="accent-color:#1d4ed8;margin:0;">
+                <input type="radio" name="tipoPessoa" value="fisica" wire:click="setTipoPessoa('fisica')" <?php echo e($tipoPessoa==='fisica' ? 'checked' : ''); ?> style="accent-color:#1d4ed8;margin:0;">
                 Pessoa Física
             </label>
             <label style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;border:1.5px solid <?php echo e($tipoPessoa==='juridica' ? '#d1fae5' : 'var(--border)'); ?>;background:<?php echo e($tipoPessoa==='juridica' ? '#dcfce7' : 'var(--white)'); ?>;color:<?php echo e($tipoPessoa==='juridica' ? '#15803d' : 'var(--text)'); ?>;transition:all .15s;">
-                <input type="radio" wire:model.live="tipoPessoa" value="juridica" style="accent-color:#15803d;margin:0;">
+                <input type="radio" name="tipoPessoa" value="juridica" wire:click="setTipoPessoa('juridica')" <?php echo e($tipoPessoa==='juridica' ? 'checked' : ''); ?> style="accent-color:#15803d;margin:0;">
                 Pessoa Jurídica
             </label>
         </div>

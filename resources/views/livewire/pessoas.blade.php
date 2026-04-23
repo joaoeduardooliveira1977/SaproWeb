@@ -270,9 +270,9 @@
 
                             <td style="padding:14px 16px;">
                                 <div style="display:flex;flex-wrap:wrap;gap:4px;">
-                                    @foreach($tiposPorPessoa->get($p->id, []) as $tipoPessoa)
+                                    @foreach($tiposPorPessoa->get($p->id, []) as $tipoLabel)
                                     @php
-                                    $corTipo = match($tipoPessoa) {
+                                    $corTipo = match($tipoLabel) {
                                         'Cliente'         => ['#1d4ed8','#dbeafe'],
                                         'Advogado'        => ['#15803d','#dcfce7'],
                                         'Juiz'            => ['#b45309','#fef3c7'],
@@ -281,7 +281,7 @@
                                     };
                                     @endphp
                                     <span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:{{ $corTipo[1] }};color:{{ $corTipo[0] }};">
-                                        {{ $tipoPessoa }}
+                                        {{ $tipoLabel }}
                                     </span>
                                     @endforeach
                                 </div>
@@ -478,11 +478,11 @@
         {{-- Tipo de Pessoa --}}
         <div style="display:flex;gap:10px;margin-bottom:14px;">
             <label style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;border:1.5px solid {{ $tipoPessoa==='fisica' ? '#bfdbfe' : 'var(--border)' }};background:{{ $tipoPessoa==='fisica' ? '#dbeafe' : 'var(--white)' }};color:{{ $tipoPessoa==='fisica' ? '#1d4ed8' : 'var(--text)' }};transition:all .15s;">
-                <input type="radio" wire:model.live="tipoPessoa" value="fisica" style="accent-color:#1d4ed8;margin:0;">
+                <input type="radio" name="tipoPessoa" value="fisica" wire:click="setTipoPessoa('fisica')" {{ $tipoPessoa==='fisica' ? 'checked' : '' }} style="accent-color:#1d4ed8;margin:0;">
                 Pessoa Física
             </label>
             <label style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;border:1.5px solid {{ $tipoPessoa==='juridica' ? '#d1fae5' : 'var(--border)' }};background:{{ $tipoPessoa==='juridica' ? '#dcfce7' : 'var(--white)' }};color:{{ $tipoPessoa==='juridica' ? '#15803d' : 'var(--text)' }};transition:all .15s;">
-                <input type="radio" wire:model.live="tipoPessoa" value="juridica" style="accent-color:#15803d;margin:0;">
+                <input type="radio" name="tipoPessoa" value="juridica" wire:click="setTipoPessoa('juridica')" {{ $tipoPessoa==='juridica' ? 'checked' : '' }} style="accent-color:#15803d;margin:0;">
                 Pessoa Jurídica
             </label>
         </div>

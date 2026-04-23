@@ -109,6 +109,14 @@ class Pessoas extends Component
     public function updatingBusca(): void { $this->resetPage(); }
     public function updatingTipo():  void { $this->resetPage(); }
 
+    public function setTipoPessoa(string $tipo): void
+    {
+        $this->tipoPessoa        = $tipo;
+        $this->cpf_cnpj          = '';
+        $this->rg                = '';
+        $this->inscricaoEstadual = '';
+    }
+
     public function abrirModal(?int $id = null): void
     {
         $this->limparFormulario();

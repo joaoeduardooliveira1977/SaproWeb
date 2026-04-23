@@ -56,11 +56,18 @@ class PerfilPermissoes extends Component
         }
     }
 
+    private function tenantId(): int
+    {
+        $id = tenant_id();
+        if (! $id) abort(403, 'Sem contexto de tenant.');
+        return $id;
+    }
+
     public function toggle(string $perfil, string $modulo): void
     {
         if (! isset(self::$PERFIS[$perfil]) || ! isset(self::$MODULOS[$modulo])) return;
 
-        $tenantId  = tenant_id();
+        $tenantId  = $this->tenantId();
         $atual     = $this->matriz[$perfil][$modulo] ?? false;
         $novo      = ! $atual;
 
@@ -71,7 +78,6 @@ class PerfilPermissoes extends Component
 
         $this->matriz[$perfil][$modulo] = $novo;
 
-        // Limpa cache para este perfil+módulo
         Cache::forget("perfil_perm.{$tenantId}.{$perfil}.{$modulo}");
 
         $this->dispatch('toast', tipo: 'success', msg: 'Permissão atualizada.');
@@ -81,7 +87,7 @@ class PerfilPermissoes extends Component
     {
         if (! isset(self::$PERFIS[$perfil])) return;
 
-        $tenantId = tenant_id();
+        $tenantId = $this->tenantId();
         DB::table('perfil_permissoes')
             ->where('tenant_id', $tenantId)
             ->where('perfil', $perfil)
