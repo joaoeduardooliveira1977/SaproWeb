@@ -46,11 +46,11 @@
         <p style="font-size:13px;color:var(--muted);margin-top:4px;">Controle financeiro, honorários, inadimplência e relatórios em uma visão rápida da operação.</p>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <a href="{{ route('financeiro') }}"
+        <a href="{{ route('financeiro.central') }}"
             style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">
             + Registrar Receita
         </a>
-        <a href="{{ route('financeiro') }}"
+        <a href="{{ route('financeiro.central') }}"
             style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:var(--primary);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
             + Registrar Despesa
         </a>

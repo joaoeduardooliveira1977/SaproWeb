@@ -71,7 +71,9 @@
       "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l app/Models/FinanceiroLancamento.php)",
       "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe c:/projetos/saproweb-base/artisan make:migration add_interno_to_andamentos_table)",
       "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe c:/projetos/saproweb-base/artisan migrate)",
-      "Bash(cmd /c \"php artisan tinker --execute=\\\\\"print_r\\(Schema::getColumnListing\\('custas_processuais'\\)\\);\\\\\"\")"
+      "Bash(cmd /c \"php artisan tinker --execute=\\\\\"print_r\\(Schema::getColumnListing\\('custas_processuais'\\)\\);\\\\\"\")",
+      "Bash(grep -n '$cl->' c:/projetos/saproweb-base/resources/views/livewire/financeiro-central.blade.php)",
+      "Bash(grep -n '$f->' c:/projetos/saproweb-base/resources/views/livewire/financeiro-central.blade.php)"
     ]
   }
 }

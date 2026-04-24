@@ -62,18 +62,35 @@ class FinanceiroCentral extends Component
 
     private function carregarAuxiliares(): void
     {
-        $this->clientes = DB::select("
-            SELECT p.id, p.nome FROM pessoas p
-            JOIN pessoa_tipos pt ON pt.pessoa_id = p.id
-            WHERE pt.tipo = 'Cliente' AND p.ativo = true
-            ORDER BY p.nome
-        ");
-        $this->fornecedores = DB::select("
-            SELECT p.id, p.nome FROM pessoas p
-            JOIN pessoa_tipos pt ON pt.pessoa_id = p.id
-            WHERE pt.tipo = 'Fornecedor' AND p.ativo = true
-            ORDER BY p.nome
-        ");
+        $tenantId = tenant_id();
+
+        // Clientes: pessoa_tipos.tipo='Cliente' OU referenciados como cliente_id em processos/lancamentos
+        $this->clientes = DB::table('pessoas as p')
+            ->where('p.ativo', true)
+            ->when($tenantId, fn($q) => $q->where('p.tenant_id', $tenantId))
+            ->where(function ($q) use ($tenantId) {
+                $q->whereExists(fn($s) => $s->from('pessoa_tipos')->whereColumn('pessoa_id', 'p.id')->where('tipo', 'Cliente'))
+                  ->orWhereExists(fn($s) => $s->from('processos')->whereColumn('cliente_id', 'p.id')
+                      ->when($tenantId, fn($s2) => $s2->where('tenant_id', $tenantId)))
+                  ->orWhereExists(fn($s) => $s->from('financeiro_lancamentos')->whereColumn('cliente_id', 'p.id')
+                      ->when($tenantId, fn($s2) => $s2->where('tenant_id', $tenantId)));
+            })
+            ->orderBy('p.nome')
+            ->distinct()
+            ->get(['p.id', 'p.nome'])
+            ->map(fn($r) => ['id' => $r->id, 'nome' => $r->nome])
+            ->values()
+            ->toArray();
+
+        $this->fornecedores = DB::table('pessoas as p')
+            ->join('pessoa_tipos as pt', 'pt.pessoa_id', '=', 'p.id')
+            ->where('pt.tipo', 'Fornecedor')
+            ->where('p.ativo', true)
+            ->when($tenantId, fn($q) => $q->where('p.tenant_id', $tenantId))
+            ->orderBy('p.nome')
+            ->get(['p.id', 'p.nome'])
+            ->map(fn($r) => ['id' => $r->id, 'nome' => $r->nome])
+            ->toArray();
     }
 
     public function updatedClienteId(): void

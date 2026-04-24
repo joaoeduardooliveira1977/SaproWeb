@@ -102,7 +102,7 @@
     <select wire:model.live="filtroCliente" style="width:170px;">
         <option value="">Todos os clientes</option>
         @foreach($clientes as $cl)
-        <option value="{{ $cl->id }}">{{ $cl->nome }}</option>
+        <option value="{{ $cl['id'] }}">{{ $cl['nome'] }}</option>
         @endforeach
     </select>
 
@@ -285,11 +285,11 @@
                         <option value="0">— Selecione —</option>
                         @if($tipo === 'despesa')
                             @foreach($fornecedores as $f)
-                            <option value="{{ $f->id }}">{{ $f->nome }}</option>
+                            <option value="{{ $f['id'] }}">{{ $f['nome'] }}</option>
                             @endforeach
                         @else
                             @foreach($clientes as $cl)
-                            <option value="{{ $cl->id }}">{{ $cl->nome }}</option>
+                            <option value="{{ $cl['id'] }}">{{ $cl['nome'] }}</option>
                             @endforeach
                         @endif
                     </select>
