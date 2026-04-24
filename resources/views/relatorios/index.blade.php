@@ -323,6 +323,20 @@
       </form>
     </div>
 
+    {{-- Custas a Reembolsar --}}
+    <div class="card">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fff7ed;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Custas a Reembolsar</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Custas já pagas pelo escritório, reembolsáveis e ainda não cobradas do cliente. Agrupadas por cliente e processo.</div>
+      <a href="{{ route('relatorios.custas-reembolso') }}" target="_blank"
+         class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;">
+        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+        Gerar PDF
+      </a>
+    </div>
+
     {{-- 6. Aniversários de Clientes --}}
     <div class="card">
       <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fdf4ff;">
@@ -595,7 +609,47 @@
       </form>
     </div>
 
-    {{-- 14. Relatório Financeiro Mensal --}}
+    {{-- 14. Extrato Financeiro por Cliente --}}
+    <div class="card">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fff7ed;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="12" y1="11" x2="12" y2="21"/><line x1="8" y1="15" x2="16" y2="15"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Extrato por Cliente</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Resumo financeiro completo do cliente: cobranças, recebimentos, saldo devedor e custas pendentes.</div>
+      <form method="GET" action="{{ route('relatorios.extrato-cliente') }}" target="_blank">
+        <div class="form-field">
+          <label class="lbl">Cliente</label>
+          <select name="cliente_id" required>
+            <option value="">— Selecione —</option>
+            @foreach($clientes as $c)
+              <option value="{{ $c->id }}">{{ $c->nome }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="lbl">De</label>
+            <input type="date" name="data_ini" value="{{ now()->startOfYear()->format('Y-m-d') }}">
+          </div>
+          <div class="form-field">
+            <label class="lbl">Até</label>
+            <input type="date" name="data_fim" value="{{ now()->endOfMonth()->format('Y-m-d') }}">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            PDF
+          </button>
+          <button type="submit" name="formato" value="csv" class="btn btn-secondary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            CSV
+          </button>
+        </div>
+      </form>
+    </div>
+
+    {{-- 15. Relatório Financeiro Mensal --}}
     <div class="card">
       <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f0fdf4;">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M6 8h4M6 11h3"/><path d="M14 8l2 2-2 2"/></svg>

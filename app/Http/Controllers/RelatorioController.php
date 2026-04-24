@@ -228,6 +228,28 @@ class RelatorioController extends Controller
 
     // ── 5. Custas Pendentes ────────────────────────────────────
 
+    public function custasReembolso(Request $request)
+    {
+        $custas = \App\Models\Custa::with(['processo.cliente'])
+            ->where('pago', true)
+            ->where('reembolsavel', true)
+            ->whereNull('cobranca_lancamento_id')
+            ->orderBy('data')
+            ->get();
+
+        // Agrupa por cliente → processo
+        $porCliente = $custas->groupBy(fn($c) => $c->processo?->cliente?->nome ?? 'Sem cliente');
+
+        $totalGeral = $custas->sum('valor');
+        $totalCustas = $custas->count();
+
+        return $this->pdf('pdf.custas-reembolso', [
+            'porCliente'   => $porCliente,
+            'totalGeral'   => $totalGeral,
+            'totalCustas'  => $totalCustas,
+        ], 'Custas a Reembolsar por Cliente');
+    }
+
     public function custasPendentes(Request $request)
     {
         [$ini, $fim] = $this->datas($request);
@@ -715,6 +737,106 @@ class RelatorioController extends Controller
         ], 'Aniversários de Clientes — ' . $meses[$mes]);
     }
 
+    // ── 15. Extrato Financeiro por Cliente ────────────────────
+
+    public function extratoCliente(Request $request)
+    {
+        $clienteId = $request->cliente_id ? (int) $request->cliente_id : null;
+        if (! $clienteId) {
+            abort(400, 'Selecione um cliente.');
+        }
+
+        [$ini, $fim] = $this->datas($request);
+
+        $cliente = Pessoa::findOrFail($clienteId);
+        $tenant  = DB::table('tenants')->where('id', tenant_id())->first();
+
+        $lancamentos = DB::table('financeiro_lancamentos as fl')
+            ->leftJoin('contratos as ct', 'ct.id', '=', 'fl.contrato_id')
+            ->leftJoin('processos as pr', 'pr.id', '=', 'fl.processo_id')
+            ->where('fl.cliente_id', $clienteId)
+            ->where('fl.tenant_id', tenant_id())
+            ->whereNotIn('fl.status', ['cancelado'])
+            ->whereBetween('fl.vencimento', [$ini->toDateString(), $fim->toDateString()])
+            ->select(
+                'fl.id', 'fl.tipo', 'fl.descricao', 'fl.valor', 'fl.valor_pago',
+                'fl.status', 'fl.vencimento', 'fl.data_pagamento', 'fl.forma_pagamento',
+                'fl.numero_parcela', 'fl.total_parcelas',
+                'ct.descricao as contrato_desc',
+                'pr.numero as processo_numero'
+            )
+            ->orderBy('fl.vencimento')
+            ->get();
+
+        $custasReembolso = DB::table('custas as c')
+            ->join('processos as p', 'p.id', '=', 'c.processo_id')
+            ->where('p.cliente_id', $clienteId)
+            ->where('p.tenant_id', tenant_id())
+            ->where('c.pago', true)
+            ->where('c.reembolsavel', true)
+            ->whereNull('c.cobranca_lancamento_id')
+            ->select('c.data', 'c.descricao', 'c.valor', 'p.numero as processo_numero')
+            ->orderBy('c.data')
+            ->get();
+
+        $receitas = $lancamentos->where('tipo', 'receita');
+        $despesas = $lancamentos->where('tipo', 'despesa');
+
+        $totais = [
+            'cobrado'          => $receitas->sum('valor'),
+            'recebido'         => $receitas->where('status', 'recebido')->sum('valor_pago'),
+            'a_receber'        => $receitas->whereIn('status', ['previsto', 'atrasado'])->sum('valor'),
+            'atrasado'         => $receitas->where('status', 'atrasado')->sum('valor'),
+            'custas_pendentes' => $custasReembolso->sum('valor'),
+            'custas_qtd'       => $custasReembolso->count(),
+        ];
+        $totais['saldo_devedor'] = $totais['a_receber'] + $totais['custas_pendentes'];
+
+        if ($request->formato === 'csv') {
+            $linhas = [];
+            foreach ($lancamentos as $l) {
+                $linhas[] = [
+                    ucfirst($l->tipo),
+                    $l->descricao,
+                    $l->contrato_desc ?? '',
+                    $l->processo_numero ?? '',
+                    Carbon::parse($l->vencimento)->format('d/m/Y'),
+                    number_format($l->valor, 2, ',', '.'),
+                    $l->valor_pago ? number_format($l->valor_pago, 2, ',', '.') : '',
+                    $l->data_pagamento ? Carbon::parse($l->data_pagamento)->format('d/m/Y') : '',
+                    $l->forma_pagamento ?? '',
+                    match($l->status) {
+                        'previsto' => 'Previsto', 'atrasado' => 'Atrasado',
+                        'recebido' => 'Recebido', default => $l->status,
+                    },
+                ];
+            }
+            foreach ($custasReembolso as $c) {
+                $linhas[] = [
+                    'Reembolso de Custa', $c->descricao, '', $c->processo_numero ?? '',
+                    Carbon::parse($c->data)->format('d/m/Y'),
+                    number_format($c->valor, 2, ',', '.'), '', '', '', 'Pendente',
+                ];
+            }
+            return $this->csv(
+                ['Tipo','Descrição','Contrato','Processo','Vencimento','Valor','Valor Pago','Data Pgto','Forma Pgto','Status'],
+                $linhas, 'extrato_' . \Illuminate\Support\Str::slug($cliente->nome)
+            );
+        }
+
+        return $this->pdf('pdf.extrato-cliente', [
+            'cliente'         => $cliente,
+            'tenant'          => $tenant,
+            'lancamentos'     => $lancamentos,
+            'receitas'        => $receitas,
+            'despesas'        => $despesas,
+            'custasReembolso' => $custasReembolso,
+            'totais'          => $totais,
+            'data_ini'        => $ini->format('d/m/Y'),
+            'data_fim'        => $fim->format('d/m/Y'),
+        ], 'Extrato — ' . $cliente->nome);
+    }
+
     // ── PDF Orçamento ──────────────────────────────────────────
 
     public function orcamentoPdf(int $id)
@@ -727,5 +849,18 @@ class RelatorioController extends Controller
             'orc'        => $orc,
             'escritorio' => $escritorio,
         ], "Proposta {$orc->numero}");
+    }
+
+    // ── PDF Contrato ───────────────────────────────────────────
+
+    public function contratoPdf(int $id)
+    {
+        $contrato = \App\Models\Contrato::with(['cliente', 'advogadoResponsavel', 'processo'])->findOrFail($id);
+        $tenant   = DB::table('tenants')->where('id', tenant_id())->first();
+
+        return $this->pdf('pdf.contrato', [
+            'contrato' => $contrato,
+            'tenant'   => $tenant,
+        ], "Contrato — {$contrato->cliente?->nome}");
     }
 }

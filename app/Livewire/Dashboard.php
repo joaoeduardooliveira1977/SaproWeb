@@ -238,6 +238,23 @@ class Dashboard extends Component
             ->where('status', 'atrasado')
             ->sum('valor');
 
+        // ── Custas a reembolsar (pagas, reembolsáveis, não cobradas) ──
+        $custasReembolso = (float) DB::table('custas')
+            ->join('processos', 'processos.id', '=', 'custas.processo_id')
+            ->where('processos.tenant_id', $tenantId)
+            ->where('custas.pago', true)
+            ->where('custas.reembolsavel', true)
+            ->whereNull('custas.cobranca_lancamento_id')
+            ->sum('custas.valor');
+
+        $custasReembolsoQtd = (int) DB::table('custas')
+            ->join('processos', 'processos.id', '=', 'custas.processo_id')
+            ->where('processos.tenant_id', $tenantId)
+            ->where('custas.pago', true)
+            ->where('custas.reembolsavel', true)
+            ->whereNull('custas.cobranca_lancamento_id')
+            ->count();
+
         // ── Honorários recebidos este mês (legado) ───────────────────
         $honorariosMes = (float) DB::table('recebimentos')
             ->join('processos', 'processos.id', '=', 'recebimentos.processo_id')
@@ -298,7 +315,8 @@ class Dashboard extends Component
             'spark7',
             'honorariosMes', 'novosEstesMes', 'novosMesAnterior', 'tendenciaMensal',
             'topClientes',
-            'finAReceberMes', 'finRecebidoMes', 'finAtrasadoTotal'
+            'finAReceberMes', 'finRecebidoMes', 'finAtrasadoTotal',
+            'custasReembolso', 'custasReembolsoQtd'
         ));
     }
 }

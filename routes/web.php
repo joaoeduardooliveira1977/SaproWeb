@@ -74,6 +74,8 @@ use App\Http\Controllers\IAController;
         Route::get('/processos/{id}',        [ProcessoController::class, 'show'])->name('processos.show');
         Route::get('/processos/{id}/andamentos', [ProcessoController::class, 'andamentos'])->name('processos.andamentos');
         Route::get('/processos/{id}/custas',     [ProcessoController::class, 'custas'])->name('processos.custas');
+        Route::post('/processos/{id}/custas/{custaId}/reembolso', [ProcessoController::class, 'alternarReembolsoCusta'])->name('processos.custas.reembolso');
+        Route::post('/processos/{id}/custas/{custaId}/cobranca', [ProcessoController::class, 'gerarCobrancaCusta'])->name('processos.custas.cobranca');
 	Route::get('/processos/{id}/resumo-ia', [ProcessoController::class, 'gerarResumo']);
     });
 
@@ -114,6 +116,7 @@ use App\Http\Controllers\IAController;
         Route::get('/por-risco',          [RelatorioController::class, 'processosPorRisco'])->name('por-risco');
         Route::get('/agenda',             [RelatorioController::class, 'agendaPeriodo'])->name('agenda');
         Route::get('/custas',             [RelatorioController::class, 'custasPendentes'])->name('custas');
+        Route::get('/custas-reembolso',   [RelatorioController::class, 'custasReembolso'])->name('custas-reembolso');
         Route::get('/aniversarios',       [RelatorioController::class, 'aniversarios'])->name('aniversarios');
         Route::get('/andamentos-cliente', [RelatorioController::class, 'andamentosPorCliente'])->name('andamentos-cliente');
         Route::get('/honorarios-aberto',  [RelatorioController::class, 'honorariosEmAberto'])->name('honorarios-aberto');
@@ -123,6 +126,7 @@ use App\Http\Controllers\IAController;
         Route::get('/por-tipo-acao',         [RelatorioController::class, 'processosPorTipoAcao'])->name('por-tipo-acao');
         Route::get('/lista-geral',           [RelatorioController::class, 'listaGeral'])->name('lista-geral');
         Route::get('/financeiro-mensal',     [RelatorioController::class, 'relatorioFinanceiroMensal'])->name('financeiro-mensal');
+        Route::get('/extrato-cliente',       [RelatorioController::class, 'extratoCliente'])->name('extrato-cliente');
     });
 
     // ── Analytics & Produtividade ────────────────────────────────
@@ -143,6 +147,8 @@ use App\Http\Controllers\IAController;
         Route::get('/crm', fn() => view('crm'))->name('crm');
         Route::get('/orcamentos', fn() => view('orcamentos'))->name('orcamentos');
         Route::get('/orcamentos/{id}/pdf', [\App\Http\Controllers\RelatorioController::class, 'orcamentoPdf'])->name('orcamentos.pdf');
+        Route::get('/contratos/{id}/pdf', [\App\Http\Controllers\RelatorioController::class, 'contratoPdf'])->name('contratos.pdf');
+        Route::get('/modelos-contrato', \App\Livewire\ModelosContrato::class)->name('modelos-contrato');
         Route::get('/workflow-regras', \App\Livewire\WorkflowRegras::class)->name('workflow.regras');
     });
 

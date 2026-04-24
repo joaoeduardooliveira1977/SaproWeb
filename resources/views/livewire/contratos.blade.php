@@ -457,6 +457,37 @@
                     style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
             </div>
 
+            {{-- Modelo de contrato --}}
+            @if(!empty($modelos))
+            <div style="border-top:1.5px dashed var(--border);padding-top:16px;margin-top:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <label style="font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Modelo de Contrato
+                    </label>
+                    <a href="{{ route('modelos-contrato') }}" target="_blank" style="font-size:11px;color:#2563eb;text-decoration:none;">Gerenciar modelos →</a>
+                </div>
+                <select wire:model.live="modeloId"
+                    style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);margin-bottom:8px;">
+                    <option value="0">— Selecionar modelo (opcional) —</option>
+                    @foreach($modelos as $m)
+                        <option value="{{ $m['id'] }}">{{ $m['nome'] }}</option>
+                    @endforeach
+                </select>
+
+                @if($textoContrato)
+                <div>
+                    <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">
+                        Texto do contrato
+                        <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:4px;">(editável antes de salvar)</span>
+                    </label>
+                    <textarea wire:model="textoContrato" rows="10"
+                        style="width:100%;padding:9px 12px;border:1.5px solid #bfdbfe;border-radius:8px;font-size:11px;font-family:monospace;resize:vertical;box-sizing:border-box;background:#f8fbff;line-height:1.7;"></textarea>
+                </div>
+                @endif
+            </div>
+            @endif
+
             {{-- Contrato assinado (anexo) --}}
             <div>
                 <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">
@@ -580,6 +611,12 @@
                         @if($srv->processo)
                         <div style="font-size:11px;color:var(--muted);">Proc. {{ $srv->processo->numero }}</div>
                         @endif
+                        @if($srv->tipo === 'exito' && $srv->realizado_em)
+                        <div style="font-size:11px;color:#7c3aed;font-weight:600;">
+                            Realizado em {{ $srv->realizado_em->format('d/m/Y H:i') }}
+                            @if($srv->realizado_por) · por {{ $srv->realizado_por }} @endif
+                        </div>
+                        @endif
                     </div>
                     <div style="font-size:13px;font-weight:700;color:var(--primary);white-space:nowrap;">
                         @if($srv->tipo === 'exito' && $srv->percentual)
@@ -588,8 +625,19 @@
                         @if($srv->valor > 0 || $srv->tipo !== 'exito')
                         R$ {{ number_format($srv->valor, 2, ',', '.') }}
                         @endif
+                        @if($srv->tipo === 'exito' && $srv->valor_realizado)
+                        <div style="font-size:11px;color:#7c3aed;font-weight:700;margin-top:2px;">
+                            Realizado: R$ {{ number_format($srv->valor_realizado, 2, ',', '.') }}
+                        </div>
+                        @endif
                     </div>
                     <div style="display:flex;gap:5px;">
+                        @if($srv->tipo === 'exito')
+                        <button wire:click="abrirExito({{ $srv->id }})"
+                            style="padding:5px 9px;border:1px solid #ddd6fe;border-radius:6px;background:#faf5ff;color:#7c3aed;cursor:pointer;font-size:11px;font-weight:700;">
+                            {{ $srv->realizado_em ? 'Reprocessar' : 'Realizar êxito' }}
+                        </button>
+                        @endif
                         <button wire:click="abrirServico({{ $detalhe->id }}, {{ $srv->id }})"
                             style="padding:5px 7px;border:1px solid var(--border);border-radius:6px;background:var(--white);cursor:pointer;">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -663,6 +711,15 @@
                     Baixar
                 </a>
             </div>
+            @endif
+
+            {{-- PDF do contrato --}}
+            @if($detalhe->texto_contrato)
+            <a href="{{ route('contratos.pdf', $detalhe->id) }}" target="_blank"
+                style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;text-decoration:none;color:#92400e;font-size:13px;font-weight:600;margin-top:4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Baixar PDF do Contrato
+            </a>
             @endif
 
         </div>
@@ -769,6 +826,59 @@
                 style="padding:9px 20px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
                 <span wire:loading.remove wire:target="salvarServico">Salvar</span>
                 <span wire:loading wire:target="salvarServico">Salvando...</span>
+            </button>
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- ════════════════════════════════════════════════
+     MODAL: Realizar Êxito
+════════════════════════════════════════════════ --}}
+@if($modalExito)
+<div style="position:fixed;inset:0;z-index:1150;display:flex;align-items:center;justify-content:center;padding:16px;">
+    <div wire:click="fecharExito" style="position:absolute;inset:0;background:rgba(0,0,0,.5);"></div>
+    <div style="position:relative;background:var(--white);border-radius:14px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.25);z-index:1;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);">
+            <h3 style="font-size:16px;font-weight:700;color:var(--text);margin:0;">Realizar êxito</h3>
+            <button wire:click="fecharExito" style="background:none;border:none;cursor:pointer;color:var(--muted);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+            <div style="padding:12px 14px;background:#faf5ff;border:1px solid #ddd6fe;border-radius:10px;font-size:13px;color:#5b21b6;line-height:1.6;">
+                Use este fluxo quando o êxito realmente acontecer. A cobrança será criada no financeiro somente agora.
+            </div>
+
+            <div>
+                <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Valor realizado (R$) *</label>
+                <input wire:model="exitoValor" type="text" placeholder="0,00"
+                    style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                @error('exitoValor')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
+            </div>
+
+            <div>
+                <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Vencimento da cobrança *</label>
+                <input wire:model="exitoVencimento" type="date"
+                    style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                @error('exitoVencimento')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
+            </div>
+
+            <div>
+                <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Observações da realização</label>
+                <textarea wire:model="exitoObs" rows="3"
+                    style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
+            </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);">
+            <button wire:click="fecharExito" style="padding:9px 18px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
+            <button wire:click="realizarExito" wire:loading.attr="disabled"
+                style="padding:9px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+                <span wire:loading.remove wire:target="realizarExito">Gerar cobrança</span>
+                <span wire:loading wire:target="realizarExito">Processando...</span>
             </button>
         </div>
     </div>

@@ -11,7 +11,9 @@ class ContratoServico extends Model
 
     protected $fillable = [
         'contrato_id', 'processo_id', 'descricao', 'tipo',
-        'valor', 'percentual', 'vencimento', 'numero_parcelas', 'status', 'observacoes',
+        'valor', 'percentual', 'vencimento', 'numero_parcelas',
+        'valor_realizado', 'realizado_em', 'realizado_por',
+        'status', 'observacoes',
     ];
 
     protected $casts = [
@@ -19,6 +21,8 @@ class ContratoServico extends Model
         'percentual'      => 'decimal:2',
         'vencimento'      => 'date',
         'numero_parcelas' => 'integer',
+        'valor_realizado' => 'decimal:2',
+        'realizado_em'    => 'datetime',
     ];
 
     public function contrato(): BelongsTo

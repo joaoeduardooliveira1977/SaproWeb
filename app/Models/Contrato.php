@@ -19,6 +19,7 @@ class Contrato extends Model
         'data_inicio', 'data_fim', 'status',
         'arquivo', 'arquivo_original',
         'validado', 'validado_em', 'validado_por',
+        'modelo_id', 'texto_contrato',
     ];
 
     protected $casts = [

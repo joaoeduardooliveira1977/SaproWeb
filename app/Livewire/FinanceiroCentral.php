@@ -283,7 +283,7 @@ class FinanceiroCentral extends Component
     // ── Render ────────────────────────────────────────────────
     public function render(): \Illuminate\View\View
     {
-        $lancamentos = FinanceiroLancamento::with(['cliente', 'contrato', 'processo'])
+        $lancamentos = FinanceiroLancamento::with(['cliente', 'contrato', 'processo', 'servico'])
             ->when($this->busca, fn($q) => $q->where(fn($s) => $s
                 ->where('descricao', 'ilike', "%{$this->busca}%")
                 ->orWhereHas('cliente', fn($c) => $c->where('nome', 'ilike', "%{$this->busca}%"))

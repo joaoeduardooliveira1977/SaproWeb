@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Processo, Prazo};
+use App\Models\{Custa, FinanceiroLancamento, Processo, Prazo};
 use App\Services\AIService;
-use Illuminate\Support\Facades\{DB, Schema};
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\{Auth, DB, Schema};
 
 
 class ProcessoController extends Controller
@@ -180,12 +181,83 @@ class ProcessoController extends Controller
 
     public function custas(int $id)
     {
-        $processo = Processo::with('custas')->findOrFail($id);
+        $processo = Processo::with(['cliente', 'custas.cobrancaLancamento'])->findOrFail($id);
         $totais = [
             'total'    => $processo->custas->sum('valor'),
             'pago'     => $processo->custas->where('pago', true)->sum('valor'),
             'pendente' => $processo->custas->where('pago', false)->sum('valor'),
+            'reembolsavel' => $processo->custas->where('reembolsavel', true)->sum('valor'),
+            'a_cobrar' => $processo->custas
+                ->where('reembolsavel', true)
+                ->where('pago', true)
+                ->whereNull('cobranca_lancamento_id')
+                ->sum('valor'),
+            'cobrado' => $processo->custas->whereNotNull('cobranca_lancamento_id')->sum('valor'),
         ];
         return view('processo-custas', compact('processo', 'totais'));
+    }
+
+    public function alternarReembolsoCusta(int $id, int $custaId): RedirectResponse
+    {
+        $processo = Processo::findOrFail($id);
+        $custa = Custa::where('processo_id', $processo->id)->findOrFail($custaId);
+
+        if ($custa->cobranca_lancamento_id) {
+            return back()->with('erro', 'Essa custa já foi cobrada no financeiro.');
+        }
+
+        $custa->update([
+            'reembolsavel' => !$custa->reembolsavel,
+        ]);
+
+        return back()->with('sucesso', $custa->reembolsavel
+            ? 'Custa marcada como reembolsável.'
+            : 'Custa marcada como não reembolsável.');
+    }
+
+    public function gerarCobrancaCusta(int $id, int $custaId): RedirectResponse
+    {
+        $processo = Processo::with('cliente')->findOrFail($id);
+        $custa = Custa::where('processo_id', $processo->id)->findOrFail($custaId);
+
+        if (!$custa->reembolsavel) {
+            return back()->with('erro', 'Essa custa está marcada como não reembolsável.');
+        }
+
+        if (!$custa->pago) {
+            return back()->with('erro', 'Marque a custa como paga antes de gerar a cobrança de reembolso.');
+        }
+
+        if ($custa->cobranca_lancamento_id) {
+            return back()->with('erro', 'Essa custa já possui cobrança gerada.');
+        }
+
+        if (!$processo->cliente_id) {
+            return back()->with('erro', 'O processo não possui cliente vinculado para gerar a cobrança.');
+        }
+
+        $usuario = Auth::guard('usuarios')->user();
+
+        $lancamentoId = DB::table('financeiro_lancamentos')->insertGetId([
+            'tenant_id'   => $processo->tenant_id ?? $usuario?->tenant_id,
+            'cliente_id'  => $processo->cliente_id,
+            'processo_id' => $processo->id,
+            'tipo'        => 'receita',
+            'descricao'   => 'Reembolso de custa - ' . $custa->descricao . ' - Proc. ' . $processo->numero,
+            'valor'       => $custa->valor,
+            'vencimento'  => now()->toDateString(),
+            'status'      => 'previsto',
+            'observacoes' => 'Cobrança gerada a partir da custa processual em ' . now()->format('d/m/Y H:i'),
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
+
+        $custa->update([
+            'cobranca_lancamento_id' => $lancamentoId,
+            'cobrado_em'             => now(),
+            'cobrado_por'            => $usuario?->nome ?? 'Sistema',
+        ]);
+
+        return back()->with('sucesso', 'Cobrança de reembolso gerada no Financeiro Central.');
     }
 }

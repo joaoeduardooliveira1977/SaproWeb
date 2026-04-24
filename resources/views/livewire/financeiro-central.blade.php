@@ -160,6 +160,36 @@
                 <div style="font-weight:600;color:var(--text);">{{ $l->cliente?->nome ?? '—' }}</div>
             </td>
             <td style="padding:11px 14px;max-width:260px;">
+                @php
+                $srv = $l->servico;
+                if ($srv && $srv->tipo === 'exito') {
+                    $origemLabel = 'Êxito';
+                    $origemBg    = '#fef3c7'; $origemCor = '#92400e';
+                } elseif ($srv && $srv->tipo === 'consultoria') {
+                    $origemLabel = 'Consultoria';
+                    $origemBg    = '#ede9fe'; $origemCor = '#6d28d9';
+                } elseif ($srv) {
+                    $origemLabel = 'Serviço';
+                    $origemBg    = '#dbeafe'; $origemCor = '#1d4ed8';
+                } elseif ($l->processo_id && str_starts_with($l->descricao, 'Reembolso')) {
+                    $origemLabel = 'Reembolso de Custa';
+                    $origemBg    = '#ffedd5'; $origemCor = '#c2410c';
+                } elseif ($l->contrato_id) {
+                    $origemLabel = 'Contrato';
+                    $origemBg    = '#dcfce7'; $origemCor = '#15803d';
+                } else {
+                    $origemLabel = 'Manual';
+                    $origemBg    = '#f1f5f9'; $origemCor = '#64748b';
+                }
+                @endphp
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;">
+                    <span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;background:{{ $origemBg }};color:{{ $origemCor }};white-space:nowrap;">
+                        {{ $origemLabel }}
+                    </span>
+                    @if($srv && $srv->tipo === 'exito' && $srv->percentual)
+                    <span style="font-size:10px;color:#92400e;">{{ $srv->percentual }}%</span>
+                    @endif
+                </div>
                 <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);">{{ $l->descricao }}</div>
                 @if($l->contrato)
                 <div style="font-size:11px;color:var(--muted);">Contrato: {{ $l->contrato->descricao }}</div>

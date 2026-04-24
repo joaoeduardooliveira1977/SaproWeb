@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\{Contrato, ContratoServico, ContratoRepasse, FinanceiroLancamento, Pessoa, Processo};
+use App\Models\{Contrato, ContratoServico, ContratoRepasse, FinanceiroLancamento, ModeloContrato, Pessoa, Processo};
 use Illuminate\Support\Facades\{Auth, DB, Storage};
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -12,7 +12,7 @@ class Contratos extends Component
 {
     use WithPagination, WithFileUploads;
 
-    // ── Filtros ───────────────────────────────────────────────
+    // â”€â”€ Filtros â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public string $busca          = '';
     public string $filtroTipo     = '';
     public string $filtroStatus   = 'ativo';
@@ -23,7 +23,7 @@ class Contratos extends Component
         'filtroStatus' => ['except' => 'ativo'],
     ];
 
-    // ── Modal principal ───────────────────────────────────────
+    // â”€â”€ Modal principal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public bool   $modal         = false;
     public ?int   $contratoId    = null;
 
@@ -45,7 +45,7 @@ class Contratos extends Component
     public ?string $arquivoAtual   = null;
     public ?string $arquivoNome    = null;
 
-    // ── Serviços (itens do contrato) ──────────────────────────
+    // â”€â”€ ServiÃ§os (itens do contrato) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public bool   $modalServico   = false;
     public ?int   $servicoId      = null;
     public ?int   $contratoIdServico = null;
@@ -57,15 +57,20 @@ class Contratos extends Component
     public string $servicoObs        = '';
     public string $servicoVencimento  = '';
     public int    $servicoParcelas    = 1;
+    public bool   $modalExito         = false;
+    public ?int   $exitoServicoId     = null;
+    public string $exitoValor         = '';
+    public string $exitoVencimento    = '';
+    public string $exitoObs           = '';
 
-    // ── Modal detalhe (visualizar contrato) ───────────────────
+    // â”€â”€ Modal detalhe (visualizar contrato) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public bool   $modalDetalhe    = false;
     public ?int   $contratoDetalhe = null;
 
-    // ── Validação (admin/financeiro) ──────────────────────────
+    // â”€â”€ ValidaÃ§Ã£o (admin/financeiro) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public bool   $podeValidar    = false;
 
-    // ── Repasses ──────────────────────────────────────────────
+    // â”€â”€ Repasses â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public bool   $modalRepasse      = false;
     public ?int   $repasseId         = null;
     public ?int   $repasseContratoId = null;
@@ -75,12 +80,18 @@ class Contratos extends Component
     public string $repasseValorFixo   = '';
     public string $repasseFrequencia  = 'mensal';
 
-    // ── Dados auxiliares ──────────────────────────────────────
+    // â”€â”€ Dados auxiliares â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // â”€â”€ Modelo de contrato â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    public int    $modeloId       = 0;
+    public string $textoContrato  = '';
+
+    // â”€â”€ Dados auxiliares â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public array  $clientes    = [];
     public array  $processos   = [];
     public array  $processosContrato = [];
     public array  $advogados   = [];
-    public array  $indicadores = []; // pessoas que podem receber repasse
+    public array  $indicadores = [];
+    public array  $modelos     = [];
 
     public function mount(): void
     {
@@ -112,7 +123,7 @@ class Contratos extends Component
             ORDER BY p.nome
         ");
 
-        // Indicadores: qualquer pessoa ativa (síndico, corretor, advogado parceiro)
+        // Indicadores: qualquer pessoa ativa (sÃ­ndico, corretor, advogado parceiro)
         $this->indicadores = DB::select("
             SELECT id, nome FROM pessoas WHERE ativo = true ORDER BY nome
         ");
@@ -126,11 +137,57 @@ class Contratos extends Component
         ");
 
         $this->processosContrato = [];
+
+        $this->modelos = ModeloContrato::where('tenant_id', tenant_id())
+            ->where('ativo', true)
+            ->orderBy('nome')
+            ->get(['id', 'nome', 'tipo', 'texto'])
+            ->toArray();
     }
 
     public function updatedClienteId(): void
     {
         $this->carregarOpcoesDoCliente();
+    }
+
+    public function updatedModeloId(): void
+    {
+        if (! $this->modeloId) {
+            $this->textoContrato = '';
+            return;
+        }
+
+        $modelo = collect($this->modelos)->firstWhere('id', $this->modeloId);
+        if (! $modelo) return;
+
+        $this->textoContrato = (new ModeloContrato($modelo))->mesclar($this->variaveisContrato());
+    }
+
+    private function variaveisContrato(): array
+    {
+        $cliente   = $this->clienteId   ? DB::table('pessoas')->where('id', $this->clienteId)->first()   : null;
+        $advogado  = $this->advogadoResponsavelId ? DB::table('pessoas')->where('id', $this->advogadoResponsavelId)->first() : null;
+        $processo  = $this->processoContratoId    ? DB::table('processos')->where('id', $this->processoContratoId)->first()  : null;
+        $tipoAcao  = $processo ? DB::table('tipo_acoes')->where('id', $processo->tipo_acao_id)->value('descricao') : null;
+        $tenant    = DB::table('tenants')->where('id', tenant_id())->first();
+
+        $valor = $this->valor ? 'R$ ' . $this->valor : '{{valor}}';
+        $parcelas = $this->diaVencimento ?: '{{parcelas}}';
+
+        return [
+            'cliente'     => $cliente?->nome     ?? '{{cliente}}',
+            'cpf_cnpj'    => $cliente?->cpf_cnpj ?? '{{cpf_cnpj}}',
+            'advogado'    => $advogado?->nome     ?? '{{advogado}}',
+            'oab'         => $advogado?->oab      ?? '{{oab}}',
+            'processo'    => $processo?->numero   ?? '{{processo}}',
+            'tipo_acao'   => $tipoAcao            ?? '{{tipo_acao}}',
+            'vara'        => $processo?->vara     ?? '{{vara}}',
+            'valor'       => $valor,
+            'parcelas'    => $parcelas,
+            'data_inicio' => $this->dataInicio ? \Carbon\Carbon::parse($this->dataInicio)->format('d/m/Y') : '{{data_inicio}}',
+            'escritorio'  => $tenant?->nome      ?? '{{escritorio}}',
+            'data_hoje'   => now()->format('d/m/Y'),
+        ];
     }
 
     private function prepararContratoInicial(): void
@@ -168,7 +225,7 @@ class Contratos extends Component
             $this->servicoPercentual = '';
         }
 
-        if (!$this->servicoDescricao || str_starts_with($this->servicoDescricao, 'Serviço:')) {
+        if (!$this->servicoDescricao || str_starts_with($this->servicoDescricao, 'ServiÃ§o:')) {
             $this->servicoDescricao = $this->descricaoServicoPadrao($this->servicoTipo);
         }
     }
@@ -186,12 +243,12 @@ class Contratos extends Component
     private function descricaoServicoPadrao(string $tipo): string
     {
         return match ($tipo) {
-            'consultoria' => 'Serviço: mensalidade de assessoria',
-            'exito'       => 'Serviço: honorários de êxito',
-            'avulso'      => 'Serviço: atendimento avulso',
-            'repasse'     => 'Serviço: repasse financeiro',
-            'outro'       => 'Serviço: ajuste complementar',
-            default       => 'Serviço: parcela de honorários',
+            'consultoria' => 'ServiÃ§o: mensalidade de assessoria',
+            'exito'       => 'ServiÃ§o: honorÃ¡rios de Ãªxito',
+            'avulso'      => 'ServiÃ§o: atendimento avulso',
+            'repasse'     => 'ServiÃ§o: repasse financeiro',
+            'outro'       => 'ServiÃ§o: ajuste complementar',
+            default       => 'ServiÃ§o: parcela de honorÃ¡rios',
         };
     }
 
@@ -199,34 +256,34 @@ class Contratos extends Component
     {
         return [
             'honorario' => [
-                'descricao'   => 'Use para entrada, parcelas ou honorários fixos do contrato.',
+                'descricao'   => 'Use para entrada, parcelas ou honorÃ¡rios fixos do contrato.',
                 'label_valor' => 'Valor da parcela (R$) *',
                 'placeholder' => 'Ex: Entrada contratual ou Parcela 1/3',
             ],
             'consultoria' => [
                 'descricao'   => 'Use para contratos mensais ou assessoria recorrente.',
                 'label_valor' => 'Valor mensal (R$) *',
-                'placeholder' => 'Ex: Mensalidade de assessoria jurídica',
+                'placeholder' => 'Ex: Mensalidade de assessoria jurÃ­dica',
             ],
             'exito' => [
-                'descricao'   => 'Use para honorários condicionados ao ganho. Informe o percentual e, se quiser, um valor-base estimado.',
+                'descricao'   => 'Use para honorÃ¡rios condicionados ao ganho. Informe o percentual e, se quiser, um valor-base estimado.',
                 'label_valor' => 'Valor-base estimado (R$)',
-                'placeholder' => 'Ex: Honorários sobre êxito da ação',
+                'placeholder' => 'Ex: HonorÃ¡rios sobre Ãªxito da aÃ§Ã£o',
             ],
             'avulso' => [
-                'descricao'   => 'Use para serviços pontuais cobrados uma única vez.',
-                'label_valor' => 'Valor do serviço (R$) *',
-                'placeholder' => 'Ex: Elaboração de parecer ou reunião extraordinária',
+                'descricao'   => 'Use para serviÃ§os pontuais cobrados uma Ãºnica vez.',
+                'label_valor' => 'Valor do serviÃ§o (R$) *',
+                'placeholder' => 'Ex: ElaboraÃ§Ã£o de parecer ou reuniÃ£o extraordinÃ¡ria',
             ],
             'repasse' => [
-                'descricao'   => 'Use apenas se o contrato precisar registrar um serviço ligado a repasse específico.',
+                'descricao'   => 'Use apenas se o contrato precisar registrar um serviÃ§o ligado a repasse especÃ­fico.',
                 'label_valor' => 'Valor do repasse (R$) *',
                 'placeholder' => 'Ex: Repasse operacional',
             ],
             'outro' => [
                 'descricao'   => 'Use para ajustes complementares fora dos tipos principais.',
                 'label_valor' => 'Valor do ajuste (R$) *',
-                'placeholder' => 'Ex: Complemento de honorários',
+                'placeholder' => 'Ex: Complemento de honorÃ¡rios',
             ],
         ];
     }
@@ -253,14 +310,21 @@ class Contratos extends Component
 
         $tipoAcao = $processo->tipoAcao?->descricao;
         $this->descricao = $tipoAcao
-            ? "Contrato de honorários - {$tipoAcao} ({$processo->numero})"
-            : "Contrato de honorários - processo {$processo->numero}";
+            ? "Contrato de honorÃ¡rios - {$tipoAcao} ({$processo->numero})"
+            : "Contrato de honorÃ¡rios - processo {$processo->numero}";
 
         if (!$this->observacoes) {
             $clienteNome = $processo->cliente?->nome;
             $this->observacoes = $clienteNome
                 ? "Contrato gerado a partir do processo {$processo->numero} do cliente {$clienteNome}."
                 : "Contrato gerado a partir do processo {$processo->numero}.";
+        }
+
+        // Aplica o primeiro modelo de honorÃ¡rio_processo disponÃ­vel automaticamente
+        $modeloPadrao = collect($this->modelos)->firstWhere('tipo', 'honorario_processo');
+        if ($modeloPadrao) {
+            $this->modeloId = $modeloPadrao['id'];
+            $this->updatedModeloId();
         }
     }
 
@@ -312,7 +376,7 @@ class Contratos extends Component
         }
     }
 
-    // ── Abrir / fechar modal contrato ─────────────────────────
+    // â”€â”€ Abrir / fechar modal contrato â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function abrirModal(?int $id = null): void
     {
         $this->resetErrorBag();
@@ -336,6 +400,8 @@ class Contratos extends Component
             $this->status         = $c->status;
             $this->arquivoAtual   = $c->arquivo;
             $this->arquivoNome    = $c->arquivo_original;
+            $this->modeloId       = (int) ($c->modelo_id ?? 0);
+            $this->textoContrato  = $c->texto_contrato ?? '';
             $this->carregarOpcoesDoCliente();
         } else {
             $this->clienteId      = 0;
@@ -353,6 +419,8 @@ class Contratos extends Component
             $this->status         = 'ativo';
             $this->arquivoAtual   = null;
             $this->arquivoNome    = null;
+            $this->modeloId       = 0;
+            $this->textoContrato  = '';
             $this->processosContrato = [];
         }
 
@@ -366,7 +434,7 @@ class Contratos extends Component
         $this->resetErrorBag();
     }
 
-    // ── Salvar contrato ───────────────────────────────────────
+    // â”€â”€ Salvar contrato â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function salvar(): void
     {
         $this->validate([
@@ -380,10 +448,10 @@ class Contratos extends Component
             'arquivo'      => 'nullable|file|max:20480',
         ], [
             'clienteId.min'    => 'Selecione o cliente.',
-            'advogadoResponsavelId.min' => 'Selecione o advogado responsável.',
-            'descricao.required' => 'A descrição é obrigatória.',
+            'advogadoResponsavelId.min' => 'Selecione o advogado responsÃ¡vel.',
+            'descricao.required' => 'A descriÃ§Ã£o Ã© obrigatÃ³ria.',
             'valor.required'   => 'Informe o valor.',
-            'dataInicio.required' => 'Informe a data de início.',
+            'dataInicio.required' => 'Informe a data de inÃ­cio.',
         ]);
 
         $valorNum = (float) str_replace(['.', ','], ['', '.'], $this->valor);
@@ -394,6 +462,8 @@ class Contratos extends Component
             'tipo'           => $this->tipo,
             'descricao'      => $this->descricao,
             'processo_id'    => $this->processoContratoId ?: null,
+            'modelo_id'      => $this->modeloId ?: null,
+            'texto_contrato' => $this->textoContrato ?: null,
             'observacoes'    => $this->observacoes ?: null,
             'forma_cobranca' => $this->formaCobranca,
             'valor'          => $valorNum,
@@ -414,31 +484,29 @@ class Contratos extends Component
 
         if ($this->contratoId) {
             DB::table('contratos')->where('id', $this->contratoId)->update(array_merge($dados, ['updated_at' => now()]));
+            if ($dados['status'] === 'ativo') {
+                $contrato = Contrato::with('servicos')->find($this->contratoId);
+                if ($contrato && $contrato->servicos->isNotEmpty()) {
+                    FinanceiroLancamento::gerarDoContrato($contrato);
+                }
+            }
+
             $msg = 'Contrato atualizado.';
         } else {
-            $novoId = DB::table('contratos')->insertGetId(array_merge($dados, [
+            DB::table('contratos')->insertGetId(array_merge($dados, [
                 'tenant_id'  => Auth::guard('usuarios')->user()?->tenant_id,
                 'validado'   => false,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]));
-
-            // Gerar lançamentos financeiros automaticamente se contrato ativo
-            if ($dados['status'] === 'ativo') {
-                $contrato = Contrato::find($novoId);
-                if ($contrato) {
-                    FinanceiroLancamento::gerarDoContrato($contrato);
-                }
-            }
-
-            $msg = 'Contrato criado com sucesso!';
+            $msg = 'Contrato criado com sucesso! Agora adicione os serviÃ§os para gerar o financeiro.';
         }
 
         $this->fecharModal();
         $this->dispatch('toast', message: $msg, type: 'success');
     }
 
-    // ── Validar contrato (admin/financeiro) ───────────────────
+    // â”€â”€ Validar contrato (admin/financeiro) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function validar(int $id): void
     {
         if (!$this->podeValidar) return;
@@ -452,7 +520,7 @@ class Contratos extends Component
         $this->dispatch('toast', message: 'Contrato validado!', type: 'success');
     }
 
-    // ── Abrir detalhe ─────────────────────────────────────────
+    // â”€â”€ Abrir detalhe â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function abrirDetalhe(int $id): void
     {
         $this->contratoDetalhe = $id;
@@ -465,7 +533,7 @@ class Contratos extends Component
         $this->contratoDetalhe = null;
     }
 
-    // ── Serviços ──────────────────────────────────────────────
+    // â”€â”€ ServiÃ§os â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function abrirServico(int $contratoId, ?int $servicoId = null): void
     {
         $this->resetErrorBag();
@@ -516,9 +584,9 @@ class Contratos extends Component
             'servicoVencimento' => $semValor ? 'nullable|date' : 'required|date',
             'servicoParcelas'   => 'integer|min:1|max:120',
         ], [
-            'servicoDescricao.required'  => 'A descrição é obrigatória.',
+            'servicoDescricao.required'  => 'A descriÃ§Ã£o Ã© obrigatÃ³ria.',
             'servicoValor.required'      => 'Informe o valor.',
-            'servicoPercentual.required' => 'Informe o percentual de êxito.',
+            'servicoPercentual.required' => 'Informe o percentual de Ãªxito.',
             'servicoVencimento.required' => 'Informe a data do primeiro vencimento.',
         ]);
 
@@ -543,63 +611,137 @@ class Contratos extends Component
         if ($this->servicoId) {
             DB::table('contrato_servicos')->where('id', $this->servicoId)
                 ->update(array_merge($dados, ['updated_at' => now()]));
-        } else {
-            DB::table('contrato_servicos')
-                ->insert(array_merge($dados, ['created_at' => now(), 'updated_at' => now()]));
 
-            if (!$semValor && $this->servicoVencimento && $valor > 0) {
-                $this->gerarLancamentosServico($dados);
+            $servico = ContratoServico::find($this->servicoId);
+            if ($servico) {
+                FinanceiroLancamento::sincronizarServico($servico);
+            }
+        } else {
+            $servicoId = DB::table('contrato_servicos')
+                ->insertGetId(array_merge($dados, ['created_at' => now(), 'updated_at' => now()]));
+
+            $servico = ContratoServico::find($servicoId);
+            if ($servico) {
+                FinanceiroLancamento::sincronizarServico($servico);
             }
         }
 
         $this->fecharServico();
-        $msg = $this->servicoId ? 'Serviço atualizado!' : 'Serviço salvo e lançamentos gerados!';
+        $msg = $this->servicoId
+            ? 'Serviço atualizado e financeiro sincronizado!'
+            : ($semValor ? 'Serviço salvo. Esse tipo não gera cobrança automática agora.' : 'Serviço salvo e financeiro gerado!');
         $this->dispatch('toast', message: $msg, type: 'success');
-    }
-
-    private function gerarLancamentosServico(array $servico): void
-    {
-        $contrato  = Contrato::findOrFail($servico['contrato_id']);
-        $tenantId  = Auth::guard('usuarios')->user()?->tenant_id;
-        $parcelas  = max(1, (int) $servico['numero_parcelas']);
-        $valorParc = round($servico['valor'] / $parcelas, 2);
-        $vencimento = \Carbon\Carbon::parse($servico['vencimento']);
-
-        $tipoLanc = $servico['tipo'] === 'consultoria' ? 'receita' : 'receita';
-
-        for ($i = 1; $i <= $parcelas; $i++) {
-            $venc = $parcelas === 1
-                ? $vencimento
-                : $vencimento->copy()->addMonths($i - 1);
-
-            DB::table('financeiro_lancamentos')->insert([
-                'tenant_id'       => $tenantId,
-                'cliente_id'      => $contrato->cliente_id,
-                'contrato_id'     => $contrato->id,
-                'processo_id'     => $servico['processo_id'] ?? null,
-                'tipo'            => $tipoLanc,
-                'descricao'       => $parcelas > 1
-                    ? $servico['descricao'] . " ({$i}/{$parcelas})"
-                    : $servico['descricao'],
-                'valor'           => $valorParc,
-                'vencimento'      => $venc->format('Y-m-d'),
-                'status'          => 'previsto',
-                'numero_parcela'  => $parcelas > 1 ? $i : null,
-                'total_parcelas'  => $parcelas > 1 ? $parcelas : null,
-                'observacoes'     => $servico['observacoes'] ?? null,
-                'created_at'      => now(),
-                'updated_at'      => now(),
-            ]);
-        }
     }
 
     public function excluirServico(int $id): void
     {
+        DB::table('financeiro_lancamentos')
+            ->where('contrato_servico_id', $id)
+            ->whereIn('status', ['previsto', 'atrasado'])
+            ->delete();
+
         DB::table('contrato_servicos')->where('id', $id)->delete();
-        $this->dispatch('toast', message: 'Serviço removido.', type: 'success');
+        $this->dispatch('toast', message: 'Serviço removido e financeiro previsto excluído.', type: 'success');
     }
 
-    // ── Repasses ──────────────────────────────────────────────
+    public function abrirExito(int $servicoId): void
+    {
+        $servico = ContratoServico::with('contrato')->findOrFail($servicoId);
+
+        $this->resetErrorBag();
+        $this->exitoServicoId  = $servico->id;
+        $this->exitoValor      = $servico->valor_realizado
+            ? number_format((float) $servico->valor_realizado, 2, ',', '.')
+            : ($servico->valor > 0 ? number_format((float) $servico->valor, 2, ',', '.') : '');
+        $this->exitoVencimento = now()->format('Y-m-d');
+        $this->exitoObs        = '';
+        $this->modalDetalhe    = false;
+        $this->modalExito      = true;
+    }
+
+    public function fecharExito(): void
+    {
+        $this->modalExito   = false;
+        $this->exitoServicoId = null;
+        $this->exitoValor     = '';
+        $this->exitoVencimento = '';
+        $this->exitoObs        = '';
+        $this->resetErrorBag();
+
+        if ($this->contratoDetalhe) {
+            $this->modalDetalhe = true;
+        }
+    }
+
+    public function realizarExito(): void
+    {
+        $this->validate([
+            'exitoServicoId'  => 'required|integer|min:1',
+            'exitoValor'      => 'required',
+            'exitoVencimento' => 'required|date',
+        ], [
+            'exitoValor.required' => 'Informe o valor do êxito realizado.',
+            'exitoVencimento.required' => 'Informe o vencimento da cobrança.',
+        ]);
+
+        $servico = ContratoServico::with('contrato')->findOrFail($this->exitoServicoId);
+        $valor   = (float) str_replace(['.', ','], ['', '.'], $this->exitoValor);
+
+        if ($servico->tipo !== 'exito') {
+            $this->addError('exitoValor', 'Apenas serviços de êxito podem ser realizados por este fluxo.');
+            return;
+        }
+
+        if ($valor <= 0) {
+            $this->addError('exitoValor', 'Informe um valor maior que zero para realizar o êxito.');
+            return;
+        }
+
+        $recebido = DB::table('financeiro_lancamentos')
+            ->where('contrato_servico_id', $servico->id)
+            ->where('status', 'recebido')
+            ->exists();
+
+        if ($recebido) {
+            $this->addError('exitoValor', 'Este êxito já possui lançamento recebido. Ajuste manualmente no financeiro.');
+            return;
+        }
+
+        DB::table('financeiro_lancamentos')
+            ->where('contrato_servico_id', $servico->id)
+            ->whereIn('status', ['previsto', 'atrasado'])
+            ->delete();
+
+        DB::table('financeiro_lancamentos')->insert([
+            'tenant_id'           => $servico->contrato->tenant_id,
+            'cliente_id'          => $servico->contrato->cliente_id,
+            'contrato_id'         => $servico->contrato->id,
+            'contrato_servico_id' => $servico->id,
+            'processo_id'         => $servico->processo_id,
+            'tipo'                => 'receita',
+            'descricao'           => 'Êxito realizado - ' . $servico->descricao,
+            'valor'               => $valor,
+            'vencimento'          => $this->exitoVencimento,
+            'status'              => 'previsto',
+            'observacoes'         => $this->exitoObs ?: $servico->observacoes,
+            'created_at'          => now(),
+            'updated_at'          => now(),
+        ]);
+
+        DB::table('contrato_servicos')
+            ->where('id', $servico->id)
+            ->update([
+                'valor_realizado' => $valor,
+                'realizado_em'    => now(),
+                'realizado_por'   => Auth::guard('usuarios')->user()?->nome ?? 'Sistema',
+                'updated_at'      => now(),
+            ]);
+
+        $this->fecharExito();
+        $this->dispatch('toast', message: 'Êxito realizado e cobrança gerada no financeiro.', type: 'success');
+    }
+
+    // â”€â”€ Repasses â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function abrirRepasse(int $contratoId, ?int $repasseId = null): void
     {
@@ -662,7 +804,7 @@ class Contratos extends Component
             DB::table('contrato_repasses')
                 ->insert(array_merge($dados, ['created_at' => now(), 'updated_at' => now()]));
 
-            // Gerar lançamentos de repasse para os lançamentos já existentes do contrato
+            // Gerar lanÃ§amentos de repasse para os lanÃ§amentos jÃ¡ existentes do contrato
             $this->gerarLancamentosRepasse($this->repasseContratoId, $dados);
         }
 
@@ -675,7 +817,7 @@ class Contratos extends Component
         $contrato = Contrato::find($contratoId);
         if (!$contrato) return;
 
-        // Buscar lançamentos de receita deste contrato ainda não liquidados
+        // Buscar lanÃ§amentos de receita deste contrato ainda nÃ£o liquidados
         $lancamentos = DB::table('financeiro_lancamentos')
             ->where('contrato_id', $contratoId)
             ->where('tipo', 'receita')
@@ -696,7 +838,7 @@ class Contratos extends Component
                 'cliente_id'  => $contrato->cliente_id,
                 'contrato_id' => $contratoId,
                 'tipo'        => 'repasse',
-                'descricao'   => "Repasse — {$indicador} — " . \Carbon\Carbon::parse($lanc->vencimento)->format('m/Y'),
+                'descricao'   => "Repasse â€” {$indicador} â€” " . \Carbon\Carbon::parse($lanc->vencimento)->format('m/Y'),
                 'valor'       => $valor,
                 'vencimento'  => $lanc->vencimento,
                 'status'      => 'previsto',
@@ -714,18 +856,31 @@ class Contratos extends Component
         $this->dispatch('toast', message: 'Repasse removido.', type: 'success');
     }
 
-    // ── Encerrar contrato ─────────────────────────────────────
+    // â”€â”€ Encerrar contrato â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function encerrar(int $id): void
     {
         DB::table('contratos')->where('id', $id)->update(['status' => 'encerrado', 'updated_at' => now()]);
-        $this->dispatch('toast', message: 'Contrato encerrado.', type: 'success');
+
+        // Cancela lançamentos futuros ainda não recebidos
+        $cancelados = DB::table('financeiro_lancamentos')
+            ->where('contrato_id', $id)
+            ->whereIn('status', ['previsto', 'atrasado'])
+            ->where('vencimento', '>', now()->toDateString())
+            ->update(['status' => 'cancelado', 'updated_at' => now()]);
+
+        $msg = 'Contrato encerrado.';
+        if ($cancelados > 0) {
+            $msg .= " {$cancelados} lançamento(s) futuro(s) cancelado(s) automaticamente.";
+        }
+
+        $this->dispatch('toast', message: $msg, type: 'success');
     }
 
     public function updatingBusca(): void      { $this->resetPage(); }
     public function updatingFiltroTipo(): void  { $this->resetPage(); }
     public function updatingFiltroStatus(): void { $this->resetPage(); }
 
-    // ── Render ────────────────────────────────────────────────
+    // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function render(): \Illuminate\View\View
     {
         $contratos = Contrato::with(['cliente', 'servicos', 'advogadoResponsavel', 'processo'])
@@ -737,7 +892,7 @@ class Contratos extends Component
             ->orderByDesc('created_at')
             ->paginate(15);
 
-        // Métricas
+        // MÃ©tricas
         $totalAtivos     = Contrato::where('status', 'ativo')->count();
         $totalValor      = Contrato::where('status', 'ativo')->sum('valor');
         $totalNaoValid   = Contrato::where('status', 'ativo')->where('validado', false)->count();

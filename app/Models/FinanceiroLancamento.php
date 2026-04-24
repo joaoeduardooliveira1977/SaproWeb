@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Traits\BelongsToTenant;
+use Illuminate\Support\Facades\DB;
 
 class FinanceiroLancamento extends Model
 {
@@ -35,19 +36,21 @@ class FinanceiroLancamento extends Model
         return $this->belongsTo(Contrato::class, 'contrato_id');
     }
 
+    public function servico(): BelongsTo
+    {
+        return $this->belongsTo(ContratoServico::class, 'contrato_servico_id');
+    }
+
     public function processo(): BelongsTo
     {
         return $this->belongsTo(Processo::class, 'processo_id');
     }
-
-    // ── Helpers ────────────────────────────────────────────────
 
     public function isAtrasado(): bool
     {
         return $this->status === 'previsto' && $this->vencimento->isPast();
     }
 
-    /** Atualiza status para "atrasado" se vencido e ainda previsto */
     public static function atualizarAtrasados(): void
     {
         static::where('status', 'previsto')
@@ -55,14 +58,18 @@ class FinanceiroLancamento extends Model
             ->update(['status' => 'atrasado', 'updated_at' => now()]);
     }
 
-    /** Gera lançamentos a partir de um contrato */
     public static function gerarDoContrato(Contrato $contrato): void
     {
-        $tenantId  = $contrato->tenant_id;
-        $clienteId = $contrato->cliente_id;
+        $contrato->loadMissing('servicos');
+
+        if ($contrato->servicos->isNotEmpty()) {
+            static::gerarDosServicos($contrato);
+            return;
+        }
+
         $base = [
-            'tenant_id'   => $tenantId,
-            'cliente_id'  => $clienteId,
+            'tenant_id'   => $contrato->tenant_id,
+            'cliente_id'  => $contrato->cliente_id,
             'contrato_id' => $contrato->id,
             'tipo'        => 'receita',
             'created_at'  => now(),
@@ -77,50 +84,127 @@ class FinanceiroLancamento extends Model
         };
     }
 
+    public static function sincronizarServico(ContratoServico $servico): void
+    {
+        $servico->loadMissing('contrato');
+
+        DB::table('financeiro_lancamentos')
+            ->where('contrato_servico_id', $servico->id)
+            ->whereIn('status', ['previsto', 'atrasado'])
+            ->delete();
+
+        if (!static::servicoGeraFinanceiro($servico) || !$servico->contrato) {
+            return;
+        }
+
+        static::gerarLancamentosDoServico($servico, $servico->contrato);
+    }
+
+    private static function gerarDosServicos(Contrato $contrato): void
+    {
+        DB::table('financeiro_lancamentos')
+            ->where('contrato_id', $contrato->id)
+            ->whereNull('contrato_servico_id')
+            ->where('tipo', 'receita')
+            ->whereIn('status', ['previsto', 'atrasado'])
+            ->delete();
+
+        foreach ($contrato->servicos as $servico) {
+            static::sincronizarServico($servico);
+        }
+    }
+
+    private static function servicoGeraFinanceiro(ContratoServico $servico): bool
+    {
+        if (in_array($servico->tipo, ['exito', 'repasse'], true)) {
+            return false;
+        }
+
+        return (float) $servico->valor > 0 && !empty($servico->vencimento);
+    }
+
+    private static function gerarLancamentosDoServico(ContratoServico $servico, Contrato $contrato): void
+    {
+        $parcelas   = max(1, (int) ($servico->numero_parcelas ?? 1));
+        $valorBase  = round((float) $servico->valor, 2);
+        $valorParc  = round($valorBase / $parcelas, 2);
+        $vencimento = \Carbon\Carbon::parse($servico->vencimento);
+
+        for ($i = 1; $i <= $parcelas; $i++) {
+            $valorAtual = $i === $parcelas
+                ? round($valorBase - ($valorParc * ($parcelas - 1)), 2)
+                : $valorParc;
+
+            DB::table('financeiro_lancamentos')->insert([
+                'tenant_id'           => $contrato->tenant_id,
+                'cliente_id'          => $contrato->cliente_id,
+                'contrato_id'         => $contrato->id,
+                'contrato_servico_id' => $servico->id,
+                'processo_id'         => $servico->processo_id,
+                'tipo'                => 'receita',
+                'descricao'           => $parcelas > 1
+                    ? "{$servico->descricao} ({$i}/{$parcelas})"
+                    : $servico->descricao,
+                'valor'               => $valorAtual,
+                'vencimento'          => $vencimento->copy()->addMonths($i - 1)->format('Y-m-d'),
+                'status'              => 'previsto',
+                'numero_parcela'      => $parcelas > 1 ? $i : null,
+                'total_parcelas'      => $parcelas > 1 ? $parcelas : null,
+                'observacoes'         => $servico->observacoes,
+                'created_at'          => now(),
+                'updated_at'          => now(),
+            ]);
+        }
+    }
+
     private static function gerarMensais(Contrato $contrato, array $base): void
     {
-        // Gera 12 meses a partir do início (ou até data_fim)
-        $dia   = $contrato->dia_vencimento ?? 10;
+        $dia    = $contrato->dia_vencimento ?? 10;
         $inicio = $contrato->data_inicio->copy()->day($dia);
         $fim    = $contrato->data_fim ?? $inicio->copy()->addMonths(11);
         $mes    = $inicio->copy();
         $n      = 1;
 
         while ($mes->lte($fim)) {
-            \Illuminate\Support\Facades\DB::table('financeiro_lancamentos')->insert(array_merge($base, [
-                'descricao'      => $contrato->descricao . " — {$mes->format('m/Y')}",
+            DB::table('financeiro_lancamentos')->insert(array_merge($base, [
+                'descricao'      => $contrato->descricao . ' - ' . $mes->format('m/Y'),
                 'valor'          => $contrato->valor,
                 'vencimento'     => $mes->format('Y-m-d'),
                 'status'         => 'previsto',
                 'numero_parcela' => $n++,
             ]));
+
             $mes->addMonthNoOverflow();
         }
     }
 
     private static function gerarParcelas(Contrato $contrato, array $base): void
     {
-        // Usa total_parcelas dos serviços ou padrão 1
-        $total = max(1, $contrato->servicos()->count() ?: 1);
+        $total        = max(1, $contrato->servicos()->count() ?: 1);
         $valorParcela = round($contrato->valor / $total, 2);
-        $venc = $contrato->data_inicio->copy();
+        $vencimento   = $contrato->data_inicio->copy();
 
         for ($i = 1; $i <= $total; $i++) {
-            \Illuminate\Support\Facades\DB::table('financeiro_lancamentos')->insert(array_merge($base, [
-                'descricao'      => $contrato->descricao . " — Parcela {$i}/{$total}",
-                'valor'          => $valorParcela,
-                'vencimento'     => $venc->format('Y-m-d'),
+            $valorAtual = $i === $total
+                ? round($contrato->valor - ($valorParcela * ($total - 1)), 2)
+                : $valorParcela;
+
+            DB::table('financeiro_lancamentos')->insert(array_merge($base, [
+                'descricao'      => $contrato->descricao . " - Parcela {$i}/{$total}",
+                'valor'          => $valorAtual,
+                'vencimento'     => $vencimento->format('Y-m-d'),
                 'status'         => 'previsto',
                 'numero_parcela' => $i,
                 'total_parcelas' => $total,
             ]));
-            $venc->addMonthNoOverflow();
+
+            $vencimento->addMonthNoOverflow();
         }
     }
 
     private static function gerarUnico(Contrato $contrato, array $base): void
     {
-        \Illuminate\Support\Facades\DB::table('financeiro_lancamentos')->insert(array_merge($base, [
+        DB::table('financeiro_lancamentos')->insert(array_merge($base, [
             'descricao'  => $contrato->descricao,
             'valor'      => $contrato->valor,
             'vencimento' => $contrato->data_inicio->format('Y-m-d'),
