@@ -32,7 +32,71 @@
         @if($processo->cliente) · Cliente {{ $processo->cliente->nome }} @endif
       </div>
     </div>
+    <button onclick="document.getElementById('modal-nova-custa').style.display='flex'"
+      style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nova Custa
+    </button>
   </div>
+
+  {{-- Modal Nova Custa --}}
+  <div id="modal-nova-custa" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:14px;padding:28px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2 style="font-size:16px;font-weight:700;margin:0;">Nova Custa</h2>
+        <button onclick="document.getElementById('modal-nova-custa').style.display='none'"
+          style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:20px;line-height:1;">&times;</button>
+      </div>
+      <form method="POST" action="{{ route('processos.custas.store', $processo->id) }}">
+        @csrf
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px;">Data *</label>
+            <input type="date" name="data" value="{{ now()->format('Y-m-d') }}" required
+              style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px;">Descrição *</label>
+            <input type="text" name="descricao" placeholder="Ex: Taxa de distribuição, Diligência..." required
+              style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px;">Valor (R$) *</label>
+            <input type="number" name="valor" step="0.01" min="0.01" placeholder="0,00" required
+              style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div style="display:flex;gap:20px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+              <input type="checkbox" name="reembolsavel" value="1" checked onchange="toggleReembolso(this)"> Reembolsável pelo cliente
+            </label>
+          </div>
+          <div style="display:flex;gap:20px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+              <input type="checkbox" name="pago" value="1" id="chk-pago" onchange="toggleDataPgto(this)"> Já pago pelo escritório
+            </label>
+          </div>
+          <div id="campo-data-pgto" style="display:none;">
+            <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px;">Data do Pagamento</label>
+            <input type="date" name="data_pagamento" value="{{ now()->format('Y-m-d') }}"
+              style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div style="display:flex;gap:10px;margin-top:6px;">
+            <button type="submit"
+              style="flex:1;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">
+              Salvar Custa
+            </button>
+            <button type="button" onclick="document.getElementById('modal-nova-custa').style.display='none'"
+              style="padding:10px 16px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    function toggleDataPgto(el) { document.getElementById('campo-data-pgto').style.display = el.checked ? 'block' : 'none'; }
+  </script>
 
   <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px;">
     <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">

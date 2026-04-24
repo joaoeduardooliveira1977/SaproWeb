@@ -74,6 +74,7 @@ use App\Http\Controllers\IAController;
         Route::get('/processos/{id}',        [ProcessoController::class, 'show'])->name('processos.show');
         Route::get('/processos/{id}/andamentos', [ProcessoController::class, 'andamentos'])->name('processos.andamentos');
         Route::get('/processos/{id}/custas',     [ProcessoController::class, 'custas'])->name('processos.custas');
+        Route::post('/processos/{id}/custas',                    [ProcessoController::class, 'storeCusta'])->name('processos.custas.store');
         Route::post('/processos/{id}/custas/{custaId}/reembolso', [ProcessoController::class, 'alternarReembolsoCusta'])->name('processos.custas.reembolso');
         Route::post('/processos/{id}/custas/{custaId}/cobranca', [ProcessoController::class, 'gerarCobrancaCusta'])->name('processos.custas.cobranca');
 	Route::get('/processos/{id}/resumo-ia', [ProcessoController::class, 'gerarResumo']);

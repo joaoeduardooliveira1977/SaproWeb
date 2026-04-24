@@ -197,6 +197,33 @@ class ProcessoController extends Controller
         return view('processo-custas', compact('processo', 'totais'));
     }
 
+    public function storeCusta(int $id, \Illuminate\Http\Request $request): RedirectResponse
+    {
+        $processo = Processo::findOrFail($id);
+
+        $request->validate([
+            'data'           => 'required|date',
+            'descricao'      => 'required|string|max:255',
+            'valor'          => 'required|numeric|min:0.01',
+            'data_pagamento' => 'nullable|date',
+        ]);
+
+        $pago = $request->boolean('pago');
+
+        Custa::create([
+            'processo_id'    => $processo->id,
+            'data'           => $request->data,
+            'descricao'      => $request->descricao,
+            'valor'          => $request->valor,
+            'reembolsavel'   => $request->boolean('reembolsavel'),
+            'pago'           => $pago,
+            'data_pagamento' => $pago ? $request->data_pagamento : null,
+            'usuario_id'     => auth('usuarios')->id(),
+        ]);
+
+        return back()->with('sucesso', 'Custa registrada com sucesso.');
+    }
+
     public function alternarReembolsoCusta(int $id, int $custaId): RedirectResponse
     {
         $processo = Processo::findOrFail($id);

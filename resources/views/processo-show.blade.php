@@ -113,6 +113,7 @@
             'historico'        => 'Histórico',
             'jurisprudencia'  => 'Jurisprudência',
         ];
+        $linksCustas = route('processos.custas', $processo->id);
         @endphp
         @foreach($abasPrincipais as $key => $label)
         <button onclick="showTab('{{ $key }}')" id="tab-btn-{{ $key }}"
@@ -133,6 +134,12 @@
             {{ $label }}
         </button>
         @endforeach
+        <a href="{{ $linksCustas }}"
+           style="padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;background:#fff7ed;border:1px solid #fed7aa;
+                  white-space:nowrap;color:#c2410c;text-align:left;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            Custas
+        </a>
     </div>
 
     {{-- ── ABA: DADOS ── --}}
