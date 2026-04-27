@@ -610,7 +610,7 @@
     $hubAtivo   = '';
     $rotasProcessos  = ['processos','processos.kanban','processos.novo','processos.editar','processos.show','documentos','minutas','assinatura-digital','audiencias','prazos','sla','agenda','processos.hub','processos.monitoramento'];
     $rotasCadastros  = ['cadastros.hub','correspondentes','procuracoes','administradoras','tabelas'];
-    $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','horas','financeiro.hub'];
+    $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','horas','financeiro.hub','financeiro.despesas-escritorio'];
     $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','orcamentos','ferramentas.hub','workflow.regras'];
     $rotasAdmin      = ['usuarios','tabelas','administradoras','indices','auditoria','admin.perfis','admin.portal-acesso','admin.portal-mensagens','admin.notificacoes-whatsapp','admin.hub'];
     if (in_array($rota, $rotasProcessos))   $hubAtivo = 'processos';

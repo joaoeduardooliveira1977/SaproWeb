@@ -722,7 +722,7 @@ $abas = [
                     </div>
                 </div>
 
-                <a href="{{ route('financeiro.central') }}?novo=despesa" style="text-decoration:none;">
+                <a href="{{ route('financeiro.despesas-escritorio') }}?novo=1" style="text-decoration:none;">
                     <div style="background:#fff;padding:24px;display:flex;flex-direction:column;gap:10px;cursor:pointer;"
                          onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
                         <div style="width:44px;height:44px;border-radius:12px;background:#fee2e2;display:flex;align-items:center;justify-content:center;">
@@ -872,18 +872,18 @@ $abas = [
             </button>
             <div style="font-size:15px;font-weight:700;color:#1e3a5f;">Esta custa será cobrada do cliente?</div>
             <div style="display:flex;flex-direction:column;gap:10px;">
-                <label style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:2px solid {{ $custaReembolsavel==='sim' ? '#f97316' : '#e2e8f0' }};border-radius:10px;cursor:pointer;background:{{ $custaReembolsavel==='sim' ? '#fff7ed' : '#fff' }}">
-                    <input type="radio" wire:model.live="custaReembolsavel" value="sim" style="margin-top:2px;flex-shrink:0;">
-                    <div>
+                <label style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:2px solid {{ $custaReembolsavel==='sim' ? '#f97316' : '#e2e8f0' }};border-radius:10px;cursor:pointer;background:{{ $custaReembolsavel==='sim' ? '#fff7ed' : '#fff' }};width:100%;box-sizing:border-box;">
+                    <input type="radio" wire:model.live="custaReembolsavel" value="sim" style="width:16px;height:16px;flex-shrink:0;margin-top:3px;padding:0;border:none;">
+                    <div style="flex:1;min-width:0;">
                         <div style="font-size:13px;font-weight:700;color:#c2410c;">Sim — cobrar do cliente (reembolsável)</div>
-                        <div style="font-size:12px;color:#64748b;margin-top:2px;">A custa aparecerá na lista de reembolsos a cobrar do cliente.</div>
+                        <div style="font-size:12px;color:#64748b;margin-top:4px;line-height:1.5;">A custa aparecerá na lista de reembolsos a cobrar do cliente.</div>
                     </div>
                 </label>
-                <label style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:2px solid {{ $custaReembolsavel==='nao' ? '#94a3b8' : '#e2e8f0' }};border-radius:10px;cursor:pointer;background:{{ $custaReembolsavel==='nao' ? '#f8fafc' : '#fff' }}">
-                    <input type="radio" wire:model.live="custaReembolsavel" value="nao" style="margin-top:2px;flex-shrink:0;">
-                    <div>
+                <label style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:2px solid {{ $custaReembolsavel==='nao' ? '#94a3b8' : '#e2e8f0' }};border-radius:10px;cursor:pointer;background:{{ $custaReembolsavel==='nao' ? '#f8fafc' : '#fff' }};width:100%;box-sizing:border-box;">
+                    <input type="radio" wire:model.live="custaReembolsavel" value="nao" style="width:16px;height:16px;flex-shrink:0;margin-top:3px;padding:0;border:none;">
+                    <div style="flex:1;min-width:0;">
                         <div style="font-size:13px;font-weight:700;color:#475569;">Não — despesa do escritório</div>
-                        <div style="font-size:12px;color:#64748b;margin-top:2px;">Será registrada como pagamento simples do escritório, sem reembolso.</div>
+                        <div style="font-size:12px;color:#64748b;margin-top:4px;line-height:1.5;">Será registrada como pagamento simples do escritório, sem reembolso.</div>
                     </div>
                 </label>
             </div>
