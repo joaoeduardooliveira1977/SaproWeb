@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\{Tenant, Usuario};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\{Auth, DB, Hash};
+use Illuminate\Support\Str;
 
 class SuperAdminController extends Controller
 {
@@ -95,6 +96,86 @@ class SuperAdminController extends Controller
             session()->forget('super_admin_id');
         }
         return redirect()->route('super-admin.index');
+    }
+
+    public function criar()
+    {
+        $planos = ['starter', 'pro', 'enterprise'];
+        return view('super-admin.criar', compact('planos'));
+    }
+
+    public function salvar(Request $request)
+    {
+        $request->validate([
+            'nome'        => 'required|string|min:3|max:150',
+            'email'       => 'required|email|unique:tenants,email',
+            'plano'       => 'required|in:starter,pro,enterprise',
+            'cnpj'        => 'nullable|string|max:18',
+            'telefone'    => 'nullable|string|max:20',
+            'oab'         => 'nullable|string|max:30',
+            'cidade'      => 'nullable|string|max:100',
+            'admin_nome'  => 'required|string|min:3|max:150',
+            'admin_email' => 'required|email|unique:usuarios,email',
+            'admin_senha' => 'required|string|min:8|confirmed',
+        ], [
+            'nome.required'        => 'O nome do escritório é obrigatório.',
+            'email.required'       => 'O e-mail é obrigatório.',
+            'email.unique'         => 'Este e-mail já está cadastrado.',
+            'plano.required'       => 'Selecione o plano.',
+            'admin_nome.required'  => 'O nome do administrador é obrigatório.',
+            'admin_email.required' => 'O e-mail de login é obrigatório.',
+            'admin_email.unique'   => 'Este e-mail de usuário já está em uso.',
+            'admin_senha.required' => 'A senha é obrigatória.',
+            'admin_senha.min'      => 'A senha deve ter no mínimo 8 caracteres.',
+            'admin_senha.confirmed'=> 'As senhas não conferem.',
+        ]);
+
+        $nomeRef = $request->nome;
+
+        DB::transaction(function () use ($request) {
+            $slug     = Str::slug($request->nome);
+            $slugBase = $slug;
+            $i        = 1;
+            while (Tenant::where('slug', $slug)->exists()) {
+                $slug = $slugBase . '-' . $i++;
+            }
+
+            $limites = Tenant::limitesPlano($request->plano);
+
+            $tenant = Tenant::create([
+                'nome'                => $request->nome,
+                'email'               => $request->email,
+                'slug'                => $slug,
+                'cnpj'                => $request->cnpj     ?: null,
+                'telefone'            => $request->telefone ?: null,
+                'oab'                 => $request->oab      ?: null,
+                'cidade'              => $request->cidade   ?: null,
+                'plano'               => $request->plano,
+                'ativo'               => true,
+                'trial_expira_em'     => null,
+                'limite_processos'    => $limites['processos'],
+                'limite_usuarios'     => $limites['usuarios'],
+                'ia_habilitada'       => $limites['ia'],
+                'datajud_habilitado'  => $limites['datajud'],
+                'whatsapp_habilitado' => $limites['whatsapp'],
+                'timezone'            => 'America/Sao_Paulo',
+                'onboarding_concluido'=> false,
+            ]);
+
+            Usuario::create([
+                'tenant_id' => $tenant->id,
+                'nome'      => $request->admin_nome,
+                'email'     => $request->admin_email,
+                'login'     => $request->admin_email,
+                'password'  => Hash::make($request->admin_senha),
+                'perfil'    => 'administrador',
+                'ativo'     => true,
+            ]);
+        });
+
+        return redirect()
+            ->route('super-admin.index')
+            ->with('sucesso', "Tenant \"{$nomeRef}\" criado com sucesso!");
     }
 
     public function excluir(int $id)

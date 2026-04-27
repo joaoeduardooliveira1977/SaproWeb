@@ -3,10 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Models\Andamento;
-use App\Models\Processo;
-use App\Observers\AndamentoObserver;
-use App\Observers\ProcessoObserver;
+use App\Models\{Andamento, Processo, Recebimento, HonorarioParcela};
+use App\Observers\{AndamentoObserver, ProcessoObserver, RecebimentoObserver, HonorarioParcelaObserver};
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,5 +17,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Processo::observe(ProcessoObserver::class);
         Andamento::observe(AndamentoObserver::class);
+        Recebimento::observe(RecebimentoObserver::class);
+        HonorarioParcela::observe(HonorarioParcelaObserver::class);
     }
 }

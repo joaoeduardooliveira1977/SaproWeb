@@ -648,6 +648,23 @@
         </div>
         @endif
 
+        {{-- Indicador (apenas para Clientes) --}}
+        @if(in_array('Cliente', $tipos_selecionados) && $indicadores->count() > 0)
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+            <label class="lbl" style="display:block;margin-bottom:6px;">
+                Indicado por
+                <span style="font-weight:400;color:var(--muted);">(quem indicou este cliente)</span>
+            </label>
+            <select wire:model="indicadorId"
+                style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:var(--text);">
+                <option value="">— Nenhum —</option>
+                @foreach($indicadores as $ind)
+                <option value="{{ $ind->id }}">{{ $ind->nome }}</option>
+                @endforeach
+            </select>
+        </div>
+        @endif
+
         {{-- Honorário (obrigatório para novo Cliente) --}}
         @if(in_array('Cliente', $tipos_selecionados) && !$pessoaId)
         <div style="border-top:1px solid var(--border);padding-top:16px;">

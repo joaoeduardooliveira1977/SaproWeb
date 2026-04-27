@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
-use App\Models\{Pessoa, Administradora, Documento, Honorario};
+use App\Models\{Pessoa, Administradora, Documento, Honorario, Indicador};
 use Illuminate\Support\Facades\{Auth, DB, Storage};
 
 class Pessoas extends Component
@@ -51,6 +51,7 @@ class Pessoas extends Component
     public array  $tipos_selecionados   = [];
     public array  $advogados_ids        = [];
     public ?int   $administradoraId     = null;
+    public ?int   $indicadorId          = null;
 
     // ── Honorário (obrigatório para Cliente) ──────────────
     public string  $honorarioTipo       = 'fixo_mensal';
@@ -143,6 +144,7 @@ class Pessoas extends Component
             $this->tipos_selecionados  = $p->listaTipos();
             $this->administradoraId    = $p->administradora_id;
             $this->advogados_ids       = $p->advogadosResponsaveis()->pluck('pessoas.id')->map(fn($id) => (string) $id)->toArray();
+            $this->indicadorId         = $p->indicador_id;
             $this->contratoAtual       = $p->contrato_arquivo;
             $this->contratoAtualNome   = $p->contrato_arquivo_original;
         }
@@ -179,6 +181,7 @@ class Pessoas extends Component
             'oab'            => $this->oab ?: null,
             'observacoes'    => $this->observacoes ?: null,
             'administradora_id' => $this->administradoraId ?: null,
+            'indicador_id'      => in_array('Cliente', $this->tipos_selecionados) ? ($this->indicadorId ?: null) : null,
         ];
 
         // Upload do contrato de validação
@@ -462,6 +465,7 @@ Use linguagem profissional e objetiva.";
         $this->tipos_selecionados = [];
         $this->advogados_ids      = [];
         $this->administradoraId   = null;
+        $this->indicadorId        = null;
         $this->honorarioTipo      = 'fixo_mensal';
         $this->honorarioValor     = '';
         $this->honorarioDescricao = '';
@@ -552,6 +556,7 @@ Use linguagem profissional e objetiva.";
 
         $administradoras      = Administradora::ativas()->orderBy('nome')->get();
         $advogadosDisponiveis = Pessoa::ativos()->doTipo('Advogado')->orderBy('nome')->get(['id','nome']);
+        $indicadores          = Indicador::ativos()->orderBy('nome')->get(['id','nome']);
         $usuario              = Auth::guard('usuarios')->user();
         $podeVerContrato      = $usuario && ($usuario->isAdmin() || $usuario->perfil === 'financeiro');
 
@@ -573,6 +578,7 @@ Use linguagem profissional e objetiva.";
             'tiposDisponiveis'     => self::TIPOS,
             'administradoras'      => $administradoras,
             'advogadosDisponiveis' => $advogadosDisponiveis,
+            'indicadores'          => $indicadores,
             'podeVerContrato'      => $podeVerContrato,
             'totalPessoas'         => $totalPessoas,
             'totalClientes'        => $totalClientes,

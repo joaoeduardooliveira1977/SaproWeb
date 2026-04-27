@@ -22,6 +22,8 @@ use App\Http\Controllers\IAController;
 	Route::prefix('super-admin')->name('super-admin.')->middleware(['auth:usuarios', 'super_admin'])->group(function () {
 		Route::get('/',                   [\App\Http\Controllers\SuperAdminController::class, 'index'])->name('index');
 		Route::get('/voltar',             [\App\Http\Controllers\SuperAdminController::class, 'voltarSuperAdmin'])->name('voltar');
+		Route::get('/novo',               [\App\Http\Controllers\SuperAdminController::class, 'criar'])->name('criar');
+		Route::post('/novo',              [\App\Http\Controllers\SuperAdminController::class, 'salvar'])->name('salvar');
 		Route::get('/{id}',               [\App\Http\Controllers\SuperAdminController::class, 'show'])->name('show');
 		Route::post('/{id}/plano',        [\App\Http\Controllers\SuperAdminController::class, 'atualizarPlano'])->name('plano');
 		Route::post('/{id}/toggle',       [\App\Http\Controllers\SuperAdminController::class, 'toggleAtivo'])->name('toggle');
@@ -35,7 +37,7 @@ use App\Http\Controllers\IAController;
 	})->name('tenant.planos');
 
 // ─── Registro ──────────────────────────────────
-	Route::get('/registro',  [\App\Http\Controllers\RegistroController::class, 'index'])->name('registro');
+	Route::get('/registro', \App\Livewire\Auth\RegistroTenant::class)->name('registro');
 	Route::post('/registro', [\App\Http\Controllers\RegistroController::class, 'store'])->name('registro.store');
 
 
@@ -108,6 +110,8 @@ use App\Http\Controllers\IAController;
         Route::get('/financeiro/custas-reembolso', \App\Livewire\Financeiro\CustasReembolso::class)->name('financeiro.custas-reembolso');
         Route::get('/honorarios',             fn() => view('honorarios'))->name('honorarios');
         Route::get('/inadimplencia',          fn() => view('inadimplencia'))->name('inadimplencia');
+        Route::get('/indicadores',            fn() => view('indicadores'))->name('indicadores');
+        Route::get('/comissoes',              fn() => view('comissoes'))->name('comissoes');
     });
 
     // ── Relatórios ──────────────────────────────────────────────

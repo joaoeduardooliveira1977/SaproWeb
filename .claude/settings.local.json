@@ -76,7 +76,19 @@
       "Bash(grep -n '$f->' c:/projetos/saproweb-base/resources/views/livewire/financeiro-central.blade.php)",
       "Bash(dir \"c:\\\\projetos\\\\saproweb-base\\\\app\\\\Models\")",
       "Bash(findstr /i honor)",
-      "Bash(dir \"c:\\\\projetos\\\\saproweb-base\\\\database\\\\migrations\")"
+      "Bash(dir \"c:\\\\projetos\\\\saproweb-base\\\\database\\\\migrations\")",
+      "Bash(C:/laragon/bin/php/php-8.3.3-Win32-vs16-x64/php.exe artisan *)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" artisan *)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Models/Indicador.php)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Models/Comissao.php)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Services/Financeiro/ComissaoService.php)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Observers/RecebimentoObserver.php)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Observers/HonorarioParcelaObserver.php)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Livewire/Pessoas.php)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Models/Pessoa.php)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Providers/AppServiceProvider.php)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Livewire/Auth/RegistroTenant.php)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Http/Controllers/SuperAdminController.php)"
     ]
   }
 }

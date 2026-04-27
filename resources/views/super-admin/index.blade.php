@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Admin — Software Jur�dico</title>
+    <title>Super Admin — Software Jur�dico</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; min-height: 100vh; }
@@ -36,7 +36,7 @@
 
 <div class="topbar">
     <div class="topbar-title">
-        ⚖️ Software Jur�dico
+        ⚖️ Software Jur�dico
         <span class="topbar-badge">SUPER ADMIN</span>
     </div>
     <a href="{{ route('dashboard') }}" class="btn btn-blue" style="color:#93c5fd;background:rgba(255,255,255,.1);">
@@ -80,7 +80,12 @@
     <div class="card">
         <div style="padding:16px 20px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
             <strong style="font-size:15px;color:#1e293b;">Escritórios Cadastrados</strong>
-            <span style="font-size:13px;color:#64748b;">{{ $stats['total_tenants'] }} tenant(s)</span>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:13px;color:#64748b;">{{ $stats['total_tenants'] }} tenant(s)</span>
+                <a href="{{ route('super-admin.criar') }}" class="btn btn-green" style="font-size:12px;padding:6px 14px;">
+                    ➕ Novo Tenant
+                </a>
+            </div>
         </div>
         <table>
             <thead>

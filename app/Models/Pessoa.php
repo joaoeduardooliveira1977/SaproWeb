@@ -17,7 +17,7 @@ class Pessoa extends Model
         'nome', 'tipo_pessoa', 'cpf_cnpj', 'rg', 'inscricao_estadual', 'data_nascimento',
         'telefone', 'celular', 'email',
         'logradouro', 'cidade', 'estado', 'cep',
-        'oab', 'observacoes', 'ativo', 'administradora_id',
+        'oab', 'observacoes', 'ativo', 'administradora_id', 'indicador_id',
         'contrato_arquivo', 'contrato_arquivo_original', 'contrato_validado_em', 'contrato_validado_por',
     ];
 
@@ -104,6 +104,16 @@ class Pessoa extends Model
     public function administradora(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Administradora::class);
+    }
+
+    public function indicador(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Indicador::class, 'indicador_id');
+    }
+
+    public function comissoes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Comissao::class, 'pessoa_id');
     }
 
     // ── Scopes ─────────────────────────────────────
