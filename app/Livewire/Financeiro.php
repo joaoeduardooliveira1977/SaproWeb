@@ -8,7 +8,7 @@ use App\Models\{Apontamento, Pagamento, Recebimento, Fornecedor, OrigemRecebimen
 use Illuminate\Support\Facades\Auth;
 
 /**
- * Software Jur�dico — Módulo Financeiro por Processo
+ * Software Jur�dico — Módulo Financeiro por Processo
  * Gerencia Apontamentos, Pagamentos e Recebimentos.
  */
 class Financeiro extends Component
@@ -34,6 +34,7 @@ class Financeiro extends Component
     public string $data_vencimento = '';
     public string $data_pagamento  = '';
     public bool   $pago            = false;
+    public bool   $reembolsavel    = false;
     public string $fornecedor_id   = '';
 
     // ── Campos de Recebimento ──────────────────
@@ -69,6 +70,11 @@ class Financeiro extends Component
     {
         $this->processoId = $processoId;
         $this->data       = today()->format('Y-m-d');
+
+        if (session()->has('novo_pagamento_reembolsavel')) {
+            $this->reembolsavel = session()->pull('novo_pagamento_reembolsavel');
+        }
+
         $this->atualizarTotais();
     }
 
@@ -177,8 +183,9 @@ class Financeiro extends Component
             'documento'       => $this->documento        ?: null,
             'data_vencimento' => $this->data_vencimento  ?: null,
             'data_pagamento'  => $this->data_pagamento   ?: null,
-            'pago'            => $this->pago,
-            'usuario_id'      => Auth::guard('usuarios')->id(),
+            'pago'          => $this->pago,
+            'reembolsavel'  => $this->reembolsavel,
+            'usuario_id'    => Auth::guard('usuarios')->id(),
         ];
 
         $this->registroId

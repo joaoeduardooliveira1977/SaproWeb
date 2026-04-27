@@ -16,13 +16,6 @@
     $cobrancasAberto = \App\Models\Recebimento::where('recebido', false)->count();
     $titulosAtivos   = $cobrancasAberto;
 
-    // Saúde financeira (0–100)
-    $saude = 100;
-    if ($inadimplentes > 0)               $saude -= min(40, $inadimplentes * 10);
-    if ($aReceber > 0 && $recebidoMes == 0) $saude -= 20;
-    if ($honorariosPend > 0)              $saude -= 10;
-    $saude = max(0, $saude);
-
     // Últimos recebimentos
     $ultimosRecebimentos = \App\Models\Recebimento::with('processo.cliente')
                             ->where('recebido', true)
@@ -58,107 +51,6 @@
             style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#fff;border:1.5px solid var(--border);color:var(--text);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">
             Ver Relatórios
         </a>
-    </div>
-</div>
-
-{{-- ── Linha 1: Resumo Inteligente + Painel Executivo ── --}}
-<div style="display:grid;grid-template-columns:1fr 400px;gap:20px;margin-bottom:20px;" class="fin-hub-top">
-
-    {{-- Resumo Inteligente --}}
-    <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
-            <div style="font-size:17px;font-weight:800;color:var(--text);">Resumo Inteligente</div>
-            <span style="padding:4px 12px;border-radius:99px;font-size:12px;font-weight:700;
-                background:{{ $saude >= 70 ? '#f0fdf4' : ($saude >= 40 ? '#fffbeb' : '#fef2f2') }};
-                color:{{ $saude >= 70 ? '#16a34a' : ($saude >= 40 ? '#d97706' : '#dc2626') }};
-                border:1px solid {{ $saude >= 70 ? '#86efac' : ($saude >= 40 ? '#fde68a' : '#fca5a5') }};">
-                Saúde Financeira: {{ $saude }}%
-            </span>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
-
-            @if($inadimplentes === 0)
-            <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <div style="font-size:14px;font-weight:700;color:#16a34a;">Tudo em ordem: <strong>nenhuma inadimplência registrada.</strong></div>
-                    <div style="font-size:12px;color:var(--muted);margin-top:2px;">Seu fluxo financeiro está saudável e sem risco imediato.</div>
-                </div>
-                <span style="font-size:20px;">✅</span>
-            </div>
-            @else
-            <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <div style="font-size:14px;font-weight:700;color:#dc2626;">Existem <strong>{{ $inadimplentes }} cliente(s) inadimplente(s).</strong></div>
-                    <div style="font-size:12px;color:var(--muted);margin-top:2px;">Priorize cobrança dos títulos mais atrasados.</div>
-                </div>
-                <span style="font-size:20px;">⚠️</span>
-            </div>
-            @endif
-
-            @if($honorariosPend > 0)
-            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <div style="font-size:14px;font-weight:700;color:#d97706;">Existem <strong>R$ {{ number_format($honorariosPend, 2, ',', '.') }} em honorários pendentes.</strong></div>
-                    <div style="font-size:12px;color:var(--muted);margin-top:2px;">{{ $cobrancasAberto }} cliente(s) aguardam cobrança ou confirmação de pagamento.</div>
-                </div>
-                <span style="font-size:20px;">💰</span>
-            </div>
-            @endif
-
-            @if($recebidoMes == 0)
-            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <div style="font-size:14px;font-weight:700;color:#2563a8;">Ainda não houve <strong>recebimentos registrados neste mês.</strong></div>
-                    <div style="font-size:12px;color:var(--muted);margin-top:2px;">Registrar o primeiro pagamento melhora os indicadores da central.</div>
-                </div>
-                <span style="font-size:20px;">📋</span>
-            </div>
-            @endif
-        </div>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <a href="{{ route('inadimplencia') }}"
-                style="padding:9px 18px;background:var(--primary);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
-                Cobrar Cliente
-            </a>
-            <a href="{{ route('financeiro') }}"
-                style="padding:9px 18px;background:#fff;border:1.5px solid var(--border);color:var(--text);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">
-                Registrar Recebimento
-            </a>
-            <a href="{{ route('financeiro.consolidado') }}"
-                style="padding:9px 18px;background:#fff;border:1.5px solid var(--border);color:var(--text);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">
-                Abrir Financeiro
-            </a>
-        </div>
-    </div>
-
-    {{-- Painel Executivo --}}
-    <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;color:var(--text);">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px;">Painel Executivo</div>
-        <div style="font-size:30px;font-weight:800;letter-spacing:-1px;margin-bottom:8px;color:var(--primary);">
-            R$ {{ number_format($honorariosPend + $aReceber, 2, ',', '.') }}
-        </div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5;">
-            Total atual em honorários pendentes, com carteira {{ $inadimplentes === 0 ? 'estável e sem clientes inadimplentes' : 'com ' . $inadimplentes . ' clientes inadimplentes' }} no momento.
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            @php
-            $submetricas = [
-                ['val' => $inadimplentes,                                                 'label' => 'Clientes inadimplentes'],
-                ['val' => $cobrancasAberto,                                               'label' => 'Cobranças em aberto'],
-                ['val' => 'R$ ' . number_format($recebidoMes, 2, ',', '.'),              'label' => 'Recebido no mês'],
-                ['val' => $inadimplentes === 0 ? 'Nenhum' : $inadimplentes . ' alertas', 'label' => $inadimplentes === 0 ? 'Sem alertas críticos' : 'Alertas ativos'],
-            ];
-            @endphp
-            @foreach($submetricas as $sm)
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;">
-                <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px;">{{ $sm['val'] }}</div>
-                <div style="font-size:11px;color:var(--muted);">{{ $sm['label'] }}</div>
-            </div>
-            @endforeach
-        </div>
     </div>
 </div>
 
@@ -437,7 +329,6 @@
 
 <style>
 @media (max-width: 1200px) {
-    .fin-hub-top    { grid-template-columns: 1fr !important; }
     .fin-hub-bottom { grid-template-columns: 1fr !important; }
 }
 @media (max-width: 768px) {

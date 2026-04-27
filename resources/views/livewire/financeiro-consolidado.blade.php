@@ -1,4 +1,5 @@
-<div>
+<div x-data="{ lAberto: false, lPasso: 'main' }"
+     @lancamento-passo.window="lPasso = $event.detail.passo; lAberto = true">
 
 {{-- ── Cabeçalho ── --}}
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
@@ -21,11 +22,11 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             Gerar relatório
         </a>
-        <a href="{{ route('financeiro') }}"
-            style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:var(--primary);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
+        <button @click="lAberto=true; lPasso='main'"
+            style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:var(--primary);color:#fff;border-radius:8px;font-size:13px;font-weight:700;border:none;cursor:pointer;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Novo lançamento
-        </a>
+        </button>
     </div>
 </div>
 
@@ -639,5 +640,269 @@ $abas = [
     .fin-kpis { grid-template-columns: 1fr 1fr !important; }
 }
 </style>
+
+{{-- ── Modal: Tipo de Lançamento (multi-step) ── --}}
+<div :style="lAberto ? 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;' : 'display:none'"
+     @click.self="lAberto=false; lPasso='main'">
+    <div style="background:#fff;border-radius:16px;width:100%;max-width:600px;box-shadow:0 24px 64px rgba(0,0,0,.2);overflow:hidden;"
+         @click.stop>
+
+        {{-- Header dinâmico --}}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #e2e8f0;">
+            <div>
+                <div style="font-size:17px;font-weight:800;color:#1e3a5f;">
+                    <span x-show="lPasso==='main'">O que deseja lançar?</span>
+                    <span x-show="lPasso==='honorario'">Honorário de Processo</span>
+                    <span x-show="lPasso==='honorario-fixo'">Honorário Fixo</span>
+                    <span x-show="lPasso==='exito'">Honorário de Êxito</span>
+                    <span x-show="lPasso==='custa'">Custa Processual</span>
+                </div>
+                <div style="font-size:12px;color:#64748b;margin-top:2px;">
+                    <span x-show="lPasso==='main'">Escolha o tipo para ir direto ao lugar certo</span>
+                    <span x-show="lPasso==='honorario'">Qual o tipo de honorário?</span>
+                    <span x-show="lPasso==='honorario-fixo'">Selecione o processo e continue</span>
+                    <span x-show="lPasso==='exito'">Registre o acordo de êxito do processo</span>
+                    <span x-show="lPasso==='custa'">Defina se a custa será cobrada do cliente</span>
+                </div>
+            </div>
+            <button @click="lAberto=false; lPasso='main'"
+                style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:22px;line-height:1;padding:4px;">&times;</button>
+        </div>
+
+        {{-- Passo 1: 4 opções principais --}}
+        <div x-show="lPasso==='main'">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#e2e8f0;">
+
+                <a href="{{ route('financeiro.central') }}?novo=receita" style="text-decoration:none;">
+                    <div style="background:#fff;padding:24px;display:flex;flex-direction:column;gap:10px;cursor:pointer;"
+                         onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='#fff'">
+                        <div style="width:44px;height:44px;border-radius:12px;background:#dcfce7;display:flex;align-items:center;justify-content:center;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-size:14px;font-weight:700;color:#15803d;">Receita / Serviço Avulso</div>
+                            <div style="font-size:12px;color:#64748b;margin-top:3px;line-height:1.5;">Reunião, consultoria, cobrança direta ao cliente — sem vínculo de processo.</div>
+                        </div>
+                        <div style="font-size:11px;font-weight:700;color:#16a34a;display:flex;align-items:center;gap:4px;">
+                            Ir para Financeiro Central
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+                </a>
+
+                <div @click="$wire.call('carregarProcessos'); lPasso='honorario'"
+                     style="background:#fff;padding:24px;display:flex;flex-direction:column;gap:10px;cursor:pointer;"
+                     onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='#fff'">
+                    <div style="width:44px;height:44px;border-radius:12px;background:#dbeafe;display:flex;align-items:center;justify-content:center;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:14px;font-weight:700;color:#1d4ed8;">Honorário de Processo</div>
+                        <div style="font-size:12px;color:#64748b;margin-top:3px;line-height:1.5;">Parcela, êxito ou recebimento vinculado a um processo específico.</div>
+                    </div>
+                    <div style="font-size:11px;font-weight:700;color:#2563eb;display:flex;align-items:center;gap:4px;">
+                        Escolher tipo →
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                </div>
+
+                <div @click="lPasso='custa'"
+                     style="background:#fff;padding:24px;display:flex;flex-direction:column;gap:10px;cursor:pointer;"
+                     onmouseover="this.style.background='#fff7ed'" onmouseout="this.style.background='#fff'">
+                    <div style="width:44px;height:44px;border-radius:12px;background:#ffedd5;display:flex;align-items:center;justify-content:center;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:14px;font-weight:700;color:#c2410c;">Custa Processual</div>
+                        <div style="font-size:12px;color:#64748b;margin-top:3px;line-height:1.5;">Taxa de distribuição, diligência, guia — paga pelo escritório e reembolsável pelo cliente.</div>
+                    </div>
+                    <div style="font-size:11px;font-weight:700;color:#ea580c;display:flex;align-items:center;gap:4px;">
+                        Registrar custa →
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                </div>
+
+                <a href="{{ route('financeiro.central') }}?novo=despesa" style="text-decoration:none;">
+                    <div style="background:#fff;padding:24px;display:flex;flex-direction:column;gap:10px;cursor:pointer;"
+                         onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+                        <div style="width:44px;height:44px;border-radius:12px;background:#fee2e2;display:flex;align-items:center;justify-content:center;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-size:14px;font-weight:700;color:#dc2626;">Despesa do Escritório</div>
+                            <div style="font-size:12px;color:#64748b;margin-top:3px;line-height:1.5;">Aluguel, software, salário, conta de luz — saída do escritório, não do processo.</div>
+                        </div>
+                        <div style="font-size:11px;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:4px;">
+                            Ir para Financeiro Central
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+        {{-- Passo 2: Tipo de Honorário --}}
+        <div x-show="lPasso==='honorario'" style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+            <button @click="lPasso='main'"
+                style="align-self:flex-start;display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:#64748b;font-size:13px;font-weight:600;padding:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                Voltar
+            </button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div @click="lPasso='honorario-fixo'"
+                     style="border:2px solid #e2e8f0;border-radius:12px;padding:20px;cursor:pointer;"
+                     onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#e2e8f0'">
+                    <div style="width:40px;height:40px;border-radius:10px;background:#dbeafe;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="12" y1="6" x2="12" y2="18"/><line x1="6" y1="12" x2="18" y2="12"/></svg>
+                    </div>
+                    <div style="font-size:14px;font-weight:700;color:#1d4ed8;">Honorário Fixo</div>
+                    <div style="font-size:12px;color:#64748b;margin-top:4px;line-height:1.5;">Parcela mensal ou recebimento avulso vinculado ao processo.</div>
+                </div>
+                <div @click="$wire.call('abrirEtapaExito')"
+                     style="border:2px solid #e2e8f0;border-radius:12px;padding:20px;cursor:pointer;"
+                     onmouseover="this.style.borderColor='#7c3aed'" onmouseout="this.style.borderColor='#e2e8f0'">
+                    <div style="width:40px;height:40px;border-radius:10px;background:#ede9fe;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div style="font-size:14px;font-weight:700;color:#6d28d9;">Honorário de Êxito</div>
+                    <div style="font-size:12px;color:#64748b;margin-top:4px;line-height:1.5;">Percentual ou valor a receber quando o processo for ganho.</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Passo 3A: Honorário Fixo — selecionar processo --}}
+        <div x-show="lPasso==='honorario-fixo'" style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+            <button @click="lPasso='honorario'"
+                style="align-self:flex-start;display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:#64748b;font-size:13px;font-weight:600;padding:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                Voltar
+            </button>
+            <div>
+                <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px;">Processo</label>
+                <select wire:model="honorarioFixoProcessoId"
+                    style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;background:#fff;">
+                    <option value="">— selecione o processo —</option>
+                    @foreach($processosLista as $proc)
+                    <option value="{{ $proc['id'] }}">{{ $proc['numero'] }} — {{ $proc['cliente_nome'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <button wire:click="irParaHonorarioFixo"
+                style="padding:11px 20px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;align-self:flex-end;">
+                Ir para o processo →
+            </button>
+        </div>
+
+        {{-- Passo 3B: Honorário de Êxito — formulário --}}
+        <div x-show="lPasso==='exito'" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+            <button @click="lPasso='honorario'"
+                style="align-self:flex-start;display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:#64748b;font-size:13px;font-weight:600;padding:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                Voltar
+            </button>
+
+            @if($exitoSalvo)
+            <div style="padding:24px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;text-align:center;">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" style="margin:0 auto 10px;display:block;"><polyline points="20 6 9 17 4 12"/></svg>
+                <div style="font-size:15px;font-weight:700;color:#15803d;">Honorário de Êxito registrado!</div>
+                <div style="font-size:12px;color:#64748b;margin-top:4px;">Uma parcela pendente foi criada no processo selecionado.</div>
+                <button @click="lAberto=false; lPasso='main'"
+                    style="margin-top:14px;padding:8px 24px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">
+                    Fechar
+                </button>
+            </div>
+            @else
+            @if($exitoErro)
+            <div style="padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:13px;font-weight:600;">
+                {{ $exitoErro }}
+            </div>
+            @endif
+            <div>
+                <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px;">
+                    Processo <span style="color:#dc2626">*</span>
+                </label>
+                <select wire:model="exitoProcessoId"
+                    style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;background:#fff;">
+                    <option value="">— selecione o processo —</option>
+                    @foreach($processosLista as $proc)
+                    <option value="{{ $proc['id'] }}">{{ $proc['numero'] }} — {{ $proc['cliente_nome'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px;">% Êxito</label>
+                    <input wire:model="exitoPercentual" type="text" placeholder="Ex: 20" inputmode="decimal"
+                        style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px;">Valor Estimado</label>
+                    <input wire:model="exitoValor" type="text" placeholder="0,00" inputmode="decimal"
+                        style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px;">
+                        Data <span style="color:#dc2626">*</span>
+                    </label>
+                    <input wire:model="exitoData" type="date"
+                        style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px;">Descrição</label>
+                    <input wire:model="exitoDescricao" type="text" placeholder="Honorário de Êxito"
+                        style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                </div>
+            </div>
+            <button wire:click="salvarHonorarioExito"
+                style="padding:11px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;align-self:flex-end;">
+                Salvar Honorário de Êxito
+            </button>
+            @endif
+        </div>
+
+        {{-- Passo 4: Custa — definir reembolso --}}
+        <div x-show="lPasso==='custa'" style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+            <button @click="lPasso='main'"
+                style="align-self:flex-start;display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:#64748b;font-size:13px;font-weight:600;padding:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                Voltar
+            </button>
+            <div style="font-size:15px;font-weight:700;color:#1e3a5f;">Esta custa será cobrada do cliente?</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <label style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:2px solid {{ $custaReembolsavel==='sim' ? '#f97316' : '#e2e8f0' }};border-radius:10px;cursor:pointer;background:{{ $custaReembolsavel==='sim' ? '#fff7ed' : '#fff' }}">
+                    <input type="radio" wire:model.live="custaReembolsavel" value="sim" style="margin-top:2px;flex-shrink:0;">
+                    <div>
+                        <div style="font-size:13px;font-weight:700;color:#c2410c;">Sim — cobrar do cliente (reembolsável)</div>
+                        <div style="font-size:12px;color:#64748b;margin-top:2px;">A custa aparecerá na lista de reembolsos a cobrar do cliente.</div>
+                    </div>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:2px solid {{ $custaReembolsavel==='nao' ? '#94a3b8' : '#e2e8f0' }};border-radius:10px;cursor:pointer;background:{{ $custaReembolsavel==='nao' ? '#f8fafc' : '#fff' }}">
+                    <input type="radio" wire:model.live="custaReembolsavel" value="nao" style="margin-top:2px;flex-shrink:0;">
+                    <div>
+                        <div style="font-size:13px;font-weight:700;color:#475569;">Não — despesa do escritório</div>
+                        <div style="font-size:12px;color:#64748b;margin-top:2px;">Será registrada como pagamento simples do escritório, sem reembolso.</div>
+                    </div>
+                </label>
+            </div>
+            <button wire:click="irParaCusta"
+                style="padding:11px 20px;background:#ea580c;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;align-self:flex-end;">
+                Continuar → Selecionar processo
+            </button>
+        </div>
+
+        {{-- Footer --}}
+        <div style="padding:14px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+            <div style="font-size:11px;color:#94a3b8;">
+                💡 <strong>Dica:</strong> Para contratos mensais (honorário de assessoria/consultoria), acesse
+                <a href="{{ route('contratos') }}" style="color:#2563eb;text-decoration:none;font-weight:600;">Contratos</a>
+                — os lançamentos são gerados automaticamente.
+            </div>
+        </div>
+
+    </div>
+</div>
 
 </div>

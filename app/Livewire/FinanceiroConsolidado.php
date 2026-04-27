@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Models\Honorario;
+use App\Models\HonorarioParcela;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -14,7 +16,19 @@ class FinanceiroConsolidado extends Component
     public string $abaAtiva     = 'visao';
     public string $filtroMes    = '';
     public string $filtroStatus = 'pendente';
-    public int    $periodoFluxo = 6;           // meses: 3 | 6 | 12
+    public int    $periodoFluxo = 6;
+
+    // ── Modal: Seletor de Lançamento ────────────────────────────
+    public array  $processosLista          = [];
+    public string $honorarioFixoProcessoId = '';
+    public string $exitoProcessoId         = '';
+    public string $exitoPercentual         = '';
+    public string $exitoValor              = '0,00';
+    public string $exitoData               = '';
+    public string $exitoDescricao          = 'Honorário de Êxito';
+    public bool   $exitoSalvo              = false;
+    public string $exitoErro               = '';
+    public string $custaReembolsavel       = 'sim';
 
     protected $queryString = [
         'abaAtiva'     => ['except' => 'visao'],
@@ -29,7 +43,105 @@ class FinanceiroConsolidado extends Component
 
     public function mount(): void
     {
-        $this->filtroMes = now()->format('Y-m');
+        $this->filtroMes  = now()->format('Y-m');
+        $this->exitoData  = now()->format('Y-m-d');
+    }
+
+    // ── Modal: Seletor ──────────────────────────────────────────
+
+    public function carregarProcessos(): void
+    {
+        $tenantId = tenant_id();
+        $this->processosLista = DB::table('processos as p')
+            ->leftJoin('pessoas as cl', 'cl.id', '=', 'p.cliente_id')
+            ->select('p.id', 'p.numero', 'cl.nome as cliente_nome')
+            ->when($tenantId, fn($q) => $q->where('p.tenant_id', $tenantId))
+            ->orderByDesc('p.id')
+            ->limit(200)
+            ->get()
+            ->map(fn($r) => [
+                'id'           => $r->id,
+                'numero'       => $r->numero,
+                'cliente_nome' => $r->cliente_nome ?? '—',
+            ])
+            ->toArray();
+    }
+
+    public function irParaHonorarioFixo(): void
+    {
+        if (! $this->honorarioFixoProcessoId) return;
+        $this->redirect(route('processos.show', $this->honorarioFixoProcessoId));
+    }
+
+    public function abrirEtapaExito(): void
+    {
+        if (empty($this->processosLista)) {
+            $this->carregarProcessos();
+        }
+
+        $this->exitoSalvo      = false;
+        $this->exitoErro       = '';
+        $this->exitoProcessoId = '';
+        $this->exitoPercentual = '';
+        $this->exitoValor      = '0,00';
+        $this->exitoData       = now()->format('Y-m-d');
+        $this->exitoDescricao  = 'Honorário de Êxito';
+        $this->dispatch('lancamento-passo', passo: 'exito');
+    }
+
+    public function salvarHonorarioExito(): void
+    {
+        $this->exitoErro = '';
+
+        if (! $this->exitoProcessoId) {
+            $this->exitoErro = 'Selecione o processo.';
+            return;
+        }
+        if (! $this->exitoData) {
+            $this->exitoErro = 'Informe a data.';
+            return;
+        }
+
+        $processo = DB::table('processos')->where('id', $this->exitoProcessoId)->first();
+        if (! $processo || ! $processo->cliente_id) {
+            $this->exitoErro = 'Processo sem cliente vinculado.';
+            return;
+        }
+
+        $percentual = $this->exitoPercentual !== ''
+            ? (float) str_replace(',', '.', $this->exitoPercentual)
+            : null;
+
+        $valor = (float) str_replace(['.', ','], ['', '.'], $this->exitoValor);
+
+        $honorario = Honorario::create([
+            'processo_id'      => $this->exitoProcessoId,
+            'cliente_id'       => $processo->cliente_id,
+            'tipo'             => 'exito',
+            'descricao'        => $this->exitoDescricao ?: 'Honorário de Êxito',
+            'valor_contrato'   => $valor,
+            'percentual_exito' => $percentual,
+            'total_parcelas'   => 1,
+            'data_inicio'      => $this->exitoData,
+            'status'           => 'ativo',
+        ]);
+
+        HonorarioParcela::create([
+            'honorario_id'   => $honorario->id,
+            'numero_parcela' => 1,
+            'valor'          => $valor,
+            'vencimento'     => $this->exitoData,
+            'status'         => 'pendente',
+        ]);
+
+        $this->exitoSalvo = true;
+        $this->dispatch('toast', message: 'Honorário de Êxito registrado com sucesso!', type: 'success');
+    }
+
+    public function irParaCusta(): void
+    {
+        session()->put('novo_pagamento_reembolsavel', $this->custaReembolsavel === 'sim');
+        $this->redirect(route('processos'));
     }
 
     public function updatedAbaAtiva(): void

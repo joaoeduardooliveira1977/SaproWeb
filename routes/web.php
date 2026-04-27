@@ -105,6 +105,7 @@ use App\Http\Controllers\IAController;
         Route::get('/financeiro',             fn() => view('financeiro'))->name('financeiro');
         Route::get('/financeiro-consolidado', fn() => view('financeiro-consolidado'))->name('financeiro.consolidado');
         Route::get('/financeiro-central',     fn() => view('financeiro-central'))->name('financeiro.central');
+        Route::get('/financeiro/custas-reembolso', \App\Livewire\Financeiro\CustasReembolso::class)->name('financeiro.custas-reembolso');
         Route::get('/honorarios',             fn() => view('honorarios'))->name('honorarios');
         Route::get('/inadimplencia',          fn() => view('inadimplencia'))->name('inadimplencia');
     });

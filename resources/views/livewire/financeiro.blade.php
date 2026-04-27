@@ -343,9 +343,13 @@
                     <input type="date" wire:model="data_pagamento">
                 </div>
             </div>
-            <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;cursor:pointer">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:10px;cursor:pointer">
                 <input type="checkbox" wire:model="pago" style="width:auto">
                 Marcar como pago
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;cursor:pointer;padding:8px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;">
+                <input type="checkbox" wire:model="reembolsavel" style="width:auto">
+                <span>Esta despesa será <strong>reembolsada pelo cliente</strong></span>
             </label>
             @endif
 

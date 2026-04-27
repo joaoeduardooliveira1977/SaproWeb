@@ -58,6 +58,12 @@ class FinanceiroCentral extends Component
     {
         $this->filtroMes = now()->format('Y-m');
         $this->carregarAuxiliares();
+
+        $novo = request()->query('novo');
+        if (in_array($novo, ['receita', 'despesa'])) {
+            $this->tipo = $novo;
+            $this->abrirModal();
+        }
     }
 
     private function carregarAuxiliares(): void

@@ -158,6 +158,16 @@
         </div>
 
         
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($custasReembolsoQtd > 0): ?>
+        <a href="<?php echo e(route('relatorios.custas-reembolso')); ?>" style="text-decoration:none;display:flex;align-items:center;gap:12px;padding:10px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;">
+            <svg width="16" height="16" fill="none" stroke="#ea580c" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <span style="font-size:13px;color:#7c2d12;">
+                <strong><?php echo e($custasReembolsoQtd); ?> custa<?php echo e($custasReembolsoQtd > 1 ? 's' : ''); ?></strong> a reembolsar — total de <strong>R$ <?php echo e(number_format($custasReembolso, 2, ',', '.')); ?></strong> pago pelo escritório e ainda não cobrado do cliente
+            </span>
+            <span style="margin-left:auto;font-size:11px;font-weight:700;color:#ea580c;white-space:nowrap;">Ver relatório →</span>
+        </a>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($processosParados > 0): ?>
         <a href="<?php echo e(route('relatorios.sem-andamento')); ?>" style="text-decoration:none;display:flex;align-items:center;gap:12px;padding:10px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;">
             <svg width="16" height="16" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
