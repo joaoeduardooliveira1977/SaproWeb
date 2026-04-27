@@ -354,59 +354,439 @@
 
         {{-- ABA: Financeiro --}}
         @if($aba === 'financeiro')
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;">
-                <div style="background:#eff6ff;border-radius:10px;padding:12px 14px;border-left:3px solid #2563eb;">
-                    <div style="font-size:10px;color:#2563eb;font-weight:600;">A Receber</div>
-                    <div style="font-size:16px;font-weight:800;color:#2563eb;">R$ {{ number_format($lancamentosAReceber, 2, ',', '.') }}</div>
-                </div>
-                <div style="background:#f0fdf4;border-radius:10px;padding:12px 14px;border-left:3px solid #16a34a;">
-                    <div style="font-size:10px;color:#16a34a;font-weight:600;">Recebido</div>
-                    <div style="font-size:16px;font-weight:800;color:#16a34a;">R$ {{ number_format($lancamentosRecebido, 2, ',', '.') }}</div>
-                </div>
-                @if($totalLancamentosAtrasados > 0)
-                <div style="background:#fef2f2;border-radius:10px;padding:12px 14px;border-left:3px solid #dc2626;">
-                    <div style="font-size:10px;color:#dc2626;font-weight:600;">Atrasados</div>
-                    <div style="font-size:16px;font-weight:800;color:#dc2626;">{{ $totalLancamentosAtrasados }}</div>
-                </div>
+
+        {{-- Header --}}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Lançamentos Financeiros</div>
+            <div style="display:flex;gap:6px;">
+                <button wire:click="abrirModalLanc('receita')"
+                    style="display:inline-flex;align-items:center;gap:4px;padding:6px 14px;background:#f0fdf4;color:#16a34a;border:1.5px solid #86efac;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Receita
+                </button>
+                <button wire:click="abrirModalLanc('despesa')"
+                    style="display:inline-flex;align-items:center;gap:4px;padding:6px 14px;background:#fef2f2;color:#dc2626;border:1.5px solid #fca5a5;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Despesa
+                </button>
+            </div>
+        </div>
+
+        {{-- KPIs 4 cards --}}
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+            <div style="background:#eff6ff;border-radius:10px;padding:10px 12px;border-top:3px solid #2563eb;">
+                <div style="font-size:9px;color:#2563eb;font-weight:700;text-transform:uppercase;letter-spacing:.4px;">A Receber</div>
+                <div style="font-size:15px;font-weight:800;color:#2563eb;margin-top:3px;">R$ {{ number_format($lancamentosAReceber,2,',','.') }}</div>
+            </div>
+            <div style="background:#f0fdf4;border-radius:10px;padding:10px 12px;border-top:3px solid #16a34a;">
+                <div style="font-size:9px;color:#16a34a;font-weight:700;text-transform:uppercase;letter-spacing:.4px;">Recebido</div>
+                <div style="font-size:15px;font-weight:800;color:#16a34a;margin-top:3px;">R$ {{ number_format($lancamentosRecebido,2,',','.') }}</div>
+            </div>
+            <div style="background:#fff7ed;border-radius:10px;padding:10px 12px;border-top:3px solid #f59e0b;">
+                <div style="font-size:9px;color:#b45309;font-weight:700;text-transform:uppercase;letter-spacing:.4px;">A Pagar</div>
+                <div style="font-size:15px;font-weight:800;color:#b45309;margin-top:3px;">R$ {{ number_format($lancamentosAPagar,2,',','.') }}</div>
+            </div>
+            <div style="background:#fef2f2;border-radius:10px;padding:10px 12px;border-top:3px solid #dc2626;">
+                <div style="font-size:9px;color:#dc2626;font-weight:700;text-transform:uppercase;letter-spacing:.4px;">Pago</div>
+                <div style="font-size:15px;font-weight:800;color:#dc2626;margin-top:3px;">R$ {{ number_format($lancamentosPago,2,',','.') }}</div>
+            </div>
+        </div>
+
+        {{-- Filtros --}}
+        <div style="display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+            @foreach(['todos'=>'Todos','receitas'=>'Receitas','despesas'=>'Despesas','avulsos'=>'Avulsos'] as $fk => $fl)
+            <button wire:click="$set('filtroFinanceiro','{{ $fk }}')"
+                style="padding:4px 12px;border-radius:99px;font-size:11px;font-weight:700;border:1.5px solid {{ $filtroFinanceiro===$fk ? 'var(--primary)' : 'var(--border)' }};background:{{ $filtroFinanceiro===$fk ? 'var(--primary)' : '#fff' }};color:{{ $filtroFinanceiro===$fk ? '#fff' : 'var(--muted)' }};cursor:pointer;">
+                {{ $fl }}
+            </button>
+            @endforeach
+        </div>
+
+        {{-- Lista --}}
+        @if($lancamentos->isEmpty())
+            <div class="pasta-empty" style="padding:30px 0;">
+                Nenhum lançamento encontrado.
+                @if($filtroFinanceiro === 'todos')
+                Use os botões acima para registrar uma receita ou despesa avulsa.
                 @endif
             </div>
+        @else
+        <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+            {{-- Cabeçalho da tabela --}}
+            <div style="display:grid;grid-template-columns:24px 1fr 80px 80px 70px auto;gap:8px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid var(--border);">
+                <div></div>
+                <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Descrição</div>
+                <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Vencimento</div>
+                <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Forma</div>
+                <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;text-align:right;">Valor</div>
+                <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;text-align:center;">Ações</div>
+            </div>
 
-            @if($lancamentos->isEmpty())
-                <div class="pasta-empty">
-                    Nenhum lançamento financeiro.
-                    <a href="{{ route('contratos') }}" style="color:var(--primary);font-weight:600;">Criar contrato</a>
+            @foreach($lancamentos as $lanc)
+            @php
+                $stCor  = match($lanc->status) {
+                    'recebido' => ['#dcfce7','#16a34a'],
+                    'atrasado' => ['#fef2f2','#dc2626'],
+                    'cancelado'=> ['#f1f5f9','#94a3b8'],
+                    default    => ['#eff6ff','#2563eb'],
+                };
+                $isAvulso  = !$lanc->contrato_id && !$lanc->processo_id;
+                $isDespesa = $lanc->tipo === 'despesa';
+                $atrasado  = $lanc->status === 'atrasado';
+                $statusLabel = ($lanc->status === 'recebido' && $isDespesa) ? 'Pago' : ucfirst($lanc->status);
+            @endphp
+            <div style="display:grid;grid-template-columns:24px 1fr 80px 80px 70px auto;gap:8px;padding:9px 12px;border-bottom:1px solid var(--border);align-items:center;"
+                 onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+
+                {{-- Ícone + − --}}
+                <div style="width:20px;height:20px;border-radius:50%;background:{{ $isDespesa ? '#fef2f2' : '#f0fdf4' }};display:flex;align-items:center;justify-content:center;">
+                    @if($isDespesa)
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    @else
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    @endif
                 </div>
-            @else
-                @foreach($lancamentos as $lanc)
-                @php
-                    $stCor = match($lanc->status) {
-                        'recebido' => ['#dcfce7','#16a34a'],
-                        'atrasado' => ['#fef2f2','#dc2626'],
-                        'cancelado'=> ['#f1f5f9','#94a3b8'],
-                        default    => ['#eff6ff','#2563eb'],
-                    };
-                @endphp
-                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $lanc->descricao }}</div>
-                        <div style="font-size:11px;color:var(--muted);margin-top:2px;">
-                            Venc: {{ $lanc->vencimento->format('d/m/Y') }}
-                            @if($lanc->contrato) &bull; {{ $lanc->contrato->descricao }} @endif
-                            @if($lanc->numero_parcela) &bull; Parcela {{ $lanc->numero_parcela }}{{ $lanc->total_parcelas ? '/'.$lanc->total_parcelas : '' }} @endif
+
+                {{-- Descrição + badges --}}
+                <div style="min-width:0;">
+                    <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                        <span style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $lanc->descricao }}</span>
+                        @if($isAvulso)
+                        <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:99px;background:#f5f3ff;color:#7c3aed;flex-shrink:0;">Avulso</span>
+                        @endif
+                        <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:99px;background:{{ $stCor[0] }};color:{{ $stCor[1] }};flex-shrink:0;">{{ $statusLabel }}</span>
+                    </div>
+                    <div style="font-size:10px;color:var(--muted);margin-top:1px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                        @if($lanc->contrato) <span>{{ $lanc->contrato->descricao }}</span> @endif
+                        @if($lanc->processo_id)
+                        <span style="display:inline-flex;align-items:center;gap:3px;background:#f0f9ff;color:#0369a1;padding:1px 6px;border-radius:4px;font-weight:600;">
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                            Proc. {{ $lanc->processo?->numero ?? '#'.$lanc->processo_id }}
+                        </span>
+                        @endif
+                        @if($lanc->numero_parcela) <span style="font-weight:600;">Parcela {{ $lanc->numero_parcela }}/{{ $lanc->total_parcelas }}</span> @endif
+                        @if($lanc->status === 'recebido' && $lanc->data_pagamento)
+                        <span style="color:#16a34a;">Pago em {{ $lanc->data_pagamento->format('d/m/Y') }}</span>
+                        @endif
+                        @if($lanc->observacoes) <span style="color:#94a3b8;">{{ Str::limit($lanc->observacoes, 30) }}</span> @endif
+                    </div>
+                </div>
+
+                {{-- Vencimento --}}
+                <div style="font-size:11px;{{ $atrasado ? 'color:#dc2626;font-weight:700;' : 'color:var(--muted);' }}">
+                    {{ $lanc->vencimento->format('d/m/Y') }}
+                    @if($atrasado) <div style="font-size:9px;">Atrasado</div> @endif
+                </div>
+
+                {{-- Forma --}}
+                <div style="font-size:10px;color:var(--muted);">
+                    @if($lanc->forma_pagamento)
+                    <span style="padding:2px 6px;background:#f1f5f9;border-radius:4px;font-weight:600;">{{ $formas[$lanc->forma_pagamento] ?? ucfirst($lanc->forma_pagamento) }}</span>
+                    @else
+                    <span style="color:#cbd5e1;">—</span>
+                    @endif
+                </div>
+
+                {{-- Valor --}}
+                <div style="text-align:right;font-size:12px;font-weight:800;color:{{ $isDespesa ? '#dc2626' : '#16a34a' }};">
+                    {{ $isDespesa ? '−' : '+' }}<br>R$ {{ number_format($lanc->valor,2,',','.') }}
+                </div>
+
+                {{-- Ações --}}
+                <div style="display:flex;gap:3px;justify-content:flex-end;">
+                    @if($isAvulso)
+                        @if(!in_array($lanc->status, ['recebido','cancelado']))
+                        <button wire:click="marcarLancamentoPago({{ $lanc->id }})" title="{{ $isDespesa ? 'Pagar' : 'Receber' }}"
+                            style="padding:3px 7px;background:#f0fdf4;color:#16a34a;border:1px solid #86efac;border-radius:5px;font-size:10px;cursor:pointer;">✓</button>
+                        @endif
+                        <button wire:click="abrirModalLanc('{{ $lanc->tipo }}', {{ $lanc->id }})" title="Editar"
+                            style="padding:3px 7px;background:#eff6ff;color:#2563a8;border:1px solid #bfdbfe;border-radius:5px;font-size:10px;cursor:pointer;">✎</button>
+                        <button wire:click="excluirLancamento({{ $lanc->id }})" wire:confirm="Excluir este lançamento?" title="Excluir"
+                            style="padding:3px 7px;background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:5px;font-size:10px;cursor:pointer;">✕</button>
+                    @else
+                    <span style="font-size:10px;color:#cbd5e1;">Contrato</span>
+                    @endif
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <div style="margin-top:10px;text-align:center;">
+            <a href="{{ route('financeiro.central') }}" style="font-size:12px;color:var(--primary);font-weight:600;text-decoration:none;">
+                Ver todos no Financeiro Centralizado →
+            </a>
+        </div>
+        @endif
+
+        {{-- ═══ Modal Lançamento Avulso ═══ --}}
+        @if($modalLanc)
+        <div style="position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;" wire:click.self="fecharModalLanc">
+            <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.25);">
+
+                {{-- Header modal --}}
+                <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:{{ $lancTipo==='despesa' ? '#fef2f2' : '#f0fdf4' }};border-radius:16px 16px 0 0;">
+                    <div style="font-size:15px;font-weight:800;color:{{ $lancTipo==='despesa' ? '#dc2626' : '#16a34a' }};">
+                        {{ $lancId ? 'Editar' : 'Nova' }} {{ $lancTipo === 'despesa' ? 'Despesa' : 'Receita' }} — {{ $cliente->nome }}
+                    </div>
+                    <button wire:click="fecharModalLanc" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;line-height:1;">×</button>
+                </div>
+
+                <form wire:submit="salvarLancamento" style="padding:22px;display:flex;flex-direction:column;gap:14px;">
+
+                    {{-- Descrição --}}
+                    <div>
+                        <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">
+                            Descrição <span style="color:#dc2626;">*</span>
+                        </label>
+                        <input type="text" wire:model="lancDescricao" autofocus
+                            placeholder="{{ $lancTipo==='despesa' ? 'Ex: Seguro, Aluguel sala...' : 'Ex: Honorário consultoria, Assessoria...' }}"
+                            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);">
+                        @error('lancDescricao')<div style="font-size:11px;color:#dc2626;margin-top:3px;">{{ $message }}</div>@enderror
+                    </div>
+
+                    {{-- Processo (opcional) --}}
+                    <div>
+                        <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">
+                            Processo vinculado
+                            <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#94a3b8;">(opcional)</span>
+                        </label>
+                        @if($processos->count())
+                        <select wire:model="lancProcessoId"
+                            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:#fff;">
+                            <option value="">— Nenhum (lançamento avulso) —</option>
+                            @foreach($processos->sortByDesc(fn($p) => $p->status === 'Ativo') as $proc)
+                            <option value="{{ $proc->id }}">
+                                {{ $proc->numero }}@if($proc->titulo) — {{ Str::limit($proc->titulo, 50) }}@endif{{ $proc->status !== 'Ativo' ? ' ('.$proc->status.')' : '' }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @if($lancProcessoId)
+                        <div style="font-size:11px;color:#0369a1;margin-top:4px;display:flex;align-items:center;gap:4px;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                            Lançamento será vinculado ao processo selecionado.
+                        </div>
+                        @endif
+                        @else
+                        <div style="padding:9px 12px;border:1.5px dashed var(--border);border-radius:8px;font-size:13px;color:#94a3b8;display:flex;align-items:center;gap:8px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            Este cliente ainda não possui processos cadastrados.
+                            <a href="{{ route('processos.novo') }}" style="color:var(--primary);font-weight:600;text-decoration:none;white-space:nowrap;">Criar processo</a>
+                        </div>
+                        @endif
+                    </div>
+
+                    {{-- Tipo de honorário (só para receita) --}}
+                    @if($lancTipo === 'receita')
+                    <div>
+                        <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">
+                            Tipo de cobrança
+                        </label>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            @foreach([''=>'Avulso','fixo'=>'Fixo','hora'=>'Por hora','exito'=>'Êxito da causa'] as $tk => $tl)
+                            <button type="button" wire:click="$set('lancTipoHonorario','{{ $lancTipoHonorario===$tk ? '' : $tk }}')"
+                                style="padding:5px 13px;border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;
+                                       border:1.5px solid {{ $lancTipoHonorario===$tk ? '#16a34a' : 'var(--border)' }};
+                                       background:{{ $lancTipoHonorario===$tk ? '#16a34a' : '#fff' }};
+                                       color:{{ $lancTipoHonorario===$tk ? '#fff' : 'var(--muted)' }};">
+                                {{ $tl }}
+                            </button>
+                            @endforeach
+                        </div>
+
+                        {{-- Bloco de êxito --}}
+                        @if($lancTipoHonorario === 'exito')
+                        <div style="margin-top:12px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px;">
+                            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                <div>
+                                    <label style="display:block;font-size:10px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">% de êxito</label>
+                                    <div style="display:flex;align-items:center;gap:4px;">
+                                        <input type="number" wire:model.live="lancPercentualExito" min="1" max="100" step="0.5"
+                                            style="width:72px;padding:7px 10px;border:1.5px solid #86efac;border-radius:8px;font-size:14px;font-weight:700;color:#16a34a;text-align:center;background:#fff;">
+                                        <span style="font-size:16px;font-weight:700;color:#16a34a;">%</span>
+                                    </div>
+                                </div>
+
+                                @if($lancProcessoId)
+                                @php
+                                    $procSel = $processos->firstWhere('id', $lancProcessoId);
+                                    $valCausa = (float)($procSel?->valor_causa ?? 0);
+                                    $valExito = $valCausa > 0 ? round($valCausa * (float)$lancPercentualExito / 100, 2) : 0;
+                                @endphp
+                                @if($valCausa > 0)
+                                <div style="flex:1;min-width:0;padding-left:10px;border-left:1px solid #86efac;">
+                                    <div style="font-size:10px;color:#16a34a;font-weight:600;margin-bottom:2px;">Valor da causa</div>
+                                    <div style="font-size:13px;font-weight:700;color:#1e293b;">R$ {{ number_format($valCausa,2,',','.') }}</div>
+                                    <div style="font-size:10px;color:#64748b;margin-top:4px;">
+                                        {{ $lancPercentualExito }}% =
+                                        <strong style="color:#16a34a;font-size:13px;">R$ {{ number_format($valExito,2,',','.') }}</strong>
+                                    </div>
+                                </div>
+                                <button type="button"
+                                    wire:click="$set('lancValor','{{ number_format($valExito,2,'.','')}}')"
+                                    style="padding:7px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+                                    ↓ Aplicar
+                                </button>
+                                @else
+                                <div style="flex:1;padding-left:10px;border-left:1px solid #86efac;font-size:12px;color:#94a3b8;">
+                                    O processo selecionado não tem valor da causa cadastrado.
+                                </div>
+                                @endif
+                                @else
+                                <div style="flex:1;padding-left:10px;border-left:1px solid #86efac;font-size:12px;color:#94a3b8;">
+                                    Selecione um processo acima para calcular automaticamente.
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+
+                    {{-- Valor | Parcelas | Vencimento --}}
+                    <div style="display:grid;grid-template-columns:1fr {{ $lancId ? '0' : '80px' }} 1fr;gap:10px;">
+                        <div>
+                            <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">
+                                Valor total (R$) <span style="color:#dc2626;">*</span>
+                            </label>
+                            <input type="number" wire:model.live="lancValor" step="0.01" min="0.01" placeholder="0,00"
+                                style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);">
+                            @error('lancValor')<div style="font-size:11px;color:#dc2626;margin-top:3px;">{{ $message }}</div>@enderror
+                        </div>
+                        @if(!$lancId)
+                        <div>
+                            <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">
+                                Parcelas
+                            </label>
+                            <input type="number" wire:model.live="lancParcelas" min="1" max="60" placeholder="1"
+                                style="width:100%;padding:9px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);text-align:center;">
+                        </div>
+                        @endif
+                        <div>
+                            <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">
+                                {{ !$lancId && $lancParcelas > 1 ? '1ª Parcela' : 'Vencimento' }} <span style="color:#dc2626;">*</span>
+                            </label>
+                            <input type="date" wire:model.live="lancVencimento"
+                                style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);">
+                            @error('lancVencimento')<div style="font-size:11px;color:#dc2626;margin-top:3px;">{{ $message }}</div>@enderror
                         </div>
                     </div>
-                    <div style="text-align:right;flex-shrink:0;">
-                        <div style="font-size:13px;font-weight:700;color:var(--primary);">R$ {{ number_format($lanc->valor,2,',','.') }}</div>
-                        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;background:{{ $stCor[0] }};color:{{ $stCor[1] }};">{{ ucfirst($lanc->status) }}</span>
+
+                    {{-- Preview parcelas --}}
+                    @if(!$lancId && $lancParcelas > 1 && $lancValor > 0 && $lancVencimento)
+                    @php
+                        $prevN = min((int)$lancParcelas, 12);
+                        $prevVal = round((float)$lancValor / (int)$lancParcelas, 2);
+                        $prevVenc = \Carbon\Carbon::parse($lancVencimento);
+                    @endphp
+                    <div style="background:#f8fafc;border-radius:10px;padding:12px;border:1px solid var(--border);">
+                        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">
+                            Preview — {{ $lancParcelas }} parcelas de R$ {{ number_format($prevVal,2,',','.') }}
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">
+                            @for($pi = 1; $pi <= $prevN; $pi++)
+                            @php
+                                $pValAtual = ($pi === (int)$lancParcelas)
+                                    ? round((float)$lancValor - ($prevVal * ((int)$lancParcelas - 1)), 2)
+                                    : $prevVal;
+                            @endphp
+                            <div style="display:flex;justify-content:space-between;background:#fff;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;">
+                                <span style="color:var(--muted);">{{ $pi }}/{{ $lancParcelas }}</span>
+                                <div style="text-align:right;">
+                                    <div style="font-weight:700;color:var(--text);">R$ {{ number_format($pValAtual,2,',','.') }}</div>
+                                    <div style="font-size:10px;color:var(--muted);">{{ $prevVenc->copy()->addMonths($pi-1)->format('d/m/Y') }}</div>
+                                </div>
+                            </div>
+                            @endfor
+                        </div>
+                        @if($lancParcelas > 12)
+                        <div style="font-size:10px;color:var(--muted);margin-top:6px;text-align:center;">+ {{ $lancParcelas - 12 }} parcelas adicionais...</div>
+                        @endif
                     </div>
-                </div>
-                @endforeach
-                <div style="margin-top:10px;text-align:center;">
-                    <a href="{{ route('financeiro.central') }}" style="font-size:12px;color:var(--primary);font-weight:600;text-decoration:none;">
-                        Ver todos no Financeiro Centralizado →
-                    </a>
-                </div>
-            @endif
+                    @endif
+
+                    {{-- Forma de pagamento --}}
+                    <div>
+                        <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">
+                            Forma de pagamento
+                        </label>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            @foreach($formas as $fk => $fl)
+                            <button type="button" wire:click="$set('lancForma','{{ $lancForma===$fk ? '' : $fk }}')"
+                                style="padding:5px 11px;border-radius:99px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid {{ $lancForma===$fk ? 'var(--primary)' : 'var(--border)' }};background:{{ $lancForma===$fk ? 'var(--primary)' : '#fff' }};color:{{ $lancForma===$fk ? '#fff' : 'var(--muted)' }};">
+                                {{ $fl }}
+                            </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Já pago/recebido (só para parcela única ou edição) --}}
+                    @if($lancId || (int)$lancParcelas === 1)
+                    <div style="background:#f8fafc;border-radius:10px;padding:14px;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" wire:model.live="lancStatus" true-value="recebido" false-value="previsto"
+                                style="width:16px;height:16px;cursor:pointer;padding:0;border:none;flex-shrink:0;">
+                            <span style="font-size:13px;font-weight:700;color:var(--text);">
+                                Já {{ $lancTipo === 'despesa' ? 'pago' : 'recebido' }}
+                            </span>
+                        </label>
+                        @if($lancStatus === 'recebido')
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+                            <div>
+                                <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">
+                                    Data <span style="color:#dc2626;">*</span>
+                                </label>
+                                <input type="date" wire:model="lancDataPagamento"
+                                    style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);">
+                                @error('lancDataPagamento')<div style="font-size:11px;color:#dc2626;margin-top:3px;">{{ $message }}</div>@enderror
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">
+                                    Valor pago (R$) <span style="color:#dc2626;">*</span>
+                                </label>
+                                <input type="number" wire:model="lancValorPago" step="0.01" min="0.01"
+                                    style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);">
+                                @error('lancValorPago')<div style="font-size:11px;color:#dc2626;margin-top:3px;">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                    @else
+                    <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 12px;font-size:12px;color:#92400e;">
+                        As {{ $lancParcelas }} parcelas serão criadas com status <strong>Previsto</strong>. Marque cada uma como paga individualmente.
+                    </div>
+                    @endif
+
+                    {{-- Observações --}}
+                    <div>
+                        <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">Observações</label>
+                        <textarea wire:model="lancObservacoes" rows="2" placeholder="Opcional..."
+                            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);resize:vertical;"></textarea>
+                    </div>
+
+                    {{-- Rodapé --}}
+                    <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:6px;border-top:1px solid var(--border);">
+                        <button type="button" wire:click="fecharModalLanc"
+                            style="padding:9px 20px;background:#f1f5f9;color:var(--muted);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                            style="padding:9px 24px;background:{{ $lancTipo==='despesa' ? '#dc2626' : '#16a34a' }};color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">
+                            <span wire:loading.remove wire:target="salvarLancamento">
+                                @if(!$lancId && $lancParcelas > 1)
+                                    Gerar {{ $lancParcelas }} parcelas
+                                @else
+                                    Salvar lançamento
+                                @endif
+                            </span>
+                            <span wire:loading wire:target="salvarLancamento">Salvando...</span>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+        @endif
+
         @endif
 
         {{-- ABA: Histórico --}}

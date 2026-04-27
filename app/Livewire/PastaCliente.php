@@ -23,6 +23,33 @@ class PastaCliente extends Component
     public string  $docData        = '';
     public         $docArquivo     = null;
 
+    // ── Modal lançamento avulso (receita/despesa sem processo) ───
+    public bool   $modalLanc         = false;
+    public ?int   $lancId            = null;
+    public string $lancTipo          = 'receita';
+    public string $lancDescricao     = '';
+    public string $lancValor         = '';
+    public string $lancVencimento    = '';
+    public string $lancParcelas      = '1';
+    public string $lancForma         = '';
+    public string $lancStatus        = 'previsto';
+    public string $lancDataPagamento = '';
+    public string $lancValorPago     = '';
+    public string $lancObservacoes   = '';
+    public ?int   $lancProcessoId    = null;
+    public string $lancTipoHonorario = '';   // fixo | hora | exito | ''
+    public string $lancPercentualExito = '20';
+    public string $filtroFinanceiro  = 'todos';
+
+    public const FORMAS = [
+        'pix'          => 'PIX',
+        'boleto'       => 'Boleto',
+        'cartao'       => 'Cartão',
+        'dinheiro'     => 'Dinheiro',
+        'transferencia'=> 'Transferência',
+        'outro'        => 'Outro',
+    ];
+
     public const TIPOS_DOC = [
         'contrato'           => 'Contrato',
         'procuracao'         => 'Procuração',
@@ -114,6 +141,160 @@ class PastaCliente extends Component
         $this->dispatch('toast', message: 'Documento salvo com sucesso!', type: 'success');
     }
 
+    // ── Lançamentos avulsos (receita/despesa sem processo) ───────
+    public function abrirModalLanc(string $tipo = 'receita', ?int $id = null): void
+    {
+        $this->resetValidation();
+        $this->lancId      = $id;
+        $this->lancTipo    = $tipo;
+        $this->lancParcelas = '1';
+
+        if ($id) {
+            $l = FinanceiroLancamento::findOrFail($id);
+            $this->lancTipo          = $l->tipo;
+            $this->lancDescricao     = $l->descricao;
+            $this->lancValor         = (string) $l->valor;
+            $this->lancVencimento    = $l->vencimento->format('Y-m-d');
+            $this->lancForma         = $l->forma_pagamento ?? '';
+            $this->lancStatus        = $l->status;
+            $this->lancDataPagamento = $l->data_pagamento?->format('Y-m-d') ?? '';
+            $this->lancValorPago     = $l->valor_pago ? (string) $l->valor_pago : '';
+            $this->lancObservacoes   = $l->observacoes ?? '';
+            $this->lancProcessoId   = $l->processo_id;
+        } else {
+            $this->lancDescricao     = '';
+            $this->lancValor         = '';
+            $this->lancVencimento    = now()->format('Y-m-d');
+            $this->lancForma         = '';
+            $this->lancStatus        = 'previsto';
+            $this->lancDataPagamento = '';
+            $this->lancValorPago     = '';
+            $this->lancObservacoes    = '';
+            $this->lancProcessoId    = null;
+            $this->lancTipoHonorario = '';
+            $this->lancPercentualExito = '20';
+        }
+
+        $this->modalLanc = true;
+    }
+
+    private function calcularExito(): void
+    {
+        if ($this->lancTipoHonorario !== 'exito' || !$this->lancProcessoId || !$this->lancPercentualExito) {
+            return;
+        }
+
+        $valorCausa = Processo::where('id', $this->lancProcessoId)
+            ->where('cliente_id', $this->clienteId)
+            ->value('valor_causa');
+
+        if ($valorCausa > 0) {
+            $this->lancValor = number_format(
+                (float) $valorCausa * (float) $this->lancPercentualExito / 100,
+                2, '.', ''
+            );
+        }
+    }
+
+    public function updatedLancTipoHonorario(): void   { $this->calcularExito(); }
+    public function updatedLancPercentualExito(): void  { $this->calcularExito(); }
+    public function updatedLancProcessoId(): void       { $this->calcularExito(); }
+
+    public function fecharModalLanc(): void
+    {
+        $this->modalLanc = false;
+        $this->resetValidation();
+    }
+
+    public function salvarLancamento(): void
+    {
+        $this->validate([
+            'lancDescricao'     => 'required|string|max:200',
+            'lancValor'         => 'required|numeric|min:0.01',
+            'lancVencimento'    => 'required|date',
+            'lancParcelas'      => 'required|integer|min:1|max:60',
+            'lancStatus'        => 'required|in:previsto,recebido',
+            'lancDataPagamento' => 'nullable|date|required_if:lancStatus,recebido',
+            'lancValorPago'     => 'nullable|numeric|required_if:lancStatus,recebido',
+        ], [
+            'lancDescricao.required'        => 'A descrição é obrigatória.',
+            'lancValor.required'            => 'O valor é obrigatório.',
+            'lancVencimento.required'       => 'A data de vencimento é obrigatória.',
+            'lancDataPagamento.required_if' => 'Informe a data de pagamento.',
+            'lancValorPago.required_if'     => 'Informe o valor pago.',
+        ]);
+
+        $totalParcelas = $this->lancId ? 1 : max(1, (int) $this->lancParcelas);
+        $valor         = (float) $this->lancValor;
+
+        $dadosBase = [
+            'cliente_id'      => $this->clienteId,
+            'contrato_id'     => null,
+            'processo_id'     => $this->lancProcessoId ?: null,
+            'tipo'            => $this->lancTipo,
+            'forma_pagamento' => $this->lancForma ?: null,
+            'observacoes'     => $this->lancObservacoes ?: null,
+        ];
+
+        if ($this->lancId || $totalParcelas === 1) {
+            $dados = array_merge($dadosBase, [
+                'descricao'      => $this->lancDescricao,
+                'valor'          => $valor,
+                'vencimento'     => $this->lancVencimento,
+                'status'         => $this->lancStatus,
+                'data_pagamento' => $this->lancStatus === 'recebido' ? $this->lancDataPagamento : null,
+                'valor_pago'     => $this->lancStatus === 'recebido' ? $this->lancValorPago : null,
+                'numero_parcela' => null,
+                'total_parcelas' => null,
+            ]);
+
+            $this->lancId
+                ? FinanceiroLancamento::findOrFail($this->lancId)->update($dados)
+                : FinanceiroLancamento::create($dados);
+        } else {
+            $valorParcela = round($valor / $totalParcelas, 2);
+            $vencimento   = \Carbon\Carbon::parse($this->lancVencimento);
+
+            for ($i = 1; $i <= $totalParcelas; $i++) {
+                $valorAtual = ($i === $totalParcelas)
+                    ? round($valor - ($valorParcela * ($totalParcelas - 1)), 2)
+                    : $valorParcela;
+
+                FinanceiroLancamento::create(array_merge($dadosBase, [
+                    'descricao'      => $this->lancDescricao . " ({$i}/{$totalParcelas})",
+                    'valor'          => $valorAtual,
+                    'vencimento'     => $vencimento->copy()->addMonths($i - 1)->format('Y-m-d'),
+                    'status'         => 'previsto',
+                    'data_pagamento' => null,
+                    'valor_pago'     => null,
+                    'numero_parcela' => $i,
+                    'total_parcelas' => $totalParcelas,
+                ]));
+            }
+        }
+
+        $this->fecharModalLanc();
+        $msg = $totalParcelas > 1 ? "{$totalParcelas} parcelas geradas!" : 'Lançamento salvo!';
+        $this->dispatch('toast', message: $msg, type: 'success');
+    }
+
+    public function marcarLancamentoPago(int $id): void
+    {
+        $l = FinanceiroLancamento::findOrFail($id);
+        $l->update([
+            'status'         => 'recebido',
+            'data_pagamento' => now()->format('Y-m-d'),
+            'valor_pago'     => $l->valor,
+        ]);
+        $this->dispatch('toast', message: 'Lançamento marcado como ' . ($l->tipo === 'receita' ? 'recebido' : 'pago') . '!', type: 'success');
+    }
+
+    public function excluirLancamento(int $id): void
+    {
+        FinanceiroLancamento::whereNull('contrato_id')->findOrFail($id)->delete();
+        $this->dispatch('toast', message: 'Lançamento excluído.', type: 'success');
+    }
+
     // ── Excluir documento ─────────────────────────────────────
     public function excluirDocumento(int $id): void
     {
@@ -183,37 +364,55 @@ class PastaCliente extends Component
         $valorCausa = $processos->where('status', 'Ativo')->sum('valor_causa');
 
         // ── Lançamentos financeiros (só carrega quando a aba está ativa) ──
-        $lancamentos = collect();
+        $lancamentos               = collect();
         $totalLancamentosAtrasados = 0;
-        $lancamentosAReceber = 0;
-        $lancamentosRecebido = 0;
+        $lancamentosAReceber       = 0;
+        $lancamentosRecebido       = 0;
+        $lancamentosAPagar         = 0;
+        $lancamentosPago           = 0;
 
         if ($this->aba === 'financeiro') {
-            $lancamentos = FinanceiroLancamento::with(['contrato'])
+            $todos = FinanceiroLancamento::with(['contrato', 'processo:id,numero'])
                 ->where('cliente_id', $this->clienteId)
                 ->whereNotIn('status', ['cancelado'])
                 ->orderBy('vencimento')
                 ->get();
-            $totalLancamentosAtrasados = $lancamentos->where('status', 'atrasado')->count();
-            $lancamentosAReceber = $lancamentos->whereIn('status', ['previsto', 'atrasado'])->sum('valor');
-            $lancamentosRecebido = $lancamentos->where('status', 'recebido')->sum('valor_pago');
+
+            $totalLancamentosAtrasados = $todos->where('status', 'atrasado')->count();
+
+            $todosReceitas = $todos->where('tipo', 'receita');
+            $todosDespesas = $todos->where('tipo', 'despesa');
+
+            $lancamentosAReceber = $todosReceitas->whereIn('status', ['previsto', 'atrasado'])->sum('valor');
+            $lancamentosRecebido = $todosReceitas->where('status', 'recebido')->sum('valor_pago');
+            $lancamentosAPagar   = $todosDespesas->whereIn('status', ['previsto', 'atrasado'])->sum('valor');
+            $lancamentosPago     = $todosDespesas->where('status', 'recebido')->sum('valor_pago');
+
+            $lancamentos = match ($this->filtroFinanceiro) {
+                'receitas' => $todosReceitas->values(),
+                'despesas' => $todosDespesas->values(),
+                'avulsos'  => $todos->filter(fn($l) => !$l->contrato_id && !$l->processo_id)->values(),
+                default    => $todos,
+            };
         } else {
-            // Contagem rápida de atrasados para o badge da aba (sem carregar tudo)
             $totalLancamentosAtrasados = FinanceiroLancamento::where('cliente_id', $this->clienteId)
                 ->where('status', 'atrasado')
                 ->count();
         }
 
         $tiposDoc = self::TIPOS_DOC;
+        $formas   = self::FORMAS;
 
         return view('livewire.pasta-cliente', compact(
             'cliente', 'processos', 'totalAtivos', 'totalArquivados',
             'prazos', 'totalPrazosVencidos', 'totalPrazosHoje',
             'parcelas', 'totalHonorarios',
             'documentos', 'historico',
-            'lancamentos', 'totalLancamentosAtrasados', 'lancamentosAReceber', 'lancamentosRecebido',
+            'lancamentos', 'totalLancamentosAtrasados',
+            'lancamentosAReceber', 'lancamentosRecebido',
+            'lancamentosAPagar', 'lancamentosPago',
             'valorRisco', 'valorCausa',
-            'tiposDoc'
+            'tiposDoc', 'formas'
         ));
     }
 }
