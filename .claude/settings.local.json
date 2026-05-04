@@ -88,7 +88,19 @@
       "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Models/Pessoa.php)",
       "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Providers/AppServiceProvider.php)",
       "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Livewire/Auth/RegistroTenant.php)",
-      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Http/Controllers/SuperAdminController.php)"
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -l app/Http/Controllers/SuperAdminController.php)",
+      "Bash(mkdir -p \"c:/projetos/saproweb-base/app/Livewire/Configuracoes\")",
+      "Bash(mkdir -p \"c:/projetos/saproweb-base/resources/views/livewire/configuracoes\")",
+      "Bash(mkdir -p \"c:/projetos/saproweb-base/storage/app/public/logos\")",
+      "Bash(php8.3 artisan *)",
+      "Bash(where php *)",
+      "Bash(/c/laragon/bin/php/php-8.3.0/php.exe artisan *)",
+      "PowerShell(Get-Command php -ErrorAction SilentlyContinue | Select-Object Source; \\(php -r \"echo PHP_VERSION;\"\\) 2>&1)",
+      "Bash(grep \"App\\\\\\\\\\\\\\\\\" \"c:/projetos/saproweb-base/vendor/composer/autoload_psr4.php\")",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l \"c:/projetos/saproweb-base/app/Livewire/Configuracoes/EscritorioConfig.php\")",
+      "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe \"c:/projetos/saproweb-base/artisan\" route:list --name=configuracoes)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | ForEach-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue } | Select-Object Id, Name, Path)",
+      "Bash(netstat -ano)"
     ]
   }
 }

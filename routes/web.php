@@ -42,10 +42,18 @@ use App\Http\Controllers\IAController;
 
 
 // ─── Área Autenticada ──────────────────────────
+
+
+Route::get('/teste-config', fn() => 'funcionou');
+
+
 	Route::middleware('auth:usuarios')->group(function () {
 
     // ── Onboarding ─────────────────────────────────────────────
     Route::get('/onboarding', \App\Livewire\Onboarding::class)->name('onboarding');
+
+    // ── Configurações ───────────────────────────────────────────
+    Route::get('/configuracoes/escritorio', \App\Livewire\Configuracoes\EscritorioConfig::class)->name('configuracoes.escritorio');
 
     // ── Geral (todos os perfis autenticados) ───────────────────
     	Route::middleware('perfil:geral')->group(function () {
