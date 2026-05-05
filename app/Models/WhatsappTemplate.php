@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class WhatsappTemplate extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'whatsapp_templates';
 
-    protected $fillable = ['nome', 'mensagem', 'canal', 'ativo'];
+    protected $fillable = ['tenant_id', 'nome', 'mensagem', 'canal', 'ativo'];
 
     protected $casts = ['ativo' => 'boolean'];
 

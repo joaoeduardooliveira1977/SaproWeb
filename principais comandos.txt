@@ -397,10 +397,10 @@ php artisan migrate --path=database/migrations/2026_03_18_225203_add_tenant_id_t
 
 
 
+App\Models\Usuario::create(['nome'=>'Super Admin','email'=>'joaoeduardooliveira1977@gmail.com','login'=>'superadmin','password'=>bcrypt('teste1234'),'perfil'=>'super_admin','ativo'=>true]);
 
 
-
-
+App\Models\Usuario::create(['nome'=>'Admin Oliveira','email'=>'admin@oliveira.com.br','login'=>'admin.oliveira','password'=>bcrypt('teste1234'),'perfil'=>'administrador','ativo'=>true,'tenant_id'=>1]);
 
 
 

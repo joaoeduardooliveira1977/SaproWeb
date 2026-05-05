@@ -171,6 +171,8 @@ class SuperAdminController extends Controller
                 'perfil'    => 'administrador',
                 'ativo'     => true,
             ]);
+
+            (new \App\Services\TenantDominioService())->copiarPadroesParaTenant($tenant->id);
         });
 
         return redirect()

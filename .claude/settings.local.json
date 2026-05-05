@@ -100,7 +100,9 @@
       "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe -l \"c:/projetos/saproweb-base/app/Livewire/Configuracoes/EscritorioConfig.php\")",
       "Bash(/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe \"c:/projetos/saproweb-base/artisan\" route:list --name=configuracoes)",
       "PowerShell(Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | ForEach-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue } | Select-Object Id, Name, Path)",
-      "Bash(netstat -ano)"
+      "Bash(netstat -ano)",
+      "Bash(Get-ChildItem -Path \"C:\\\\projetos\\\\SaproWeb\\\\database\\\\migrations\" -Filter \"*.php\")",
+      "Bash(Select-Object Name)"
     ]
   }
 }
