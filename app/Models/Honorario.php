@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
-use App\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -19,21 +18,6 @@ class Honorario extends Model
         'valor_contrato', 'percentual_exito', 'total_parcelas',
         'data_inicio', 'data_fim', 'status', 'observacoes',
     ];
-
-
-	protected static function booted(): void
-{
-    static::addGlobalScope(new TenantScope());
-
-    static::creating(function ($model) {
-        if (!$model->tenant_id) {
-            $model->tenant_id = auth('usuarios')->user()?->tenant_id;
-        }
-    });
-}
-
-
-
 
     protected $casts = [
         'data_inicio'     => 'date',
