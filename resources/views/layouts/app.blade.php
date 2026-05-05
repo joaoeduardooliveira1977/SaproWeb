@@ -588,7 +588,7 @@
     $isAdvogado = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado']);
     $isFinanc   = in_array($perfil, ['admin', 'administrador', 'super_admin', 'financeiro']);
     $hubAtivo   = '';
-    $rotasProcessos  = ['processos','processos.kanban','processos.novo','processos.editar','processos.show','documentos','minutas','assinatura-digital','audiencias','prazos','sla','agenda','processos.hub','processos.monitoramento'];
+    $rotasProcessos  = ['processos','processos.novo','processos.editar','processos.show','documentos','minutas','assinatura-digital','audiencias','prazos','sla','agenda','processos.hub','processos.monitoramento'];
     $rotasCadastros  = ['cadastros.hub','correspondentes','procuracoes','administradoras','tabelas'];
     $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','horas','financeiro.hub','financeiro.despesas-escritorio'];
     $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','orcamentos','ferramentas.hub','workflow.regras'];
@@ -1102,7 +1102,7 @@
             <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             Início
         </a>
-        <a href="{{ route('processos') }}" class="{{ in_array($rota, ['processos','processos.show','processos.kanban']) ? 'active' : '' }}">
+        <a href="{{ route('processos') }}" class="{{ in_array($rota, ['processos','processos.show']) ? 'active' : '' }}">
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             Processos
         </a>
