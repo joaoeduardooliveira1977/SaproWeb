@@ -19,6 +19,8 @@
         'Advogado'        => 'Advogados',
         'Fornecedor'      => 'Fornecedores',
         'Parte Contrária' => 'Partes Contrárias',
+        'Juiz'            => 'Juízes',
+        'Usuário'         => 'Usuários',
         default           => 'Pessoas',
     };
 @endphp
