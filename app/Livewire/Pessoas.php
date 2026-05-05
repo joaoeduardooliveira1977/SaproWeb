@@ -85,11 +85,10 @@ class Pessoas extends Component
             'email'              => 'nullable|email|max:150',
             'tipos_selecionados' => 'required|array|min:1',
             'advogados_ids'      => 'nullable|array',
-            // Honorário obrigatório para novos clientes
-            'honorarioTipo'       => $isCliente && !$this->pessoaId ? 'required|string' : 'nullable|string',
-            'honorarioValor'      => $isCliente && !$this->pessoaId ? 'required|numeric|min:0.01' : 'nullable|numeric',
-            'honorarioDescricao'  => $isCliente && !$this->pessoaId ? 'required|string|max:200' : 'nullable|string',
-            'honorarioDataInicio' => $isCliente && !$this->pessoaId ? 'required|date' : 'nullable|date',
+            'honorarioTipo'       => 'nullable|string',
+            'honorarioValor'      => 'nullable|numeric',
+            'honorarioDescricao'  => 'nullable|string|max:200',
+            'honorarioDataInicio' => 'nullable|date',
             // Contrato de validação
             'contratoArquivo'    => 'nullable|file|max:20480',
         ];
@@ -248,32 +247,6 @@ class Pessoas extends Component
             $pessoa->advogadosResponsaveis()->sync(array_filter($this->advogados_ids));
         } else {
             $pessoa->advogadosResponsaveis()->detach();
-        }
-
-        // Criar honorário para novos clientes
-        if ($isCliente && !$this->pessoaId) {
-            $valorNum = (float) str_replace(['.', ','], ['', '.'], $this->honorarioValor);
-            $honorario = Honorario::create([
-                'cliente_id'     => $pessoa->id,
-                'tipo'           => $this->honorarioTipo,
-                'descricao'      => $this->honorarioDescricao,
-                'valor_contrato' => $valorNum,
-                'total_parcelas' => max(1, $this->honorarioParcelas),
-                'data_inicio'    => $this->honorarioDataInicio,
-                'status'         => 'ativo',
-            ]);
-            // Gerar parcelas
-            for ($i = 1; $i <= $honorario->total_parcelas; $i++) {
-                DB::table('honorario_parcelas')->insert([
-                    'honorario_id'   => $honorario->id,
-                    'numero_parcela' => $i,
-                    'valor'          => round($valorNum / $honorario->total_parcelas, 2),
-                    'vencimento'     => \Carbon\Carbon::parse($this->honorarioDataInicio)->addMonthsNoOverflow($i - 1)->format('Y-m-d'),
-                    'status'         => 'pendente',
-                    'created_at'     => now(),
-                    'updated_at'     => now(),
-                ]);
-            }
         }
 
         $usuario->registrarAuditoria($acao, 'pessoas', $pessoa->id, null, ['nome' => $this->nome, 'tipos' => $this->tipos_selecionados]);

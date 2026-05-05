@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Honorario extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'honorarios';
 
     protected $fillable = [
-        'processo_id', 'contrato_id', 'cliente_id', 'tipo', 'descricao',
+        'tenant_id', 'processo_id', 'contrato_id', 'cliente_id', 'tipo', 'descricao',
         'valor_contrato', 'percentual_exito', 'total_parcelas',
         'data_inicio', 'data_fim', 'status', 'observacoes',
     ];

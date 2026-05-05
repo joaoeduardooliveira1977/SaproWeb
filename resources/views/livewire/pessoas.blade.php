@@ -665,47 +665,6 @@
         </div>
         @endif
 
-        {{-- Honorário (obrigatório para novo Cliente) --}}
-        @if(in_array('Cliente', $tipos_selecionados) && !$pessoaId)
-        <div style="border-top:1px solid var(--border);padding-top:16px;">
-            <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-                Honorário <span style="color:var(--danger);">*</span>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;">
-                <div>
-                    <label class="lbl" style="display:block;margin-bottom:4px;">Tipo *</label>
-                    <select wire:model="honorarioTipo" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
-                        <option value="fixo_mensal">Fixo Mensal</option>
-                        <option value="exito">Êxito</option>
-                        <option value="hora">Por Hora</option>
-                        <option value="ato_diligencia">Ato / Diligência</option>
-                    </select>
-                    @error('honorarioTipo')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
-                </div>
-                <div>
-                    <label class="lbl" style="display:block;margin-bottom:4px;">Valor (R$) *</label>
-                    <input type="text" wire:model="honorarioValor" placeholder="0,00" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
-                    @error('honorarioValor')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
-                </div>
-                <div>
-                    <label class="lbl" style="display:block;margin-bottom:4px;">Descrição *</label>
-                    <input type="text" wire:model="honorarioDescricao" placeholder="Ex: Honorário advocatício" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
-                    @error('honorarioDescricao')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
-                </div>
-                <div>
-                    <label class="lbl" style="display:block;margin-bottom:4px;">Data Início *</label>
-                    <input type="date" wire:model="honorarioDataInicio" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
-                    @error('honorarioDataInicio')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
-                </div>
-                <div>
-                    <label class="lbl" style="display:block;margin-bottom:4px;">Nº de Parcelas</label>
-                    <input type="number" wire:model="honorarioParcelas" min="1" max="120" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
-                </div>
-            </div>
-        </div>
-        @endif
-
         {{-- Documento de Validação (só admin/financeiro) --}}
         @if($podeVerContrato && in_array('Cliente', $tipos_selecionados))
         <div style="border-top:1px solid var(--border);padding-top:16px;">
