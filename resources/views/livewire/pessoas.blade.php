@@ -13,9 +13,18 @@
 </style>
 
 {{-- Cabecalho --}}
+@php
+    $tituloTipo = match($tipo) {
+        'Cliente'         => 'Clientes',
+        'Advogado'        => 'Advogados',
+        'Fornecedor'      => 'Fornecedores',
+        'Parte Contrária' => 'Partes Contrárias',
+        default           => 'Pessoas',
+    };
+@endphp
 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:14px;">
     <div>
-        <h1 style="font-size:24px;font-weight:800;color:var(--text);margin:0 0 4px;">Clientes</h1>
+        <h1 style="font-size:24px;font-weight:800;color:var(--text);margin:0 0 4px;">{{ $tituloTipo }}</h1>
         <p style="font-size:13px;color:var(--muted);margin:0;max-width:620px;line-height:1.5;">
             Consulte contatos, identifique o papel de cada pessoa e acesse rapidamente a pasta do cliente.
         </p>
