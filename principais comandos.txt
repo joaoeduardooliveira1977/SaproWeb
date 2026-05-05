@@ -405,3 +405,13 @@ App\Models\Usuario::create(['nome'=>'Admin Oliveira','email'=>'admin@oliveira.co
 
 
 
+
+Usuário: superadmin
+Senha: Nova@Senha123
+
+
+
+
+
+
+

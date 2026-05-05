@@ -616,7 +616,7 @@
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Processos
     </a>
     <a href="{{ route('pessoas') }}" class="nav-drawer-item {{ in_array($rota, ['pessoas','pessoas.pasta']) ? 'active' : '' }}" onclick="toggleDrawer()">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clientes
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Pessoas
     </a>
     <a href="{{ route('prazos') }}" class="nav-drawer-item {{ $rota==='prazos' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Prazos
@@ -679,9 +679,9 @@
         <span class="nav-btn-label">Processos</span>
     </a>
 
-    <a href="{{ route('pessoas') }}" class="nav-btn {{ in_array($rota, ['pessoas','pessoas.pasta']) ? 'active' : '' }}" title="Clientes">
+    <a href="{{ route('pessoas') }}" class="nav-btn {{ in_array($rota, ['pessoas','pessoas.pasta']) ? 'active' : '' }}" title="Pessoas">
         <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        <span class="nav-btn-label">Clientes</span>
+        <span class="nav-btn-label">Pessoas</span>
     </a>
 
     <a href="{{ route('prazos') }}" class="nav-btn {{ $rota==='prazos' ? 'active' : '' }}" title="Prazos">
