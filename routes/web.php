@@ -173,6 +173,7 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/indices',         fn() => view('indices'))->name('indices');
         Route::get('/auditoria', fn() => view('auditoria'))->name('auditoria');
         Route::get('/usuarios', fn() => view('usuarios'))->name('usuarios');
+        Route::get('/admin/usuarios', \App\Livewire\Admin\GestaoUsuarios::class)->name('admin.usuarios');
         Route::get('/admin/perfis', fn() => view('perfil-permissoes'))->name('admin.perfis');
         Route::get('/admin/portal-acesso',       fn() => view('portal-acesso'))->name('admin.portal-acesso');
         Route::get('/admin/portal-mensagens',    fn() => view('portal-mensagens'))->name('admin.portal-mensagens');

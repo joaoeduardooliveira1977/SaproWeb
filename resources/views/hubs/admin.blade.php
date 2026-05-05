@@ -31,7 +31,7 @@
     }
 
     $atalhos = [
-        'usuarios' => ['titulo' => 'Usuários', 'desc' => 'Permissões, perfis e acessos internos.', 'valor' => $totalUsuarios, 'rota' => route('usuarios'), 'cor' => '#2563a8', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>'],
+        'usuarios' => ['titulo' => 'Usuários', 'desc' => 'Permissões, perfis e acessos internos.', 'valor' => $totalUsuarios, 'rota' => route('admin.usuarios'), 'cor' => '#2563a8', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>'],
         'perfis' => ['titulo' => 'Perfis de Acesso', 'desc' => 'Configure quais módulos cada perfil pode acessar.', 'valor' => 'Novo', 'rota' => route('admin.perfis'), 'cor' => '#6366f1', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'],
         'tabelas' => ['titulo' => 'Cadastros auxiliares', 'desc' => 'Fases, riscos, tipos e listas do sistema.', 'valor' => 'Base', 'rota' => route('tabelas'), 'cor' => '#7c3aed', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>'],
         'administradoras' => ['titulo' => 'Administradoras', 'desc' => 'Cadastros usados em clientes e condomínios.', 'valor' => \App\Models\Administradora::count(), 'rota' => route('administradoras'), 'cor' => '#059669', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>'],
@@ -57,7 +57,7 @@
             <p style="font-size:13px;color:var(--muted);margin:4px 0 0;line-height:1.5;">Configure acessos, cadastros auxiliares, portal do cliente e rotinas automáticas do sistema.</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <a href="{{ route('usuarios') }}" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">{!! $atalhos['usuarios']['icone'] !!} Usuários</a>
+            <a href="{{ route('admin.usuarios') }}" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">{!! $atalhos['usuarios']['icone'] !!} Usuários</a>
             <a href="{{ route('auditoria') }}" class="btn btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;background:#eef2f7;color:var(--primary);border:1px solid var(--border);">{!! $atalhos['auditoria']['icone'] !!} Auditoria</a>
         </div>
     </div>
@@ -67,7 +67,7 @@
             <div style="width:38px;height:38px;border-radius:8px;background:#f1f5f9;color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
             <div><div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px;">Por onde começar?</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">A administração mexe na base do sistema. A ordem abaixo ajuda a revisar sem se perder.</div></div>
         </div>
-        <a href="{{ route('usuarios') }}" style="text-decoration:none;border-left:3px solid #2563a8;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">1. Acessos</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Revise usuários e portal do cliente.</span></a>
+        <a href="{{ route('admin.usuarios') }}" style="text-decoration:none;border-left:3px solid #2563a8;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">1. Acessos</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Revise usuários e portal do cliente.</span></a>
         <a href="{{ route('tabelas') }}" style="text-decoration:none;border-left:3px solid #7c3aed;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">2. Cadastros base</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Ajuste listas e índices de cálculo.</span></a>
         <a href="{{ route('admin.notificacoes-whatsapp') }}" style="text-decoration:none;border-left:3px solid #16a34a;padding-left:10px;"><strong style="display:block;font-size:12px;color:var(--text);margin-bottom:3px;">3. Comunicação</strong><span style="font-size:12px;color:var(--muted);line-height:1.4;">Configure WhatsApp, SMS e mensagens.</span></a>
     </div>

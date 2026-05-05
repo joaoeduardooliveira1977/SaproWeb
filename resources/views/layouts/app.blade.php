@@ -592,7 +592,7 @@
     $rotasCadastros  = ['cadastros.hub','correspondentes','procuracoes','administradoras','tabelas'];
     $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','horas','financeiro.hub','financeiro.despesas-escritorio'];
     $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','orcamentos','ferramentas.hub','workflow.regras'];
-    $rotasAdmin      = ['usuarios','tabelas','administradoras','indices','auditoria','admin.perfis','admin.portal-acesso','admin.portal-mensagens','admin.notificacoes-whatsapp','admin.hub','configuracoes.escritorio'];
+    $rotasAdmin      = ['usuarios','admin.usuarios','tabelas','administradoras','indices','auditoria','admin.perfis','admin.portal-acesso','admin.portal-mensagens','admin.notificacoes-whatsapp','admin.hub','configuracoes.escritorio'];
     if (in_array($rota, $rotasProcessos))   $hubAtivo = 'processos';
     if (in_array($rota, $rotasFinanceiro))  $hubAtivo = 'financeiro';
     if (in_array($rota, $rotasFerramentas)) $hubAtivo = 'ferramentas';
