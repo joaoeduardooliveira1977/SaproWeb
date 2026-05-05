@@ -11,7 +11,7 @@ trait BelongsToTenant
     {
         // Filtro automático por tenant
         static::addGlobalScope('tenant', function (Builder $builder) {
-            $tenantId = tenant_id() ?? (Auth::check() ? Auth::user()->tenant_id : null);
+            $tenantId = tenant_id() ?? Auth::guard('usuarios')->user()?->tenant_id;
 
             if ($tenantId) {
                 $builder->where(
@@ -24,7 +24,7 @@ trait BelongsToTenant
         // Auto preencher tenant_id ao criar
         static::creating(function ($model) {
             if (empty($model->tenant_id)) {
-                $model->tenant_id = tenant_id() ?? (Auth::check() ? Auth::user()->tenant_id : null);
+                $model->tenant_id = tenant_id() ?? Auth::guard('usuarios')->user()?->tenant_id;
             }
         });
     }
