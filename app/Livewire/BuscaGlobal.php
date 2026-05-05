@@ -29,6 +29,7 @@ class BuscaGlobal extends Component
 
         if (strlen($q) >= 2) {
             $like = '%' . $q . '%';
+            $tenantId = tenant_id();
 
             // ── Processos ──────────────────────────────────────
             $processos = DB::select(
@@ -41,9 +42,10 @@ class BuscaGlobal extends Component
                  WHERE  (p.numero ILIKE ?
                     OR   p.parte_contraria ILIKE ?
                     OR   pe.nome ILIKE ?)
+                   AND  p.tenant_id = ?
                  ORDER  BY p.updated_at DESC
                  LIMIT  5",
-                [$like, $like, $like]
+                [$like, $like, $like, $tenantId]
             );
 
             foreach ($processos as $r) {
@@ -64,9 +66,10 @@ class BuscaGlobal extends Component
                  FROM   pessoas p
                  WHERE  (p.nome ILIKE ? OR p.cpf_cnpj ILIKE ? OR p.email ILIKE ?)
                    AND  p.ativo = true
+                   AND  p.tenant_id = ?
                  ORDER  BY p.nome
                  LIMIT  4",
-                [$like, $like, $like]
+                [$like, $like, $like, $tenantId]
             );
 
             foreach ($pessoas as $r) {
@@ -88,9 +91,10 @@ class BuscaGlobal extends Component
                  FROM   andamentos a
                  JOIN   processos p ON p.id = a.processo_id
                  WHERE  a.descricao ILIKE ?
+                   AND  p.tenant_id = ?
                  ORDER  BY a.data DESC
                  LIMIT  4",
-                [$like]
+                [$like, $tenantId]
             );
 
             foreach ($andamentos as $r) {
@@ -112,9 +116,10 @@ class BuscaGlobal extends Component
                  FROM   prazos pz
                  JOIN   processos p ON p.id = pz.processo_id
                  WHERE  pz.titulo ILIKE ?
+                   AND  p.tenant_id = ?
                  ORDER  BY pz.data_prazo ASC
                  LIMIT  4",
-                [$like]
+                [$like, $tenantId]
             );
 
             foreach ($prazos as $r) {

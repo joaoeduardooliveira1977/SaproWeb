@@ -130,7 +130,7 @@
 
         {{-- Filtro por Tipo --}}
         <div style="margin-bottom:4px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">Tipo no cadastro</div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">Tipo de cadastro</div>
             <div style="display:flex;flex-direction:column;gap:4px;">
 
                 {{-- Todos --}}
@@ -579,7 +579,7 @@
         <div style="{{ $box }}">
         <div style="{{ $sec }}margin-top:0;">
             <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Tipo no cadastro *
+            Tipo de cadastro *
         </div>
         <div style="font-size:12px;color:var(--muted);line-height:1.5;margin:-4px 0 10px;">
             Escolha o papel deste cadastro no sistema. Use "Cliente" quando ele tiver processos vinculados.

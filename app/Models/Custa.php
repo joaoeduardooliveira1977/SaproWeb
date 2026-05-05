@@ -1,12 +1,15 @@
 <?php
 namespace App\Models;
+use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Custa extends Model {
+    use BelongsToTenant;
+
     protected $table = "custas";
     protected $fillable = [
-        "processo_id","data","descricao","valor","pago","data_pagamento","usuario_id",
+        "tenant_id","processo_id","data","descricao","valor","pago","data_pagamento","usuario_id",
         "reembolsavel","cobranca_lancamento_id","cobrado_em","cobrado_por"
     ];
     protected $casts = [

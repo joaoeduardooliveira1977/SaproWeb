@@ -65,7 +65,7 @@ class Pessoas extends Component
     public ?string $contratoAtual       = null; // path existente no banco
     public ?string $contratoAtualNome   = null;
 
-    public const TIPOS = ['Cliente', 'Fornecedor', 'Advogado', 'Juiz', 'Parte Contrária', 'Usuário'];
+    public const TIPOS = ['Cliente', 'Fornecedor', 'Advogado', 'Parte Contrária'];
 
     public function mount(): void
     {

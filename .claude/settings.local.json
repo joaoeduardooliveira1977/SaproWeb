@@ -102,7 +102,10 @@
       "PowerShell(Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | ForEach-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue } | Select-Object Id, Name, Path)",
       "Bash(netstat -ano)",
       "Bash(Get-ChildItem -Path \"C:\\\\projetos\\\\SaproWeb\\\\database\\\\migrations\" -Filter \"*.php\")",
-      "Bash(Select-Object Name)"
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem -Path \"c:\\\\projetos\\\\SaproWeb\\\\app\\\\Models\" -Filter \"*.php\" -File)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(Sort-Object)"
     ]
   }
 }

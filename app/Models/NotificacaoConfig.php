@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class NotificacaoConfig extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'notificacao_configs';
 
-    protected $fillable = ['tipo', 'label', 'ativo', 'antecedencias', 'canal'];
+    protected $fillable = ['tenant_id', 'tipo', 'label', 'ativo', 'antecedencias', 'canal'];
 
     protected $casts = [
         'ativo'         => 'boolean',

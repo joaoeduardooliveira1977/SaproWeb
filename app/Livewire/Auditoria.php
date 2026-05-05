@@ -48,9 +48,12 @@ class Auditoria extends Component
 
     public function render(): \Illuminate\View\View
     {
+        $tenantId = tenant_id();
+
         $query = DB::table('auditorias as a')
             ->leftJoin('usuarios as u', 'u.id', '=', 'a.usuario_id')
             ->select('a.*')
+            ->when($tenantId, fn ($q) => $q->where('u.tenant_id', $tenantId))
             ->orderByDesc('a.created_at');
 
         if ($this->filtroUsuario) {
@@ -72,12 +75,14 @@ class Auditoria extends Component
         $registros = $query->paginate(25);
 
         // Opções para filtros
-        $tabelas = DB::table('auditorias')
-            ->selectRaw('tabela, COUNT(*) as total')
-            ->whereNotNull('tabela')
-            ->groupBy('tabela')
+        $tabelas = DB::table('auditorias as a')
+            ->leftJoin('usuarios as u', 'u.id', '=', 'a.usuario_id')
+            ->selectRaw('a.tabela, COUNT(*) as total')
+            ->whereNotNull('a.tabela')
+            ->when($tenantId, fn ($q) => $q->where('u.tenant_id', $tenantId))
+            ->groupBy('a.tabela')
             ->orderByDesc('total')
-            ->pluck('tabela');
+            ->pluck('a.tabela');
 
         $detalhe = $this->detalheId
             ? DB::table('auditorias')->where('id', $this->detalheId)->first()

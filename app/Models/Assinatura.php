@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Assinatura extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'assinaturas';
 
     protected $fillable = [
-        'documento_id', 'processo_id', 'criado_por',
+        'tenant_id', 'documento_id', 'processo_id', 'criado_por',
         'titulo', 'descricao', 'arquivo_path', 'arquivo_nome',
         'clicksign_document_key', 'clicksign_list_key',
         'status', 'deadline_at', 'enviado_em', 'concluido_em', 'erro_mensagem',

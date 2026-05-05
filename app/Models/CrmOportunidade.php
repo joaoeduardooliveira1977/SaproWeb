@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class CrmOportunidade extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'crm_oportunidades';
 
     protected $fillable = [
-        'nome', 'telefone', 'email', 'cpf_cnpj', 'origem',
+        'tenant_id', 'nome', 'telefone', 'email', 'cpf_cnpj', 'origem',
         'titulo', 'area_direito', 'valor_estimado', 'descricao',
         'etapa', 'responsavel_id', 'data_previsao', 'data_fechamento',
         'motivo_perda', 'convertido', 'pessoa_id', 'usuario_id',

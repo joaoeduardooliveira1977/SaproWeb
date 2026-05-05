@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class Minuta extends Model
 {
-    protected $fillable = ['titulo', 'categoria', 'corpo', 'ativo'];
+    use BelongsToTenant;
+
+    protected $fillable = ['tenant_id', 'titulo', 'categoria', 'corpo', 'ativo'];
 
     protected $casts = ['ativo' => 'boolean'];
 

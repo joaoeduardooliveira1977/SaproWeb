@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Cobranca extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'cobrancas';
 
     protected $fillable = [
-        'parcela_id', 'cliente_id', 'usuario_id',
+        'tenant_id', 'parcela_id', 'cliente_id', 'usuario_id',
         'tipo', 'data', 'descricao',
     ];
 
