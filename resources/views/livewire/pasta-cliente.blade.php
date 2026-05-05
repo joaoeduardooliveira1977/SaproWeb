@@ -119,10 +119,6 @@
             <div class="pasta-kpi-val" style="color:#d97706;">{{ $totalPrazosHoje }}</div>
             <div class="pasta-kpi-lbl">Prazos hoje</div>
         </div>
-        <div class="pasta-kpi" style="border-left-color:#16a34a;">
-            <div class="pasta-kpi-val" style="color:#16a34a;">R$ {{ number_format($totalHonorarios, 2, ',', '.') }}</div>
-            <div class="pasta-kpi-lbl">Honorários em aberto</div>
-        </div>
         @if($valorRisco > 0)
         <div class="pasta-kpi" style="border-left-color:#7c3aed;">
             <div class="pasta-kpi-val" style="color:#7c3aed;">R$ {{ number_format($valorRisco, 0, ',', '.') }}</div>
@@ -142,11 +138,6 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             Prazos
             <span class="pasta-tab-badge">{{ $prazos->count() }}</span>
-        </button>
-        <button class="pasta-tab {{ $aba === 'honorarios' ? 'active' : '' }}" wire:click="$set('aba','honorarios')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-            Honorários
-            <span class="pasta-tab-badge">{{ $parcelas->count() }}</span>
         </button>
         <button class="pasta-tab {{ $aba === 'documentos' ? 'active' : '' }}" wire:click="$set('aba','documentos')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -249,53 +240,6 @@
                     </div>
                 </div>
                 @endforeach
-            @endif
-        @endif
-
-        {{-- ABA: Honorários --}}
-        @if($aba === 'honorarios')
-            @if($parcelas->isEmpty())
-                <div class="pasta-empty">Nenhuma parcela em aberto.</div>
-            @else
-                <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Processo</th>
-                            <th>Parcela</th>
-                            <th>Vencimento</th>
-                            <th>Valor</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($parcelas as $par)
-                        @php $atrasado = $par->vencimento->isPast() && $par->status === 'pendente'; @endphp
-                        <tr>
-                            <td>{{ $par->honorario?->processo?->numero ?? '—' }}</td>
-                            <td>Parcela {{ $par->numero_parcela }}</td>
-                            <td style="color:{{ $atrasado ? '#dc2626' : 'var(--text)' }};font-weight:{{ $atrasado ? '700' : '400' }};">
-                                {{ $par->vencimento->format('d/m/Y') }}
-                                @if($atrasado) <span style="font-size:10px;">({{ $par->vencimento->diffInDays(now()) }}d)</span> @endif
-                            </td>
-                            <td style="font-weight:600;">R$ {{ number_format($par->valor, 2, ',', '.') }}</td>
-                            <td>
-                                <span style="font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;background:{{ $par->status==='vencido' ? '#fee2e2' : '#fef3c7' }};color:{{ $par->status==='vencido' ? '#991b1b' : '#92400e' }};">
-                                    {{ ucfirst($par->status) }}
-                                </span>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="3" style="font-weight:700;color:var(--text);">Total em aberto</td>
-                            <td style="font-weight:700;color:#dc2626;">R$ {{ number_format($totalHonorarios, 2, ',', '.') }}</td>
-                            <td></td>
-                        </tr>
-                    </tfoot>
-                </table>
-                </div>
             @endif
         @endif
 

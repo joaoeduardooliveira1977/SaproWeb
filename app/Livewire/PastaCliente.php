@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\{Andamento, Documento, FinanceiroLancamento, HonorarioParcela, Pessoa, Prazo, Processo};
+use App\Models\{Andamento, Documento, FinanceiroLancamento, Pessoa, Prazo, Processo};
 use Illuminate\Support\Facades\{Auth, Storage};
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -12,7 +12,7 @@ class PastaCliente extends Component
     use WithFileUploads;
 
     public int    $clienteId;
-    public string $aba = 'processos'; // processos | prazos | honorarios | documentos | financeiro | historico
+    public string $aba = 'processos'; // processos | prazos | documentos | financeiro | historico
 
     // ── Upload de documento ───────────────────────────────────
     public bool    $modalDoc       = false;
@@ -333,16 +333,6 @@ class PastaCliente extends Component
         $totalPrazosVencidos = $prazos->filter(fn($p) => $p->data_prazo->isPast())->count();
         $totalPrazosHoje     = $prazos->filter(fn($p) => $p->data_prazo->isToday())->count();
 
-        // ── Honorários em aberto ─────────────────────────────────────
-        $parcelas = HonorarioParcela::with(['honorario.processo:id,numero'])
-            ->whereHas('honorario', fn($q) => $q->where('cliente_id', $this->clienteId))
-            ->whereIn('status', ['pendente', 'vencido'])
-            ->orderBy('vencimento')
-            ->take(30)
-            ->get();
-
-        $totalHonorarios = $parcelas->sum('valor');
-
         // ── Documentos ───────────────────────────────────────────────
         $documentos = Documento::where(function ($q) use ($processosIds) {
                 $q->whereIn('processo_id', $processosIds)
@@ -406,7 +396,6 @@ class PastaCliente extends Component
         return view('livewire.pasta-cliente', compact(
             'cliente', 'processos', 'totalAtivos', 'totalArquivados',
             'prazos', 'totalPrazosVencidos', 'totalPrazosHoje',
-            'parcelas', 'totalHonorarios',
             'documentos', 'historico',
             'lancamentos', 'totalLancamentosAtrasados',
             'lancamentosAReceber', 'lancamentosRecebido',
