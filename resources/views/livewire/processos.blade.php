@@ -9,7 +9,8 @@
 }
 </style>
 
-{{-- ── Cabeçalho ── --}}
+{{-- ── Cabeçalho (oculto quando embutido no hub) ── --}}
+@if(!$embutido)
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
     <div>
         <h1 style="font-size:24px;font-weight:800;color:var(--primary);margin:0;">Processos</h1>
@@ -34,6 +35,7 @@
         </a>
     </div>
 </div>
+@endif
 
 {{-- ── Visão rápida ── --}}
 <div class="metricas-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">

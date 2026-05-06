@@ -11,6 +11,8 @@ class Processos extends Component
 {
     use WithPagination;
 
+    public bool     $embutido   = false;
+
     public string  $busca      = '';
     public string  $status     = '';
     public string  $fase_id    = '';
