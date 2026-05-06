@@ -13,4 +13,11 @@ class RecebimentoObserver
             app(ComissaoService::class)->gerarParaRecebimento($recebimento);
         }
     }
+
+    public function created(Recebimento $recebimento): void
+    {
+        if ($recebimento->recebido) {
+            app(ComissaoService::class)->gerarParaRecebimento($recebimento);
+        }
+    }
 }

@@ -279,8 +279,12 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                 {{-- Vara --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Vara</label>
-                    <input wire:model.live="vara" type="text" style="{{ $inp }}" placeholder="Ex: 3ª Vara Cível"
-                        {{ $disJ ? 'disabled' : '' }}>
+                    <select wire:model.live="vara" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
+                        <option value="">— Selecione —</option>
+                        @foreach($varas as $v)
+                            <option value="{{ $v->descricao }}">{{ $v->descricao }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
             </div>

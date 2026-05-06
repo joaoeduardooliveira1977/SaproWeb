@@ -105,7 +105,11 @@
       "Bash(Select-Object Name)",
       "Bash(Get-ChildItem -Path \"c:\\\\projetos\\\\SaproWeb\\\\app\\\\Models\" -Filter \"*.php\" -File)",
       "Bash(Select-Object -ExpandProperty Name)",
-      "Bash(Sort-Object)"
+      "Bash(Sort-Object)",
+      "PowerShell(Get-ChildItem \"c:\\\\projetos\\\\SaproWeb\\\\database\\\\migrations\\\\\" | Select-Object -ExpandProperty Name | Where-Object {$_ -match \"fase|risco|comarca|reparticao\"})",
+      "PowerShell(head -20)",
+      "Bash(Get-ChildItem -Path \"database\\\\migrations\" -Filter \"*fase*\" -Recurse)",
+      "Bash(Get-ChildItem -Path \"app\\\\Models\" -Filter \"*.php\")"
     ]
   }
 }

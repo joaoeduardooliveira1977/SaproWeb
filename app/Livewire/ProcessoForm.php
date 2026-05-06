@@ -393,11 +393,12 @@ class ProcessoForm extends Component
         $tiposAcao     = DB::table('tipos_acao')->orderBy('descricao')->get();
         $tiposProcesso = DB::table('tipos_processo')->orderBy('descricao')->get();
         $reparticoes   = DB::table('reparticoes')->orderBy('descricao')->get();
+        $varas         = DB::table('varas')->where('ativo', true)->orderBy('descricao')->get();
 
         return view('livewire.processo-form', compact(
             'advogados', 'fases',
             'riscos', 'tiposAcao', 'tiposProcesso',
-            'reparticoes'
+            'reparticoes', 'varas'
         ));
     }
 }

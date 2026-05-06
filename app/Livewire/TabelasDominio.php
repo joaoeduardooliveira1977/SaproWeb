@@ -29,6 +29,7 @@ class TabelasDominio extends Component
             'assuntos'        => ['label' => 'Assuntos',             'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
             'reparticoes'     => ['label' => 'Repartições / Fóruns','temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
             'secretarias'     => ['label' => 'Secretarias',         'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
+            'varas'           => ['label' => 'Varas',               'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
         ];
     }
 

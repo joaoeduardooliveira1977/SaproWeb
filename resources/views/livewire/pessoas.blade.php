@@ -42,7 +42,7 @@
         </button>
         <button wire:click="abrirModal()" class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;">
             <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Novo Cliente
+            Nova Pessoa
         </button>
     </div>
 </div>
@@ -155,9 +155,7 @@
                 @foreach([
                     'Cliente'         => ['#1d4ed8','#dbeafe','#bfdbfe'],
                     'Advogado'        => ['#15803d','#dcfce7','#bbf7d0'],
-                    'Juiz'            => ['#b45309','#fef3c7','#fde68a'],
                     'Parte Contrária' => ['#b91c1c','#fee2e2','#fecaca'],
-                    'Usuário'         => ['#6d28d9','#ede9fe','#ddd6fe'],
                 ] as $t => $cor)
                 @php $sel = $tipo === $t; $cnt = $tipoCounts[$t] ?? 0; @endphp
                 <button wire:click="$set('tipo', '{{ $sel ? '' : $t }}')"
@@ -460,7 +458,7 @@
                     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </div>
                 <div>
-                    <div class="modal-title">{{ $pessoaId ? 'Editar Cadastro' : 'Novo Cliente' }}</div>
+                    <div class="modal-title">{{ $pessoaId ? 'Editar Cadastro' : 'Nova Pessoa' }}</div>
                     <div style="font-size:12px;color:var(--muted);margin-top:2px;">Preencha o essencial primeiro e complete os dados complementares quando necessário.</div>
                 </div>
             </div>

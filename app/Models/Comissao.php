@@ -13,7 +13,7 @@ class Comissao extends Model
     protected $table = 'comissoes';
 
     protected $fillable = [
-        'indicador_id', 'pessoa_id', 'origem_tipo', 'origem_id',
+        'tenant_id', 'indicador_id', 'pessoa_id', 'origem_tipo', 'origem_id',
         'valor_base', 'percentual', 'valor_comissao',
         'competencia', 'status', 'data_pagamento', 'observacoes',
     ];
