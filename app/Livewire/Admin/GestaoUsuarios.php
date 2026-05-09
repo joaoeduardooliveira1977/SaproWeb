@@ -218,13 +218,13 @@ class GestaoUsuarios extends Component
         $this->resetErrorBag();
     }
 
-    public function render(): \Illuminate\View\View
-    {
-        return view('livewire.admin.gestao-usuarios', [
-            'usuarios'      => $this->usuarios,
-            'atingiuLimite' => $this->atingiuLimite,
-            'limite'        => $this->limite,
-            'totalAtivos'   => $this->totalAtivos,
-        ]);
-    }
+   public function render(): \Illuminate\View\View
+{
+    return view('livewire.admin.gestao-usuarios', [
+        'usuarios'      => $this->usuarios,
+        'atingiuLimite' => $this->atingiuLimite,
+        'limite'        => $this->limite,
+        'totalAtivos'   => $this->totalAtivos,
+    ])->extends('layouts.app')->section('content');
+}
 }
