@@ -88,7 +88,7 @@ class TabelasDominio extends Component
         $cfg   = self::config()[$this->tabelaAtiva] ?? [];
         $dados = ['descricao' => $this->descricao];
 
-        $dados['codigo'] = $this->codigo ?: strtoupper(substr(preg_replace('/\s+/', '_', $this->descricao), 0, 20));
+        $dados['codigo'] = $this->codigo ?: strtoupper(substr(preg_replace('/\s+/', '_', $this->descricao), 0, 10));
 
         if ($cfg['temOrdem']  ?? false) $dados['ordem']   = $this->ordem !== '' ? (int) $this->ordem : null;
         if ($cfg['temCor']    ?? false) $dados['cor_hex'] = $this->cor_hex ?: '#1a3a5c';
