@@ -90,7 +90,7 @@ class TabelasDominio extends Component
 
         $dados['codigo'] = $this->codigo ?: strtoupper(substr(preg_replace('/\s+/', '_', $this->descricao), 0, 10));
 
-        if ($cfg['temOrdem']  ?? false) $dados['ordem']   = $this->ordem !== '' ? (int) $this->ordem : null;
+        if ($cfg['temOrdem']  ?? false) $dados['ordem']   = $this->ordem !== '' ? (int) $this->ordem : 0;
         if ($cfg['temCor']    ?? false) $dados['cor_hex'] = $this->cor_hex ?: '#1a3a5c';
         if ($cfg['temAtivo']  ?? false) $dados['ativo']   = $this->ativo;
 
