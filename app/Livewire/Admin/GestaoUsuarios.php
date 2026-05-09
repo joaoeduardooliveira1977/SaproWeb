@@ -35,8 +35,6 @@ class GestaoUsuarios extends Component
 
     protected function rules(): array
     {
-        $tenantId = auth('usuarios')->user()->tenant_id;
-
         $rules = [
             'nome'             => 'required|string|min:3|max:150',
             'email'            => 'required|email|max:150',
@@ -61,19 +59,19 @@ class GestaoUsuarios extends Component
     }
 
     protected array $messages = [
-        'nome.required'    => 'Informe o nome.',
-        'nome.min'         => 'Nome deve ter ao menos 3 caracteres.',
-        'email.required'   => 'Informe o e-mail.',
-        'email.email'      => 'E-mail inválido.',
-        'email.unique'     => 'Este e-mail já está em uso.',
-        'login.required'   => 'Informe o login.',
-        'login.min'        => 'Login deve ter ao menos 3 caracteres.',
-        'login.unique'     => 'Este login já está em uso.',
-        'senha.required'   => 'A senha é obrigatória para novos usuários.',
-        'senha.min'        => 'A senha deve ter ao menos 8 caracteres.',
+        'nome.required'         => 'Informe o nome.',
+        'nome.min'              => 'Nome deve ter ao menos 3 caracteres.',
+        'email.required'        => 'Informe o e-mail.',
+        'email.email'           => 'E-mail inválido.',
+        'email.unique'          => 'Este e-mail já está em uso.',
+        'login.required'        => 'Informe o login.',
+        'login.min'             => 'Login deve ter ao menos 3 caracteres.',
+        'login.unique'          => 'Este login já está em uso.',
+        'senha.required'        => 'A senha é obrigatória para novos usuários.',
+        'senha.min'             => 'A senha deve ter ao menos 8 caracteres.',
         'senhaConfirmacao.same' => 'As senhas não coincidem.',
-        'perfil.required'  => 'Selecione um perfil.',
-        'perfil.in'        => 'Perfil inválido.',
+        'perfil.required'       => 'Selecione um perfil.',
+        'perfil.in'             => 'Perfil inválido.',
     ];
 
     #[Computed]
@@ -119,7 +117,7 @@ class GestaoUsuarios extends Component
     public function abrirModal(?int $id = null): void
     {
         $this->limpar();
-        $this->usuarioId  = $id;
+        $this->usuarioId   = $id;
         $this->modalAberto = true;
 
         if ($id) {
@@ -222,6 +220,11 @@ class GestaoUsuarios extends Component
 
     public function render(): \Illuminate\View\View
     {
-        return view('livewire.admin.gestao-usuarios');
+        return view('livewire.admin.gestao-usuarios', [
+            'usuarios'      => $this->usuarios,
+            'atingiuLimite' => $this->atingiuLimite,
+            'limite'        => $this->limite,
+            'totalAtivos'   => $this->totalAtivos,
+        ]);
     }
 }
