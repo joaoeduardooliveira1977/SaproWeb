@@ -161,7 +161,7 @@ class FinanceiroConsolidado extends Component
             SELECT COALESCE(SUM(valor),0) AS total
             FROM recebimentos
             WHERE recebido = false
-              AND (tenant_id = ? OR ? IS NULL)
+              AND (tenant_id = ? OR ?::int IS NULL)
         ", [$tenantId, $tenantId])->total;
 
         $recebido_mes = DB::selectOne("
@@ -169,14 +169,14 @@ class FinanceiroConsolidado extends Component
             FROM recebimentos
             WHERE recebido = true
               AND data_recebimento BETWEEN ? AND ?
-              AND (tenant_id = ? OR ? IS NULL)
+              AND (tenant_id = ? OR ?::int IS NULL)
         ", [$inicioMes, $fimMes, $tenantId, $tenantId])->total;
 
         $a_pagar = DB::selectOne("
             SELECT COALESCE(SUM(valor),0) AS total
             FROM pagamentos
             WHERE pago = false
-              AND (tenant_id = ? OR ? IS NULL)
+              AND (tenant_id = ? OR ?::int IS NULL)
         ", [$tenantId, $tenantId])->total;
 
         $pago_mes = DB::selectOne("
@@ -184,7 +184,7 @@ class FinanceiroConsolidado extends Component
             FROM pagamentos
             WHERE pago = true
               AND data_pagamento BETWEEN ? AND ?
-              AND (tenant_id = ? OR ? IS NULL)
+              AND (tenant_id = ? OR ?::int IS NULL)
         ", [$inicioMes, $fimMes, $tenantId, $tenantId])->total;
 
         $honorarios_atrasados = DB::selectOne("
@@ -193,7 +193,7 @@ class FinanceiroConsolidado extends Component
             JOIN honorarios h ON h.id = hp.honorario_id
             WHERE hp.status IN ('atrasado','pendente')
               AND hp.vencimento < CURRENT_DATE
-              AND (h.tenant_id = ? OR ? IS NULL)
+              AND (h.tenant_id = ? OR ?::int IS NULL)
         ", [$tenantId, $tenantId])->total;
 
         $honorarios_vencer = DB::selectOne("
@@ -202,7 +202,7 @@ class FinanceiroConsolidado extends Component
             JOIN honorarios h ON h.id = hp.honorario_id
             WHERE hp.status = 'pendente'
               AND hp.vencimento >= CURRENT_DATE
-              AND (h.tenant_id = ? OR ? IS NULL)
+              AND (h.tenant_id = ? OR ?::int IS NULL)
         ", [$tenantId, $tenantId])->total;
 
         return compact(
@@ -380,7 +380,7 @@ class FinanceiroConsolidado extends Component
                 FROM recebimentos
                 WHERE recebido = true
                   AND TO_CHAR(data_recebimento,'YYYY-MM') = ?
-                  AND (tenant_id = ? OR ? IS NULL)
+                  AND (tenant_id = ? OR ?::int IS NULL)
             ", [$mes, $tenantId, $tenantId])->total;
 
             $pago = DB::selectOne("
@@ -388,7 +388,7 @@ class FinanceiroConsolidado extends Component
                 FROM pagamentos
                 WHERE pago = true
                   AND TO_CHAR(data_pagamento,'YYYY-MM') = ?
-                  AND (tenant_id = ? OR ? IS NULL)
+                  AND (tenant_id = ? OR ?::int IS NULL)
             ", [$mes, $tenantId, $tenantId])->total;
 
             $honorarios = DB::selectOne("
@@ -397,7 +397,7 @@ class FinanceiroConsolidado extends Component
                 JOIN honorarios h ON h.id = hp.honorario_id
                 WHERE hp.status = 'pago'
                   AND TO_CHAR(hp.data_pagamento,'YYYY-MM') = ?
-                  AND (h.tenant_id = ? OR ? IS NULL)
+                  AND (h.tenant_id = ? OR ?::int IS NULL)
             ", [$mes, $tenantId, $tenantId])->total;
 
             $rows[] = [

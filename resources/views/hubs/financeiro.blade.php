@@ -117,104 +117,101 @@
 {{-- ── Módulos + Coluna Direita ── --}}
 <div style="display:grid;grid-template-columns:1fr 380px;gap:20px;" class="fin-hub-bottom">
 
+    {{-- Alerta de urgência --}}
+    @if($inadimplentes > 0 || $cobrancasAberto > 0)
+    <div style="display:flex;align-items:center;gap:10px;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div style="flex:1;font-size:13px;color:#991b1b;font-weight:600;">
+            @if($inadimplentes > 0)
+                {{ $inadimplentes }} cliente(s) com pagamentos vencidos.
+            @endif
+            @if($cobrancasAberto > 0)
+                {{ $cobrancasAberto }} cobrança(s) em aberto aguardando recebimento.
+            @endif
+        </div>
+        @if($inadimplentes > 0)
+        <a href="{{ route('inadimplencia') }}" style="font-size:12px;font-weight:700;color:#dc2626;text-decoration:none;white-space:nowrap;background:#fee2e2;padding:5px 12px;border-radius:6px;">Resolver agora →</a>
+        @endif
+    </div>
+    @endif
+
     {{-- Módulos Financeiros --}}
     <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <div style="font-size:16px;font-weight:800;color:var(--text);">Módulos Financeiros</div>
-            <a href="{{ route('financeiro.consolidado') }}" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:600;">Ver consolidado →</a>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;" class="fin-hub-modulos">
+        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:16px;">Módulos</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;" class="fin-hub-modulos">
             @php
+            $contrAtivos = \App\Models\Contrato::where('status','ativo')->count();
+            $comissoesPend = \App\Models\Comissao::where('status','pendente')->count();
             $modulos = [
                 [
-                    'label'    => 'Visão Geral',
-                    'desc'     => 'Resumo consolidado da operação financeira com leitura rápida dos indicadores.',
-                    'cor'      => '#059669',
-                    'bg'       => '#f0fdf4',
-                    'badge'    => 'OK',
-                    'badge_bg' => '#059669',
-                    'route'    => route('financeiro.consolidado'),
-                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>',
-                ],
-                [
-                    'label'    => 'Por Processo',
-                    'desc'     => 'Receitas e despesas vinculadas aos processos para análise de rentabilidade.',
+                    'label'    => 'Lançamentos',
+                    'desc'     => 'Receitas e despesas por cliente ou processo. Filtro unificado em uma só tela.',
                     'cor'      => '#2563a8',
                     'bg'       => '#eff6ff',
-                    'badge'    => $titulosAtivos,
+                    'badge'    => $titulosAtivos . ' em aberto',
                     'badge_bg' => '#2563a8',
-                    'route'    => route('financeiro'),
-                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+                    'route'    => route('financeiro.central'),
+                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
                 ],
                 [
-                    'label'    => 'Honorários',
-                    'desc'     => 'Gestão de cobranças, parcelas pendentes e acompanhamento contratual.',
+                    'label'    => 'Honorários e Contratos',
+                    'desc'     => 'Cobranças, parcelas e contratos de prestação de serviços.',
                     'cor'      => '#d97706',
                     'bg'       => '#fffbeb',
-                    'badge'    => $cobrancasAberto,
+                    'badge'    => ($cobrancasAberto + $contrAtivos) . ' ativos',
                     'badge_bg' => '#d97706',
                     'route'    => route('honorarios'),
                     'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
                 ],
                 [
-                    'label'    => 'Contratos',
-                    'desc'     => 'Contratos de honorários, consultoria e avulsos com geração automática de lançamentos.',
-                    'cor'      => '#7c3aed',
-                    'bg'       => '#faf5ff',
-                    'badge'    => \App\Models\Contrato::where('status','ativo')->count(),
-                    'badge_bg' => '#7c3aed',
-                    'route'    => route('contratos'),
-                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
-                ],
-                [
                     'label'    => 'Inadimplência',
-                    'desc'     => 'Painel de atrasos, risco financeiro e ações de cobrança por prioridade.',
-                    'cor'      => '#dc2626',
-                    'bg'       => '#fef2f2',
-                    'badge'    => $inadimplentes,
-                    'badge_bg' => '#dc2626',
+                    'desc'     => 'Clientes com pagamentos vencidos. Registre contatos e ações de cobrança.',
+                    'cor'      => $inadimplentes > 0 ? '#dc2626' : '#16a34a',
+                    'bg'       => $inadimplentes > 0 ? '#fef2f2' : '#f0fdf4',
+                    'badge'    => $inadimplentes > 0 ? $inadimplentes . ' clientes' : 'Em dia',
+                    'badge_bg' => $inadimplentes > 0 ? '#dc2626' : '#16a34a',
                     'route'    => route('inadimplencia'),
                     'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
                 ],
                 [
-                    'label'    => 'Conciliação',
-                    'desc'     => 'Conferência de extratos, lançamentos e validação das movimentações.',
+                    'label'    => 'Comissões',
+                    'desc'     => 'Comissões geradas automaticamente para indicadores e síndicos.',
+                    'cor'      => '#059669',
+                    'bg'       => '#f0fdf4',
+                    'badge'    => $comissoesPend > 0 ? $comissoesPend . ' pendentes' : 'Tudo pago',
+                    'badge_bg' => $comissoesPend > 0 ? '#d97706' : '#059669',
+                    'route'    => route('comissoes'),
+                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
+                ],
+                [
+                    'label'    => 'Conciliação Bancária',
+                    'desc'     => 'Importe extratos OFX e concilie com os lançamentos do sistema.',
                     'cor'      => '#7c3aed',
                     'bg'       => '#f5f3ff',
-                    'badge'    => '●',
+                    'badge'    => 'OFX',
                     'badge_bg' => '#7c3aed',
                     'route'    => route('conciliacao-bancaria'),
                     'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
                 ],
                 [
-                    'label'    => 'Controle de Horas',
-                    'desc'     => 'Apontamentos de tempo por processo e advogado, rankings e exportação CSV.',
-                    'cor'      => '#6366f1',
-                    'bg'       => '#eef2ff',
-                    'badge'    => 'Novo',
-                    'badge_bg' => '#6366f1',
-                    'route'    => route('horas'),
-                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+                    'label'    => 'Visão Consolidada',
+                    'desc'     => 'Painel financeiro completo: saldo projetado, fluxo de caixa, a receber e a pagar.',
+                    'cor'      => '#0891b2',
+                    'bg'       => '#f0f9ff',
+                    'badge'    => 'Dashboard',
+                    'badge_bg' => '#0891b2',
+                    'route'    => route('financeiro.consolidado'),
+                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
                 ],
                 [
                     'label'    => 'Relatórios',
-                    'desc'     => 'Exportações financeiras, visão por período e relatórios executivos.',
-                    'cor'      => '#0891b2',
-                    'bg'       => '#f0f9ff',
-                    'badge'    => 'PDF',
-                    'badge_bg' => '#0891b2',
+                    'desc'     => 'Relatórios financeiros por período, cliente e processo.',
+                    'cor'      => '#475569',
+                    'bg'       => '#f8fafc',
+                    'badge'    => 'PDF / CSV',
+                    'badge_bg' => '#475569',
                     'route'    => route('relatorios.index'),
                     'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-                ],
-                [
-                    'label'    => 'Comissões',
-                    'desc'     => 'Geração e pagamento automático de comissões para indicadores.',
-                    'cor'      => '#059669',
-                    'bg'       => '#f0fdf4',
-                    'badge'    => \App\Models\Comissao::where('status','pendente')->count(),
-                    'badge_bg' => '#d97706',
-                    'route'    => route('comissoes'),
-                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
                 ],
             ];
             @endphp

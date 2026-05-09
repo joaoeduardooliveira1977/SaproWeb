@@ -12,7 +12,7 @@
         <div class="stat-val" style="color:var(--success);font-size:20px;">R$ {{ number_format($resumo->total_recebido,2,',','.') }}</div>
     </div>
     <div class="card" style="border-left:4px solid var(--warning);">
-        <div class="stat-label">Pendente</div>
+        <div class="stat-label">A Receber</div>
         <div class="stat-val" style="color:var(--warning);font-size:20px;">R$ {{ number_format($resumo->total_pendente,2,',','.') }}</div>
     </div>
     <div class="card" style="border-left:4px solid var(--danger);">
@@ -320,7 +320,7 @@
                 </thead>
                 <tbody>
                     @foreach($parcelasModal as $p)
-                    <tr>
+                    <tr style="{{ $modalPagamento && $parcelaId == $p->id ? 'background:#f0fdf4;' : '' }}">
                         <td style="text-align:center;font-weight:600;">{{ $p->numero_parcela }}</td>
                         <td>{{ \Carbon\Carbon::parse($p->vencimento)->format('d/m/Y') }}</td>
                         <td style="text-align:right;">R$ {{ number_format($p->valor,2,',','.') }}</td>
@@ -349,13 +349,51 @@
                 </tbody>
             </table>
         </div>
+
+        @if($modalPagamento)
+        <div style="border-top:2px solid var(--border);padding:20px;background:#f8fafc;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                <span style="width:24px;height:24px;border-radius:6px;background:#f0fdf4;color:#16a34a;display:inline-flex;align-items:center;justify-content:center;"><svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span>
+                Registrar Pagamento
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                    <label style="font-size:12px;font-weight:600;color:var(--muted);">DATA DO PAGAMENTO</label>
+                    <input wire:model="data_pagamento" type="date" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:600;color:var(--muted);">VALOR PAGO (R$)</label>
+                    <input wire:model="valor_pago" type="number" step="0.01" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:600;color:var(--muted);">FORMA DE PAGAMENTO</label>
+                    <select wire:model="forma_pagamento" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
+                        <option value="pix">PIX</option>
+                        <option value="transferencia">Transferência</option>
+                        <option value="boleto">Boleto</option>
+                        <option value="dinheiro">Dinheiro</option>
+                        <option value="cheque">Cheque</option>
+                        <option value="cartao">Cartão</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:12px;font-weight:600;color:var(--muted);">OBSERVAÇÕES</label>
+                    <input wire:model="obs_pagamento" type="text" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-top:4px;">
+                </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">
+                <button wire:click="$set('modalPagamento',false)" class="btn btn-secondary">Cancelar</button>
+                <button wire:click="registrarPagamento" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;"><svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Confirmar</button>
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 @endif
 
-{{-- Modal Pagamento --}}
-@if($modalPagamento)
-<div class="modal-backdrop" style="z-index:1100;">
+{{-- Modal Pagamento (standalone — when parcelas modal is closed) --}}
+@if($modalPagamento && !$modalParcelas)
+<div class="modal-backdrop">
     <div class="modal" style="max-width:400px;">
         <div class="modal-header">
             <span class="modal-title" style="display:inline-flex;align-items:center;gap:8px;"><span style="width:24px;height:24px;border-radius:6px;background:#f0fdf4;color:#16a34a;display:inline-flex;align-items:center;justify-content:center;"><svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span> Registrar Pagamento</span>

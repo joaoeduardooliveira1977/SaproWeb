@@ -99,15 +99,22 @@
         <option value="repasse">Repasse</option>
     </select>
 
-    <select wire:model.live="filtroCliente" style="width:170px;">
+    <select wire:model.live="filtroCliente" style="width:160px;">
         <option value="">Todos os clientes</option>
         @foreach($clientes as $cl)
         <option value="{{ $cl['id'] }}">{{ $cl['nome'] }}</option>
         @endforeach
     </select>
 
-    @if($busca || $filtroStatus || $filtroTipo || $filtroMes !== now()->format('Y-m') || $filtroCliente)
-    <button wire:click="$set('busca',''); $set('filtroStatus',''); $set('filtroTipo',''); $set('filtroCliente',''); $set('filtroMes','{{ now()->format('Y-m') }}')"
+    <select wire:model.live="filtroProcesso" style="width:160px;">
+        <option value="">Todos os processos</option>
+        @foreach($processos as $pr)
+        <option value="{{ $pr->id }}">{{ $pr->numero }}</option>
+        @endforeach
+    </select>
+
+    @if($busca || $filtroStatus || $filtroTipo || $filtroMes !== now()->format('Y-m') || $filtroCliente || $filtroProcesso)
+    <button wire:click="$set('busca',''); $set('filtroStatus',''); $set('filtroTipo',''); $set('filtroCliente',''); $set('filtroProcesso',''); $set('filtroMes','{{ now()->format('Y-m') }}')"
         style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         Limpar
@@ -316,6 +323,16 @@
                 </select>
             </div>
             @endif
+
+            <div>
+                <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Processo <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
+                <select wire:model="processoId" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
+                    <option value="">— Nenhum —</option>
+                    @foreach($processos as $pr)
+                    <option value="{{ $pr->id }}">{{ $pr->numero }}</option>
+                    @endforeach
+                </select>
+            </div>
 
             <div>
                 <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Descrição *</label>

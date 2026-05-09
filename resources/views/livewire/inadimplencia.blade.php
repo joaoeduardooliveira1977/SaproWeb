@@ -3,7 +3,7 @@
 <style>
 .inadimplencia-kpis {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -29,14 +29,11 @@
   border-radius: 7px;
   font-size: 12px;
 }
-@media (max-width: 1400px) {
-  .inadimplencia-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
 @media (max-width: 1100px) {
   .inadimplencia-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 700px) {
-  .inadimplencia-kpis { grid-template-columns: 1fr; }
+  .inadimplencia-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 </style>
 @endverbatim
@@ -67,18 +64,6 @@
       <div class="stat-icon"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="#991b1b" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
       <div style="font-size:11px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.5px">Crítico (+30 dias)</div>
       <div style="font-size:20px;font-weight:800;color:#991b1b;margin-top:4px">R$ {{ number_format($kpis->valor_critico ?? 0, 0, ',', '.') }}</div>
-    </div>
-    <div class="inadimplencia-kpi" style="border-top:3px solid #7c3aed">
-      <div class="stat-icon"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div>
-      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Honorários</div>
-      <div style="font-size:18px;font-weight:800;color:#7c3aed;margin-top:4px">R$ {{ number_format($kpis->total_honorarios ?? 0, 0, ',', '.') }}</div>
-      <div style="font-size:10px;color:#94a3b8;margin-top:2px">módulo antigo</div>
-    </div>
-    <div class="inadimplencia-kpi" style="border-top:3px solid #16a34a">
-      <div class="stat-icon"><svg aria-hidden="true" width="20" height="20" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Contratos</div>
-      <div style="font-size:18px;font-weight:800;color:#16a34a;margin-top:4px">R$ {{ number_format($kpis->total_lancamentos ?? 0, 0, ',', '.') }}</div>
-      <div style="font-size:10px;color:#94a3b8;margin-top:2px">módulo novo</div>
     </div>
   </div>
 

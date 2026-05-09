@@ -12,18 +12,20 @@ class FinanceiroCentral extends Component
     use WithPagination;
 
     // ── Filtros ───────────────────────────────────────────────
-    public string $busca         = '';
-    public string $filtroStatus  = '';
-    public string $filtroTipo    = '';
-    public string $filtroMes     = '';
-    public string $filtroCliente = '';
+    public string $busca          = '';
+    public string $filtroStatus   = '';
+    public string $filtroTipo     = '';
+    public string $filtroMes      = '';
+    public string $filtroCliente  = '';
+    public string $filtroProcesso = '';
 
     protected $queryString = [
-        'busca'         => ['except' => ''],
-        'filtroStatus'  => ['except' => ''],
-        'filtroTipo'    => ['except' => ''],
-        'filtroMes'     => ['except' => ''],
-        'filtroCliente' => ['except' => ''],
+        'busca'          => ['except' => ''],
+        'filtroStatus'   => ['except' => ''],
+        'filtroTipo'     => ['except' => ''],
+        'filtroMes'      => ['except' => ''],
+        'filtroCliente'  => ['except' => ''],
+        'filtroProcesso' => ['except' => ''],
     ];
 
     // ── Modal lançamento ──────────────────────────────────────
@@ -31,6 +33,7 @@ class FinanceiroCentral extends Component
     public ?int   $lancamentoId = null;
     public int    $clienteId    = 0;
     public ?int   $contratoId   = null;
+    public string $processoId   = '';
     public string $tipo         = 'receita';
     public string $descricao    = '';
     public string $valor        = '';
@@ -108,11 +111,12 @@ class FinanceiroCentral extends Component
     }
 
     // ── Filtros reset page ────────────────────────────────────
-    public function updatingBusca():         void { $this->resetPage(); }
-    public function updatingFiltroStatus():  void { $this->resetPage(); }
-    public function updatingFiltroTipo():    void { $this->resetPage(); }
-    public function updatingFiltroMes():     void { $this->resetPage(); }
-    public function updatingFiltroCliente(): void { $this->resetPage(); }
+    public function updatingBusca():          void { $this->resetPage(); }
+    public function updatingFiltroStatus():   void { $this->resetPage(); }
+    public function updatingFiltroTipo():     void { $this->resetPage(); }
+    public function updatingFiltroMes():      void { $this->resetPage(); }
+    public function updatingFiltroCliente():  void { $this->resetPage(); }
+    public function updatingFiltroProcesso(): void { $this->resetPage(); }
 
     public function ordenar(string $coluna): void
     {
@@ -151,6 +155,7 @@ class FinanceiroCentral extends Component
             $l = FinanceiroLancamento::findOrFail($id);
             $this->clienteId  = $l->cliente_id;
             $this->contratoId = $l->contrato_id;
+            $this->processoId = $l->processo_id ?? '';
             $this->tipo       = $l->tipo;
             $this->descricao  = $l->descricao;
             $this->valor      = number_format($l->valor, 2, ',', '.');
@@ -159,6 +164,7 @@ class FinanceiroCentral extends Component
             $this->updatedClienteId();
         } else {
             $this->clienteId  = 0;
+            $this->processoId = '';
             $this->tipo       = 'receita';
             $this->descricao  = '';
             $this->valor      = '';
@@ -193,6 +199,7 @@ class FinanceiroCentral extends Component
             'tenant_id'   => Auth::guard('usuarios')->user()?->tenant_id,
             'cliente_id'  => $this->clienteId,
             'contrato_id' => $this->contratoId ?: null,
+            'processo_id' => $this->processoId ?: null,
             'tipo'        => $this->tipo,
             'descricao'   => $this->descricao,
             'valor'       => (float) str_replace(['.', ','], ['', '.'], $this->valor),
@@ -216,15 +223,16 @@ class FinanceiroCentral extends Component
 
     public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $lancamentos = FinanceiroLancamento::with(['cliente', 'contrato'])
+        $lancamentos = FinanceiroLancamento::with(['cliente', 'contrato', 'processo'])
             ->when($this->busca, fn($q) => $q->where(fn($s) => $s
                 ->where('descricao', 'ilike', "%{$this->busca}%")
                 ->orWhereHas('cliente', fn($c) => $c->where('nome', 'ilike', "%{$this->busca}%"))
             ))
-            ->when($this->filtroStatus,  fn($q) => $q->where('status', $this->filtroStatus))
-            ->when($this->filtroTipo,    fn($q) => $q->where('tipo', $this->filtroTipo))
-            ->when($this->filtroCliente, fn($q) => $q->where('cliente_id', $this->filtroCliente))
-            ->when($this->filtroMes,     fn($q) => $q->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$this->filtroMes]))
+            ->when($this->filtroStatus,   fn($q) => $q->where('status', $this->filtroStatus))
+            ->when($this->filtroTipo,     fn($q) => $q->where('tipo', $this->filtroTipo))
+            ->when($this->filtroCliente,  fn($q) => $q->where('cliente_id', $this->filtroCliente))
+            ->when($this->filtroProcesso, fn($q) => $q->where('processo_id', $this->filtroProcesso))
+            ->when($this->filtroMes,      fn($q) => $q->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$this->filtroMes]))
             ->orderBy('vencimento')
             ->get();
 
@@ -311,9 +319,10 @@ class FinanceiroCentral extends Component
                 ->where('descricao', 'ilike', "%{$this->busca}%")
                 ->orWhereHas('cliente', fn($c) => $c->where('nome', 'ilike', "%{$this->busca}%"))
             ))
-            ->when($this->filtroStatus,  fn($q) => $q->where('status', $this->filtroStatus))
-            ->when($this->filtroTipo,    fn($q) => $q->where('tipo', $this->filtroTipo))
-            ->when($this->filtroCliente, fn($q) => $q->where('cliente_id', $this->filtroCliente))
+            ->when($this->filtroStatus,   fn($q) => $q->where('status', $this->filtroStatus))
+            ->when($this->filtroTipo,     fn($q) => $q->where('tipo', $this->filtroTipo))
+            ->when($this->filtroCliente,  fn($q) => $q->where('cliente_id', $this->filtroCliente))
+            ->when($this->filtroProcesso, fn($q) => $q->where('processo_id', $this->filtroProcesso))
             ->when($this->filtroMes,      fn($q) => $q->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$this->filtroMes]))
             ->when($this->ordenarPor === 'cliente',
                 fn($q) => $q->leftJoin('pessoas', 'pessoas.id', '=', 'financeiro_lancamentos.cliente_id')
@@ -325,9 +334,10 @@ class FinanceiroCentral extends Component
 
         // KPIs respeitando todos os filtros ativos
         $base = FinanceiroLancamento::query()
-            ->when($this->filtroMes,     fn($q) => $q->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$this->filtroMes]))
-            ->when($this->filtroCliente, fn($q) => $q->where('cliente_id', $this->filtroCliente))
-            ->when($this->busca,         fn($q) => $q->where(fn($s) => $s
+            ->when($this->filtroMes,      fn($q) => $q->whereRaw("TO_CHAR(vencimento, 'YYYY-MM') = ?", [$this->filtroMes]))
+            ->when($this->filtroCliente,  fn($q) => $q->where('cliente_id', $this->filtroCliente))
+            ->when($this->filtroProcesso, fn($q) => $q->where('processo_id', $this->filtroProcesso))
+            ->when($this->busca,          fn($q) => $q->where(fn($s) => $s
                 ->where('descricao', 'ilike', "%{$this->busca}%")
                 ->orWhereHas('cliente', fn($c) => $c->where('nome', 'ilike', "%{$this->busca}%"))
             ));
@@ -343,9 +353,15 @@ class FinanceiroCentral extends Component
         $ordenarPor   = $this->ordenarPor;
         $ordenarDir   = $this->ordenarDir;
 
+        $tenantId = tenant_id();
+        $processos = DB::table('processos')
+            ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
+            ->orderBy('numero')
+            ->get(['id', 'numero']);
+
         return view('livewire.financeiro-central', compact(
             'lancamentos', 'totalPrevisto', 'totalRecebido', 'totalAtrasado', 'totalDespesa', 'totalRepasse',
-            'clientes', 'fornecedores', 'ordenarPor', 'ordenarDir'
+            'clientes', 'fornecedores', 'ordenarPor', 'ordenarDir', 'processos'
         ));
     }
 }

@@ -46,7 +46,13 @@
                     </div>
                     <div style="font-size:12px;color:var(--muted);margin-top:2px;">Projeção {{ $saldo >= 0 ? 'positiva' : 'negativa' }} para os próximos 30 dias.</div>
                 </div>
-                <span style="font-size:20px;">{{ $saldo >= 0 ? '📈' : '📉' }}</span>
+                <span style="width:36px;height:36px;border-radius:8px;background:{{ $saldo >= 0 ? '#dcfce7' : '#fee2e2' }};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    @if($saldo >= 0)
+                    <svg aria-hidden="true" width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    @else
+                    <svg aria-hidden="true" width="18" height="18" fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+                    @endif
+                </span>
             </div>
 
             @if($metricas['a_receber'] > 0)
@@ -57,7 +63,9 @@
                     </div>
                     <div style="font-size:12px;color:var(--muted);margin-top:2px;">Priorize cobrança dos títulos mais próximos do vencimento.</div>
                 </div>
-                <span style="font-size:20px;">💰</span>
+                <span style="width:36px;height:36px;border-radius:8px;background:#fef9c3;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg aria-hidden="true" width="18" height="18" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                </span>
             </div>
             @endif
 
@@ -69,13 +77,15 @@
                     </div>
                     <div style="font-size:12px;color:var(--muted);margin-top:2px;">Ação necessária para reduzir inadimplência.</div>
                 </div>
-                <span style="font-size:20px;">⚠️</span>
+                <span style="width:36px;height:36px;border-radius:8px;background:#fee2e2;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg aria-hidden="true" width="18" height="18" fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
             </div>
             @endif
 
             @if($metricas['a_receber'] == 0 && $metricas['honorarios_atrasados'] == 0)
             <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 16px;text-align:center;color:#16a34a;font-size:13px;font-weight:600;">
-                ✅ Nenhuma pendência financeira crítica no momento!
+                <span style="display:inline-flex;align-items:center;gap:8px;"><svg aria-hidden="true" width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Nenhuma pendência financeira crítica no momento!</span>
             </div>
             @endif
         </div>
@@ -106,10 +116,10 @@
 {{-- ── 6 KPIs ── --}}
 @php
 $kpis = [
-    ['label'=>'A receber',           'val'=>$metricas['a_receber'],           'cor'=>'#16a34a', 'tag'=>'Recebimentos em aberto',    'tag_cor'=>'#16a34a'],
-    ['label'=>'Recebido este mês',   'val'=>$metricas['recebido_mes'],        'cor'=>'#2563a8', 'tag'=>'Competência ' . now()->translatedFormat('M/Y'), 'tag_cor'=>'#64748b'],
-    ['label'=>'A pagar',             'val'=>$metricas['a_pagar'],             'cor'=>'#dc2626', 'tag'=>'Despesas pendentes',        'tag_cor'=>'#dc2626'],
-    ['label'=>'Pago este mês',       'val'=>$metricas['pago_mes'],            'cor'=>'#d97706', 'tag'=>'Saídas registradas',        'tag_cor'=>'#d97706'],
+    ['label'=>'A Receber',           'val'=>$metricas['a_receber'],           'cor'=>'#16a34a', 'tag'=>'Recebimentos em aberto',    'tag_cor'=>'#16a34a'],
+    ['label'=>'Recebido no Mês',     'val'=>$metricas['recebido_mes'],        'cor'=>'#2563a8', 'tag'=>'Competência ' . now()->translatedFormat('M/Y'), 'tag_cor'=>'#64748b'],
+    ['label'=>'A Pagar',             'val'=>$metricas['a_pagar'],             'cor'=>'#dc2626', 'tag'=>'Despesas pendentes',        'tag_cor'=>'#dc2626'],
+    ['label'=>'Pago no Mês',         'val'=>$metricas['pago_mes'],            'cor'=>'#d97706', 'tag'=>'Saídas registradas',        'tag_cor'=>'#d97706'],
     ['label'=>'Honorários atrasados','val'=>$metricas['honorarios_atrasados'],'cor'=>'#7c3aed', 'tag'=>'● Ação necessária',        'tag_cor'=>'#7c3aed'],
     ['label'=>'Honorários a vencer', 'val'=>$metricas['honorarios_vencer'],  'cor'=>'#0891b2', 'tag'=>'↑ Carteira futura',        'tag_cor'=>'#0891b2'],
 ];
@@ -127,11 +137,11 @@ $kpis = [
 {{-- ── Abas de navegação ── --}}
 @php
 $abas = [
-    ['id'=>'visao',      'label'=>'📊 Visão Geral',         'count'=>null],
-    ['id'=>'fluxo',      'label'=>'📈 Fluxo de Caixa',      'count'=>null],
-    ['id'=>'receber',    'label'=>'💰 A Receber',            'count'=>$aReceberCount],
-    ['id'=>'pagar',      'label'=>'💸 A Pagar',              'count'=>$aPagarCount],
-    ['id'=>'honorarios', 'label'=>'⚠️ Honorários Atrasados', 'count'=>$inadimplentesCount],
+    ['id'=>'visao',      'label'=>'Visão Geral',         'count'=>null],
+    ['id'=>'fluxo',      'label'=>'Fluxo de Caixa',      'count'=>null],
+    ['id'=>'receber',    'label'=>'A Receber',            'count'=>$aReceberCount],
+    ['id'=>'pagar',      'label'=>'A Pagar',              'count'=>$aPagarCount],
+    ['id'=>'honorarios', 'label'=>'Honorários Atrasados', 'count'=>$inadimplentesCount],
 ];
 @endphp
 <div style="display:flex;gap:4px;background:#f8fafc;border-radius:12px;padding:4px;margin-bottom:20px;overflow-x:auto;">
@@ -166,10 +176,10 @@ $abas = [
 
         @php
         $linhas = [
-            ['label'=>'Recebimentos em aberto', 'desc'=>'Títulos pendentes de clientes',       'val'=>$metricas['a_receber'],          'cor'=>'#16a34a', 'btn'=>'Ver lista',   'rota'=>route('financeiro.consolidado')],
-            ['label'=>'Recebido este mês',       'desc'=>'Total efetivamente recebido',          'val'=>$metricas['recebido_mes'],       'cor'=>null,      'btn'=>'Detalhar',    'rota'=>route('financeiro.consolidado')],
-            ['label'=>'Despesas em aberto',      'desc'=>'Compromissos ainda não quitados',     'val'=>$metricas['a_pagar'],            'cor'=>'#dc2626', 'btn'=>'Pagar',       'rota'=>route('financeiro')],
-            ['label'=>'Pago este mês',           'desc'=>'Saídas já registradas',               'val'=>$metricas['pago_mes'],           'cor'=>null,      'btn'=>'Detalhar',    'rota'=>route('financeiro.consolidado')],
+            ['label'=>'A Receber',        'desc'=>'Títulos pendentes de clientes',       'val'=>$metricas['a_receber'],          'cor'=>'#16a34a', 'btn'=>'Ver lista',   'rota'=>route('financeiro.consolidado')],
+            ['label'=>'Recebido no Mês', 'desc'=>'Total efetivamente recebido',          'val'=>$metricas['recebido_mes'],       'cor'=>null,      'btn'=>'Detalhar',    'rota'=>route('financeiro.consolidado')],
+            ['label'=>'A Pagar',         'desc'=>'Compromissos ainda não quitados',     'val'=>$metricas['a_pagar'],            'cor'=>'#dc2626', 'btn'=>'Pagar',       'rota'=>route('financeiro')],
+            ['label'=>'Pago no Mês',     'desc'=>'Saídas já registradas',               'val'=>$metricas['pago_mes'],           'cor'=>null,      'btn'=>'Detalhar',    'rota'=>route('financeiro.consolidado')],
             ['label'=>'Honorários atrasados',    'desc'=>'Valores que exigem atenção imediata', 'val'=>$metricas['honorarios_atrasados'],'cor'=>'#7c3aed','btn'=>'Cobrar agora','rota'=>route('inadimplencia')],
             ['label'=>'Honorários a vencer',     'desc'=>'Receita futura prevista',             'val'=>$metricas['honorarios_vencer'],  'cor'=>null,      'btn'=>'Ver agenda',  'rota'=>route('honorarios')],
         ];

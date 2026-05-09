@@ -9,7 +9,6 @@ class TabelasDominio extends Component
 {
     public ?string $tabelaAtiva = null;
 
-    // Form
     public bool   $modal      = false;
     public ?int   $registroId = null;
     public string $codigo     = '';
@@ -18,18 +17,24 @@ class TabelasDominio extends Component
     public string $cor_hex    = '#1a3a5c';
     public bool   $ativo      = true;
 
+    // ── Helper de tenant ─────────────────────────
+    private function tenantId(): int
+    {
+        return auth('usuarios')->user()->tenant_id;
+    }
+
     // ── Config das tabelas simples ────────────────
     public static function config(): array
     {
         return [
-            'fases'           => ['label' => 'Fases do Processo',  'temOrdem' => true,  'temCor' => false, 'temAtivo' => true],
-            'graus_risco'     => ['label' => 'Graus de Risco',      'temOrdem' => false, 'temCor' => true,  'temAtivo' => false],
-            'tipos_acao'      => ['label' => 'Tipos de Ação',       'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
-            'tipos_processo'  => ['label' => 'Tipos de Processo',   'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
-            'assuntos'        => ['label' => 'Assuntos',             'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
-            'reparticoes'     => ['label' => 'Repartições / Fóruns','temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
-            'secretarias'     => ['label' => 'Secretarias',         'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
-            'varas'           => ['label' => 'Varas',               'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
+            'fases'           => ['label' => 'Fases do Processo',   'temOrdem' => true,  'temCor' => false, 'temAtivo' => true],
+            'graus_risco'     => ['label' => 'Graus de Risco',       'temOrdem' => false, 'temCor' => true,  'temAtivo' => false],
+            'tipos_acao'      => ['label' => 'Tipos de Ação',        'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
+            'tipos_processo'  => ['label' => 'Tipos de Processo',    'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
+            'assuntos'        => ['label' => 'Assuntos',              'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
+            'reparticoes'     => ['label' => 'Repartições / Fóruns', 'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
+            'secretarias'     => ['label' => 'Secretarias',          'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
+            'varas'           => ['label' => 'Varas',                'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
         ];
     }
 
@@ -50,12 +55,18 @@ class TabelasDominio extends Component
         $this->modal      = true;
 
         if ($id) {
-            $row = DB::table($this->tabelaAtiva)->find($id);
-            $this->codigo   = $row->codigo   ?? '';
-            $this->descricao= $row->descricao ?? '';
-            $this->ordem    = isset($row->ordem)   ? (string) $row->ordem   : '';
-            $this->cor_hex  = $row->cor_hex ?? '#1a3a5c';
-            $this->ativo    = (bool) ($row->ativo ?? true);
+            $row = DB::table($this->tabelaAtiva)
+                ->where('id', $id)
+                ->where('tenant_id', $this->tenantId())
+                ->first();
+
+            if (! $row) return; // segurança: não pertence a este tenant
+
+            $this->codigo    = $row->codigo   ?? '';
+            $this->descricao = $row->descricao ?? '';
+            $this->ordem     = isset($row->ordem) ? (string) $row->ordem : '';
+            $this->cor_hex   = $row->cor_hex ?? '#1a3a5c';
+            $this->ativo     = (bool) ($row->ativo ?? true);
         }
     }
 
@@ -74,30 +85,28 @@ class TabelasDominio extends Component
             'descricao.required' => 'A descrição é obrigatória.',
         ]);
 
-        $cfg  = self::config()[$this->tabelaAtiva] ?? [];
+        $cfg   = self::config()[$this->tabelaAtiva] ?? [];
         $dados = ['descricao' => $this->descricao];
 
-        // codigo: upper do inicio da descricao se em branco
         $dados['codigo'] = $this->codigo ?: strtoupper(substr(preg_replace('/\s+/', '_', $this->descricao), 0, 20));
 
-        if ($cfg['temOrdem']  ?? false) {
-            $dados['ordem'] = $this->ordem !== '' ? (int) $this->ordem : null;
-        }
-        if ($cfg['temCor']    ?? false) {
-            $dados['cor_hex'] = $this->cor_hex ?: '#1a3a5c';
-        }
-        if ($cfg['temAtivo']  ?? false) {
-            $dados['ativo'] = $this->ativo;
-        }
+        if ($cfg['temOrdem']  ?? false) $dados['ordem']   = $this->ordem !== '' ? (int) $this->ordem : null;
+        if ($cfg['temCor']    ?? false) $dados['cor_hex'] = $this->cor_hex ?: '#1a3a5c';
+        if ($cfg['temAtivo']  ?? false) $dados['ativo']   = $this->ativo;
 
         if ($this->registroId) {
-            DB::table($this->tabelaAtiva)->where('id', $this->registroId)->update(
-                array_merge($dados, ['updated_at' => now()])
-            );
+            DB::table($this->tabelaAtiva)
+                ->where('id', $this->registroId)
+                ->where('tenant_id', $this->tenantId())
+                ->update(array_merge($dados, ['updated_at' => now()]));
             $msg = "Registro atualizado.";
         } else {
             DB::table($this->tabelaAtiva)->insert(
-                array_merge($dados, ['created_at' => now(), 'updated_at' => now()])
+                array_merge($dados, [
+                    'tenant_id'  => $this->tenantId(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ])
             );
             $msg = "Registro adicionado.";
         }
@@ -108,17 +117,27 @@ class TabelasDominio extends Component
 
     public function excluir(int $id): void
     {
-        DB::table($this->tabelaAtiva)->where('id', $id)->delete();
+        DB::table($this->tabelaAtiva)
+            ->where('id', $id)
+            ->where('tenant_id', $this->tenantId())
+            ->delete();
+
         $this->dispatch('toast', tipo: 'success', msg: "Registro excluído.");
     }
 
     public function toggleAtivo(int $id): void
     {
-        $row = DB::table($this->tabelaAtiva)->find($id);
-        DB::table($this->tabelaAtiva)->where('id', $id)->update([
-            'ativo'      => ! $row->ativo,
-            'updated_at' => now(),
-        ]);
+        $row = DB::table($this->tabelaAtiva)
+            ->where('id', $id)
+            ->where('tenant_id', $this->tenantId())
+            ->first();
+
+        if (! $row) return;
+
+        DB::table($this->tabelaAtiva)
+            ->where('id', $id)
+            ->where('tenant_id', $this->tenantId())
+            ->update(['ativo' => ! $row->ativo, 'updated_at' => now()]);
     }
 
     private function resetForm(): void
@@ -132,18 +151,22 @@ class TabelasDominio extends Component
 
     public function render()
     {
+        $tid     = $this->tenantId();
         $config  = self::config();
+
         $contagens = [];
         foreach (array_keys($config) as $t) {
-            $contagens[$t] = DB::table($t)->count();
+            $contagens[$t] = DB::table($t)
+                ->where('tenant_id', $tid)
+                ->count();
         }
 
         $registros = [];
         if ($this->tabelaAtiva && isset($config[$this->tabelaAtiva])) {
-            $q = DB::table($this->tabelaAtiva)->orderBy(
-                ($config[$this->tabelaAtiva]['temOrdem'] ?? false) ? 'ordem' : 'descricao'
-            );
-            $registros = $q->get();
+            $registros = DB::table($this->tabelaAtiva)
+                ->where('tenant_id', $tid)
+                ->orderBy(($config[$this->tabelaAtiva]['temOrdem'] ?? false) ? 'ordem' : 'descricao')
+                ->get();
         }
 
         return view('livewire.tabelas-dominio', compact('config', 'contagens', 'registros'));
