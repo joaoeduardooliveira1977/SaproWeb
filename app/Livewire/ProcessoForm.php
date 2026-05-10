@@ -36,29 +36,35 @@ class ProcessoForm extends Component
     public array   $conflitos = [];
 
     // Sugestão de risco por IA
-    public string  $sugestaoRisco      = '';
+    public string  $sugestaoRisco       = '';
     public bool    $mostrarSugestaoRisco = false;
-    public bool    $gerandoRisco        = false;
+    public bool    $gerandoRisco         = false;
 
     // Parte Contrária — autocomplete
-    public ?int    $parteContrariaId         = null;
-    public string  $parteContrariaBusca      = '';
-    public string  $parte_contraria          = ''; // coluna original, mantida
-    public array   $parteContrariaSugestoes  = [];
+    public ?int    $parteContrariaId        = null;
+    public string  $parteContrariaBusca     = '';
+    public string  $parte_contraria         = '';
+    public array   $parteContrariaSugestoes = [];
 
     // Classificação
     public array   $advogados_selecionados = [];
-    public ?int    $advogado_id            = null; // legado — mantido
-    public ?int    $tipo_acao_id          = null;
-    public ?int    $tipo_processo_id      = null;
-    public ?int    $fase_id               = null;
-    public ?int    $risco_id              = null;
-    public ?int    $reparticao_id         = null;
-    public string  $vara                  = '';
-    public string  $valor_causa           = '';
-    public string  $valor_risco           = '';
-    public string  $observacoes           = '';
-    public string  $status                = 'Ativo';
+    public ?int    $advogado_id            = null;
+    public ?int    $tipo_acao_id           = null;
+    public ?int    $tipo_processo_id       = null;
+    public ?int    $fase_id                = null;
+    public ?int    $risco_id               = null;
+    public ?int    $reparticao_id          = null;
+    public string  $vara                   = '';
+    public string  $valor_causa            = '';
+    public string  $valor_risco            = '';
+    public string  $observacoes            = '';
+    public string  $status                 = 'Ativo';
+
+    // ── Helper de tenant ─────────────────────────
+    private function tenantId(): int
+    {
+        return auth('usuarios')->user()->tenant_id;
+    }
 
     // ── Tribunal ─────────────────────────────────
 
@@ -86,6 +92,7 @@ class ProcessoForm extends Component
         }
 
         $this->clienteSugestoes = Pessoa::doTipo('Cliente')
+            ->where('tenant_id', $this->tenantId())
             ->where('nome', 'ilike', "%{$this->clienteBusca}%")
             ->orderBy('nome')
             ->limit(10)
@@ -121,6 +128,7 @@ class ProcessoForm extends Component
         }
 
         $this->parteContrariaSugestoes = Pessoa::doTipo('Parte Contrária')
+            ->where('tenant_id', $this->tenantId())
             ->where('nome', 'ilike', "%{$this->parteContrariaBusca}%")
             ->orderBy('nome')
             ->limit(10)
@@ -130,20 +138,20 @@ class ProcessoForm extends Component
 
     public function selecionarParteContraria(int $id, string $nome): void
     {
-        $this->parteContrariaId         = $id;
-        $this->parte_contraria          = $nome;
-        $this->parteContrariaBusca      = $nome;
-        $this->parteContrariaSugestoes  = [];
+        $this->parteContrariaId        = $id;
+        $this->parte_contraria         = $nome;
+        $this->parteContrariaBusca     = $nome;
+        $this->parteContrariaSugestoes = [];
         $this->verificarConflito();
     }
 
     public function limparParteContraria(): void
     {
-        $this->parteContrariaId         = null;
-        $this->parte_contraria          = '';
-        $this->parteContrariaBusca      = '';
-        $this->parteContrariaSugestoes  = [];
-        $this->conflitos                = [];
+        $this->parteContrariaId        = null;
+        $this->parte_contraria         = '';
+        $this->parteContrariaBusca     = '';
+        $this->parteContrariaSugestoes = [];
+        $this->conflitos               = [];
     }
 
     // ── Sugestão de Risco por IA ─────────────────
@@ -152,8 +160,8 @@ class ProcessoForm extends Component
     {
         if ($this->gerandoRisco) return;
 
-        $this->gerandoRisco        = true;
-        $this->sugestaoRisco       = '';
+        $this->gerandoRisco         = true;
+        $this->sugestaoRisco        = '';
         $this->mostrarSugestaoRisco = false;
 
         $tipoAcao = $this->tipo_acao_id
@@ -164,17 +172,17 @@ class ProcessoForm extends Component
             : null;
 
         if (!$tipoAcao && !$fase && empty($this->valor_causa)) {
-            $this->sugestaoRisco       = 'Preencha ao menos Tipo de Ação, Fase ou Valor da Causa para sugerir o risco.';
-            $this->gerandoRisco        = false;
+            $this->sugestaoRisco        = 'Preencha ao menos Tipo de Ação, Fase ou Valor da Causa para sugerir o risco.';
+            $this->gerandoRisco         = false;
             $this->mostrarSugestaoRisco = true;
             return;
         }
 
         $dados = implode(' | ', array_filter([
-            $tipoAcao             ? "Tipo de Ação: {$tipoAcao}"         : null,
-            $fase                 ? "Fase: {$fase}"                      : null,
-            $this->valor_causa    ? "Valor da Causa: R$ {$this->valor_causa}" : null,
-            $this->observacoes    ? "Observações: {$this->observacoes}"  : null,
+            $tipoAcao          ? "Tipo de Ação: {$tipoAcao}"              : null,
+            $fase              ? "Fase: {$fase}"                           : null,
+            $this->valor_causa ? "Valor da Causa: R$ {$this->valor_causa}" : null,
+            $this->observacoes ? "Observações: {$this->observacoes}"       : null,
         ]));
 
         $prompt = "Você é um advogado experiente no direito brasileiro. "
@@ -185,8 +193,8 @@ class ProcessoForm extends Component
 
         $result = app(\App\Services\AIService::class)->gerar($prompt, 200);
 
-        $this->sugestaoRisco       = $result ?? 'IA temporariamente indisponível. Tente novamente.';
-        $this->gerandoRisco        = false;
+        $this->sugestaoRisco        = $result ?? 'IA temporariamente indisponível. Tente novamente.';
+        $this->gerandoRisco         = false;
         $this->mostrarSugestaoRisco = true;
     }
 
@@ -200,24 +208,23 @@ class ProcessoForm extends Component
             return;
         }
 
+        $tid = $this->tenantId();
         $exc = $this->processoId ? " AND id != {$this->processoId}" : '';
 
-        // Cliente selecionado é parte contrária em outro processo ativo?
         if ($this->cliente_id) {
             $rows = DB::select(
-                "SELECT numero FROM processos WHERE status = 'Ativo' AND parte_contraria_id = ?{$exc}",
-                [$this->cliente_id]
+                "SELECT numero FROM processos WHERE tenant_id = ? AND status = 'Ativo' AND parte_contraria_id = ?{$exc}",
+                [$tid, $this->cliente_id]
             );
             foreach ($rows as $r) {
                 $this->conflitos[] = "O cliente figura como parte contrária no processo {$r->numero}.";
             }
         }
 
-        // Parte contrária selecionada é cliente em outro processo ativo?
         if ($this->parteContrariaId) {
             $rows = DB::select(
-                "SELECT numero FROM processos WHERE status = 'Ativo' AND cliente_id = ?{$exc}",
-                [$this->parteContrariaId]
+                "SELECT numero FROM processos WHERE tenant_id = ? AND status = 'Ativo' AND cliente_id = ?{$exc}",
+                [$tid, $this->parteContrariaId]
             );
             foreach ($rows as $r) {
                 $this->conflitos[] = "A parte contrária é cliente no processo {$r->numero}.";
@@ -271,7 +278,7 @@ class ProcessoForm extends Component
 
             // Advogados (pivot)
             $this->advogados_selecionados = $processo->advogados->pluck('id')->toArray();
-            $this->advogado_id            = $processo->advogado_id; // legado
+            $this->advogado_id            = $processo->advogado_id;
 
             $this->tipo_acao_id     = $processo->tipo_acao_id;
             $this->tipo_processo_id = $processo->tipo_processo_id;
@@ -290,7 +297,6 @@ class ProcessoForm extends Component
 
     public function salvar(): void
     {
-        // Verificar limite de processos
         $tenant = tenant();
         if ($tenant && !$this->processoId && $tenant->atingiuLimiteProcessos()) {
             $this->dispatch('toast',
@@ -308,13 +314,12 @@ class ProcessoForm extends Component
             'cliente_id'        => 'required|integer',
             'data_distribuicao' => 'nullable|date',
         ], [
-            'numero.required' => 'O número do processo é obrigatório.',
-            'numero.max'      => 'O número do processo não pode exceder 30 caracteres.',
-            'numero.unique'   => 'Já existe outro processo com este número.',
+            'numero.required'     => 'O número do processo é obrigatório.',
+            'numero.max'          => 'O número do processo não pode exceder 30 caracteres.',
+            'numero.unique'       => 'Já existe outro processo com este número.',
             'cliente_id.required' => 'O cliente é obrigatório.',
         ]);
 
-        // parte_contraria: usar o texto do campo de busca se nenhum ID foi selecionado
         $parteContraria = $this->parte_contraria ?: ($this->parteContrariaBusca ?: null);
 
         $dados = [
@@ -324,19 +329,19 @@ class ProcessoForm extends Component
             'cliente_id'         => $this->cliente_id,
             'parte_contraria'    => $parteContraria,
             'parte_contraria_id' => $this->parteContrariaId ?: null,
-            'autor_reu'         => $this->autorReu ?: null,
-            'unidade'           => $this->unidade ?: null,
+            'autor_reu'          => $this->autorReu ?: null,
+            'unidade'            => $this->unidade ?: null,
             'advogado_id'        => $this->advogado_id ?: null,
-            'tipo_acao_id'      => $this->tipo_acao_id ?: null,
-            'tipo_processo_id'  => $this->tipo_processo_id ?: null,
-            'fase_id'           => $this->fase_id ?: null,
-            'risco_id'          => $this->risco_id ?: null,
-            'reparticao_id'     => $this->reparticao_id ?: null,
-            'vara'              => $this->vara ?: null,
-            'valor_causa'       => $this->normalizarDecimal($this->valor_causa),
-            'valor_risco'       => $this->normalizarDecimal($this->valor_risco),
-            'observacoes'       => $this->observacoes ?: null,
-            'status'            => $this->status,
+            'tipo_acao_id'       => $this->tipo_acao_id ?: null,
+            'tipo_processo_id'   => $this->tipo_processo_id ?: null,
+            'fase_id'            => $this->fase_id ?: null,
+            'risco_id'           => $this->risco_id ?: null,
+            'reparticao_id'      => $this->reparticao_id ?: null,
+            'vara'               => $this->vara ?: null,
+            'valor_causa'        => $this->normalizarDecimal($this->valor_causa),
+            'valor_risco'        => $this->normalizarDecimal($this->valor_risco),
+            'observacoes'        => $this->observacoes ?: null,
+            'status'             => $this->status,
         ];
 
         if ($this->processoId) {
@@ -345,8 +350,8 @@ class ProcessoForm extends Component
             $processo->fill($dados);
             $alterado = $processo->isDirty();
 
-            $advogadosAtuais = $processo->advogados()->pluck('pessoas.id')->map(fn ($id) => (int) $id)->sort()->values()->all();
-            $advogadosNovos = collect($this->advogados_selecionados)->map(fn ($id) => (int) $id)->sort()->values()->all();
+            $advogadosAtuais   = $processo->advogados()->pluck('pessoas.id')->map(fn ($id) => (int) $id)->sort()->values()->all();
+            $advogadosNovos    = collect($this->advogados_selecionados)->map(fn ($id) => (int) $id)->sort()->values()->all();
             $advogadosAlterados = $advogadosAtuais !== $advogadosNovos;
 
             if (! $alterado && ! $advogadosAlterados) {
@@ -363,18 +368,18 @@ class ProcessoForm extends Component
             }
 
             \Illuminate\Support\Facades\Log::info('ProcessoForm::salvar', [
-                'processoId'   => $this->processoId,
-                'alterado'     => $alterado,
+                'processoId'         => $this->processoId,
+                'alterado'           => $alterado,
                 'advogadosAlterados' => $advogadosAlterados,
-                'changes'      => array_keys($processo->getChanges()),
-                'fase_id'      => $this->fase_id,
-                'status'       => $this->status,
+                'changes'            => array_keys($processo->getChanges()),
+                'fase_id'            => $this->fase_id,
+                'status'             => $this->status,
             ]);
 
             $this->dispatch('toast', message: "Processo #{$this->processoId} atualizado!", type: 'success');
         } else {
             $dados['criado_por'] = Auth::guard('usuarios')->id();
-            $dados['tenant_id'] = tenant_id() ?? Auth::guard('usuarios')->user()?->tenant_id;
+            $dados['tenant_id']  = tenant_id() ?? Auth::guard('usuarios')->user()?->tenant_id;
             $processo = Processo::create($dados);
             $processo->advogados()->sync($this->advogados_selecionados);
             $this->dispatch('toast', message: 'Processo cadastrado com sucesso!', type: 'success');
@@ -387,13 +392,15 @@ class ProcessoForm extends Component
 
     public function render()
     {
-        $advogados     = Pessoa::doTipo('Advogado')->orderBy('nome')->get();
-        $fases         = \App\Models\Fase::orderBy('descricao')->get();
-        $riscos        = DB::table('graus_risco')->orderBy('descricao')->get();
-        $tiposAcao     = DB::table('tipos_acao')->orderBy('descricao')->get();
-        $tiposProcesso = DB::table('tipos_processo')->orderBy('descricao')->get();
-        $reparticoes   = DB::table('reparticoes')->orderBy('descricao')->get();
-        $varas         = DB::table('varas')->where('ativo', true)->orderBy('descricao')->get();
+        $tid = $this->tenantId();
+
+        $advogados     = Pessoa::doTipo('Advogado')->where('tenant_id', $tid)->orderBy('nome')->get();
+        $fases         = \App\Models\Fase::where('tenant_id', $tid)->orderBy('descricao')->get();
+        $riscos        = DB::table('graus_risco')->where('tenant_id', $tid)->orderBy('descricao')->get();
+        $tiposAcao     = DB::table('tipos_acao')->where('tenant_id', $tid)->orderBy('descricao')->get();
+        $tiposProcesso = DB::table('tipos_processo')->where('tenant_id', $tid)->orderBy('descricao')->get();
+        $reparticoes   = DB::table('reparticoes')->where('tenant_id', $tid)->orderBy('descricao')->get();
+        $varas         = DB::table('varas')->where('tenant_id', $tid)->where('ativo', true)->orderBy('descricao')->get();
 
         return view('livewire.processo-form', compact(
             'advogados', 'fases',
