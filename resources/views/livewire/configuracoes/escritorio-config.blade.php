@@ -377,11 +377,7 @@
         </div>
         @endif
 
-        <div style="background:#f8fafc;border-radius:8px;padding:14px 16px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Para alterar seu plano, entre em contato com o suporte pelo e-mail
-            <a href="mailto:suporte@saproweb.com.br" style="color:var(--primary-light);font-weight:600;">suporte@saproweb.com.br</a>
-        </div>
+       
     </div>
     @endif
 
