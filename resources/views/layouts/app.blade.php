@@ -630,7 +630,7 @@
     </a>
     <div class="nav-drawer-sep"></div>
     @if($isFinanc)
-    <a href="{{ route('financeiro.hub') }}" class="nav-drawer-item {{ $hubAtivo==='financeiro' ? 'active' : '' }}" onclick="toggleDrawer()">
+    <a href="{{ route('financeiro.central') }}" class="nav-drawer-item {{ $hubAtivo==='financeiro' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Financeiro
     </a>
     @endif
@@ -703,7 +703,7 @@
     <div class="nav-sep"></div>
 
     @if($isFinanc)
-    <a href="{{ route('financeiro.hub') }}" class="nav-btn {{ $hubAtivo==='financeiro' ? 'active' : '' }}" title="Financeiro">
+    <a href="{{ route('financeiro.central') }}" class="nav-btn {{ $hubAtivo==='financeiro' ? 'active' : '' }}" title="Financeiro">
         <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
         <span class="nav-btn-label">Financeiro</span>
     </a>
