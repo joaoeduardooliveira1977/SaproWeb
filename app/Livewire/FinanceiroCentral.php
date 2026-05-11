@@ -62,6 +62,10 @@ class FinanceiroCentral extends Component
     public array $fornecedores = [];
     public array $contratos    = [];
 
+    // Autocomplete cliente
+    public string $clienteBusca     = '';
+    public array  $clienteSugestoes = [];
+
     public function mount(): void
     {
         $this->filtroMes = now()->format('Y-m');
@@ -112,6 +116,58 @@ class FinanceiroCentral extends Component
             ? Contrato::where('cliente_id', $this->clienteId)->where('status', 'ativo')->get(['id','descricao'])->toArray()
             : [];
         $this->contratoId = null;
+    }
+
+    public function updatedClienteBusca(): void
+    {
+        if (strlen($this->clienteBusca) < 2) {
+            $this->clienteSugestoes = [];
+            return;
+        }
+
+        $tid = auth('usuarios')->user()->tenant_id;
+
+        if ($this->tipo === 'despesa') {
+            $this->clienteSugestoes = DB::table('pessoas as p')
+                ->join('pessoa_tipos as pt', 'pt.pessoa_id', '=', 'p.id')
+                ->where('pt.tipo', 'Fornecedor')
+                ->where('p.tenant_id', $tid)
+                ->where('p.ativo', true)
+                ->where('p.nome', 'ilike', "%{$this->clienteBusca}%")
+                ->orderBy('p.nome')
+                ->limit(8)
+                ->get(['p.id', 'p.nome'])
+                ->toArray();
+        } else {
+            $this->clienteSugestoes = DB::table('pessoas as p')
+                ->where('p.tenant_id', $tid)
+                ->where('p.ativo', true)
+                ->where('p.nome', 'ilike', "%{$this->clienteBusca}%")
+                ->where(function ($q) use ($tid) {
+                    $q->whereExists(fn($s) => $s->from('pessoa_tipos')->whereColumn('pessoa_id', 'p.id')->where('tipo', 'Cliente'))
+                      ->orWhereExists(fn($s) => $s->from('processos')->whereColumn('cliente_id', 'p.id')->where('tenant_id', $tid))
+                      ->orWhereExists(fn($s) => $s->from('financeiro_lancamentos')->whereColumn('cliente_id', 'p.id')->where('tenant_id', $tid));
+                })
+                ->orderBy('p.nome')
+                ->limit(8)
+                ->get(['p.id', 'p.nome'])
+                ->toArray();
+        }
+    }
+
+    public function selecionarCliente(int $id, string $nome): void
+    {
+        $this->clienteId        = $id;
+        $this->clienteBusca     = $nome;
+        $this->clienteSugestoes = [];
+        $this->updatedClienteId();
+    }
+
+    public function limparCliente(): void
+    {
+        $this->clienteId        = 0;
+        $this->clienteBusca     = '';
+        $this->clienteSugestoes = [];
     }
 
     // ── Filtros reset page ────────────────────────────────────
@@ -168,9 +224,12 @@ class FinanceiroCentral extends Component
             $this->vencimento  = $l->vencimento->format('Y-m-d');
             $this->observacoes = $l->observacoes ?? '';
             $this->updatedClienteId();
+            $this->clienteBusca = $l->cliente?->nome ?? '';
             $this->carregarAnexos($id);
         } else {
-            $this->clienteId   = 0;
+            $this->clienteId        = 0;
+            $this->clienteBusca     = '';
+            $this->clienteSugestoes = [];
             $this->processoId  = '';
             $this->tipo        = 'receita';
             $this->descricao   = '';
@@ -190,9 +249,11 @@ class FinanceiroCentral extends Component
 
     public function fecharModal(): void
     {
-        $this->modal      = false;
-        $this->anexo      = null;
-        $this->anexos     = [];
+        $this->modal            = false;
+        $this->anexo            = null;
+        $this->anexos           = [];
+        $this->clienteBusca     = '';
+        $this->clienteSugestoes = [];
         $this->resetErrorBag();
     }
 

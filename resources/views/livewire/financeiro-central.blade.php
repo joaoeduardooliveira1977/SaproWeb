@@ -48,13 +48,15 @@
             </span>
             <span wire:loading wire:target="exportarCsv">Gerando…</span>
         </button>
-        <button wire:click="abrirModalTipo('receita')" style="display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;cursor:pointer;">
+        <button wire:click="abrirModalTipo('receita')"
+            style="display:flex;align-items:center;gap:6px;padding:9px 16px;border:1.5px solid #bbf7d0;border-radius:8px;background:#f0fdf4;color:#16a34a;font-size:13px;font-weight:600;cursor:pointer;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Receita
+            + Receita
         </button>
-        <button wire:click="abrirModalTipo('despesa')" style="display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;cursor:pointer;">
+        <button wire:click="abrirModalTipo('despesa')"
+            style="display:flex;align-items:center;gap:6px;padding:9px 16px;border:1.5px solid #fecaca;border-radius:8px;background:#fef2f2;color:#dc2626;font-size:13px;font-weight:600;cursor:pointer;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Despesa
+            + Despesa
         </button>
     </div>
 </div>
@@ -280,7 +282,9 @@
     <div style="position:relative;background:var(--white);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);z-index:1;">
 
         <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);z-index:2;">
-            <h3 style="font-size:16px;font-weight:700;color:var(--text);margin:0;">{{ $lancamentoId ? 'Editar Lançamento' : 'Novo Lançamento' }}</h3>
+            <h3 style="font-size:16px;font-weight:700;color:var(--text);margin:0;">
+                {{ $lancamentoId ? 'Editar Lançamento' : ($tipo === 'despesa' ? 'Nova Despesa' : ($tipo === 'repasse' ? 'Novo Repasse' : 'Nova Receita')) }}
+            </h3>
             <button wire:click="fecharModal" style="background:none;border:none;cursor:pointer;color:var(--muted);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -294,18 +298,38 @@
                     <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">
                         {{ $tipo === 'despesa' ? 'Fornecedor' : 'Cliente' }} *
                     </label>
-                    <select wire:model.live="clienteId" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
-                        <option value="0">— Selecione —</option>
-                        @if($tipo === 'despesa')
-                            @foreach($fornecedores as $f)
-                            <option value="{{ $f['id'] }}">{{ $f['nome'] }}</option>
+                    <div style="position:relative;">
+                        <input
+                            type="text"
+                            wire:model.live.debounce.300ms="clienteBusca"
+                            placeholder="Digite o nome para buscar..."
+                            autocomplete="off"
+                            style="width:100%;padding:9px 12px;border:1.5px solid {{ $errors->has('clienteId') ? 'var(--danger)' : 'var(--border)' }};border-radius:8px;font-size:13px;background:var(--white);box-sizing:border-box;">
+
+                        @if(count($clienteSugestoes) > 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:50;max-height:200px;overflow-y:auto;margin-top:2px;">
+                            @foreach($clienteSugestoes as $s)
+                            <div
+                                wire:click="selecionarCliente({{ $s->id }}, '{{ addslashes($s->nome) }}')"
+                                style="padding:9px 14px;font-size:13px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border);transition:background .1s;"
+                                onmouseover="this.style.background='#f1f5f9'"
+                                onmouseout="this.style.background=''">
+                                {{ $s->nome }}
+                            </div>
                             @endforeach
-                        @else
-                            @foreach($clientes as $cl)
-                            <option value="{{ $cl['id'] }}">{{ $cl['nome'] }}</option>
-                            @endforeach
+                        </div>
                         @endif
-                    </select>
+
+                        @if($clienteId && $clienteBusca)
+                        <button
+                            wire:click="limparCliente"
+                            type="button"
+                            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;"
+                            title="Limpar">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                        @endif
+                    </div>
                     @error('clienteId')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
                 </div>
                 <div>
