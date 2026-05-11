@@ -20,6 +20,7 @@ class MonitoramentoJuridico extends Component
         $hoje     = today();
         $semana   = today()->subDays(7);
         $mes      = today()->subDays(30);
+        $tid      = auth('usuarios')->user()->tenant_id;
 
         // ── KPIs do dia ────────────────────────────────────────
         $pubsHoje = AaspPublicacao::whereDate('created_at', $hoje)->count();
@@ -28,11 +29,15 @@ class MonitoramentoJuridico extends Component
             ->latest('concluido_em')->first();
 
         $andamentosHoje = DB::table('andamentos')
-            ->whereDate('created_at', $hoje)
+            ->join('processos', 'processos.id', '=', 'andamentos.processo_id')
+            ->where('processos.tenant_id', $tid)
+            ->whereDate('andamentos.created_at', $hoje)
             ->count();
 
         $andamentosSemana = DB::table('andamentos')
-            ->where('created_at', '>=', $semana)
+            ->join('processos', 'processos.id', '=', 'andamentos.processo_id')
+            ->where('processos.tenant_id', $tid)
+            ->where('andamentos.created_at', '>=', $semana)
             ->count();
 
         // Processos sem consulta há mais de 30 dias
@@ -44,14 +49,18 @@ class MonitoramentoJuridico extends Component
 
         // Prazos críticos (≤ 3 dias, abertos, fatais ou normais)
         $prazosCriticos = DB::table('prazos')
-            ->where('status', 'aberto')
-            ->whereBetween('data_prazo', [$hoje, $hoje->copy()->addDays(3)])
+            ->join('processos', 'processos.id', '=', 'prazos.processo_id')
+            ->where('processos.tenant_id', $tid)
+            ->where('prazos.status', 'aberto')
+            ->whereBetween('prazos.data_prazo', [$hoje, $hoje->copy()->addDays(3)])
             ->count();
 
         $prazosFatais = DB::table('prazos')
-            ->where('status', 'aberto')
-            ->where('prazo_fatal', true)
-            ->where('data_prazo', '>=', $hoje)
+            ->join('processos', 'processos.id', '=', 'prazos.processo_id')
+            ->where('processos.tenant_id', $tid)
+            ->where('prazos.status', 'aberto')
+            ->where('prazos.prazo_fatal', true)
+            ->where('prazos.data_prazo', '>=', $hoje)
             ->count();
 
         // ── Publicações recentes vinculadas a processos ────────
@@ -71,6 +80,7 @@ class MonitoramentoJuridico extends Component
             ->leftJoin('pessoas as pe', 'pe.id', '=', 'p.cliente_id')
             ->select('a.id', 'a.data', 'a.descricao', 'a.created_at',
                      'p.numero', 'pe.nome as cliente_nome')
+            ->where('p.tenant_id', $tid)
             ->where('a.created_at', '>=', $semana)
             ->orderByDesc('a.created_at')
             ->limit(50)

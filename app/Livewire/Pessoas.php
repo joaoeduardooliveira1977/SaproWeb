@@ -209,6 +209,7 @@ class Pessoas extends Component
         if ($novoContrato) {
             $tenantId = $usuario?->tenant_id;
             $docExistente = DB::table('documentos')
+                ->where('tenant_id', $tenantId)
                 ->where('cliente_id', $pessoa->id)
                 ->where('tipo', 'contrato')
                 ->where('titulo', 'Contrato de Honorários')

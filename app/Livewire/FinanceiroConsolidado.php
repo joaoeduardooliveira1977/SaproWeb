@@ -102,7 +102,8 @@ class FinanceiroConsolidado extends Component
             return;
         }
 
-        $processo = DB::table('processos')->where('id', $this->exitoProcessoId)->first();
+        $tid = auth('usuarios')->user()->tenant_id;
+        $processo = DB::table('processos')->where('id', $this->exitoProcessoId)->where('tenant_id', $tid)->first();
         if (! $processo || ! $processo->cliente_id) {
             $this->exitoErro = 'Processo sem cliente vinculado.';
             return;
@@ -276,10 +277,11 @@ class FinanceiroConsolidado extends Component
 
     public function marcarRecebido(int $id): void
     {
-        DB::table('recebimentos')->where('id', $id)->update([
+        $tid = auth('usuarios')->user()->tenant_id;
+        DB::table('recebimentos')->where('id', $id)->where('tenant_id', $tid)->update([
             'recebido'         => true,
             'data_recebimento' => today(),
-            'valor_recebido'   => DB::table('recebimentos')->where('id', $id)->value('valor'),
+            'valor_recebido'   => DB::table('recebimentos')->where('id', $id)->where('tenant_id', $tid)->value('valor'),
             'updated_at'       => now(),
         ]);
         $this->dispatch('toast', message: 'Recebimento marcado como recebido.', type: 'success');
@@ -287,10 +289,11 @@ class FinanceiroConsolidado extends Component
 
     public function marcarPago(int $id): void
     {
-        DB::table('pagamentos')->where('id', $id)->update([
+        $tid = auth('usuarios')->user()->tenant_id;
+        DB::table('pagamentos')->where('id', $id)->where('tenant_id', $tid)->update([
             'pago'           => true,
             'data_pagamento' => today(),
-            'valor_pago'     => DB::table('pagamentos')->where('id', $id)->value('valor'),
+            'valor_pago'     => DB::table('pagamentos')->where('id', $id)->where('tenant_id', $tid)->value('valor'),
             'updated_at'     => now(),
         ]);
         $this->dispatch('toast', message: 'Pagamento marcado como pago.', type: 'success');

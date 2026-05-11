@@ -93,6 +93,9 @@ class ControleHoras extends Component
 
         if ($this->editandoId) {
             DB::table('apontamentos')
+                ->whereExists(fn($q) => $q->from('processos')
+                    ->whereColumn('processos.id', 'apontamentos.processo_id')
+                    ->where('processos.tenant_id', tenant_id()))
                 ->where('id', $this->editandoId)
                 ->update(array_merge($dados, ['updated_at' => now()]));
         } else {

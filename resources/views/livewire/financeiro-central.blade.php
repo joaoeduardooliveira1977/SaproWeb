@@ -273,9 +273,9 @@
 @if($modal)
 <div style="position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;">
     <div wire:click="fecharModal" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
-    <div style="position:relative;background:var(--white);border-radius:14px;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.2);z-index:1;">
+    <div style="position:relative;background:var(--white);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);z-index:1;">
 
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);z-index:2;">
             <h3 style="font-size:16px;font-weight:700;color:var(--text);margin:0;">{{ $lancamentoId ? 'Editar Lançamento' : 'Novo Lançamento' }}</h3>
             <button wire:click="fecharModal" style="background:none;border:none;cursor:pointer;color:var(--muted);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -283,6 +283,8 @@
         </div>
 
         <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+
+            {{-- Cliente / Tipo --}}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <div>
                     <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">
@@ -312,6 +314,7 @@
                 </div>
             </div>
 
+            {{-- Contrato --}}
             @if($contratos)
             <div>
                 <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Contrato vinculado <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
@@ -324,6 +327,7 @@
             </div>
             @endif
 
+            {{-- Processo --}}
             <div>
                 <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Processo <span style="font-weight:400;color:var(--muted);">(opcional)</span></label>
                 <select wire:model="processoId" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
@@ -334,6 +338,7 @@
                 </select>
             </div>
 
+            {{-- Descrição --}}
             <div>
                 <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Descrição *</label>
                 <input wire:model="descricao" type="text" placeholder="Ex: Honorário — Janeiro 2026"
@@ -341,6 +346,7 @@
                 @error('descricao')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
             </div>
 
+            {{-- Valor / Vencimento --}}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <div>
                     <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Valor (R$) *</label>
@@ -356,70 +362,91 @@
                 </div>
             </div>
 
+            {{-- Observações --}}
             <div>
                 <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Observações</label>
                 <textarea wire:model="observacoes" rows="2"
                     style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
             </div>
+
+            {{-- ── Anexo ── --}}
+            <div style="border-top:1px solid var(--border);padding-top:14px;">
+                <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:8px;">
+                    Anexar documento
+                    <span style="font-weight:400;color:var(--muted);">(PDF, imagem, Word, Excel — máx. 20MB)</span>
+                </label>
+
+                {{-- Upload --}}
+                <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px dashed var(--border);border-radius:8px;cursor:pointer;background:#f8fafc;transition:border-color .15s;"
+                    onmouseover="this.style.borderColor='var(--primary-light)'" onmouseout="this.style.borderColor='var(--border)'">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <span style="font-size:12px;color:var(--muted);">
+                        @if($anexo)
+                            <span style="color:#16a34a;font-weight:600;">{{ $anexo->getClientOriginalName() }}</span>
+                            ({{ round($anexo->getSize() / 1024) }} KB)
+                        @else
+                            Clique para selecionar um arquivo
+                        @endif
+                    </span>
+                    <input type="file" wire:model="anexo" style="display:none;"
+                        accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx,.txt">
+                </label>
+                @error('anexo')<span style="color:var(--danger);font-size:11px;display:block;margin-top:4px;">{{ $message }}</span>@enderror
+
+                <div wire:loading wire:target="anexo" style="font-size:12px;color:var(--muted);margin-top:6px;">
+                    Carregando arquivo...
+                </div>
+
+                {{-- Anexos já salvos (ao editar) --}}
+                @if(count($anexos) > 0)
+                <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;">
+                    <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:2px;">ARQUIVOS SALVOS</div>
+                    @foreach($anexos as $a)
+                    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8fafc;border:1px solid var(--border);border-radius:6px;">
+                        @php
+                            $icone = match(true) {
+                                str_contains($a->mime_type ?? '', 'pdf')   => '📄',
+                                str_contains($a->mime_type ?? '', 'image') => '🖼️',
+                                str_contains($a->mime_type ?? '', 'word')  => '📝',
+                                str_contains($a->mime_type ?? '', 'excel') ||
+                                str_contains($a->mime_type ?? '', 'sheet') => '📊',
+                                default => '📎',
+                            };
+                        @endphp
+                        <span style="font-size:16px;">{{ $icone }}</span>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                {{ $a->arquivo_original }}
+                            </div>
+                            <div style="font-size:10px;color:var(--muted);">
+                                {{ $a->uploaded_by }} · {{ \Carbon\Carbon::parse($a->created_at)->format('d/m/Y') }}
+                                @if($a->tamanho) · {{ round($a->tamanho / 1024) }} KB @endif
+                            </div>
+                        </div>
+                        <a href="{{ Storage::url($a->arquivo) }}" target="_blank"
+                            style="padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:11px;color:var(--primary);text-decoration:none;font-weight:600;white-space:nowrap;">
+                            Baixar
+                        </a>
+                        <button wire:click="excluirAnexo({{ $a->id }})"
+                            onclick="return confirm('Excluir este anexo?')"
+                            style="padding:4px 6px;border:1.5px solid #fecaca;border-radius:6px;background:#fef2f2;cursor:pointer;">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                        </button>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+            {{-- ── Fim Anexo ── --}}
+
         </div>
 
-        <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);">
+        <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);position:sticky;bottom:0;background:var(--white);">
             <button wire:click="fecharModal" style="padding:9px 18px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
             <button wire:click="salvar" wire:loading.attr="disabled"
                 style="padding:9px 20px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
                 <span wire:loading.remove wire:target="salvar">Salvar</span>
                 <span wire:loading wire:target="salvar">Salvando...</span>
-            </button>
-        </div>
-    </div>
-</div>
-@endif
-
-{{-- ════ MODAL: Registrar Pagamento ════ --}}
-@if($modalPagamento)
-<div style="position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;">
-    <div wire:click="fecharPagamento" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
-    <div style="position:relative;background:var(--white);border-radius:14px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.2);z-index:1;">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);">
-            <h3 style="font-size:16px;font-weight:700;color:var(--text);margin:0;">
-                {{ $pagamentoTipo === 'repasse' ? 'Registrar Pagamento de Repasse' : 'Registrar Recebimento' }}
-            </h3>
-            <button wire:click="fecharPagamento" style="background:none;border:none;cursor:pointer;color:var(--muted);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-        </div>
-
-        <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
-            <div>
-                <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Data do Recebimento *</label>
-                <input wire:model="dataPagamento" type="date"
-                    style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
-            </div>
-            <div>
-                <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Valor Recebido (R$) *</label>
-                <input wire:model="valorPago" type="text"
-                    style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
-            </div>
-            <div>
-                <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Forma de Pagamento</label>
-                <select wire:model="formaPagamento" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
-                    <option value="pix">PIX</option>
-                    <option value="ted">TED / DOC</option>
-                    <option value="boleto">Boleto</option>
-                    <option value="cheque">Cheque</option>
-                    <option value="dinheiro">Dinheiro</option>
-                    <option value="cartao">Cartão</option>
-                </select>
-            </div>
-        </div>
-
-        <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);">
-            <button wire:click="fecharPagamento" style="padding:9px 18px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
-            <button wire:click="registrarPagamento" wire:loading.attr="disabled"
-                style="padding:9px 20px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
-                <span wire:loading.remove wire:target="registrarPagamento">✓ Confirmar</span>
-                <span wire:loading wire:target="registrarPagamento">Salvando...</span>
             </button>
         </div>
     </div>

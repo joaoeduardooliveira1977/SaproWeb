@@ -221,9 +221,10 @@ class Documentos extends Component
         if ($this->documentoId) {
             $sets = implode(', ', array_map(fn($k) => "{$k}=?", array_keys($dados)));
             $dados['updated_at'] = now();
+            $tid = auth('usuarios')->user()->tenant_id;
             DB::update(
-                "UPDATE documentos SET {$sets}, updated_at=NOW() WHERE id=?",
-                [...array_values($dados), $this->documentoId]
+                "UPDATE documentos SET {$sets}, updated_at=NOW() WHERE id=? AND tenant_id=?",
+                [...array_values($dados), $this->documentoId, $tid]
             );
         } else {
             if (empty($dados['arquivo'])) {
@@ -274,11 +275,12 @@ class Documentos extends Component
 
     public function togglePortalVisivel(int $id): void
     {
-        $doc = DB::selectOne("SELECT portal_visivel FROM documentos WHERE id = ?", [$id]);
+        $tid = auth('usuarios')->user()->tenant_id;
+        $doc = DB::selectOne("SELECT portal_visivel FROM documentos WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         if (! $doc) return;
 
         $novo = $doc->portal_visivel ? 0 : 1;
-        DB::update("UPDATE documentos SET portal_visivel = ?, updated_at = NOW() WHERE id = ?", [$novo, $id]);
+        DB::update("UPDATE documentos SET portal_visivel = ?, updated_at = NOW() WHERE id = ? AND tenant_id = ?", [$novo, $id, $tid]);
     }
 
     public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
@@ -323,11 +325,12 @@ class Documentos extends Component
 
     public function excluirDocumento(int $id): void
     {
-        $doc = DB::selectOne("SELECT arquivo FROM documentos WHERE id = ?", [$id]);
+        $tid = auth('usuarios')->user()->tenant_id;
+        $doc = DB::selectOne("SELECT arquivo FROM documentos WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         if ($doc && $doc->arquivo) {
             Storage::disk('public')->delete($doc->arquivo);
         }
-        DB::delete("DELETE FROM documentos WHERE id = ?", [$id]);
+        DB::delete("DELETE FROM documentos WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         $this->dispatch('toast', message: 'Documento excluído.', type: 'success');
     }
 
@@ -351,7 +354,7 @@ class Documentos extends Component
             ? number_format($resumo->total_tamanho / 1024 / 1024, 1) . ' MB'
             : '0 MB';
 
-        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
 
 Dados do arquivo de documentos:
 - Total de documentos: {$resumo->total}

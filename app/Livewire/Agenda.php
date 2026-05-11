@@ -205,7 +205,7 @@ class Agenda extends Component
             ->map(fn($e) => '- ' . $e->titulo . ' (' . $e->data_hora->format('d/m H:i') . ') [' . $e->tipo . ']')
             ->join("\n");
 
-        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
 
 Dados da agenda:
 - Total de eventos pendentes: {$total}
@@ -303,8 +303,10 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
                 ->groupBy(fn($a) => $a->data_hora->format('Y-m-d'));
         }
 
+        $tid = auth('usuarios')->user()->tenant_id;
         $responsaveis = DB::table('usuarios as u')
             ->join('pessoas as p', 'p.id', '=', 'u.pessoa_id')
+            ->where('u.tenant_id', $tid)
             ->orderBy('p.nome')
             ->select('u.id', 'p.nome')
             ->get();

@@ -94,9 +94,10 @@ class Inadimplencia extends Component
 
     public function abrirEmail(int $clienteId): void
     {
+        $tid = auth('usuarios')->user()->tenant_id;
         $cliente = DB::selectOne(
-            "SELECT id, nome, email FROM pessoas WHERE id = ?",
-            [$clienteId]
+            "SELECT id, nome, email FROM pessoas WHERE id = ? AND tenant_id = ?",
+            [$clienteId, $tid]
         );
 
         if (!$cliente) return;
@@ -183,10 +184,11 @@ class Inadimplencia extends Component
 
     public function abrirPagamento(int $id, string $fonte = 'honorario'): void
     {
+        $tid = auth('usuarios')->user()->tenant_id;
         if ($fonte === 'lancamento') {
-            $p = DB::selectOne("SELECT * FROM financeiro_lancamentos WHERE id = ?", [$id]);
+            $p = DB::selectOne("SELECT * FROM financeiro_lancamentos WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         } else {
-            $p = DB::selectOne("SELECT * FROM honorario_parcelas WHERE id = ?", [$id]);
+            $p = DB::selectOne("SELECT hp.* FROM honorario_parcelas hp JOIN honorarios h ON h.id = hp.honorario_id WHERE hp.id = ? AND h.tenant_id = ?", [$id, $tid]);
         }
         if (!$p) return;
 
@@ -207,7 +209,8 @@ class Inadimplencia extends Component
         ]);
 
         if ($this->parcelaFonte === 'lancamento') {
-            DB::table('financeiro_lancamentos')->where('id', $this->parcelaIdPag)->update([
+            $tid = auth('usuarios')->user()->tenant_id;
+            DB::table('financeiro_lancamentos')->where('id', $this->parcelaIdPag)->where('tenant_id', $tid)->update([
                 'status'         => 'recebido',
                 'data_pagamento' => $this->dataPagamento,
                 'valor_pago'     => (float) $this->valorPago,
@@ -215,16 +218,18 @@ class Inadimplencia extends Component
                 'updated_at'     => now(),
             ]);
         } else {
+            $tid2 = auth('usuarios')->user()->tenant_id;
             DB::update("
                 UPDATE honorario_parcelas SET
                     status = 'pago', data_pagamento = ?, valor_pago = ?,
                     forma_pagamento = ?, updated_at = NOW()
-                WHERE id = ?
+                WHERE id = ? AND honorario_id IN (SELECT id FROM honorarios WHERE tenant_id = ?)
             ", [
                 $this->dataPagamento,
                 (float) $this->valorPago,
                 $this->formaPagamento,
                 $this->parcelaIdPag,
+                $tid2,
             ]);
         }
 
@@ -244,6 +249,7 @@ class Inadimplencia extends Component
             ? "AND p.nome ILIKE " . DB::connection()->getPdo()->quote('%' . $this->filtroCliente . '%')
             : '';
 
+        $tidSqlCsv = (int) auth('usuarios')->user()->tenant_id;
         $unionParts = [];
         if (in_array($this->filtroFonte, ['todos', 'honorarios'])) {
             $unionParts[] = "
@@ -254,7 +260,7 @@ class Inadimplencia extends Component
                 FROM honorario_parcelas hp
                 JOIN honorarios h ON h.id = hp.honorario_id
                 JOIN pessoas p ON p.id = h.cliente_id
-                WHERE hp.status = 'atrasado' {$clienteWhere}
+                WHERE hp.status = 'atrasado' AND h.tenant_id = {$tidSqlCsv} {$clienteWhere}
             ";
         }
         if (in_array($this->filtroFonte, ['todos', 'lancamentos'])) {
@@ -265,7 +271,7 @@ class Inadimplencia extends Component
                        fl.vencimento
                 FROM financeiro_lancamentos fl
                 JOIN pessoas p ON p.id = fl.cliente_id
-                WHERE fl.status = 'atrasado' AND fl.tipo = 'receita' {$clienteWhere}
+                WHERE fl.status = 'atrasado' AND fl.tipo = 'receita' AND fl.tenant_id = {$tidSqlCsv} {$clienteWhere}
             ";
         }
 
@@ -321,6 +327,7 @@ class Inadimplencia extends Component
         // ── UNION: honorarios + lancamentos ──────────────────
         $fonteHon = in_array($this->filtroFonte, ['todos', 'honorarios']);
         $fonteLan = in_array($this->filtroFonte, ['todos', 'lancamentos']);
+        $tidSql   = (int) auth('usuarios')->user()->tenant_id;
 
         $unionParts = [];
         if ($fonteHon) {
@@ -334,7 +341,7 @@ class Inadimplencia extends Component
                 FROM honorario_parcelas hp
                 JOIN honorarios h ON h.id = hp.honorario_id
                 JOIN pessoas p ON p.id = h.cliente_id
-                WHERE hp.status = 'atrasado' {$clienteWhere}
+                WHERE hp.status = 'atrasado' AND h.tenant_id = {$tidSql} {$clienteWhere}
             ";
         }
         if ($fonteLan) {
@@ -347,7 +354,7 @@ class Inadimplencia extends Component
                        NULL AS numero
                 FROM financeiro_lancamentos fl
                 JOIN pessoas p ON p.id = fl.cliente_id
-                WHERE fl.status = 'atrasado' AND fl.tipo = 'receita' {$clienteWhere}
+                WHERE fl.status = 'atrasado' AND fl.tipo = 'receita' AND fl.tenant_id = {$tidSql} {$clienteWhere}
             ";
         }
 

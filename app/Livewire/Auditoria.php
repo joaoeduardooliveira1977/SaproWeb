@@ -85,7 +85,12 @@ class Auditoria extends Component
             ->pluck('a.tabela');
 
         $detalhe = $this->detalheId
-            ? DB::table('auditorias')->where('id', $this->detalheId)->first()
+            ? DB::table('auditorias as a')
+                ->leftJoin('usuarios as u', 'u.id', '=', 'a.usuario_id')
+                ->where('a.id', $this->detalheId)
+                ->when($tenantId, fn($q) => $q->where('u.tenant_id', $tenantId))
+                ->select('a.*')
+                ->first()
             : null;
 
         return view('livewire.auditoria', compact('registros', 'tabelas', 'detalhe'));

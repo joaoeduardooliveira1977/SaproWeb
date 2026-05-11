@@ -148,11 +148,12 @@ class ProcessoAndamentos extends Component
 
     public function excluirDocumento(int $docId): void
     {
-        $doc = DB::selectOne('SELECT arquivo FROM documentos WHERE id = ?', [$docId]);
+        $tid = auth('usuarios')->user()->tenant_id;
+        $doc = DB::selectOne('SELECT arquivo FROM documentos WHERE id = ? AND tenant_id = ?', [$docId, $tid]);
         if ($doc && $doc->arquivo) {
             Storage::disk('public')->delete($doc->arquivo);
         }
-        DB::delete('DELETE FROM documentos WHERE id = ?', [$docId]);
+        DB::delete('DELETE FROM documentos WHERE id = ? AND tenant_id = ?', [$docId, $tid]);
         $this->dispatch('toast', message: 'Documento removido com sucesso!', type: 'success');
     }
 
@@ -166,6 +167,7 @@ class ProcessoAndamentos extends Component
     public function excluir(): void
     {
         if ($this->excluindoId) {
+            $andamento = Andamento::findOrFail($this->excluindoId); // tenant-scoped via BelongsToTenant
             // Remove arquivos vinculados ao andamento antes de excluir
             $docs = DB::select('SELECT arquivo FROM documentos WHERE andamento_id = ?', [$this->excluindoId]);
             foreach ($docs as $doc) {
@@ -173,7 +175,7 @@ class ProcessoAndamentos extends Component
             }
             DB::delete('DELETE FROM documentos WHERE andamento_id = ?', [$this->excluindoId]);
 
-            Andamento::findOrFail($this->excluindoId)->delete();
+            $andamento->delete();
             $this->excluindoId = null;
             $this->dispatch('toast', message: 'Andamento excluído com sucesso!', type: 'success');
         }

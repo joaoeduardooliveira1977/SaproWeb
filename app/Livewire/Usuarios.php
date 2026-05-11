@@ -84,8 +84,9 @@ class Usuarios extends Component
                 $params[] = Hash::make($this->senha);
             }
 
-            $sql .= " WHERE id=?";
+            $sql .= " WHERE id=? AND tenant_id=?";
             $params[] = $this->usuarioId;
+            $params[] = auth('usuarios')->user()->tenant_id;
             DB::update($sql, $params);
 
         } else {
@@ -110,7 +111,7 @@ class Usuarios extends Component
             $this->dispatch('toast', message: 'Você não pode desativar sua própria conta!', type: 'error');
             return;
         }
-        DB::update("UPDATE usuarios SET ativo = NOT ativo WHERE id = ?", [$id]);
+        DB::update("UPDATE usuarios SET ativo = NOT ativo WHERE id = ? AND tenant_id = ?", [$id, auth('usuarios')->user()->tenant_id]);
     }
 
     public function excluir(int $id): void
@@ -119,7 +120,7 @@ class Usuarios extends Component
             $this->dispatch('toast', message: 'Você não pode excluir sua própria conta!', type: 'error');
             return;
         }
-        DB::delete("DELETE FROM usuarios WHERE id = ?", [$id]);
+        DB::delete("DELETE FROM usuarios WHERE id = ? AND tenant_id = ?", [$id, auth('usuarios')->user()->tenant_id]);
         $this->dispatch('toast', message: 'Usuário excluído.', type: 'success');
     }
 

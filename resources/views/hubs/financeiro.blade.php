@@ -2,6 +2,7 @@
 @section('page-title', 'Central Financeira')
 @section('content')
 @php
+    $tid             = auth('usuarios')->user()->tenant_id;
     $aReceber        = (float) \App\Models\Recebimento::where('recebido', false)->sum('valor');
     $recebidoMes     = (float) \App\Models\Recebimento::where('recebido', true)
                             ->whereMonth('data_recebimento', now()->month)
@@ -11,18 +12,17 @@
                             ->where('data', '<', today())
                             ->distinct('processo_id')->count('processo_id');
     $honorariosPend  = (float) (\Illuminate\Support\Facades\DB::table('honorarios')
+                            ->where('tenant_id', $tid)
                             ->where('status', '!=', 'pago')
                             ->sum('valor_contrato') ?? 0);
     $cobrancasAberto = \App\Models\Recebimento::where('recebido', false)->count();
     $titulosAtivos   = $cobrancasAberto;
 
-    // Últimos recebimentos
     $ultimosRecebimentos = \App\Models\Recebimento::with('processo.cliente')
                             ->where('recebido', true)
                             ->orderByDesc('data_recebimento')
                             ->take(5)->get();
 
-    // Inadimplência lista
     $inadimplenciaLista = \App\Models\Recebimento::with('processo.cliente')
                             ->where('recebido', false)
                             ->where('data', '<', today())
@@ -54,7 +54,7 @@
     </div>
 </div>
 
-{{-- ── 4 KPIs coloridos ── --}}
+{{-- ── 4 KPIs ── --}}
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;" class="fin-hub-kpis">
     @php
     $kpis = [
@@ -105,9 +105,7 @@
             <div style="min-width:0;">
                 <div style="font-size:20px;font-weight:800;color:{{ $k['cor'] }};line-height:1.1;margin-bottom:3px;">{{ $k['val'] }}</div>
                 <div style="font-size:12px;color:var(--text);font-weight:700;margin-bottom:4px;">{{ $k['label'] }}</div>
-                <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                    {{ $k['tag'] }}
-                </div>
+                <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $k['tag'] }}</div>
             </div>
         </div>
     </a>
@@ -117,17 +115,12 @@
 {{-- ── Módulos + Coluna Direita ── --}}
 <div style="display:grid;grid-template-columns:1fr 380px;gap:20px;" class="fin-hub-bottom">
 
-    {{-- Alerta de urgência --}}
     @if($inadimplentes > 0 || $cobrancasAberto > 0)
-    <div style="display:flex;align-items:center;gap:10px;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+    <div style="grid-column:1 / -1;display:flex;align-items:center;gap:10px;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:12px 16px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         <div style="flex:1;font-size:13px;color:#991b1b;font-weight:600;">
-            @if($inadimplentes > 0)
-                {{ $inadimplentes }} cliente(s) com pagamentos vencidos.
-            @endif
-            @if($cobrancasAberto > 0)
-                {{ $cobrancasAberto }} cobrança(s) em aberto aguardando recebimento.
-            @endif
+            @if($inadimplentes > 0) {{ $inadimplentes }} cliente(s) com pagamentos vencidos. @endif
+            @if($cobrancasAberto > 0) {{ $cobrancasAberto }} cobrança(s) em aberto aguardando recebimento. @endif
         </div>
         @if($inadimplentes > 0)
         <a href="{{ route('inadimplencia') }}" style="font-size:12px;font-weight:700;color:#dc2626;text-decoration:none;white-space:nowrap;background:#fee2e2;padding:5px 12px;border-radius:6px;">Resolver agora →</a>
@@ -135,13 +128,13 @@
     </div>
     @endif
 
-    {{-- Módulos Financeiros --}}
+    {{-- Módulos --}}
     <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;">
         <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:16px;">Módulos</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;" class="fin-hub-modulos">
             @php
-            $contrAtivos = \App\Models\Contrato::where('status','ativo')->count();
-            $comissoesPend = \App\Models\Comissao::where('status','pendente')->count();
+            $contrAtivos   = \App\Models\Contrato::where('status','ativo')->count();
+            $comissoesPend = \App\Models\Comissao::where('tenant_id', $tid)->where('status','pendente')->count();
             $modulos = [
                 [
                     'label'    => 'Lançamentos',
@@ -184,14 +177,14 @@
                     'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
                 ],
                 [
-                    'label'    => 'Conciliação Bancária',
-                    'desc'     => 'Importe extratos OFX e concilie com os lançamentos do sistema.',
-                    'cor'      => '#7c3aed',
-                    'bg'       => '#f5f3ff',
-                    'badge'    => 'OFX',
-                    'badge_bg' => '#7c3aed',
-                    'route'    => route('conciliacao-bancaria'),
-                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
+                    'label'    => 'Relatórios',
+                    'desc'     => 'Relatórios financeiros por período, cliente e processo.',
+                    'cor'      => '#475569',
+                    'bg'       => '#f8fafc',
+                    'badge'    => 'PDF / CSV',
+                    'badge_bg' => '#475569',
+                    'route'    => route('relatorios.index'),
+                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
                 ],
                 [
                     'label'    => 'Visão Consolidada',
@@ -202,16 +195,6 @@
                     'badge_bg' => '#0891b2',
                     'route'    => route('financeiro.consolidado'),
                     'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
-                ],
-                [
-                    'label'    => 'Relatórios',
-                    'desc'     => 'Relatórios financeiros por período, cliente e processo.',
-                    'cor'      => '#475569',
-                    'bg'       => '#f8fafc',
-                    'badge'    => 'PDF / CSV',
-                    'badge_bg' => '#475569',
-                    'route'    => route('relatorios.index'),
-                    'svg'      => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
                 ],
             ];
             @endphp
@@ -246,7 +229,7 @@
             <div style="text-align:center;padding:20px;">
                 <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">Nenhum recebimento registrado</div>
                 <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Comece registrando o primeiro pagamento para alimentar os indicadores da central financeira.</div>
-                <a href="{{ route('financeiro') }}"
+                <a href="{{ route('financeiro.central') }}"
                     style="display:inline-block;padding:10px 20px;background:var(--primary);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
                     Registrar Agora
                 </a>
@@ -339,7 +322,7 @@
     .fin-hub-bottom { grid-template-columns: 1fr !important; }
 }
 @media (max-width: 768px) {
-    .fin-hub-kpis   { grid-template-columns: 1fr 1fr !important; }
+    .fin-hub-kpis    { grid-template-columns: 1fr 1fr !important; }
     .fin-hub-modulos { grid-template-columns: 1fr 1fr !important; }
 }
 </style>

@@ -132,7 +132,7 @@ class NotificacoesWhatsapp extends Component
     public function abrirTeste(): void
     {
         $this->testeTel = '';
-        $this->testeMsg = '✅ *Software Jur�dico Jurídico — Teste*\nEsta é uma mensagem de teste do sistema. Tudo funcionando!';
+        $this->testeMsg = '✅ *Software Jur�dico Jurídico — Teste*\nEsta é uma mensagem de teste do sistema. Tudo funcionando!';
         $this->testeCanal  = 'whatsapp';
         $this->testeSucesso = '';
         $this->testeErro    = '';
@@ -183,6 +183,8 @@ class NotificacoesWhatsapp extends Component
     {
         $svc = new WhatsAppSmsService();
 
+        $tid = auth('usuarios')->user()->tenant_id;
+
         // Estatísticas
         $stats = DB::selectOne("
             SELECT
@@ -193,9 +195,11 @@ class NotificacoesWhatsapp extends Component
                 SUM(CASE WHEN canal = 'sms'      AND status = 'enviado' THEN 1 ELSE 0 END) as sms,
                 SUM(CASE WHEN DATE(created_at) = CURRENT_DATE THEN 1 ELSE 0 END) as hoje
             FROM notificacoes_whatsapp
-        ");
+            WHERE tenant_id = ?
+        ", [$tid]);
 
         $query = DB::table('notificacoes_whatsapp')
+            ->where('tenant_id', $tid)
             ->when($this->filtroStatus, fn($q) => $q->where('status', $this->filtroStatus))
             ->when($this->filtroTipo,   fn($q) => $q->where('tipo', $this->filtroTipo))
             ->when($this->filtroCanal,  fn($q) => $q->where('canal', $this->filtroCanal))
@@ -210,6 +214,7 @@ class NotificacoesWhatsapp extends Component
         // Estatísticas por tipo (últimas 24h)
         $statsPorTipo = DB::table('notificacoes_whatsapp')
             ->selectRaw("tipo, COUNT(*) as total, SUM(CASE WHEN status='enviado' THEN 1 ELSE 0 END) as enviados")
+            ->where('tenant_id', $tid)
             ->where('created_at', '>=', now()->subDay())
             ->groupBy('tipo')
             ->pluck('enviados', 'tipo');

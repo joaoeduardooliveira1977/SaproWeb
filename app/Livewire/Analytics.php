@@ -18,14 +18,17 @@ class Analytics extends Component
     {
         // ── KPIs ─────────────────────────────────────────────────
         $mesAtual = now()->format('Y-m');
+        $tid      = auth('usuarios')->user()->tenant_id;
 
         $kpis = [
-            'processos_ativos' => DB::table('processos')->where('status', 'Ativo')->count(),
+            'processos_ativos' => DB::table('processos')->where('tenant_id', $tid)->where('status', 'Ativo')->count(),
             'receita_mes'      => (float) DB::table('recebimentos')
+                ->where('tenant_id', $tid)
                 ->where('recebido', true)
                 ->whereRaw("TO_CHAR(data_recebimento, 'YYYY-MM') = ?", [$mesAtual])
                 ->sum('valor'),
             'horas_mes'        => (float) DB::table('apontamentos')
+                ->where('tenant_id', $tid)
                 ->whereRaw("TO_CHAR(data, 'YYYY-MM') = ?", [$mesAtual])
                 ->sum('horas'),
             'prazos_fatais'    => Prazo::where('status', 'aberto')
@@ -36,6 +39,7 @@ class Analytics extends Component
 
         // ── Processos por Status ──────────────────────────────────
         $porStatus = DB::table('processos')
+            ->where('tenant_id', $tid)
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->orderByDesc('total')
@@ -44,6 +48,7 @@ class Analytics extends Component
         // ── Processos por Fase (ativos, top 8) ───────────────────
         $porFase = DB::table('processos as p')
             ->leftJoin('fases as f', 'f.id', '=', 'p.fase_id')
+            ->where('p.tenant_id', $tid)
             ->where('p.status', 'Ativo')
             ->selectRaw("COALESCE(f.descricao, 'Sem Fase') as fase, COUNT(*) as total")
             ->groupBy('f.descricao')
@@ -54,6 +59,7 @@ class Analytics extends Component
         // ── Processos por Risco (ativos) ─────────────────────────
         $porRisco = DB::table('processos as p')
             ->leftJoin('graus_risco as r', 'r.id', '=', 'p.risco_id')
+            ->where('p.tenant_id', $tid)
             ->where('p.status', 'Ativo')
             ->selectRaw("COALESCE(r.descricao, 'Sem Risco') as risco, COALESCE(r.cor_hex, '#94a3b8') as cor, COUNT(*) as total")
             ->groupBy('r.descricao', 'r.cor_hex')
@@ -64,6 +70,7 @@ class Analytics extends Component
         $meses12 = collect(range(11, 0))->map(fn($i) => now()->subMonths($i)->format('Y-m'));
 
         $recebimentos = DB::table('recebimentos')
+            ->where('tenant_id', $tid)
             ->where('recebido', true)
             ->where('data_recebimento', '>=', now()->subMonths(12)->startOfMonth())
             ->selectRaw("TO_CHAR(data_recebimento, 'YYYY-MM') as mes, SUM(valor) as total")
@@ -71,6 +78,7 @@ class Analytics extends Component
             ->pluck('total', 'mes');
 
         $pagamentos = DB::table('pagamentos')
+            ->where('tenant_id', $tid)
             ->where('pago', true)
             ->where('data_pagamento', '>=', now()->subMonths(12)->startOfMonth())
             ->selectRaw("TO_CHAR(data_pagamento, 'YYYY-MM') as mes, SUM(valor) as total")
@@ -85,8 +93,10 @@ class Analytics extends Component
         $meses6 = collect(range(5, 0))->map(fn($i) => now()->subMonths($i)->format('Y-m'));
 
         $andamentos = DB::table('andamentos')
-            ->where('data', '>=', now()->subMonths(6)->startOfMonth())
-            ->selectRaw("TO_CHAR(data, 'YYYY-MM') as mes, COUNT(*) as total")
+            ->join('processos', 'processos.id', '=', 'andamentos.processo_id')
+            ->where('processos.tenant_id', $tid)
+            ->where('andamentos.data', '>=', now()->subMonths(6)->startOfMonth())
+            ->selectRaw("TO_CHAR(andamentos.data, 'YYYY-MM') as mes, COUNT(*) as total")
             ->groupBy('mes')
             ->pluck('total', 'mes');
 
@@ -95,6 +105,7 @@ class Analytics extends Component
 
         // ── Horas apontadas por mês (6 meses) ────────────────────
         $horas = DB::table('apontamentos')
+            ->where('tenant_id', $tid)
             ->where('data', '>=', now()->subMonths(6)->startOfMonth())
             ->selectRaw("TO_CHAR(data, 'YYYY-MM') as mes, SUM(horas) as total")
             ->groupBy('mes')
@@ -115,11 +126,12 @@ class Analytics extends Component
         // ── Desempenho ────────────────────────────────────────────
         // Processos encerrados: taxa de conclusão e tempo médio
         $encerrados = DB::table('processos')
+            ->where('tenant_id', $tid)
             ->whereIn('status', ['Encerrado', 'Arquivado'])
             ->selectRaw("COUNT(*) as total, AVG(EXTRACT(DAY FROM (updated_at - data_distribuicao))) as media_dias")
             ->first();
 
-        $totalProcessos = DB::table('processos')->count();
+        $totalProcessos = DB::table('processos')->where('tenant_id', $tid)->count();
         $taxaConclusao  = $totalProcessos > 0
             ? round(($encerrados->total / $totalProcessos) * 100, 1)
             : 0;
@@ -132,6 +144,7 @@ class Analytics extends Component
             ->join('processos as p', 'p.id', '=', 'r.processo_id')
             ->join('processo_advogado as pa', 'pa.processo_id', '=', 'p.id')
             ->join('pessoas as pe', 'pe.id', '=', 'pa.advogado_id')
+            ->where('r.tenant_id', $tid)
             ->where('r.recebido', true)
             ->where('r.data_recebimento', '>=', now()->subMonths(12)->startOfMonth())
             ->selectRaw('pe.nome, SUM(r.valor) as total')
@@ -143,6 +156,7 @@ class Analytics extends Component
         // Top clientes por processos ativos
         $topClientes = DB::table('processos as p')
             ->join('pessoas as pe', 'pe.id', '=', 'p.cliente_id')
+            ->where('p.tenant_id', $tid)
             ->where('p.status', 'Ativo')
             ->selectRaw('pe.nome, COUNT(*) as total')
             ->groupBy('pe.nome')

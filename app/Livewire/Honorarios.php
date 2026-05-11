@@ -210,17 +210,18 @@ class Honorarios extends Component
         $perc  = $this->percentual_exito ? (float) str_replace(',', '.', $this->percentual_exito) : null;
 
         if ($this->honorarioId) {
+            $tid = auth('usuarios')->user()->tenant_id;
             DB::update("
                 UPDATE honorarios SET
                     cliente_id=?, processo_id=?, contrato_id=?, tipo=?, descricao=?, valor_contrato=?,
                     percentual_exito=?, total_parcelas=?, data_inicio=?, data_fim=?,
                     status=?, observacoes=?, updated_at=NOW()
-                WHERE id=?
+                WHERE id=? AND tenant_id=?
             ", [
                 $this->cliente_id, $this->processo_id ?: null, $this->contrato_id ?: null,
                 $this->tipo, $this->descricao, $valor, $perc, $this->total_parcelas,
                 $this->data_inicio, $this->data_fim ?: null, $this->status,
-                $this->observacoes ?: null, $this->honorarioId
+                $this->observacoes ?: null, $this->honorarioId, $tid
             ]);
         } else {
             $id = DB::selectOne("
@@ -275,8 +276,9 @@ class Honorarios extends Component
         // Atualiza atrasadas
         DB::update("
             UPDATE honorario_parcelas SET status = 'atrasado'
-            WHERE honorario_id = ? AND status = 'pendente' AND vencimento < CURRENT_DATE
-        ", [$id]);
+            WHERE honorario_id = ? AND honorario_id IN (SELECT id FROM honorarios WHERE tenant_id = ?)
+              AND status = 'pendente' AND vencimento < CURRENT_DATE
+        ", [$id, auth('usuarios')->user()->tenant_id]);
 
         $this->parcelasModal = DB::select("
             SELECT * FROM honorario_parcelas WHERE honorario_id = ? ORDER BY numero_parcela
@@ -302,11 +304,11 @@ class Honorarios extends Component
             UPDATE honorario_parcelas SET
                 status = 'pago', data_pagamento = ?, valor_pago = ?,
                 forma_pagamento = ?, observacoes = ?, updated_at = NOW()
-            WHERE id = ?
+            WHERE id = ? AND honorario_id IN (SELECT id FROM honorarios WHERE tenant_id = ?)
         ", [
             $this->data_pagamento, $this->valor_pago,
             $this->forma_pagamento, $this->obs_pagamento ?: null,
-            $this->parcelaId
+            $this->parcelaId, auth('usuarios')->user()->tenant_id
         ]);
 
         $this->modalPagamento = false;
@@ -320,8 +322,9 @@ class Honorarios extends Component
 
     public function excluirHonorario(int $id): void
     {
-        DB::delete("DELETE FROM honorario_parcelas WHERE honorario_id = ?", [$id]);
-        DB::delete("DELETE FROM honorarios WHERE id = ?", [$id]);
+        $tid = auth('usuarios')->user()->tenant_id;
+        DB::delete("DELETE FROM honorario_parcelas WHERE honorario_id = ? AND honorario_id IN (SELECT id FROM honorarios WHERE tenant_id = ?)", [$id, $tid]);
+        DB::delete("DELETE FROM honorarios WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         $this->dispatch('toast', message: 'Honorário excluído.', type: 'success');
     }
 

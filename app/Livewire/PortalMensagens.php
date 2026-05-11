@@ -20,8 +20,11 @@ class PortalMensagens extends Component
         $this->pessoaId = $id;
         $this->resposta = '';
 
+        $tid = auth('usuarios')->user()->tenant_id;
+
         // Marca como lidas pelo escritório
         DB::table('portal_mensagens')
+            ->where('tenant_id', $tid)
             ->where('pessoa_id', $id)
             ->where('de', 'cliente')
             ->where('lida_escritorio', false)
@@ -34,6 +37,7 @@ class PortalMensagens extends Component
         if (! $this->resposta || ! $this->pessoaId) return;
 
         DB::table('portal_mensagens')->insert([
+            'tenant_id'       => Auth::guard('usuarios')->user()->tenant_id,
             'pessoa_id'       => $this->pessoaId,
             'processo_id'     => null,
             'usuario_id'      => Auth::guard('usuarios')->id(),
@@ -63,9 +67,12 @@ class PortalMensagens extends Component
 
     public function render(): \Illuminate\View\View
     {
+        $tid = auth('usuarios')->user()->tenant_id;
+
         // Lista de clientes com mensagens
         $clientes = DB::table('portal_mensagens as m')
             ->join('pessoas as p', 'p.id', '=', 'm.pessoa_id')
+            ->where('m.tenant_id', $tid)
             ->select(
                 'p.id', 'p.nome',
                 DB::raw('MAX(m.created_at) as ultima_msg'),
@@ -88,6 +95,7 @@ class PortalMensagens extends Component
             $conversa = DB::table('portal_mensagens as m')
                 ->leftJoin('usuarios as u', 'u.id', '=', 'm.usuario_id')
                 ->leftJoin('processos as pr', 'pr.id', '=', 'm.processo_id')
+                ->where('m.tenant_id', $tid)
                 ->where('m.pessoa_id', $this->pessoaId)
                 ->select('m.*', 'u.nome as usuario_nome', 'pr.numero as processo_numero')
                 ->orderBy('m.created_at')
@@ -95,11 +103,13 @@ class PortalMensagens extends Component
         }
 
         $totalNaoLidas = DB::table('portal_mensagens')
+            ->where('tenant_id', $tid)
             ->where('de', 'cliente')
             ->where('lida_escritorio', false)
             ->count();
 
         $totalConversas = DB::table('portal_mensagens')
+            ->where('tenant_id', $tid)
             ->distinct('pessoa_id')
             ->count('pessoa_id');
 

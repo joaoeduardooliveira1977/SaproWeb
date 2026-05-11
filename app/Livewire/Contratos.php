@@ -107,34 +107,36 @@ class Contratos extends Component
 
     private function carregarAuxiliares(): void
     {
+        $tid = auth('usuarios')->user()->tenant_id;
+
         $this->clientes = DB::select("
             SELECT p.id, p.nome
             FROM pessoas p
             JOIN pessoa_tipos pt ON pt.pessoa_id = p.id
-            WHERE pt.tipo = 'Cliente' AND p.ativo = true
+            WHERE pt.tipo = 'Cliente' AND p.ativo = true AND p.tenant_id = ?
             ORDER BY p.nome
-        ");
+        ", [$tid]);
 
         $this->advogados = DB::select("
             SELECT p.id, p.nome
             FROM pessoas p
             JOIN pessoa_tipos pt ON pt.pessoa_id = p.id
-            WHERE pt.tipo = 'Advogado' AND p.ativo = true
+            WHERE pt.tipo = 'Advogado' AND p.ativo = true AND p.tenant_id = ?
             ORDER BY p.nome
-        ");
+        ", [$tid]);
 
-        // Indicadores: qualquer pessoa ativa (sÃ­ndico, corretor, advogado parceiro)
+        // Indicadores: qualquer pessoa ativa (síndico, corretor, advogado parceiro)
         $this->indicadores = DB::select("
-            SELECT id, nome FROM pessoas WHERE ativo = true ORDER BY nome
-        ");
+            SELECT id, nome FROM pessoas WHERE ativo = true AND tenant_id = ? ORDER BY nome
+        ", [$tid]);
 
         $this->processos = DB::select("
             SELECT p.id, p.numero, pe.nome as cliente_nome
             FROM processos p
             JOIN pessoas pe ON pe.id = p.cliente_id
-            WHERE p.status = 'Ativo'
+            WHERE p.status = 'Ativo' AND p.tenant_id = ?
             ORDER BY p.numero
-        ");
+        ", [$tid]);
 
         $this->processosContrato = [];
 
@@ -336,12 +338,13 @@ class Contratos extends Component
             return;
         }
 
+        $tid = auth('usuarios')->user()->tenant_id;
         $this->processosContrato = DB::select("
             SELECT id, numero, COALESCE(parte_contraria, numero) AS titulo
             FROM processos
-            WHERE cliente_id = ? AND status = 'Ativo'
+            WHERE cliente_id = ? AND status = 'Ativo' AND tenant_id = ?
             ORDER BY numero
-        ", [$this->clienteId]);
+        ", [$this->clienteId, $tid]);
 
         $processoIds = array_map(static fn ($processo) => (int) $processo->id, $this->processosContrato);
 
@@ -353,9 +356,9 @@ class Contratos extends Component
             SELECT p.id, p.nome
             FROM cliente_advogado ca
             JOIN pessoas p ON p.id = ca.advogado_id
-            WHERE ca.cliente_id = ? AND p.ativo = true
+            WHERE ca.cliente_id = ? AND p.ativo = true AND p.tenant_id = ?
             ORDER BY p.nome
-        ", [$this->clienteId]);
+        ", [$this->clienteId, $tid]);
 
         if (!empty($advogadosCliente)) {
             $this->advogados = $advogadosCliente;
@@ -364,9 +367,9 @@ class Contratos extends Component
                 SELECT p.id, p.nome
                 FROM pessoas p
                 JOIN pessoa_tipos pt ON pt.pessoa_id = p.id
-                WHERE pt.tipo = 'Advogado' AND p.ativo = true
+                WHERE pt.tipo = 'Advogado' AND p.ativo = true AND p.tenant_id = ?
                 ORDER BY p.nome
-            ");
+            ", [$tid]);
         }
 
         $advogadoIds = array_map(static fn ($advogado) => (int) $advogado->id, $this->advogados);
@@ -483,7 +486,8 @@ class Contratos extends Component
         }
 
         if ($this->contratoId) {
-            DB::table('contratos')->where('id', $this->contratoId)->update(array_merge($dados, ['updated_at' => now()]));
+            $tid = auth('usuarios')->user()->tenant_id;
+            DB::table('contratos')->where('id', $this->contratoId)->where('tenant_id', $tid)->update(array_merge($dados, ['updated_at' => now()]));
             if ($dados['status'] === 'ativo') {
                 $contrato = Contrato::with('servicos')->find($this->contratoId);
                 if ($contrato && $contrato->servicos->isNotEmpty()) {
@@ -511,7 +515,7 @@ class Contratos extends Component
     {
         if (!$this->podeValidar) return;
         $usuario = Auth::guard('usuarios')->user();
-        DB::table('contratos')->where('id', $id)->update([
+        DB::table('contratos')->where('id', $id)->where('tenant_id', $usuario->tenant_id)->update([
             'validado'    => true,
             'validado_em' => now(),
             'validado_por'=> $usuario->nome ?? 'Sistema',
@@ -609,7 +613,9 @@ class Contratos extends Component
         ];
 
         if ($this->servicoId) {
-            DB::table('contrato_servicos')->where('id', $this->servicoId)
+            $tid = auth('usuarios')->user()->tenant_id;
+            $contratoIds = DB::table('contratos')->where('tenant_id', $tid)->pluck('id');
+            DB::table('contrato_servicos')->where('id', $this->servicoId)->whereIn('contrato_id', $contratoIds)
                 ->update(array_merge($dados, ['updated_at' => now()]));
 
             $servico = ContratoServico::find($this->servicoId);
@@ -635,12 +641,16 @@ class Contratos extends Component
 
     public function excluirServico(int $id): void
     {
+        $tid = auth('usuarios')->user()->tenant_id;
+        $contratoIds = DB::table('contratos')->where('tenant_id', $tid)->pluck('id');
+
         DB::table('financeiro_lancamentos')
             ->where('contrato_servico_id', $id)
+            ->whereIn('contrato_id', $contratoIds)
             ->whereIn('status', ['previsto', 'atrasado'])
             ->delete();
 
-        DB::table('contrato_servicos')->where('id', $id)->delete();
+        DB::table('contrato_servicos')->where('id', $id)->whereIn('contrato_id', $contratoIds)->delete();
         $this->dispatch('toast', message: 'Serviço removido e financeiro previsto excluído.', type: 'success');
     }
 
@@ -697,8 +707,10 @@ class Contratos extends Component
             return;
         }
 
+        $tid = auth('usuarios')->user()->tenant_id;
         $recebido = DB::table('financeiro_lancamentos')
             ->where('contrato_servico_id', $servico->id)
+            ->where('tenant_id', $tid)
             ->where('status', 'recebido')
             ->exists();
 
@@ -709,6 +721,7 @@ class Contratos extends Component
 
         DB::table('financeiro_lancamentos')
             ->where('contrato_servico_id', $servico->id)
+            ->where('tenant_id', $tid)
             ->whereIn('status', ['previsto', 'atrasado'])
             ->delete();
 
@@ -728,8 +741,10 @@ class Contratos extends Component
             'updated_at'          => now(),
         ]);
 
+        $contratoIds = DB::table('contratos')->where('tenant_id', $tid)->pluck('id');
         DB::table('contrato_servicos')
             ->where('id', $servico->id)
+            ->whereIn('contrato_id', $contratoIds)
             ->update([
                 'valor_realizado' => $valor,
                 'realizado_em'    => now(),
@@ -798,7 +813,9 @@ class Contratos extends Component
         ];
 
         if ($this->repasseId) {
-            DB::table('contrato_repasses')->where('id', $this->repasseId)
+            $tid = auth('usuarios')->user()->tenant_id;
+            $contratoIds = DB::table('contratos')->where('tenant_id', $tid)->pluck('id');
+            DB::table('contrato_repasses')->where('id', $this->repasseId)->whereIn('contrato_id', $contratoIds)
                 ->update(array_merge($dados, ['updated_at' => now()]));
         } else {
             DB::table('contrato_repasses')
@@ -817,9 +834,10 @@ class Contratos extends Component
         $contrato = Contrato::find($contratoId);
         if (!$contrato) return;
 
-        // Buscar lanÃ§amentos de receita deste contrato ainda nÃ£o liquidados
+        // Buscar lançamentos de receita deste contrato ainda não liquidados
         $lancamentos = DB::table('financeiro_lancamentos')
             ->where('contrato_id', $contratoId)
+            ->where('tenant_id', $contrato->tenant_id)
             ->where('tipo', 'receita')
             ->get();
 
@@ -852,18 +870,22 @@ class Contratos extends Component
 
     public function excluirRepasse(int $id): void
     {
-        DB::table('contrato_repasses')->where('id', $id)->delete();
+        $tid = auth('usuarios')->user()->tenant_id;
+        $contratoIds = DB::table('contratos')->where('tenant_id', $tid)->pluck('id');
+        DB::table('contrato_repasses')->where('id', $id)->whereIn('contrato_id', $contratoIds)->delete();
         $this->dispatch('toast', message: 'Repasse removido.', type: 'success');
     }
 
     // â”€â”€ Encerrar contrato â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function encerrar(int $id): void
     {
-        DB::table('contratos')->where('id', $id)->update(['status' => 'encerrado', 'updated_at' => now()]);
+        $tid = auth('usuarios')->user()->tenant_id;
+        DB::table('contratos')->where('id', $id)->where('tenant_id', $tid)->update(['status' => 'encerrado', 'updated_at' => now()]);
 
         // Cancela lançamentos futuros ainda não recebidos
         $cancelados = DB::table('financeiro_lancamentos')
             ->where('contrato_id', $id)
+            ->where('tenant_id', $tid)
             ->whereIn('status', ['previsto', 'atrasado'])
             ->where('vencimento', '>', now()->toDateString())
             ->update(['status' => 'cancelado', 'updated_at' => now()]);

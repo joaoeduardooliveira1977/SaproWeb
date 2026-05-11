@@ -17,7 +17,7 @@ class Assistente extends Component
     {
         $this->mensagens[] = [
             'tipo'  => 'bot',
-            'texto' => '👋 Olá! Sou o assistente jurídico do Software Jur�dico. Posso te ajudar com informações sobre processos, agenda e clientes. O que deseja saber?',
+            'texto' => '👋 Olá! Sou o assistente jurídico do Software Jur�dico. Posso te ajudar com informações sobre processos, agenda e clientes. O que deseja saber?',
             'hora'  => now()->format('H:i'),
         ];
     }
@@ -68,14 +68,16 @@ class Assistente extends Component
     {
         $contexto = '';
         $perguntaLower = strtolower($pergunta);
+        $tid    = auth('usuarios')->user()->tenant_id;
+        $tidInt = (int) $tid;
 
         // Estatísticas gerais sempre incluídas
         $stats = DB::selectOne("
-            SELECT 
-                (SELECT COUNT(*) FROM processos WHERE status = 'Ativo') as processos_ativos,
-                (SELECT COUNT(*) FROM processos WHERE status = 'Encerrado') as processos_encerrados,
-                (SELECT COUNT(*) FROM pessoas p JOIN pessoa_tipos pt ON pt.pessoa_id = p.id WHERE pt.tipo = 'Cliente' AND p.ativo = true) as total_clientes,
-                (SELECT COUNT(*) FROM agenda WHERE data_hora >= NOW() AND concluido = false) as compromissos_futuros
+            SELECT
+                (SELECT COUNT(*) FROM processos WHERE status = 'Ativo' AND tenant_id = {$tidInt}) as processos_ativos,
+                (SELECT COUNT(*) FROM processos WHERE status = 'Encerrado' AND tenant_id = {$tidInt}) as processos_encerrados,
+                (SELECT COUNT(*) FROM pessoas p JOIN pessoa_tipos pt ON pt.pessoa_id = p.id WHERE pt.tipo = 'Cliente' AND p.ativo = true AND p.tenant_id = {$tidInt}) as total_clientes,
+                (SELECT COUNT(*) FROM agenda WHERE data_hora >= NOW() AND concluido = false AND tenant_id = {$tidInt}) as compromissos_futuros
         ");
 
         $contexto .= "=== ESTATÍSTICAS GERAIS ===\n";
@@ -101,10 +103,10 @@ class Assistente extends Component
                 FROM agenda a
                 LEFT JOIN processos p ON p.id = a.processo_id
                 LEFT JOIN pessoas pe ON pe.id = p.cliente_id
-                WHERE a.data_hora >= NOW() AND a.concluido = false
+                WHERE a.data_hora >= NOW() AND a.concluido = false AND a.tenant_id = ?
                 ORDER BY a.data_hora
                 LIMIT 15
-            ");
+            ", [$tid]);
 
             $contexto .= "=== PRÓXIMOS COMPROMISSOS ===\n";
             foreach ($agenda as $ev) {
@@ -136,10 +138,10 @@ class Assistente extends Component
                 LEFT JOIN pessoas pe ON pe.id = p.cliente_id
                 LEFT JOIN fases f ON f.id = p.fase_id
                 LEFT JOIN graus_risco g ON g.id = p.risco_id
-                WHERE p.status = 'Ativo'
+                WHERE p.status = 'Ativo' AND p.tenant_id = ?
                 ORDER BY p.updated_at DESC
                 LIMIT 20
-            ");
+            ", [$tid]);
 
             $contexto .= "=== PROCESSOS ATIVOS (últimos 20) ===\n";
             foreach ($processos as $proc) {
@@ -163,11 +165,11 @@ class Assistente extends Component
                 FROM pessoas pe
                 JOIN pessoa_tipos pt ON pt.pessoa_id = pe.id
                 LEFT JOIN processos p ON p.cliente_id = pe.id AND p.status = 'Ativo'
-                WHERE pt.tipo = 'Cliente' AND pe.ativo = true
+                WHERE pt.tipo = 'Cliente' AND pe.ativo = true AND pe.tenant_id = ?
                 GROUP BY pe.id, pe.nome, pe.telefone, pe.celular, pe.email
                 ORDER BY total_processos DESC
                 LIMIT 20
-            ");
+            ", [$tid]);
 
             $contexto .= "=== CLIENTES ATIVOS (top 20 por processos) ===\n";
             foreach ($clientes as $cli) {
@@ -193,10 +195,10 @@ class Assistente extends Component
                 LEFT JOIN processos pr ON pr.id = pz.processo_id
                 LEFT JOIN pessoas pe ON pe.id = pr.cliente_id
                 LEFT JOIN usuarios u ON u.id = pz.responsavel_id
-                WHERE pz.status = 'aberto'
+                WHERE pz.status = 'aberto' AND pr.tenant_id = ?
                 ORDER BY pz.data_prazo ASC
                 LIMIT 20
-            ");
+            ", [$tid]);
 
             $contexto .= "=== PRAZOS EM ABERTO (próximos/vencidos) ===\n";
             foreach ($prazos as $pz) {
@@ -236,7 +238,9 @@ class Assistente extends Component
                     COALESCE(SUM(hp.valor) FILTER (WHERE hp.status = 'pago'
                         AND DATE_TRUNC('month', hp.data_pagamento) = DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')), 0) as recebido_mes_anterior
                 FROM honorario_parcelas hp
-            ");
+                JOIN honorarios h ON h.id = hp.honorario_id
+                WHERE h.tenant_id = ?
+            ", [$tid]);
 
             $contexto .= "=== HONORÁRIOS — VISÃO GERAL ===\n";
             $contexto .= "Recebido este mês: R$ " . number_format($resumoHon->recebido_mes, 2, ',', '.') . "\n";
@@ -255,11 +259,11 @@ class Assistente extends Component
                 FROM honorario_parcelas hp
                 JOIN honorarios h ON h.id = hp.honorario_id
                 JOIN pessoas cl ON cl.id = h.cliente_id
-                WHERE hp.status = 'atrasado'
+                WHERE hp.status = 'atrasado' AND h.tenant_id = ?
                 GROUP BY cl.id, cl.nome
                 ORDER BY total_devido DESC
                 LIMIT 10
-            ");
+            ", [$tid]);
 
             if ($inadimplentes) {
                 $contexto .= "=== INADIMPLÊNCIA POR CLIENTE ===\n";
@@ -282,8 +286,9 @@ class Assistente extends Component
                 LEFT JOIN processos pr ON pr.id = h.processo_id
                 WHERE hp.status = 'pendente'
                   AND hp.vencimento BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days'
+                  AND h.tenant_id = ?
                 ORDER BY hp.vencimento ASC
-            ");
+            ", [$tid]);
 
             if ($vencendo) {
                 $contexto .= "=== HONORÁRIOS VENCENDO EM 7 DIAS ===\n";
@@ -314,7 +319,8 @@ class Assistente extends Component
                     COALESCE(SUM(CASE WHEN recebido = false THEN valor ELSE 0 END), 0) as a_receber_total,
                     COUNT(CASE WHEN recebido = false THEN 1 END) as qtd_pendentes
                 FROM recebimentos
-            ");
+                WHERE tenant_id = ?
+            ", [$tid]);
 
             $pag = DB::selectOne("
                 SELECT
@@ -322,14 +328,16 @@ class Assistente extends Component
                     COALESCE(SUM(CASE WHEN pago = true AND DATE_TRUNC('month', data_pagamento) = DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month') THEN valor_pago ELSE 0 END), 0) as pago_mes_ant,
                     COALESCE(SUM(CASE WHEN pago = false THEN valor ELSE 0 END), 0) as a_pagar_total
                 FROM pagamentos
-            ");
+                WHERE tenant_id = ?
+            ", [$tid]);
 
             $custas = DB::selectOne("
                 SELECT
                     COALESCE(SUM(valor) FILTER (WHERE pago = false), 0) as pendentes,
                     COUNT(*) FILTER (WHERE pago = false) as qtd_pendentes
                 FROM custas
-            ");
+                WHERE tenant_id = ?
+            ", [$tid]);
 
             $saldoMes = $fin->recebido_mes - $pag->pago_mes;
             $saldoAnt = $fin->recebido_mes_ant - $pag->pago_mes_ant;
@@ -356,7 +364,7 @@ class Assistente extends Component
     private function perguntarIA(string $pergunta, string $contexto): string
     {
         try {
-            $system = "Você é um assistente jurídico inteligente do sistema Software Jur�dico.
+            $system = "Você é um assistente jurídico inteligente do sistema Software Jur�dico.
 Responda de forma clara, objetiva e profissional em português brasileiro.
 Use os dados abaixo para responder com precisão. Não invente informações.
 Se não encontrar a informação, diga que não encontrou e sugira onde buscar.

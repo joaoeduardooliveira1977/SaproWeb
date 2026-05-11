@@ -38,7 +38,8 @@ class ResumoIA extends Component
         $riscoAlto      = Processo::where('status', 'Ativo')
                             ->whereHas('risco', fn($q) => $q->where('descricao', 'ilike', '%alto%'))
                             ->count();
-        $aReceber       = (float) DB::table('recebimentos')->where('recebido', false)->sum('valor');
+        $tid            = auth('usuarios')->user()->tenant_id;
+        $aReceber       = (float) DB::table('recebimentos')->where('tenant_id', $tid)->where('recebido', false)->sum('valor');
 
         $fatais = Prazo::where('status', 'aberto')
             ->where('prazo_fatal', true)
