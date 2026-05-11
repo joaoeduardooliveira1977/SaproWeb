@@ -182,6 +182,12 @@ class FinanceiroCentral extends Component
         $this->modal = true;
     }
 
+    public function abrirModalTipo(string $tipo): void
+    {
+        $this->tipo = $tipo;
+        $this->abrirModal();
+    }
+
     public function fecharModal(): void
     {
         $this->modal      = false;

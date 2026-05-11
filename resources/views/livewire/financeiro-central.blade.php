@@ -48,9 +48,13 @@
             </span>
             <span wire:loading wire:target="exportarCsv">Gerando…</span>
         </button>
-        <button wire:click="abrirModal()" class="btn btn-primary" style="display:flex;align-items:center;gap:6px;">
+        <button wire:click="abrirModalTipo('receita')" style="display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;cursor:pointer;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Novo Lançamento
+            Receita
+        </button>
+        <button wire:click="abrirModalTipo('despesa')" style="display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;cursor:pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Despesa
         </button>
     </div>
 </div>
