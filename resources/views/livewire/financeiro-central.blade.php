@@ -21,7 +21,7 @@
    
     <div style="background:var(--white);border-radius:12px;padding:16px 20px;border:1px solid var(--border);border-left:4px solid #16a34a;">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Saldo do Mês</div>
-        @php $saldo = $totalRecebido - $totalDespesa - $totalRepasse; @endphp
+        @php $saldo = $totalRecebido - $totalDespesa; @endphp
         <div style="font-size:20px;font-weight:800;color:{{ $saldo >= 0 ? '#16a34a' : '#dc2626' }};">
             R$ {{ number_format($saldo,2,',','.') }}
         </div>
