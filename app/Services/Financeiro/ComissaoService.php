@@ -90,14 +90,19 @@ class ComissaoService
 
 public function gerarParaLancamento(object $lancamento): void
 {
-    if ($lancamento->tipo !== 'receita' || !$lancamento->processo_id) {
+    if ($lancamento->tipo !== 'receita') {
         return;
     }
 
-    $processo = \App\Models\Processo::find($lancamento->processo_id);
-    if (!$processo) return;
+    // Busca o cliente pelo cliente_id do lançamento
+    $pessoa = \App\Models\Pessoa::find($lancamento->cliente_id);
 
-    $pessoa = \App\Models\Pessoa::find($lancamento->cliente_id ?? $processo->cliente_id);
+    // Se não tiver cliente direto, tenta pelo processo
+    if (!$pessoa && $lancamento->processo_id) {
+        $processo = \App\Models\Processo::find($lancamento->processo_id);
+        $pessoa   = \App\Models\Pessoa::find($processo?->cliente_id);
+    }
+
     if (!$pessoa?->indicador_id) return;
 
     $indicador = $pessoa->indicador;
@@ -120,11 +125,5 @@ public function gerarParaLancamento(object $lancamento): void
         ]
     );
 }
-
-
-
-
-
-
 
 }
