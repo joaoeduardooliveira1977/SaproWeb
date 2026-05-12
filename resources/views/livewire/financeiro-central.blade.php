@@ -329,15 +329,7 @@
                     </div>
                     @error('clienteId')<span style="color:var(--danger);font-size:11px;">{{ $message }}</span>@enderror
                 </div>
-                <div>
-                    <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Tipo *</label>
-                    <select wire:model="tipo" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
-                        <option value="receita">Receita</option>
-                        <option value="despesa">Despesa</option>
-                        <option value="repasse">Repasse</option>
-                    </select>
-                </div>
-            </div>
+              </div>
 
             {{-- Contrato --}}
             @if($contratos)
