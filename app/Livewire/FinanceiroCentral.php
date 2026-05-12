@@ -231,7 +231,7 @@ class FinanceiroCentral extends Component
             $this->clienteBusca     = '';
             $this->clienteSugestoes = [];
             $this->processoId  = '';
-            $this->tipo        = 'receita';
+            $this->tipo = $this->tipo ?: 'receita';
             $this->descricao   = '';
             $this->valor       = '';
             $this->vencimento  = now()->format('Y-m-d');
