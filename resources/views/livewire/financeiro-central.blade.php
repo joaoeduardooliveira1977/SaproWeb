@@ -18,10 +18,7 @@
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Despesas</div>
         <div style="font-size:20px;font-weight:800;color:#d97706;">R$ {{ number_format($totalDespesa,2,',','.') }}</div>
     </div>
-    <div style="background:var(--white);border-radius:12px;padding:16px 20px;border:1px solid var(--border);border-left:4px solid #7c3aed;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Repasses a Pagar</div>
-        <div style="font-size:20px;font-weight:800;color:#7c3aed;">R$ {{ number_format($totalRepasse,2,',','.') }}</div>
-    </div>
+   
     <div style="background:var(--white);border-radius:12px;padding:16px 20px;border:1px solid var(--border);border-left:4px solid #16a34a;">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Saldo do Mês</div>
         @php $saldo = $totalRecebido - $totalDespesa - $totalRepasse; @endphp

@@ -2,21 +2,25 @@
 
 namespace App\Console\Commands;
 
-use App\Models\FinanceiroLancamento;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class AtualizarLancamentosAtrasados extends Command
 {
     protected $signature   = 'financeiro:atualizar-atrasados';
-    protected $description = 'Marca como atrasados os lançamentos vencidos ainda com status previsto';
+    protected $description = 'Marca como atrasado os lançamentos vencidos e não recebidos';
 
     public function handle(): int
     {
-        $atualizados = FinanceiroLancamento::where('status', 'previsto')
-            ->where('vencimento', '<', now()->toDateString())
-            ->update(['status' => 'atrasado', 'updated_at' => now()]);
+        $total = DB::table('financeiro_lancamentos')
+            ->where('status', 'previsto')
+            ->where('vencimento', '<', today())
+            ->update([
+                'status'     => 'atrasado',
+                'updated_at' => now(),
+            ]);
 
-        $this->info("Lançamentos atualizados: {$atualizados}");
+        $this->info("✓ {$total} lançamento(s) marcado(s) como atrasado.");
 
         return self::SUCCESS;
     }

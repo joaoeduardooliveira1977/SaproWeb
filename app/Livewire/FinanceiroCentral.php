@@ -506,7 +506,7 @@ class FinanceiroCentral extends Component
         $totalRecebido = (clone $base)->where('tipo', 'receita')->where('status', 'recebido')->sum('valor_pago');
         $totalAtrasado = (clone $base)->where('tipo', 'receita')->where('status', 'atrasado')->sum('valor');
         $totalDespesa  = (clone $base)->where('tipo', 'despesa')->whereIn('status', ['previsto','atrasado','recebido'])->sum('valor');
-        $totalRepasse  = (clone $base)->where('tipo', 'repasse')->whereIn('status', ['previsto','atrasado'])->sum('valor');
+        
 
         $clientes     = $this->clientes;
         $fornecedores = $this->fornecedores;
@@ -520,7 +520,7 @@ class FinanceiroCentral extends Component
             ->get(['id', 'numero']);
 
         return view('livewire.financeiro-central', compact(
-            'lancamentos', 'totalPrevisto', 'totalRecebido', 'totalAtrasado', 'totalDespesa', 'totalRepasse',
+            'lancamentos', 'totalPrevisto', 'totalRecebido', 'totalAtrasado', 'totalDespesa', 
             'clientes', 'fornecedores', 'ordenarPor', 'ordenarDir', 'processos'
         ));
     }
