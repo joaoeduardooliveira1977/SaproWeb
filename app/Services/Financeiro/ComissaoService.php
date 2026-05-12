@@ -86,4 +86,45 @@ class ComissaoService
             'data_pagamento' => $dataPagamento,
         ]);
     }
+
+
+public function gerarParaLancamento(object $lancamento): void
+{
+    if ($lancamento->tipo !== 'receita' || !$lancamento->processo_id) {
+        return;
+    }
+
+    $processo = \App\Models\Processo::find($lancamento->processo_id);
+    if (!$processo) return;
+
+    $pessoa = \App\Models\Pessoa::find($lancamento->cliente_id ?? $processo->cliente_id);
+    if (!$pessoa?->indicador_id) return;
+
+    $indicador = $pessoa->indicador;
+    if (!$indicador?->ativo || $indicador->percentual_comissao <= 0) return;
+
+    $base = (float) ($lancamento->valor_pago ?: $lancamento->valor);
+    if ($base <= 0) return;
+
+    \App\Models\Comissao::firstOrCreate(
+        ['origem_tipo' => 'financeiro_lancamento', 'origem_id' => $lancamento->id],
+        [
+            'tenant_id'      => $lancamento->tenant_id,
+            'indicador_id'   => $indicador->id,
+            'pessoa_id'      => $pessoa->id,
+            'valor_base'     => $base,
+            'percentual'     => $indicador->percentual_comissao,
+            'valor_comissao' => round($base * $indicador->percentual_comissao / 100, 2),
+            'competencia'    => \Carbon\Carbon::parse($lancamento->data_pagamento ?? now())->startOfMonth(),
+            'status'         => 'pendente',
+        ]
+    );
+}
+
+
+
+
+
+
+
 }

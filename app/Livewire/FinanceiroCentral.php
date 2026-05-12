@@ -468,7 +468,17 @@ class FinanceiroCentral extends Component
                 'updated_at'      => now(),
             ]);
 
-        $this->fecharPagamento();
+
+	        // Gerar comissão se aplicável
+        $lancamento = DB::table('financeiro_lancamentos')
+            ->where('id', $this->pagamentoLancId)
+            ->first();
+
+        if ($lancamento) {
+            app(ComissaoService::class)->gerarParaLancamento($lancamento);
+        }
+        
+	$this->fecharPagamento();
         $this->dispatch('toast', message: 'Pagamento registrado!', type: 'success');
     }
 
