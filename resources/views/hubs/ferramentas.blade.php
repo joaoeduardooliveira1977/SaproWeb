@@ -225,6 +225,16 @@
                 'route' => route('workflow.regras'),
                 'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
             ],
+
+	[
+    		'label' => 'Comissões',
+    		'desc'  => 'Comissões geradas automaticamente para indicadores e síndicos.',
+    		'cor'   => '#059669',
+    		'bg'    => '#f0fdf4',
+    		'badge' => 'COM',
+    		'route' => route('comissoes'),
+    		'svg'   => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
+	],
         ];
         @endphp
         @foreach($ferramentas as $f)
