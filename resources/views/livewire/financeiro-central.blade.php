@@ -279,9 +279,9 @@
     <div style="position:relative;background:var(--white);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);z-index:1;">
 
         <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);z-index:2;">
-            <h3 style="font-size:16px;font-weight:700;color:var(--text);margin:0;">
-                {{ $lancamentoId ? 'Editar Lançamento' : ($tipo === 'despesa' ? 'Nova Despesa' : ($tipo === 'repasse' ? 'Novo Repasse' : 'Nova Receita')) }}
-            </h3>
+            <h3 style="font-size:16px;font-weight:700;color:{{ $lancamentoId ? 'var(--text)' : ($tipo === 'despesa' ? '#dc2626' : '#16a34a') }};margin:0;">
+    		{{ $lancamentoId ? 'Editar Lançamento' : ($tipo === 'despesa' ? 'Nova Despesa' : ($tipo === 'repasse' ? 'Novo Repasse' : 'Nova Receita')) }}
+	</h3>
             <button wire:click="fecharModal" style="background:none;border:none;cursor:pointer;color:var(--muted);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
