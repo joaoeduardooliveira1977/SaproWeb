@@ -31,9 +31,7 @@ class TabelasDominio extends Component
             'graus_risco'     => ['label' => 'Graus de Risco',       'temOrdem' => false, 'temCor' => true,  'temAtivo' => false],
             'tipos_acao'      => ['label' => 'Tipos de Ação',        'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
             'tipos_processo'  => ['label' => 'Tipos de Processo',    'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
-            'assuntos'        => ['label' => 'Assuntos',              'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
             'reparticoes'     => ['label' => 'Repartições / Fóruns', 'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
-            'secretarias'     => ['label' => 'Secretarias',          'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
             'varas'           => ['label' => 'Varas',                'temOrdem' => false, 'temCor' => false, 'temAtivo' => true],
         ];
     }
