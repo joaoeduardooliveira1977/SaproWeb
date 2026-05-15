@@ -3,7 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\{FinanceiroLancamento, Pessoa, Contrato};
-use Illuminate\Support\Facades\{Auth, DB, Storage};
+use App\Services\Financeiro\ComissaoService;
+use Illuminate\Support\Facades\{Auth, DB, Hash, Storage};
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -42,7 +43,7 @@ class FinanceiroCentral extends Component
     public string $observacoes  = '';
 
     // ── Anexos ────────────────────────────────────────────────
-    public $anexo       = null;
+    public $anexo        = null;
     public array $anexos = [];
 
     // ── Modal: registrar pagamento ────────────────────────────
@@ -52,6 +53,12 @@ class FinanceiroCentral extends Component
     public string $valorPago       = '';
     public string $formaPagamento  = 'pix';
     public string $pagamentoTipo   = 'receita';
+
+    // ── Modal: confirmação de exclusão com senha ──────────────
+    public bool   $modalExclusao     = false;
+    public ?int   $excluirId         = null;
+    public string $senhaExclusao     = '';
+    public string $erroSenhaExclusao = '';
 
     // ── Ordenação ─────────────────────────────────────────────
     public string $ordenarPor = 'vencimento';
@@ -230,12 +237,12 @@ class FinanceiroCentral extends Component
             $this->clienteId        = 0;
             $this->clienteBusca     = '';
             $this->clienteSugestoes = [];
-            $this->processoId  = '';
-            $this->tipo = $this->tipo ?: 'receita';
-            $this->descricao   = '';
-            $this->valor       = '';
-            $this->vencimento  = now()->format('Y-m-d');
-            $this->observacoes = '';
+            $this->processoId       = '';
+            $this->tipo             = $this->tipo ?: 'receita';
+            $this->descricao        = '';
+            $this->valor            = '';
+            $this->vencimento       = now()->format('Y-m-d');
+            $this->observacoes      = '';
         }
 
         $this->modal = true;
@@ -311,12 +318,11 @@ class FinanceiroCentral extends Component
             $msg = 'Lançamento criado!';
         }
 
-        // Salvar anexo se enviado
         if ($this->anexo) {
-            $caminho   = $this->anexo->store('financeiro/anexos', 'public');
-            $original  = $this->anexo->getClientOriginalName();
-            $mime      = $this->anexo->getMimeType();
-            $tamanho   = $this->anexo->getSize();
+            $caminho    = $this->anexo->store('financeiro/anexos', 'public');
+            $original   = $this->anexo->getClientOriginalName();
+            $mime       = $this->anexo->getMimeType();
+            $tamanho    = $this->anexo->getSize();
             $uploadedBy = Auth::guard('usuarios')->user()?->nome ?? 'Sistema';
 
             DB::table('financeiro_lancamento_anexos')->insert([
@@ -409,11 +415,59 @@ class FinanceiroCentral extends Component
         $this->dispatch('toast', message: 'Lançamento cancelado.', type: 'success');
     }
 
+    // ── Exclusão com senha de admin ───────────────────────────
     public function excluir(int $id): void
     {
-        $tenantId = Auth::guard('usuarios')->user()?->tenant_id;
+        $tenantId   = Auth::guard('usuarios')->user()?->tenant_id;
+        $lancamento = DB::table('financeiro_lancamentos')
+            ->where('id', $id)
+            ->where('tenant_id', $tenantId)
+            ->first();
 
-        // Excluir arquivos físicos dos anexos
+        if (! $lancamento) return;
+
+        // Cancelados: excluir direto sem senha
+        if ($lancamento->status === 'cancelado') {
+            $this->executarExclusao($id, $tenantId);
+            return;
+        }
+
+        // Qualquer outro status: pede senha de admin
+        $this->excluirId         = $id;
+        $this->senhaExclusao     = '';
+        $this->erroSenhaExclusao = '';
+        $this->modalExclusao     = true;
+    }
+
+    public function confirmarExclusao(): void
+    {
+        $tenantId = Auth::guard('usuarios')->user()?->tenant_id;
+        $usuario  = Auth::guard('usuarios')->user();
+
+        if (! in_array($usuario->perfil, ['admin', 'administrador', 'super_admin'])) {
+            $this->erroSenhaExclusao = 'Apenas administradores podem excluir este lançamento.';
+            return;
+        }
+
+        if (! Hash::check($this->senhaExclusao, $usuario->password)) {
+            $this->erroSenhaExclusao = 'Senha incorreta.';
+            return;
+        }
+
+        $this->executarExclusao($this->excluirId, $tenantId);
+        $this->fecharModalExclusao();
+    }
+
+    public function fecharModalExclusao(): void
+    {
+        $this->modalExclusao     = false;
+        $this->excluirId         = null;
+        $this->senhaExclusao     = '';
+        $this->erroSenhaExclusao = '';
+    }
+
+    private function executarExclusao(int $id, int $tenantId): void
+    {
         $anexos = DB::table('financeiro_lancamento_anexos')
             ->where('lancamento_id', $id)
             ->where('tenant_id', $tenantId)
@@ -468,8 +522,7 @@ class FinanceiroCentral extends Component
                 'updated_at'      => now(),
             ]);
 
-
-	        // Gerar comissão se aplicável
+        // Gerar comissão se aplicável
         $lancamento = DB::table('financeiro_lancamentos')
             ->where('id', $this->pagamentoLancId)
             ->first();
@@ -477,8 +530,8 @@ class FinanceiroCentral extends Component
         if ($lancamento) {
             app(ComissaoService::class)->gerarParaLancamento($lancamento);
         }
-        
-	$this->fecharPagamento();
+
+        $this->fecharPagamento();
         $this->dispatch('toast', message: 'Pagamento registrado!', type: 'success');
     }
 
@@ -516,7 +569,6 @@ class FinanceiroCentral extends Component
         $totalRecebido = (clone $base)->where('tipo', 'receita')->where('status', 'recebido')->sum('valor_pago');
         $totalAtrasado = (clone $base)->where('tipo', 'receita')->where('status', 'atrasado')->sum('valor');
         $totalDespesa  = (clone $base)->where('tipo', 'despesa')->whereIn('status', ['previsto','atrasado','recebido'])->sum('valor');
-        
 
         $clientes     = $this->clientes;
         $fornecedores = $this->fornecedores;
@@ -530,7 +582,7 @@ class FinanceiroCentral extends Component
             ->get(['id', 'numero']);
 
         return view('livewire.financeiro-central', compact(
-            'lancamentos', 'totalPrevisto', 'totalRecebido', 'totalAtrasado', 'totalDespesa', 
+            'lancamentos', 'totalPrevisto', 'totalRecebido', 'totalAtrasado', 'totalDespesa',
             'clientes', 'fornecedores', 'ordenarPor', 'ordenarDir', 'processos'
         ));
     }

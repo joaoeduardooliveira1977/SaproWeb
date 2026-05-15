@@ -470,4 +470,77 @@
 </div>
 @endif
 
+
+
+
+
+{{-- ════ MODAL: Confirmação de exclusão com senha ════ --}}
+@if($modalExclusao)
+<div style="position:fixed;inset:0;z-index:1100;display:flex;align-items:center;justify-content:center;padding:16px;">
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
+    <div style="position:relative;background:var(--white);border-radius:14px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2);z-index:1;">
+
+        <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#fef2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <h3 style="font-size:15px;font-weight:700;color:var(--text);margin:0;">Confirmar Exclusão</h3>
+        </div>
+
+        <div style="padding:20px 24px;display:flex;flex-direction:column;gap:12px;">
+            <p style="font-size:13px;color:var(--muted);margin:0;line-height:1.6;">
+                Esta ação é <strong style="color:#dc2626;">irreversível</strong>. Digite sua senha de administrador para confirmar a exclusão do lançamento.
+            </p>
+            <div>
+                <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Senha *</label>
+                <input type="password" wire:model="senhaExclusao"
+                    wire:keydown.enter="confirmarExclusao"
+                    placeholder="Digite sua senha..."
+                    style="width:100%;padding:9px 12px;border:1.5px solid {{ $erroSenhaExclusao ? 'var(--danger)' : 'var(--border)' }};border-radius:8px;font-size:13px;box-sizing:border-box;">
+                @if($erroSenhaExclusao)
+                <span style="color:var(--danger);font-size:11px;display:block;margin-top:4px;">{{ $erroSenhaExclusao }}</span>
+                @endif
+            </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);">
+            <button wire:click="fecharModalExclusao"
+                style="padding:9px 18px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);">
+                Cancelar
+            </button>
+            <button wire:click="confirmarExclusao" wire:loading.attr="disabled"
+                style="padding:9px 20px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+                <span wire:loading.remove wire:target="confirmarExclusao">Excluir</span>
+                <span wire:loading wire:target="confirmarExclusao">Verificando...</span>
+            </button>
+        </div>
+    </div>
+</div>
+@endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </div>
