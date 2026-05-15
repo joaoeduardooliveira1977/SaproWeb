@@ -100,14 +100,29 @@ class ProcessoForm extends Component
             ->toArray();
     }
 
-    public function selecionarCliente(int $id, string $nome): void
-    {
-        $this->cliente_id       = $id;
-        $this->clienteNome      = $nome;
-        $this->clienteBusca     = $nome;
-        $this->clienteSugestoes = [];
-        $this->verificarConflito();
+    
+	public function selecionarCliente(int $id, string $nome): void
+{
+    $this->cliente_id       = $id;
+    $this->clienteNome      = $nome;
+    $this->clienteBusca     = $nome;
+    $this->clienteSugestoes = [];
+    $this->verificarConflito();
+
+    // Trazer advogados vinculados ao cliente
+    $advogadosDoCliente = DB::table('cliente_advogado')
+        ->where('cliente_id', $id)
+        ->pluck('advogado_id')
+        ->toArray();
+
+    if (count($advogadosDoCliente) > 0) {
+        $this->advogados_selecionados = $advogadosDoCliente;
     }
+}
+
+
+
+
 
     public function limparCliente(): void
     {
@@ -309,16 +324,26 @@ class ProcessoForm extends Component
         $uniqueNumero = \Illuminate\Validation\Rule::unique('processos', 'numero')
             ->ignore($this->processoId);
 
-        $this->validate([
-            'numero'            => ['required', 'string', 'max:30', $uniqueNumero],
-            'cliente_id'        => 'required|integer',
-            'data_distribuicao' => 'nullable|date',
-        ], [
-            'numero.required'     => 'O número do processo é obrigatório.',
-            'numero.max'          => 'O número do processo não pode exceder 30 caracteres.',
-            'numero.unique'       => 'Já existe outro processo com este número.',
-            'cliente_id.required' => 'O cliente é obrigatório.',
-        ]);
+       
+
+	$regraNumero = $this->extrajudicial
+    		? ['nullable', 'string', 'max:30']
+    		: ['required', 'string', 'max:30', $uniqueNumero];
+
+	
+
+	$this->validate([
+    		'numero'            => $regraNumero,
+    		'cliente_id'        => 'required|integer',
+    		'data_distribuicao' => 'nullable|date',
+	], [
+    		'numero.required'     => 'O número do processo é obrigatório.',
+    		'numero.max'          => 'O número do processo não pode exceder 30 caracteres.',
+    		'numero.unique'       => 'Já existe outro processo com este número.',
+    		'cliente_id.required' => 'O cliente é obrigatório.',
+	]);
+
+
 
         $parteContraria = $this->parte_contraria ?: ($this->parteContrariaBusca ?: null);
 

@@ -109,7 +109,9 @@
       "PowerShell(Get-ChildItem \"c:\\\\projetos\\\\SaproWeb\\\\database\\\\migrations\\\\\" | Select-Object -ExpandProperty Name | Where-Object {$_ -match \"fase|risco|comarca|reparticao\"})",
       "PowerShell(head -20)",
       "Bash(Get-ChildItem -Path \"database\\\\migrations\" -Filter \"*fase*\" -Recurse)",
-      "Bash(Get-ChildItem -Path \"app\\\\Models\" -Filter \"*.php\")"
+      "Bash(Get-ChildItem -Path \"app\\\\Models\" -Filter \"*.php\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\conta\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--projetos-SaproWeb\\\\0df405de-5a66-47d2-b61d-56c07656fc64\\\\tasks\\\\b9b9k9vzm.output' -Wait | Select-String -Pattern 'Application key|successfully|Error|Exception|already|Generating|Installing' --SimpleMatch\")",
+      "Bash(powershell -Command \"while \\(-not \\(Test-Path 'C:\\\\projetos\\\\Icaro\\\\vendor\\\\autoload.php'\\)\\) { Start-Sleep -Milliseconds 500 }; Write-Output 'autoload.php criado!'\")"
     ]
   }
 }

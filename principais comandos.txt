@@ -412,6 +412,18 @@ Senha: Nova@Senha123
 
 
 
+############################ icaro serviços #################
 
 
+cd C:\projetos\Icaro
+php artisan serve --port=8001
 
+
+E-mail: admin@icaro.com
+Senha: icaro2024
+
+
+http://localhost:8001
+
+
+############################ icaro serviços #################
