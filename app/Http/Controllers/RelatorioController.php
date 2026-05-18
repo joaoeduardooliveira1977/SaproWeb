@@ -55,7 +55,9 @@ class RelatorioController extends Controller
                 'isHtml5ParserEnabled' => true,
             ]);
 
-        $nome = str_replace(' ', '_', strtolower($titulo)) . '_' . now()->format('Ymd_Hi') . '.pdf';
+        $nome = preg_replace('/[^a-z0-9_\-]/', '_', strtolower(
+            iconv('UTF-8', 'ASCII//TRANSLIT', $titulo)
+        )) . '_' . now()->format('Ymd_Hi') . '.pdf';
         return $pdf->download($nome);
     }
 
