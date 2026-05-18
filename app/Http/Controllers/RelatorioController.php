@@ -331,6 +331,7 @@ class RelatorioController extends Controller
             ->join('honorarios as h',  'h.id',  '=', 'hp.honorario_id')
             ->join('pessoas as p',     'p.id',  '=', 'h.cliente_id')
             ->leftJoin('processos as pr', 'pr.id', '=', 'h.processo_id')
+            ->where('h.tenant_id', tenant_id())
             ->whereIn('hp.status', ['pendente', 'atrasado'])
             ->when($clienteId, fn($q) => $q->where('h.cliente_id', $clienteId))
             ->when($status !== 'todos', fn($q) => $q->where('hp.status', $status))
@@ -397,6 +398,7 @@ class RelatorioController extends Controller
         $recebimentos = DB::table('recebimentos as r')
             ->join('processos as p',   'p.id',  '=', 'r.processo_id')
             ->leftJoin('pessoas as pe', 'pe.id', '=', 'p.cliente_id')
+            ->where('p.tenant_id', tenant_id())
             ->whereBetween('r.data', [$ini->toDateString(), $fim->toDateString()])
             ->select('r.data', 'r.descricao', 'r.valor', 'r.valor_recebido', 'r.recebido',
                      'p.numero as processo_numero', 'pe.nome as cliente_nome')
@@ -406,6 +408,7 @@ class RelatorioController extends Controller
         $pagamentos = DB::table('pagamentos as pg')
             ->join('processos as p',   'p.id',  '=', 'pg.processo_id')
             ->leftJoin('pessoas as pe', 'pe.id', '=', 'p.cliente_id')
+            ->where('p.tenant_id', tenant_id())
             ->whereBetween('pg.data', [$ini->toDateString(), $fim->toDateString()])
             ->select('pg.data', 'pg.descricao', 'pg.valor', 'pg.valor_pago', 'pg.pago',
                      'p.numero as processo_numero', 'pe.nome as cliente_nome')
@@ -472,12 +475,13 @@ class RelatorioController extends Controller
              LEFT   JOIN pessoas adv  ON adv.id = p.advogado_id
              LEFT   JOIN fases fa     ON fa.id  = p.fase_id
              LEFT   JOIN andamentos a ON a.processo_id = p.id
-             WHERE  (? = 'Todos' OR p.status = ?)
+             WHERE  p.tenant_id = ?
+               AND  (? = 'Todos' OR p.status = ?)
              GROUP  BY p.id, p.numero, p.status, pe.nome, adv.nome, fa.descricao
              HAVING MAX(a.data) IS NULL
                  OR MAX(a.data) < CURRENT_DATE - (? * INTERVAL '1 day')
              ORDER  BY ultimo_andamento ASC NULLS FIRST, p.numero",
-            [$status, $status, $dias]
+            [tenant_id(), $status, $status, $dias]
         );
 
         return $this->pdf('pdf.processos-sem-andamento', [
@@ -509,12 +513,14 @@ class RelatorioController extends Controller
             FROM pessoas pe
             JOIN pessoa_tipos pt ON pt.pessoa_id = pe.id AND pt.tipo = 'Advogado'
             WHERE pe.ativo = true
+              AND pe.tenant_id = ?
             ORDER BY pe.nome
         ", [
             $ini->toDateString(), $fim->toDateString(),
             $ini->toDateString(), $fim->toDateString(),
             $ini->toDateString(), $fim->toDateString(),
             $ini->toDateString(), $fim->toDateString(),
+            tenant_id(),
         ]);
 
         return $this->pdf('pdf.produtividade-advogado', [
@@ -637,6 +643,7 @@ class RelatorioController extends Controller
         $lancamentos = DB::table('financeiro_lancamentos as fl')
             ->join('pessoas as p', 'p.id', '=', 'fl.cliente_id')
             ->leftJoin('contratos as ct', 'ct.id', '=', 'fl.contrato_id')
+            ->where('fl.tenant_id', tenant_id())
             ->whereRaw("TO_CHAR(fl.vencimento, 'YYYY-MM') = ?", [$mes])
             ->whereNotIn('fl.status', ['cancelado'])
             ->when($clienteId, fn($q) => $q->where('fl.cliente_id', $clienteId))
