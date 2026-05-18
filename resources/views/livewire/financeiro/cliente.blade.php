@@ -197,6 +197,11 @@
             <button wire:click="abrirBaixa({{ $l->id }})"
                 style="padding:3px 8px;background:#f0fdf4;color:#16a34a;border:1px solid #86efac;border-radius:5px;font-size:10px;cursor:pointer;font-weight:700;"
                 title="Registrar Baixa">✓ Baixar</button>
+            @if($l->forma_pagamento === 'pix' || !$l->forma_pagamento)
+            <button wire:click="abrirPix({{ $l->id }})"
+                style="padding:3px 8px;background:#faf5ff;color:#7c3aed;border:1px solid #e9d5ff;border-radius:5px;font-size:10px;cursor:pointer;font-weight:700;"
+                title="Gerar QR Code PIX">⊡ PIX</button>
+            @endif
             @endif
         </div>
     </div>
@@ -613,6 +618,23 @@
             </button>
         </div>
     </form>
+    </div>
+</div>
+</div>
+@endif
+
+{{-- ══════════════════════════════════════════════════════════════════
+     MODAL: PIX
+══════════════════════════════════════════════════════════════════ --}}
+@if($modalPix && $pixLancamentoId)
+<div class="modal-backdrop" style="display:flex;" wire:click.self="fecharPix">
+<div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+        <h3 style="margin:0;font-size:15px;font-weight:700;">Pagar via PIX</h3>
+        <button wire:click="fecharPix" class="btn-action" style="width:30px;height:30px;">✕</button>
+    </div>
+    <div style="padding:16px 0 0;">
+        @livewire('financeiro.pix-modal', ['lancamentoId' => $pixLancamentoId, 'tenantId' => $tenantId], key('pix-'.$pixLancamentoId))
     </div>
 </div>
 </div>

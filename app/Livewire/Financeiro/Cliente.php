@@ -63,6 +63,10 @@ class Cliente extends Component
     public bool   $pt_ja_recebido    = false;
     public string $pt_data_receb     = '';
 
+    // ─── Modal: PIX ──────────────────────────────────────────────
+    public bool   $modalPix          = false;
+    public int    $pixLancamentoId   = 0;
+
     // ─── Modal: Baixa Financeira ──────────────────────────────────
     public bool   $modalBaixa        = false;
     public ?int   $baixaLancId       = null;
@@ -329,6 +333,21 @@ class Cliente extends Component
         $this->modalPontual = false;
         $this->dispatch('toast', tipo: 'success', msg: 'Receita pontual registrada.');
         $this->dispatch('financeiro-atualizado');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  PIX
+    // ═══════════════════════════════════════════════════════════════
+    public function abrirPix(int $lancamentoId): void
+    {
+        $this->pixLancamentoId = $lancamentoId;
+        $this->modalPix        = true;
+    }
+
+    public function fecharPix(): void
+    {
+        $this->modalPix        = false;
+        $this->pixLancamentoId = 0;
     }
 
     // ═══════════════════════════════════════════════════════════════

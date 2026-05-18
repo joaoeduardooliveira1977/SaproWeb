@@ -590,7 +590,7 @@
     $hubAtivo   = '';
     $rotasProcessos  = ['processos','processos.novo','processos.editar','processos.show','documentos','minutas','assinatura-digital','audiencias','prazos','sla','agenda','processos.hub','processos.monitoramento'];
     $rotasCadastros  = ['cadastros.hub','correspondentes','procuracoes','administradoras','tabelas','indicadores'];
-    $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','horas','financeiro.hub','financeiro.despesas-escritorio','comissoes','contratos-mensais.index','contratos-mensais.mensalidades','financeiro.contratos-mensais','financeiro.cliente'];
+    $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','horas','financeiro.hub','financeiro.despesas-escritorio','comissoes','contratos-mensais.index','contratos-mensais.mensalidades','financeiro.contratos-mensais','financeiro.cliente','config.financeiro'];
     $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','orcamentos','ferramentas.hub','workflow.regras','comissoes'];
     $rotasAdmin      = ['usuarios','admin.usuarios','tabelas','administradoras','indices','auditoria','admin.perfis','admin.portal-acesso','admin.portal-mensagens','admin.notificacoes-whatsapp','admin.hub','configuracoes.escritorio'];
     if (in_array($rota, $rotasProcessos))   $hubAtivo = 'processos';
@@ -635,6 +635,9 @@
     </a>
     <a href="{{ route('financeiro.contratos-mensais') }}" class="nav-drawer-item {{ in_array($rota, ['contratos-mensais.index','contratos-mensais.mensalidades','financeiro.contratos-mensais','financeiro.cliente']) ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="M3 9h18"/></svg>Contratos Mensais
+    </a>
+    <a href="{{ route('config.financeiro') }}" class="nav-drawer-item {{ $rota==='config.financeiro' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h4m-4 3h8m-8 3h5"/><circle cx="17" cy="12" r="3"/></svg>Config. PIX
     </a>
     @endif
     <a href="{{ route('relatorios.index') }}" class="nav-drawer-item {{ $rota==='relatorios.index' ? 'active' : '' }}" onclick="toggleDrawer()">
@@ -1133,5 +1136,6 @@
 @endauth
 
 @livewireScripts
+@stack('scripts')
 </body>
 </html>

@@ -59,6 +59,24 @@ class PixService
     }
 
     /**
+     * Busca o QR Code e retorna data URI base64 (para exibição inline sem CORS).
+     */
+    public static function qrCodeBase64(string $payload, int $size = 200): string
+    {
+        $url = 'https://api.qrserver.com/v1/create-qr-code/?size=' . $size . 'x' . $size
+            . '&format=png&ecc=M&data=' . rawurlencode($payload);
+
+        $ctx = stream_context_create(['http' => ['timeout' => 8]]);
+        $img = @file_get_contents($url, false, $ctx);
+
+        if ($img === false) {
+            return '';
+        }
+
+        return 'data:image/png;base64,' . base64_encode($img);
+    }
+
+    /**
      * Verifica se o PIX está configurado (chave preenchida).
      */
     public static function configurado(): bool

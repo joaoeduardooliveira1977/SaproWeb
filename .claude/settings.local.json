@@ -117,7 +117,12 @@
       "PowerShell(php artisan migrate --path=database/migrations/2026_05_17_000006_create_receitas_processos_table.php 2>&1)",
       "PowerShell(php artisan config:clear 2>&1)",
       "PowerShell(php artisan view:clear 2>&1)",
-      "PowerShell(php artisan route:clear 2>&1)"
+      "PowerShell(php artisan route:clear 2>&1)",
+      "Bash(php -l app/Livewire/Financeiro/PixModal.php)",
+      "Bash(php -l app/Livewire/Config/Financeiro.php)",
+      "Bash(php -l app/Services/PixService.php)",
+      "Bash(php -l app/Models/Configuracao.php)",
+      "Bash(php -l app/Livewire/Financeiro/Cliente.php)"
     ]
   }
 }

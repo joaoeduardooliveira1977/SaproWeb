@@ -124,6 +124,7 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/financeiro/despesas-escritorio', \App\Livewire\Financeiro\DespesasEscritorio::class)->name('financeiro.despesas-escritorio');
         Route::get('/financeiro/contratos-mensais', \App\Livewire\Financeiro\ContratosMensaisIndex::class)->name('financeiro.contratos-mensais');
         Route::get('/financeiro/clientes/{clienteId}', \App\Livewire\Financeiro\Cliente::class)->name('financeiro.cliente');
+        Route::get('/config/financeiro', \App\Livewire\Config\Financeiro::class)->name('config.financeiro');
         Route::get('/honorarios',             fn() => view('honorarios'))->name('honorarios');
         Route::get('/inadimplencia',          fn() => view('inadimplencia'))->name('inadimplencia');
         Route::get('/indicadores',            fn() => view('indicadores'))->name('indicadores');
