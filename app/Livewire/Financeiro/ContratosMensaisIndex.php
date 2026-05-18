@@ -15,6 +15,7 @@ class ContratosMensaisIndex extends Component
 
     public string $busca        = '';
     public string $filtroStatus = '';
+    public ?int   $tenantId     = null;
 
     protected $queryString = [
         'busca'        => ['except' => ''],
@@ -60,6 +61,7 @@ class ContratosMensaisIndex extends Component
 
     public function mount(): void
     {
+        $this->tenantId    = tenant_id();
         $this->data_inicio = now()->format('Y-m-d');
     }
 
@@ -72,9 +74,8 @@ class ContratosMensaisIndex extends Component
             $this->clienteSugestoes = [];
             return;
         }
-        $tid  = auth('usuarios')->user()->tenant_id;
         $this->clienteSugestoes = DB::table('pessoas')
-            ->where('tenant_id', $tid)
+            ->when($this->tenantId, fn($q) => $q->where('tenant_id', $this->tenantId))
             ->where('nome', 'ilike', '%' . $this->clienteBusca . '%')
             ->orderBy('nome')
             ->limit(8)
@@ -102,8 +103,7 @@ class ContratosMensaisIndex extends Component
         $this->resetForm();
 
         if ($id) {
-            $tid = auth('usuarios')->user()->tenant_id;
-            $c   = ContratoMensal::where('tenant_id', $tid)->findOrFail($id);
+            $c   = ContratoMensal::where('tenant_id', $this->tenantId)->findOrFail($id);
             $this->contratoId      = $c->id;
             $this->cliente_id      = $c->cliente_id;
             $this->clienteBusca    = $c->cliente?->nome ?? '';
@@ -149,8 +149,7 @@ class ContratosMensaisIndex extends Component
         ];
 
         if ($this->contratoId) {
-            $tid = auth('usuarios')->user()->tenant_id;
-            ContratoMensal::where('tenant_id', $tid)
+            ContratoMensal::where('tenant_id', $this->tenantId)
                 ->where('id', $this->contratoId)
                 ->firstOrFail()
                 ->update($dados);
@@ -174,8 +173,7 @@ class ContratosMensaisIndex extends Component
         if (!$this->excluindoId) {
             return;
         }
-        $tid = auth('usuarios')->user()->tenant_id;
-        $c   = ContratoMensal::where('tenant_id', $tid)->findOrFail($this->excluindoId);
+        $c   = ContratoMensal::where('tenant_id', $this->tenantId)->findOrFail($this->excluindoId);
 
         $c->mensalidades()->whereIn('status', ['pendente', 'vencido'])->update(['status' => 'cancelado']);
         $c->delete();
@@ -212,9 +210,19 @@ class ContratosMensaisIndex extends Component
 
     public function render()
     {
-        $tid = auth('usuarios')->user()->tenant_id;
+        $tid = $this->tenantId;
 
-        $contratos = ContratoMensal::where('tenant_id', $tid)
+        if (!$tid) {
+            return view('livewire.financeiro.contratos-mensais-index', [
+                'contratos'     => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15),
+                'totalAtivos'   => 0,
+                'receitaMensal' => 0,
+                'emAberto'      => 0,
+                'recebidoMes'   => 0,
+            ])->extends('layouts.app')->section('content');
+        }
+
+        $contratos = ContratoMensal::when($tid, fn($q) => $q->where('tenant_id', $tid))
             ->with('cliente')
             ->when($this->busca, fn($q) =>
                 $q->where(function ($q2) {
@@ -228,14 +236,14 @@ class ContratosMensaisIndex extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        $totalAtivos   = ContratoMensal::where('tenant_id', $tid)->where('status', 'ativo')->count();
-        $receitaMensal = ContratoMensal::where('tenant_id', $tid)->where('status', 'ativo')->sum('valor');
+        $totalAtivos   = ContratoMensal::when($tid, fn($q) => $q->where('tenant_id', $tid))->where('status', 'ativo')->count();
+        $receitaMensal = ContratoMensal::when($tid, fn($q) => $q->where('tenant_id', $tid))->where('status', 'ativo')->sum('valor');
 
-        $emAberto = Mensalidade::where('tenant_id', $tid)
+        $emAberto = Mensalidade::when($tid, fn($q) => $q->where('tenant_id', $tid))
             ->whereIn('status', ['pendente', 'vencido', 'parcial'])
             ->sum('valor');
 
-        $recebidoMes = Mensalidade::where('tenant_id', $tid)
+        $recebidoMes = Mensalidade::when($tid, fn($q) => $q->where('tenant_id', $tid))
             ->whereIn('status', ['recebido', 'parcial'])
             ->whereMonth('data_recebimento', now()->month)
             ->whereYear('data_recebimento', now()->year)

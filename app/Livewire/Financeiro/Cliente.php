@@ -245,6 +245,7 @@ class Cliente extends Component
         ]);
 
         $dados = [
+            'tenant_id'      => $this->tenantId,
             'cliente_id'     => $this->clienteId,
             'valor_unitario' => $this->rp_valor_unit,
             'dia_vencimento' => $this->rp_dia_vcto,
@@ -295,6 +296,7 @@ class Cliente extends Component
         ]);
 
         $dados = [
+            'tenant_id'      => $this->tenantId,
             'cliente_id'     => $this->clienteId,
             'tipo'           => 'receita',
             'origem_tipo'    => 'pontual',
@@ -308,6 +310,7 @@ class Cliente extends Component
         if ($this->pt_ja_recebido) {
             $dados['status']         = 'recebido';
             $dados['valor_pago']     = $this->pt_valor;
+            $dados['valor_liquido']  = $this->pt_valor;
             $dados['data_pagamento'] = $this->pt_data_receb;
         } else {
             $dados['status'] = 'previsto';
