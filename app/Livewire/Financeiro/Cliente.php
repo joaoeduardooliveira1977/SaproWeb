@@ -29,6 +29,7 @@ class Cliente extends Component
     public bool   $modalContrato     = false;
     public ?int   $contratoId        = null;
     public string $cm_descricao      = '';
+    public string $cm_responsavel    = '';
     public string $cm_valor          = '';
     public int    $cm_dia_vencimento = 5;
     public string $cm_periodicidade  = 'mensal';
@@ -110,6 +111,7 @@ class Cliente extends Component
         if ($id) {
             $c = ContratoMensal::where('tenant_id', $this->tenantId)->findOrFail($id);
             $this->cm_descricao      = $c->descricao;
+            $this->cm_responsavel    = $c->responsavel ?? '';
             $this->cm_valor          = number_format($c->valor, 2, '.', '');
             $this->cm_dia_vencimento = $c->dia_vencimento;
             $this->cm_periodicidade  = $c->periodicidade;
@@ -122,6 +124,7 @@ class Cliente extends Component
             $this->cm_observacoes    = $c->observacoes ?? '';
         } else {
             $this->cm_descricao      = '';
+            $this->cm_responsavel    = '';
             $this->cm_valor          = '';
             $this->cm_dia_vencimento = 5;
             $this->cm_periodicidade  = 'mensal';
@@ -151,6 +154,7 @@ class Cliente extends Component
         $dados = [
             'cliente_id'         => $this->clienteId,
             'descricao'          => trim($this->cm_descricao),
+            'responsavel'        => $this->cm_responsavel ?: null,
             'valor'              => $this->cm_valor,
             'dia_vencimento'     => $this->cm_dia_vencimento,
             'periodicidade'      => $this->cm_periodicidade,

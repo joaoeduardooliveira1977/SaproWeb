@@ -30,6 +30,7 @@ class ContratosMensaisIndex extends Component
     public ?int   $contratoId       = null;
     public int    $cliente_id       = 0;
     public string $descricao        = '';
+    public string $responsavel      = '';
     public string $valor            = '';
     public int    $dia_vencimento   = 5;
     public string $periodicidade    = 'mensal';
@@ -108,6 +109,7 @@ class ContratosMensaisIndex extends Component
             $this->cliente_id      = $c->cliente_id;
             $this->clienteBusca    = $c->cliente?->nome ?? '';
             $this->descricao       = $c->descricao;
+            $this->responsavel     = $c->responsavel ?? '';
             $this->valor           = number_format($c->valor, 2, '.', '');
             $this->dia_vencimento  = $c->dia_vencimento;
             $this->periodicidade   = $c->periodicidade;
@@ -136,6 +138,7 @@ class ContratosMensaisIndex extends Component
         $dados = [
             'cliente_id'          => $this->cliente_id,
             'descricao'           => trim($this->descricao),
+            'responsavel'         => $this->responsavel ?: null,
             'valor'               => $this->valor,
             'dia_vencimento'      => $this->dia_vencimento,
             'periodicidade'       => $this->periodicidade,
@@ -196,6 +199,7 @@ class ContratosMensaisIndex extends Component
         $this->clienteBusca     = '';
         $this->clienteSugestoes = [];
         $this->descricao        = '';
+        $this->responsavel      = '';
         $this->valor            = '';
         $this->dia_vencimento   = 5;
         $this->periodicidade    = 'mensal';

@@ -17,7 +17,7 @@ class ContratoMensal extends Model
     protected $table = 'contratos_mensais';
 
     protected $fillable = [
-        'tenant_id', 'cliente_id', 'descricao', 'valor',
+        'tenant_id', 'cliente_id', 'descricao', 'responsavel', 'valor',
         'dia_vencimento', 'periodicidade', 'data_inicio', 'data_fim',
         'status', 'observacoes',
         'forma_cobranca', 'email_financeiro', 'whatsapp_financeiro',

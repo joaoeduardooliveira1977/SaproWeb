@@ -180,6 +180,16 @@
                     @error('descricao')<span class="form-error">{{ $message }}</span>@enderror
                 </div>
 
+                {{-- Responsável --}}
+                <div class="form-group">
+                    <label class="form-label">
+                        Responsável
+                        <span style="font-weight:400;color:var(--muted);">(opcional)</span>
+                    </label>
+                    <input wire:model="responsavel" type="text" placeholder="Ex: Dr. João Silva"
+                        style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;">
+                </div>
+
                 <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;gap:14px;">
                     <div class="form-group">
                         <label class="form-label">Valor (R$) *</label>
@@ -219,7 +229,23 @@
                     </div>
                 </div>
 
-                {{-- Cobrança --}}
+                {{-- Seção 3: Reajuste Automático (placeholder) --}}
+                <div style="background:#f8faff;border:1.5px dashed #cbd5e1;border-radius:10px;padding:16px;margin-top:4px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                        <span style="font-size:13px;font-weight:700;color:var(--text);">Reajuste Automático</span>
+                        <span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:20px;font-weight:700;">EM BREVE</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;opacity:0.5;pointer-events:none;">
+                        <span style="font-size:13px;color:var(--muted);">Possui reajuste automático?</span>
+                        <div style="display:flex;gap:8px;">
+                            <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:not-allowed;"><input type="radio" disabled> Sim</label>
+                            <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:not-allowed;"><input type="radio" disabled checked> Não</label>
+                        </div>
+                    </div>
+                    <p style="font-size:11px;color:var(--muted);margin-top:10px;margin-bottom:0;">Índices disponíveis na próxima versão: IPCA, IGPM, Salário Mínimo, Manual.</p>
+                </div>
+
+                {{-- Seção 4: Cobrança --}}
                 <div style="border-top:1px solid var(--border);margin:12px 0;padding-top:12px;">
                     <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Cobrança</div>
                     <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;gap:14px;">
@@ -243,6 +269,34 @@
                             <label class="form-label">WhatsApp</label>
                             <input type="text" wire:model="whatsapp" placeholder="(11) 99999-9999"
                                 style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+                        </div>
+                    </div>
+
+                    {{-- Toggles Em Breve --}}
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;opacity:0.5;pointer-events:none;">
+                        <div style="background:#f8faff;border:1.5px dashed #cbd5e1;border-radius:8px;padding:12px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;">
+                                <div>
+                                    <div style="font-size:12px;font-weight:600;color:var(--text);">Enviar cobrança automática</div>
+                                    <div style="font-size:11px;color:var(--muted);margin-top:2px;">WhatsApp / E-mail</div>
+                                </div>
+                                <div style="width:36px;height:20px;background:#e2e8f0;border-radius:20px;position:relative;cursor:not-allowed;">
+                                    <div style="width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;box-shadow:0 1px 3px rgba(0,0,0,.2);"></div>
+                                </div>
+                            </div>
+                            <span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:1px 6px;border-radius:10px;font-weight:700;margin-top:6px;display:inline-block;">EM BREVE</span>
+                        </div>
+                        <div style="background:#f8faff;border:1.5px dashed #cbd5e1;border-radius:8px;padding:12px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;">
+                                <div>
+                                    <div style="font-size:12px;font-weight:600;color:var(--text);">Emitir NF automaticamente</div>
+                                    <div style="font-size:11px;color:var(--muted);margin-top:2px;">Nota Fiscal eletrônica</div>
+                                </div>
+                                <div style="width:36px;height:20px;background:#e2e8f0;border-radius:20px;position:relative;cursor:not-allowed;">
+                                    <div style="width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;box-shadow:0 1px 3px rgba(0,0,0,.2);"></div>
+                                </div>
+                            </div>
+                            <span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:1px 6px;border-radius:10px;font-weight:700;margin-top:6px;display:inline-block;">EM BREVE</span>
                         </div>
                     </div>
                 </div>
