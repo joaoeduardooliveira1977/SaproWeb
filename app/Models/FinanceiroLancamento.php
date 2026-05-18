@@ -15,8 +15,10 @@ class FinanceiroLancamento extends Model
 
     protected $fillable = [
         'tenant_id', 'cliente_id', 'contrato_id', 'contrato_servico_id', 'processo_id',
+        'contrato_mensal_id', 'mensalidade_id', 'receita_processo_id', 'origem_tipo',
         'tipo', 'descricao', 'valor', 'vencimento', 'data_pagamento', 'valor_pago',
         'status', 'forma_pagamento', 'observacoes', 'numero_parcela', 'total_parcelas',
+        'juros', 'multa', 'desconto', 'valor_liquido',
     ];
 
     protected $casts = [
@@ -24,6 +26,10 @@ class FinanceiroLancamento extends Model
         'data_pagamento' => 'date',
         'valor'          => 'decimal:2',
         'valor_pago'     => 'decimal:2',
+        'juros'          => 'decimal:2',
+        'multa'          => 'decimal:2',
+        'desconto'       => 'decimal:2',
+        'valor_liquido'  => 'decimal:2',
     ];
 
     public function cliente(): BelongsTo
@@ -44,6 +50,21 @@ class FinanceiroLancamento extends Model
     public function processo(): BelongsTo
     {
         return $this->belongsTo(Processo::class, 'processo_id');
+    }
+
+    public function contratoMensal(): BelongsTo
+    {
+        return $this->belongsTo(ContratoMensal::class, 'contrato_mensal_id');
+    }
+
+    public function mensalidade(): BelongsTo
+    {
+        return $this->belongsTo(Mensalidade::class, 'mensalidade_id');
+    }
+
+    public function receitaProcesso(): BelongsTo
+    {
+        return $this->belongsTo(ReceitaProcesso::class, 'receita_processo_id');
     }
 
     public function isAtrasado(): bool

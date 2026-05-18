@@ -560,7 +560,7 @@
   }
 </style>
 
-
+@stack('styles')
 </head>
 <body>
 <x-limite-plano />
@@ -590,7 +590,7 @@
     $hubAtivo   = '';
     $rotasProcessos  = ['processos','processos.novo','processos.editar','processos.show','documentos','minutas','assinatura-digital','audiencias','prazos','sla','agenda','processos.hub','processos.monitoramento'];
     $rotasCadastros  = ['cadastros.hub','correspondentes','procuracoes','administradoras','tabelas','indicadores'];
-    $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','horas','financeiro.hub','financeiro.despesas-escritorio','comissoes'];
+    $rotasFinanceiro = ['financeiro','financeiro.consolidado','honorarios','conciliacao-bancaria','inadimplencia','relatorios.index','analytics','produtividade','horas','financeiro.hub','financeiro.despesas-escritorio','comissoes','contratos-mensais.index','contratos-mensais.mensalidades','financeiro.contratos-mensais','financeiro.cliente'];
     $rotasFerramentas= ['tjsp','assistente','aasp-publicacoes','calculadora','monitoramento','crm','orcamentos','ferramentas.hub','workflow.regras','comissoes'];
     $rotasAdmin      = ['usuarios','admin.usuarios','tabelas','administradoras','indices','auditoria','admin.perfis','admin.portal-acesso','admin.portal-mensagens','admin.notificacoes-whatsapp','admin.hub','configuracoes.escritorio'];
     if (in_array($rota, $rotasProcessos))   $hubAtivo = 'processos';
@@ -632,6 +632,9 @@
     @if($isFinanc)
     <a href="{{ route('financeiro.central') }}" class="nav-drawer-item {{ $hubAtivo==='financeiro' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Financeiro
+    </a>
+    <a href="{{ route('financeiro.contratos-mensais') }}" class="nav-drawer-item {{ in_array($rota, ['contratos-mensais.index','contratos-mensais.mensalidades','financeiro.contratos-mensais','financeiro.cliente']) ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="M3 9h18"/></svg>Contratos Mensais
     </a>
     @endif
     <a href="{{ route('relatorios.index') }}" class="nav-drawer-item {{ $rota==='relatorios.index' ? 'active' : '' }}" onclick="toggleDrawer()">
@@ -706,6 +709,10 @@
     <a href="{{ route('financeiro.central') }}" class="nav-btn {{ $hubAtivo==='financeiro' ? 'active' : '' }}" title="Financeiro">
         <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
         <span class="nav-btn-label">Financeiro</span>
+    </a>
+    <a href="{{ route('financeiro.contratos-mensais') }}" class="nav-btn {{ in_array($rota, ['contratos-mensais.index','contratos-mensais.mensalidades','financeiro.contratos-mensais','financeiro.cliente']) ? 'active' : '' }}" title="Contratos Mensais">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="M3 9h18"/></svg>
+        <span class="nav-btn-label">Mensais</span>
     </a>
     @endif
 

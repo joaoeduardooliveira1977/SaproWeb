@@ -19,6 +19,12 @@ Schedule::command('notificacoes:whatsapp --tipo=cobranca')->dailyAt('08:00');
 // Marca lançamentos financeiros vencidos como atrasados todo dia às 6h
 Schedule::command('financeiro:atualizar-atrasados')->dailyAt('06:00');
 
+// Verifica vencimentos de mensalidades e marca vencidas (diário às 08h)
+Schedule::command('app:verificar-vencimentos-mensalidades')->dailyAt('08:00');
+
+// Gera lançamentos de receita por processos (dia 1 de cada mês às 06h)
+Schedule::command('app:processar-financeiro-mensal')->monthlyOn(1, '06:00');
+
 // Atualiza índices monetários (IPCA, IGPM, SELIC, TR) todo dia 15 às 6h
 Schedule::command('indices:atualizar')->monthlyOn(15, '06:00');
 

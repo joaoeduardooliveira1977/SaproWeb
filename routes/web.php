@@ -94,6 +94,12 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/contratos', fn() => view('contratos'))->name('contratos');
     });
 
+    // ── Contratos Mensais ────────────────────────────────────────
+    Route::middleware('perfil:financeiro')->group(function () {
+        Route::get('/contratos-mensais',                   \App\Livewire\ContratosMensais\Index::class)->name('contratos-mensais.index');
+        Route::get('/contratos-mensais/{id}/mensalidades', \App\Livewire\ContratosMensais\Mensalidades::class)->name('contratos-mensais.mensalidades');
+    });
+
     // ── Pessoas ─────────────────────────────────────────────────
     Route::middleware('perfil:pessoas')->group(function () {
         Route::get('/pessoas',                fn() => view('pessoas'))->name('pessoas');
@@ -116,6 +122,8 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/financeiro-central',     fn() => view('financeiro-central'))->name('financeiro.central');
         Route::get('/financeiro/custas-reembolso', \App\Livewire\Financeiro\CustasReembolso::class)->name('financeiro.custas-reembolso');
         Route::get('/financeiro/despesas-escritorio', \App\Livewire\Financeiro\DespesasEscritorio::class)->name('financeiro.despesas-escritorio');
+        Route::get('/financeiro/contratos-mensais', \App\Livewire\Financeiro\ContratosMensaisIndex::class)->name('financeiro.contratos-mensais');
+        Route::get('/financeiro/clientes/{clienteId}', \App\Livewire\Financeiro\Cliente::class)->name('financeiro.cliente');
         Route::get('/honorarios',             fn() => view('honorarios'))->name('honorarios');
         Route::get('/inadimplencia',          fn() => view('inadimplencia'))->name('inadimplencia');
         Route::get('/indicadores',            fn() => view('indicadores'))->name('indicadores');

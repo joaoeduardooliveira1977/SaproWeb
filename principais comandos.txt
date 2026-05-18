@@ -426,4 +426,45 @@ Senha: icaro2024
 http://localhost:8001
 
 
+
+
+CREATE USER icaro WITH PASSWORD 'Jureia@90949';
+CREATE DATABASE icaro_db OWNER icaro;
+GRANT ALL PRIVILEGES ON DATABASE icaro_db TO icaro;
+\q
+
+
+
+
+# Criar pasta do projeto
+mkdir -p /var/www/icaro
+cd /var/www/icaro
+
+# Clonar repositório (ou usar scp se não tiver git remoto)
+git clone https://github.com/joaoeduardooliveira1977/icaro.git .
+
+# Permissões
+chown -R www-data:www-data /var/www/icaro
+chmod -R 755 /var/www/icaro
+chmod -R 775 /var/www/icaro/storage
+chmod -R 775 /var/www/icaro/bootstrap/cache
+
+# Instalar dependências (sem dev)
+composer install --no-dev --optimize-autoloader
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ############################ icaro serviços #################
