@@ -151,6 +151,6 @@ class Mensalidades extends Component
 
         return view('livewire.contratos-mensais.mensalidades', compact(
             'mensalidades', 'totalPendente', 'totalRecebido', 'vencidas', 'proximoVcto', 'anos'
-        ))->layout('layouts.app', ['title' => 'Mensalidades — ' . $this->contrato->descricao]);
+        ))->extends('layouts.app')->section('content');
     }
 }

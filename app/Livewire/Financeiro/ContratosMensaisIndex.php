@@ -243,6 +243,6 @@ class ContratosMensaisIndex extends Component
 
         return view('livewire.financeiro.contratos-mensais-index', compact(
             'contratos', 'totalAtivos', 'receitaMensal', 'emAberto', 'recebidoMes'
-        ))->layout('layouts.app', ['title' => 'Contratos Mensais']);
+        ))->extends('layouts.app')->section('content');
     }
 }
