@@ -340,21 +340,24 @@
                     <input type="text" wire:model="cm_whatsapp" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;" placeholder="(11) 99999-9999">
                 </div>
             </div>
-            {{-- Toggles Em Breve --}}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;opacity:0.5;pointer-events:none;">
-                <div style="background:#f8faff;border:1.5px dashed #cbd5e1;border-radius:8px;padding:12px;">
+            {{-- Toggle: Envio automático (funcional) + NF (em breve) --}}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+                <div style="background:#f8faff;border:1.5px solid var(--border);border-radius:8px;padding:12px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;">
                         <div>
                             <div style="font-size:12px;font-weight:600;color:var(--text);">Enviar cobrança automática</div>
-                            <div style="font-size:11px;color:var(--muted);margin-top:2px;">WhatsApp / E-mail</div>
+                            <div style="font-size:11px;color:var(--muted);margin-top:2px;">E-mail automático de vencimento</div>
                         </div>
-                        <div style="width:36px;height:20px;background:#e2e8f0;border-radius:20px;position:relative;cursor:not-allowed;">
-                            <div style="width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;box-shadow:0 1px 3px rgba(0,0,0,.2);"></div>
-                        </div>
+                        <input type="checkbox" wire:model.live="cm_envio_automatico" id="toggle_envio_cli"
+                            style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary);">
                     </div>
-                    <span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:1px 6px;border-radius:10px;font-weight:700;margin-top:6px;display:inline-block;">EM BREVE</span>
+                    @if($cm_envio_automatico)
+                    <div style="margin-top:8px;padding:6px 8px;background:#dcfce7;border-radius:6px;font-size:11px;color:#166534;">
+                        E-mails de vencimento serão enviados automaticamente ao cliente.
+                    </div>
+                    @endif
                 </div>
-                <div style="background:#f8faff;border:1.5px dashed #cbd5e1;border-radius:8px;padding:12px;">
+                <div style="background:#f8faff;border:1.5px dashed #cbd5e1;border-radius:8px;padding:12px;opacity:0.5;pointer-events:none;">
                     <div style="display:flex;align-items:center;justify-content:space-between;">
                         <div>
                             <div style="font-size:12px;font-weight:600;color:var(--text);">Emitir NF automaticamente</div>

@@ -36,10 +36,11 @@ class Cliente extends Component
     public string $cm_data_inicio    = '';
     public string $cm_data_fim       = '';
     public string $cm_status         = 'ativo';
-    public string $cm_forma_cobranca = 'pix';
-    public string $cm_email          = '';
-    public string $cm_whatsapp       = '';
-    public string $cm_observacoes    = '';
+    public string $cm_forma_cobranca  = 'pix';
+    public string $cm_email           = '';
+    public string $cm_whatsapp        = '';
+    public bool   $cm_envio_automatico = false;
+    public string $cm_observacoes     = '';
 
     // ─── Modal: Receita por Processos ─────────────────────────────
     public bool   $modalProcesso   = false;
@@ -120,21 +121,23 @@ class Cliente extends Component
             $this->cm_status         = $c->status;
             $this->cm_forma_cobranca = $c->forma_cobranca ?? 'pix';
             $this->cm_email          = $c->email_financeiro ?? '';
-            $this->cm_whatsapp       = $c->whatsapp_financeiro ?? '';
-            $this->cm_observacoes    = $c->observacoes ?? '';
+            $this->cm_whatsapp        = $c->whatsapp_financeiro ?? '';
+            $this->cm_envio_automatico = (bool) ($c->envio_automatico ?? false);
+            $this->cm_observacoes     = $c->observacoes ?? '';
         } else {
-            $this->cm_descricao      = '';
-            $this->cm_responsavel    = '';
-            $this->cm_valor          = '';
-            $this->cm_dia_vencimento = 5;
-            $this->cm_periodicidade  = 'mensal';
-            $this->cm_data_inicio    = now()->format('Y-m-d');
-            $this->cm_data_fim       = '';
-            $this->cm_status         = 'ativo';
-            $this->cm_forma_cobranca = 'pix';
-            $this->cm_email          = '';
-            $this->cm_whatsapp       = '';
-            $this->cm_observacoes    = '';
+            $this->cm_descricao        = '';
+            $this->cm_responsavel      = '';
+            $this->cm_valor            = '';
+            $this->cm_dia_vencimento   = 5;
+            $this->cm_periodicidade    = 'mensal';
+            $this->cm_data_inicio      = now()->format('Y-m-d');
+            $this->cm_data_fim         = '';
+            $this->cm_status           = 'ativo';
+            $this->cm_forma_cobranca   = 'pix';
+            $this->cm_email            = '';
+            $this->cm_whatsapp         = '';
+            $this->cm_envio_automatico = false;
+            $this->cm_observacoes      = '';
         }
 
         $this->modalContrato = true;
@@ -162,9 +165,10 @@ class Cliente extends Component
             'data_fim'           => $this->cm_data_fim ?: null,
             'status'             => $this->cm_status,
             'forma_cobranca'     => $this->cm_forma_cobranca,
-            'email_financeiro'   => $this->cm_email ?: null,
-            'whatsapp_financeiro'=> $this->cm_whatsapp ?: null,
-            'observacoes'        => trim($this->cm_observacoes) ?: null,
+            'email_financeiro'    => $this->cm_email ?: null,
+            'whatsapp_financeiro' => $this->cm_whatsapp ?: null,
+            'envio_automatico'    => $this->cm_envio_automatico,
+            'observacoes'         => trim($this->cm_observacoes) ?: null,
         ];
 
         if ($this->contratoId) {

@@ -40,6 +40,7 @@ class ContratosMensaisIndex extends Component
     public string $forma_cobranca   = 'pix';
     public string $email_financeiro = '';
     public string $whatsapp         = '';
+    public bool   $envio_automatico = false;
     public string $observacoes      = '';
 
     // Autocomplete cliente
@@ -118,8 +119,9 @@ class ContratosMensaisIndex extends Component
             $this->status          = $c->status;
             $this->forma_cobranca  = $c->forma_cobranca ?? 'pix';
             $this->email_financeiro = $c->email_financeiro ?? '';
-            $this->whatsapp        = $c->whatsapp_financeiro ?? '';
-            $this->observacoes     = $c->observacoes ?? '';
+            $this->whatsapp         = $c->whatsapp_financeiro ?? '';
+            $this->envio_automatico = (bool) ($c->envio_automatico ?? false);
+            $this->observacoes      = $c->observacoes ?? '';
         }
 
         $this->modal = true;
@@ -148,6 +150,7 @@ class ContratosMensaisIndex extends Component
             'forma_cobranca'      => $this->forma_cobranca,
             'email_financeiro'    => $this->email_financeiro ?: null,
             'whatsapp_financeiro' => $this->whatsapp ?: null,
+            'envio_automatico'    => $this->envio_automatico,
             'observacoes'         => trim($this->observacoes) ?: null,
         ];
 
@@ -209,6 +212,7 @@ class ContratosMensaisIndex extends Component
         $this->forma_cobranca   = 'pix';
         $this->email_financeiro = '';
         $this->whatsapp         = '';
+        $this->envio_automatico = false;
         $this->observacoes      = '';
     }
 

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Mail\CobrancaRecebidoConfirmacao;
 use App\Models\Traits\BelongsToTenant;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class Mensalidade extends Model
 {
@@ -76,6 +79,17 @@ class Mensalidade extends Model
             'forma_pagamento' => $forma,
             'status'          => $status,
         ]);
+
+        // Confirmação por e-mail se o contrato tiver envio automático ativado
+        $this->loadMissing(['cliente', 'contratoMensal']);
+        if (!empty($this->cliente?->email) && $this->contratoMensal?->envio_automatico) {
+            try {
+                Mail::to($this->cliente->email)
+                    ->send(new CobrancaRecebidoConfirmacao($this));
+            } catch (\Exception $e) {
+                Log::error("Falha e-mail confirmação mensalidade #{$this->id}: {$e->getMessage()}");
+            }
+        }
 
         // Atualiza o lançamento financeiro vinculado
         if ($this->financeiro_lancamento_id) {
