@@ -444,7 +444,7 @@ class Cliente extends Component
                 'receitaProcessoAtiva'=> null,
                 'anos'                => [],
                 'meses'               => [],
-            ]);
+            ])->extends('layouts.app')->section('content');
         }
 
         // ── KPI 1: Receita Mensal Atual ──────────────────────────
@@ -517,7 +517,7 @@ class Cliente extends Component
             'kpiReceitaMensal', 'kpiEmAberto', 'kpiRecebidoAno', 'proximoLanc',
             'lancamentos', 'contratos', 'receitasProcesso', 'contratoAtivo',
             'receitaProcessoAtiva', 'anos', 'meses'
-        ));
+        ))->extends('layouts.app')->section('content');
     }
 
     private function calcularKpiReceitaMensal(?ContratoMensal $contrato, ?ReceitaProcesso $receita): array
