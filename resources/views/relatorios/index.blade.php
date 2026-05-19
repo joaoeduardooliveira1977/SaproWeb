@@ -93,14 +93,21 @@
       align-items: center;
       flex-wrap: wrap;
     }
-    .relatorios-chip {
+    .relatorios-filtro-btn {
+      padding: 6px 16px;
       border: 1.5px solid var(--border);
       border-radius: 8px;
-      padding: 6px 10px;
-      background: var(--white);
-      color: var(--muted);
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+      background: var(--white);
+      color: var(--text);
+      line-height: 1;
+    }
+    .relatorios-filtro-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
     }
     .relatorios-grid {
       display: grid;
@@ -179,17 +186,18 @@
       <div class="relatorios-toolbar-sub">Use PDF para apresentação e CSV para análise em planilha.</div>
     </div>
     <div class="relatorios-chip-row">
-      <span class="relatorios-chip">Processos</span>
-      <span class="relatorios-chip">Financeiro</span>
-      <span class="relatorios-chip">Agenda</span>
-      <span class="relatorios-chip">Produtividade</span>
+      <button data-filtro="todos"         class="relatorios-filtro-btn">Todos</button>
+      <button data-filtro="processos"     class="relatorios-filtro-btn">Processos</button>
+      <button data-filtro="financeiro"    class="relatorios-filtro-btn">Financeiro</button>
+      <button data-filtro="agenda"        class="relatorios-filtro-btn">Agenda</button>
+      <button data-filtro="produtividade" class="relatorios-filtro-btn">Produtividade</button>
     </div>
   </div>
 
   <div class="relatorios-grid">
 
     {{-- 1. Processos por Fase --}}
-    <div class="card">
+    <div class="card" data-categoria="processos">
       <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg>
       </div>
@@ -218,7 +226,7 @@
     </div>
 
     {{-- 2. Processos por Advogado --}}
-    <div class="card">
+    <div class="card" data-categoria="processos">
       <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
@@ -247,7 +255,7 @@
     </div>
 
     {{-- 3. Processos por Risco --}}
-    <div class="card">
+    <div class="card" data-categoria="processos">
       <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fef2f2;">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       </div>
@@ -256,7 +264,7 @@
       <form method="GET" action="{{ route('relatorios.por-risco') }}" target="_blank">
         <div class="form-field">
           <label class="lbl">Status</label>
-          <select name="status" >
+          <select name="status">
             <option value="Ativo">Ativos</option>
             <option value="Encerrado">Encerrados</option>
             <option value="Todos">Todos</option>
@@ -269,272 +277,8 @@
       </form>
     </div>
 
-    {{-- 4. Agenda do Período --}}
-    <div class="card">
-      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fffbeb;">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      </div>
-      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Agenda do Período</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Todos os compromissos em um intervalo de datas.</div>
-      <form method="GET" action="{{ route('relatorios.agenda') }}" target="_blank">
-        <div class="form-grid">
-          <div class="form-field">
-            <label class="lbl">De</label>
-            <input type="date" name="data_ini" value="{{ now()->startOfMonth()->format('Y-m-d') }}"
-              >
-          </div>
-          <div class="form-field">
-            <label class="lbl">Até</label>
-            <input type="date" name="data_fim" value="{{ now()->endOfMonth()->format('Y-m-d') }}"
-              >
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-          Gerar PDF
-        </button>
-      </form>
-    </div>
-
-    {{-- 5. Custas Pendentes --}}
-    <div class="card">
-      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f0fdf4;">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </div>
-      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Custas Pendentes</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Custas ainda não pagas no período selecionado.</div>
-      <form method="GET" action="{{ route('relatorios.custas') }}" target="_blank">
-        <div class="form-grid">
-          <div class="form-field">
-            <label class="lbl">De</label>
-            <input type="date" name="data_ini" value="{{ now()->startOfMonth()->format('Y-m-d') }}"
-              >
-          </div>
-          <div class="form-field">
-            <label class="lbl">Até</label>
-            <input type="date" name="data_fim" value="{{ now()->endOfMonth()->format('Y-m-d') }}"
-              >
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-          Gerar PDF
-        </button>
-      </form>
-    </div>
-
-    {{-- Custas a Reembolsar --}}
-    <div class="card">
-      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fff7ed;">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      </div>
-      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Custas a Reembolsar</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Custas já pagas pelo escritório, reembolsáveis e ainda não cobradas do cliente. Agrupadas por cliente e processo.</div>
-      <a href="{{ route('relatorios.custas-reembolso') }}" target="_blank"
-         class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;">
-        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-        Gerar PDF
-      </a>
-    </div>
-
-    {{-- 6. Aniversários de Clientes --}}
-    <div class="card">
-      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fdf4ff;">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M12 3v4"/></svg>
-      </div>
-      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Aniversários de Clientes</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Clientes que fazem aniversário no mês selecionado.</div>
-      <form method="GET" action="{{ route('relatorios.aniversarios') }}" target="_blank">
-        <div class="form-field">
-          <label class="lbl">Mês</label>
-          <select name="mes" >
-            @foreach([1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',5=>'Maio',6=>'Junho',
-                      7=>'Julho',8=>'Agosto',9=>'Setembro',10=>'Outubro',11=>'Novembro',12=>'Dezembro'] as $n => $nome)
-              <option value="{{ $n }}" {{ now()->month == $n ? 'selected' : '' }}>{{ $nome }}</option>
-            @endforeach
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-          Gerar PDF
-        </button>
-      </form>
-    </div>
-
-    {{-- 7. Andamentos por Cliente --}}
-    <div class="card">
-      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
-      </div>
-      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Andamentos por Cliente</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Histórico de andamentos por processo, filtrado por cliente e período.</div>
-      <form method="GET" action="{{ route('relatorios.andamentos-cliente') }}" target="_blank">
-        <div class="form-field">
-          <label class="lbl">Cliente</label>
-          <select name="cliente_id" >
-            <option value="">Todos os Clientes</option>
-            @foreach($clientes as $c)
-              <option value="{{ $c->id }}">{{ $c->nome }}</option>
-            @endforeach
-          </select>
-        </div>
-        <div class="form-grid">
-          <div class="form-field">
-            <label class="lbl">De</label>
-            <input type="date" name="data_ini" value="{{ now()->startOfMonth()->format('Y-m-d') }}"
-              >
-          </div>
-          <div class="form-field">
-            <label class="lbl">Até</label>
-            <input type="date" name="data_fim" value="{{ now()->endOfMonth()->format('Y-m-d') }}"
-              >
-          </div>
-        </div>
-        <div class="form-field">
-          <label class="lbl">Tipo</label>
-          <select name="tipo" >
-            <option value="todos">Todos</option>
-            <option value="judiciais">Somente Judiciais</option>
-            <option value="extrajudiciais">Somente Extrajudiciais</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-          Gerar PDF
-        </button>
-      </form>
-    </div>
-
-    {{-- 8. Honorários em Aberto --}}
-    <div class="card">
-      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-      </div>
-      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Honorários em Aberto</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Parcelas pendentes e atrasadas de honorários por cliente.</div>
-      <form method="GET" action="{{ route('relatorios.honorarios-aberto') }}" target="_blank">
-        <div class="form-field">
-          <label class="lbl">Cliente</label>
-          <select name="cliente_id">
-            <option value="">Todos os Clientes</option>
-            @foreach($clientes as $c)
-              <option value="{{ $c->id }}">{{ $c->nome }}</option>
-            @endforeach
-          </select>
-        </div>
-        <div class="form-field">
-          <label class="lbl">Status</label>
-          <select name="status">
-            <option value="todos">Pendentes e Atrasados</option>
-            <option value="pendente">Somente Pendentes</option>
-            <option value="atrasado">Somente Atrasados</option>
-          </select>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button type="submit" class="btn btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
-            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            PDF
-          </button>
-          <button type="submit" name="formato" value="csv" class="btn btn-secondary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
-            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            CSV
-          </button>
-        </div>
-      </form>
-    </div>
-
-    {{-- 9. Financeiro por Período --}}
-    <div class="card">
-      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f0fdf4;">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-      </div>
-      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Financeiro por Período</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Receitas e despesas com totais e saldo no período.</div>
-      <form method="GET" action="{{ route('relatorios.financeiro-periodo') }}" target="_blank">
-        <div class="form-grid">
-          <div class="form-field">
-            <label class="lbl">De</label>
-            <input type="date" name="data_ini" value="{{ now()->startOfMonth()->format('Y-m-d') }}">
-          </div>
-          <div class="form-field">
-            <label class="lbl">Até</label>
-            <input type="date" name="data_fim" value="{{ now()->endOfMonth()->format('Y-m-d') }}">
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button type="submit" class="btn btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
-            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            PDF
-          </button>
-          <button type="submit" name="formato" value="csv" class="btn btn-secondary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
-            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            CSV
-          </button>
-        </div>
-      </form>
-    </div>
-
-    {{-- 10. Processos sem Andamento --}}
-    <div class="card">
-      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f8fafc;">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
-      </div>
-      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Processos sem Andamento</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Processos que não tiveram andamentos registrados no período.</div>
-      <form method="GET" action="{{ route('relatorios.sem-andamento') }}" target="_blank">
-        <div class="form-field">
-          <label class="lbl">Sem andamento há mais de</label>
-          <select name="dias" >
-            <option value="15">15 dias</option>
-            <option value="30" selected>30 dias</option>
-            <option value="60">60 dias</option>
-            <option value="90">90 dias</option>
-            <option value="180">180 dias</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label class="lbl">Status</label>
-          <select name="status" >
-            <option value="Ativo">Somente Ativos</option>
-            <option value="Todos">Todos</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-          Gerar PDF
-        </button>
-      </form>
-    </div>
-
-    {{-- 11. Produtividade por Advogado --}}
-    <div class="card">
-      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fffbeb;">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
-      </div>
-      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Produtividade por Advogado</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Processos, horas, apontamentos e taxa de cumprimento de prazos por advogado.</div>
-      <form method="GET" action="{{ route('relatorios.produtividade-pdf') }}" target="_blank">
-        <div class="form-grid">
-          <div class="form-field">
-            <label class="lbl">De</label>
-            <input type="date" name="data_ini" value="{{ now()->startOfMonth()->format('Y-m-d') }}"
-              >
-          </div>
-          <div class="form-field">
-            <label class="lbl">Até</label>
-            <input type="date" name="data_fim" value="{{ now()->endOfMonth()->format('Y-m-d') }}"
-              >
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-          Gerar PDF
-        </button>
-      </form>
-    </div>
-
-    {{-- 12. Processos por Tipo de Ação --}}
-    <div class="card">
+    {{-- 4. Processos por Tipo de Ação --}}
+    <div class="card" data-categoria="processos">
       <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f0fdf4;">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
       </div>
@@ -562,8 +306,8 @@
       </form>
     </div>
 
-    {{-- 13. Lista Geral de Processos --}}
-    <div class="card">
+    {{-- 5. Lista Geral de Processos --}}
+    <div class="card" data-categoria="processos">
       <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
       </div>
@@ -609,8 +353,143 @@
       </form>
     </div>
 
-    {{-- 14. Extrato Financeiro por Cliente --}}
-    <div class="card">
+    {{-- 6. Processos sem Andamento --}}
+    <div class="card" data-categoria="processos">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f8fafc;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Processos sem Andamento</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Processos que não tiveram andamentos registrados no período.</div>
+      <form method="GET" action="{{ route('relatorios.sem-andamento') }}" target="_blank">
+        <div class="form-field">
+          <label class="lbl">Sem andamento há mais de</label>
+          <select name="dias">
+            <option value="15">15 dias</option>
+            <option value="30" selected>30 dias</option>
+            <option value="60">60 dias</option>
+            <option value="90">90 dias</option>
+            <option value="180">180 dias</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="lbl">Status</label>
+          <select name="status">
+            <option value="Ativo">Somente Ativos</option>
+            <option value="Todos">Todos</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
+      </form>
+    </div>
+
+    {{-- 7. Honorários em Aberto --}}
+    <div class="card" data-categoria="financeiro">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Honorários em Aberto</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Parcelas pendentes e atrasadas de honorários por cliente.</div>
+      <form method="GET" action="{{ route('relatorios.honorarios-aberto') }}" target="_blank">
+        <div class="form-field">
+          <label class="lbl">Cliente</label>
+          <select name="cliente_id">
+            <option value="">Todos os Clientes</option>
+            @foreach($clientes as $c)
+              <option value="{{ $c->id }}">{{ $c->nome }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="lbl">Status</label>
+          <select name="status">
+            <option value="todos">Pendentes e Atrasados</option>
+            <option value="pendente">Somente Pendentes</option>
+            <option value="atrasado">Somente Atrasados</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            PDF
+          </button>
+          <button type="submit" name="formato" value="csv" class="btn btn-secondary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            CSV
+          </button>
+        </div>
+      </form>
+    </div>
+
+    {{-- 8. Financeiro por Período --}}
+    <div class="card" data-categoria="financeiro">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f0fdf4;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Financeiro por Período</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Receitas e despesas com totais e saldo no período.</div>
+      <form method="GET" action="{{ route('relatorios.financeiro-periodo') }}" target="_blank">
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="lbl">De</label>
+            <input type="date" name="data_ini" value="{{ now()->startOfMonth()->format('Y-m-d') }}">
+          </div>
+          <div class="form-field">
+            <label class="lbl">Até</label>
+            <input type="date" name="data_fim" value="{{ now()->endOfMonth()->format('Y-m-d') }}">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            PDF
+          </button>
+          <button type="submit" name="formato" value="csv" class="btn btn-secondary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            CSV
+          </button>
+        </div>
+      </form>
+    </div>
+
+    {{-- 9. Financeiro Mensal --}}
+    <div class="card" data-categoria="financeiro">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f0fdf4;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M6 8h4M6 11h3"/><path d="M14 8l2 2-2 2"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Financeiro Mensal</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Receitas, despesas e saldo do mês — ideal para enviar ao contador.</div>
+      <form method="GET" action="{{ route('relatorios.financeiro-mensal') }}" target="_blank">
+        <div class="form-field">
+          <label class="lbl">Mês</label>
+          <input type="month" name="mes" value="{{ now()->format('Y-m') }}" style="min-height:36px;">
+        </div>
+        <div class="form-field">
+          <label class="lbl">Cliente (opcional)</label>
+          <select name="cliente_id">
+            <option value="">Todos os Clientes</option>
+            @foreach($clientes as $c)
+              <option value="{{ $c->id }}">{{ $c->nome }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            PDF
+          </button>
+          <button type="submit" name="formato" value="csv" class="btn btn-secondary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            CSV
+          </button>
+        </div>
+      </form>
+    </div>
+
+    {{-- 10. Extrato por Cliente --}}
+    <div class="card" data-categoria="financeiro">
       <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fff7ed;">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="12" y1="11" x2="12" y2="21"/><line x1="8" y1="15" x2="16" y2="15"/></svg>
       </div>
@@ -649,20 +528,104 @@
       </form>
     </div>
 
-    {{-- 15. Relatório Financeiro Mensal --}}
-    <div class="card">
+    {{-- 11. Custas Pendentes --}}
+    <div class="card" data-categoria="financeiro">
       <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#f0fdf4;">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M6 8h4M6 11h3"/><path d="M14 8l2 2-2 2"/></svg>
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       </div>
-      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Financeiro Mensal</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Receitas, despesas e saldo do mês — ideal para enviar ao contador.</div>
-      <form method="GET" action="{{ route('relatorios.financeiro-mensal') }}" target="_blank">
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Custas Pendentes</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Custas ainda não pagas no período selecionado.</div>
+      <form method="GET" action="{{ route('relatorios.custas') }}" target="_blank">
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="lbl">De</label>
+            <input type="date" name="data_ini" value="{{ now()->startOfMonth()->format('Y-m-d') }}">
+          </div>
+          <div class="form-field">
+            <label class="lbl">Até</label>
+            <input type="date" name="data_fim" value="{{ now()->endOfMonth()->format('Y-m-d') }}">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
+      </form>
+    </div>
+
+    {{-- 12. Custas a Reembolsar --}}
+    <div class="card" data-categoria="financeiro">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fff7ed;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Custas a Reembolsar</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Custas já pagas pelo escritório, reembolsáveis e ainda não cobradas do cliente. Agrupadas por cliente e processo.</div>
+      <a href="{{ route('relatorios.custas-reembolso') }}" target="_blank"
+         class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;">
+        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+        Gerar PDF
+      </a>
+    </div>
+
+    {{-- 13. Agenda do Período --}}
+    <div class="card" data-categoria="agenda">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fffbeb;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Agenda do Período</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Todos os compromissos em um intervalo de datas.</div>
+      <form method="GET" action="{{ route('relatorios.agenda') }}" target="_blank">
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="lbl">De</label>
+            <input type="date" name="data_ini" value="{{ now()->startOfMonth()->format('Y-m-d') }}">
+          </div>
+          <div class="form-field">
+            <label class="lbl">Até</label>
+            <input type="date" name="data_fim" value="{{ now()->endOfMonth()->format('Y-m-d') }}">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
+      </form>
+    </div>
+
+    {{-- 14. Aniversários de Clientes --}}
+    <div class="card" data-categoria="agenda">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fdf4ff;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M12 3v4"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Aniversários de Clientes</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Clientes que fazem aniversário no mês selecionado.</div>
+      <form method="GET" action="{{ route('relatorios.aniversarios') }}" target="_blank">
         <div class="form-field">
           <label class="lbl">Mês</label>
-          <input type="month" name="mes" value="{{ now()->format('Y-m') }}" style="min-height:36px;">
+          <select name="mes">
+            @foreach([1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',5=>'Maio',6=>'Junho',
+                      7=>'Julho',8=>'Agosto',9=>'Setembro',10=>'Outubro',11=>'Novembro',12=>'Dezembro'] as $n => $nome)
+              <option value="{{ $n }}" {{ now()->month == $n ? 'selected' : '' }}>{{ $nome }}</option>
+            @endforeach
+          </select>
         </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
+      </form>
+    </div>
+
+    {{-- 15. Andamentos por Cliente --}}
+    <div class="card" data-categoria="agenda">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Andamentos por Cliente</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Histórico de andamentos por processo, filtrado por cliente e período.</div>
+      <form method="GET" action="{{ route('relatorios.andamentos-cliente') }}" target="_blank">
         <div class="form-field">
-          <label class="lbl">Cliente (opcional)</label>
+          <label class="lbl">Cliente</label>
           <select name="cliente_id">
             <option value="">Todos os Clientes</option>
             @foreach($clientes as $c)
@@ -670,19 +633,87 @@
             @endforeach
           </select>
         </div>
-        <div style="display:flex;gap:8px;">
-          <button type="submit" class="btn btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
-            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            PDF
-          </button>
-          <button type="submit" name="formato" value="csv" class="btn btn-secondary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
-            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            CSV
-          </button>
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="lbl">De</label>
+            <input type="date" name="data_ini" value="{{ now()->startOfMonth()->format('Y-m-d') }}">
+          </div>
+          <div class="form-field">
+            <label class="lbl">Até</label>
+            <input type="date" name="data_fim" value="{{ now()->endOfMonth()->format('Y-m-d') }}">
+          </div>
         </div>
+        <div class="form-field">
+          <label class="lbl">Tipo</label>
+          <select name="tipo">
+            <option value="todos">Todos</option>
+            <option value="judiciais">Somente Judiciais</option>
+            <option value="extrajudiciais">Somente Extrajudiciais</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
+      </form>
+    </div>
+
+    {{-- 16. Produtividade por Advogado --}}
+    <div class="card" data-categoria="produtividade">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fffbeb;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Produtividade por Advogado</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Processos, horas, apontamentos e taxa de cumprimento de prazos por advogado.</div>
+      <form method="GET" action="{{ route('relatorios.produtividade-pdf') }}" target="_blank">
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="lbl">De</label>
+            <input type="date" name="data_ini" value="{{ now()->startOfMonth()->format('Y-m-d') }}">
+          </div>
+          <div class="form-field">
+            <label class="lbl">Até</label>
+            <input type="date" name="data_fim" value="{{ now()->endOfMonth()->format('Y-m-d') }}">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
       </form>
     </div>
 
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const botoes = document.querySelectorAll('[data-filtro]');
+    const cards  = document.querySelectorAll('[data-categoria]');
+
+    function filtrar(categoria) {
+        botoes.forEach(function (btn) {
+            var ativo = btn.dataset.filtro === categoria;
+            btn.style.background  = ativo ? 'var(--primary)' : 'var(--white)';
+            btn.style.color       = ativo ? '#fff'           : 'var(--text)';
+            btn.style.borderColor = ativo ? 'var(--primary)' : 'var(--border)';
+        });
+
+        cards.forEach(function (card) {
+            card.style.display = (categoria === 'todos' || card.dataset.categoria === categoria)
+                ? ''
+                : 'none';
+        });
+    }
+
+    botoes.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            filtrar(this.dataset.filtro);
+        });
+    });
+
+    filtrar('todos');
+});
+</script>
+
 @endsection
