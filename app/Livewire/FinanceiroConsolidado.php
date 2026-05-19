@@ -55,7 +55,7 @@ class FinanceiroConsolidado extends Component
         $this->processosLista = DB::table('processos as p')
             ->leftJoin('pessoas as cl', 'cl.id', '=', 'p.cliente_id')
             ->select('p.id', 'p.numero', 'cl.nome as cliente_nome')
-            ->when($tenantId, fn($q) => $q->where('p.tenant_id', $tenantId))
+            ->where('p.tenant_id', $tenantId)
             ->orderByDesc('p.id')
             ->limit(200)
             ->get()
@@ -162,31 +162,31 @@ class FinanceiroConsolidado extends Component
             SELECT COALESCE(SUM(valor),0) AS total
             FROM recebimentos
             WHERE recebido = false
-              AND (tenant_id = ? OR ?::int IS NULL)
-        ", [$tenantId, $tenantId])->total;
+              AND tenant_id = ?
+        ", [$tenantId])->total;
 
         $recebido_mes = DB::selectOne("
             SELECT COALESCE(SUM(valor_recebido),0) AS total
             FROM recebimentos
             WHERE recebido = true
               AND data_recebimento BETWEEN ? AND ?
-              AND (tenant_id = ? OR ?::int IS NULL)
-        ", [$inicioMes, $fimMes, $tenantId, $tenantId])->total;
+              AND tenant_id = ?
+        ", [$inicioMes, $fimMes, $tenantId])->total;
 
         $a_pagar = DB::selectOne("
             SELECT COALESCE(SUM(valor),0) AS total
             FROM pagamentos
             WHERE pago = false
-              AND (tenant_id = ? OR ?::int IS NULL)
-        ", [$tenantId, $tenantId])->total;
+              AND tenant_id = ?
+        ", [$tenantId])->total;
 
         $pago_mes = DB::selectOne("
             SELECT COALESCE(SUM(valor_pago),0) AS total
             FROM pagamentos
             WHERE pago = true
               AND data_pagamento BETWEEN ? AND ?
-              AND (tenant_id = ? OR ?::int IS NULL)
-        ", [$inicioMes, $fimMes, $tenantId, $tenantId])->total;
+              AND tenant_id = ?
+        ", [$inicioMes, $fimMes, $tenantId])->total;
 
         $honorarios_atrasados = DB::selectOne("
             SELECT COALESCE(SUM(hp.valor),0) AS total
@@ -194,8 +194,8 @@ class FinanceiroConsolidado extends Component
             JOIN honorarios h ON h.id = hp.honorario_id
             WHERE hp.status IN ('atrasado','pendente')
               AND hp.vencimento < CURRENT_DATE
-              AND (h.tenant_id = ? OR ?::int IS NULL)
-        ", [$tenantId, $tenantId])->total;
+              AND h.tenant_id = ?
+        ", [$tenantId])->total;
 
         $honorarios_vencer = DB::selectOne("
             SELECT COALESCE(SUM(hp.valor),0) AS total
@@ -203,8 +203,8 @@ class FinanceiroConsolidado extends Component
             JOIN honorarios h ON h.id = hp.honorario_id
             WHERE hp.status = 'pendente'
               AND hp.vencimento >= CURRENT_DATE
-              AND (h.tenant_id = ? OR ?::int IS NULL)
-        ", [$tenantId, $tenantId])->total;
+              AND h.tenant_id = ?
+        ", [$tenantId])->total;
 
         return compact(
             'a_receber', 'recebido_mes',
@@ -224,7 +224,7 @@ class FinanceiroConsolidado extends Component
             ->select('r.id', 'r.valor', 'r.data', 'cl.nome as cliente_nome')
             ->where('r.recebido', false)
             ->whereRaw("r.data <= ?", [today()->addDay()->format('Y-m-d')])
-            ->when($tenantId, fn($q) => $q->where('r.tenant_id', $tenantId))
+            ->where('r.tenant_id', $tenantId)
             ->orderBy('r.data')
             ->take(5)
             ->get();
@@ -260,7 +260,7 @@ class FinanceiroConsolidado extends Component
                 today()->format('Y-m-d'),
                 today()->addDays(7)->format('Y-m-d'),
             ])
-            ->when($tenantId, fn($q) => $q->where('r.tenant_id', $tenantId))
+            ->where('r.tenant_id', $tenantId)
             ->orderBy('r.data')
             ->take(5)
             ->get();
@@ -383,16 +383,16 @@ class FinanceiroConsolidado extends Component
                 FROM recebimentos
                 WHERE recebido = true
                   AND TO_CHAR(data_recebimento,'YYYY-MM') = ?
-                  AND (tenant_id = ? OR ?::int IS NULL)
-            ", [$mes, $tenantId, $tenantId])->total;
+                  AND tenant_id = ?
+            ", [$mes, $tenantId])->total;
 
             $pago = DB::selectOne("
                 SELECT COALESCE(SUM(valor_pago),0) AS total
                 FROM pagamentos
                 WHERE pago = true
                   AND TO_CHAR(data_pagamento,'YYYY-MM') = ?
-                  AND (tenant_id = ? OR ?::int IS NULL)
-            ", [$mes, $tenantId, $tenantId])->total;
+                  AND tenant_id = ?
+            ", [$mes, $tenantId])->total;
 
             $honorarios = DB::selectOne("
                 SELECT COALESCE(SUM(hp.valor),0) AS total
@@ -400,8 +400,8 @@ class FinanceiroConsolidado extends Component
                 JOIN honorarios h ON h.id = hp.honorario_id
                 WHERE hp.status = 'pago'
                   AND TO_CHAR(hp.data_pagamento,'YYYY-MM') = ?
-                  AND (h.tenant_id = ? OR ?::int IS NULL)
-            ", [$mes, $tenantId, $tenantId])->total;
+                  AND h.tenant_id = ?
+            ", [$mes, $tenantId])->total;
 
             $rows[] = [
                 'mes'        => $mes,
@@ -430,7 +430,7 @@ class FinanceiroConsolidado extends Component
                 'p.numero as processo_numero',
                 'cl.nome as cliente_nome'
             )
-            ->when($tenantId, fn($q) => $q->where('r.tenant_id', $tenantId))
+            ->where('r.tenant_id', $tenantId)
             ->orderBy('r.data');
 
         if ($this->filtroStatus === 'pendente') {
@@ -458,7 +458,7 @@ class FinanceiroConsolidado extends Component
                 'cl.nome as cliente_nome',
                 'f.nome as fornecedor_nome'
             )
-            ->when($tenantId, fn($q) => $q->where('p.tenant_id', $tenantId))
+            ->where('p.tenant_id', $tenantId)
             ->orderBy('p.data_vencimento');
 
         if ($this->filtroStatus === 'pendente') {
@@ -489,7 +489,7 @@ class FinanceiroConsolidado extends Component
             )
             ->whereIn('hp.status', ['atrasado', 'pendente'])
             ->whereRaw('hp.vencimento < CURRENT_DATE')
-            ->when($tenantId, fn($q) => $q->where('h.tenant_id', $tenantId))
+            ->where('h.tenant_id', $tenantId)
             ->orderBy('hp.vencimento');
     }
 
@@ -519,15 +519,15 @@ class FinanceiroConsolidado extends Component
             ->join('honorarios as h', 'h.id', '=', 'hp.honorario_id')
             ->whereIn('hp.status', ['atrasado', 'pendente'])
             ->whereRaw('hp.vencimento < CURRENT_DATE')
-            ->when($tenantId, fn($q) => $q->where('h.tenant_id', $tenantId))
+            ->where('h.tenant_id', $tenantId)
             ->count();
         $aReceberCount = DB::table('recebimentos')
             ->where('recebido', false)
-            ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
+            ->where('tenant_id', $tenantId)
             ->count();
         $aPagarCount = DB::table('pagamentos')
             ->where('pago', false)
-            ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
+            ->where('tenant_id', $tenantId)
             ->count();
 
         return view('livewire.financeiro-consolidado', compact(
