@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProcessoJurisprudencia extends Model
 {
+    use BelongsToTenant;
     protected $table = 'processo_jurisprudencias';
 
     protected $fillable = [
