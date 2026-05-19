@@ -40,13 +40,14 @@
         'portal' => ['titulo' => 'Portal do cliente', 'desc' => 'Acessos externos liberados para clientes.', 'valor' => $portalAtivos, 'rota' => route('admin.portal-acesso'), 'cor' => '#d97706', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 0 20"/></svg>'],
         'mensagens' => ['titulo' => 'Mensagens do portal', 'desc' => 'Conversas e retornos enviados pelo cliente.', 'valor' => 'Portal', 'rota' => route('admin.portal-mensagens'), 'cor' => '#dc2626', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'],
         'whatsapp' => ['titulo' => 'WhatsApp / SMS', 'desc' => 'Notificações automáticas, modelos e testes.', 'valor' => $whatsappHoje, 'rota' => route('admin.notificacoes-whatsapp'), 'cor' => '#16a34a', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'],
+        'backup' => ['titulo' => 'Backup do Banco', 'desc' => 'Gere backups manuais e acompanhe o histórico automático diário.', 'valor' => 'Diário', 'rota' => route('admin.backup'), 'cor' => '#0891b2', 'icone' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>'],
     ];
 
     $grupos = [
         ['titulo' => 'Acessos', 'desc' => 'Quem entra no sistema e o que o cliente pode consultar.', 'itens' => ['usuarios', 'perfis', 'portal']],
         ['titulo' => 'Cadastros e base', 'desc' => 'Listas estruturais usadas nas rotinas do escritório.', 'itens' => ['tabelas', 'administradoras', 'indices']],
         ['titulo' => 'Comunicação', 'desc' => 'Canais de contato e mensagens automáticas.', 'itens' => ['whatsapp', 'mensagens']],
-        ['titulo' => 'Controle', 'desc' => 'Rastreabilidade das alterações feitas no sistema.', 'itens' => ['auditoria']],
+        ['titulo' => 'Controle', 'desc' => 'Rastreabilidade das alterações feitas no sistema.', 'itens' => ['auditoria', 'backup']],
     ];
 @endphp
 
