@@ -126,7 +126,9 @@
       "Bash(php -l app/Models/Assunto.php)",
       "Bash(php -l app/Models/Reparticao.php)",
       "Bash(php -l app/Models/Secretaria.php)",
-      "Bash(php -l app/Models/ProcessoJurisprudencia.php)"
+      "Bash(php -l app/Models/ProcessoJurisprudencia.php)",
+      "Bash(Get-ChildItem \"c:\\\\projetos\\\\SaproWeb\\\\app\\\\Console\\\\Commands\")",
+      "Bash(Get-ChildItem \"c:\\\\projetos\\\\SaproWeb\\\\app\\\\Livewire\\\\Admin\")"
     ]
   }
 }

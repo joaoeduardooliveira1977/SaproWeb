@@ -42,6 +42,9 @@ Schedule::command('workflow:verificar-agendados')
     ->dailyAt('07:30')
     ->timezone('America/Sao_Paulo');
 
+// Backup diário do banco PostgreSQL às 02:00h
+Schedule::command('backup:database')->dailyAt('02:00');
+
 // Verifica monitoramentos automáticos de processos: 7h e 13h
 Schedule::job(new \App\Jobs\VerificarMonitoramentos())
     ->dailyAt('07:00')

@@ -187,6 +187,7 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/admin/portal-acesso',       fn() => view('portal-acesso'))->name('admin.portal-acesso');
         Route::get('/admin/portal-mensagens',    fn() => view('portal-mensagens'))->name('admin.portal-mensagens');
         Route::get('/admin/notificacoes-whatsapp', fn() => view('notificacoes-whatsapp'))->name('admin.notificacoes-whatsapp');
+        Route::get('/admin/backup', \App\Livewire\Admin\Backup::class)->name('admin.backup');
     });
 
 });
