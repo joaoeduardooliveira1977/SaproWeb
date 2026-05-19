@@ -33,7 +33,7 @@
         @foreach($recebimentos as $r)
         <tr>
             <td>{{ \Carbon\Carbon::parse($r->data)->format('d/m/Y') }}</td>
-            <td>{{ $r->processo_numero }}</td>
+            <td>{{ $r->processo_numero ?? '—' }}</td>
             <td>{{ $r->cliente_nome }}</td>
             <td>{{ $r->descricao }}</td>
             <td style="text-align:right;">
@@ -70,7 +70,7 @@
         @foreach($pagamentos as $p)
         <tr>
             <td>{{ \Carbon\Carbon::parse($p->data)->format('d/m/Y') }}</td>
-            <td>{{ $p->processo_numero }}</td>
+            <td>{{ $p->processo_numero ?? '—' }}</td>
             <td>{{ $p->descricao }}</td>
             <td style="text-align:right;">
                 @if($p->pago)

@@ -395,13 +395,15 @@ class RelatorioController extends Controller
     {
         [$ini, $fim] = $this->datas($request);
 
+        // Histórico legado (tabelas antigas)
         $recebimentos = DB::table('recebimentos as r')
             ->join('processos as p',   'p.id',  '=', 'r.processo_id')
             ->leftJoin('pessoas as pe', 'pe.id', '=', 'p.cliente_id')
             ->where('p.tenant_id', tenant_id())
             ->whereBetween('r.data', [$ini->toDateString(), $fim->toDateString()])
             ->select('r.data', 'r.descricao', 'r.valor', 'r.valor_recebido', 'r.recebido',
-                     'p.numero as processo_numero', 'pe.nome as cliente_nome')
+                     'p.numero as processo_numero', 'pe.nome as cliente_nome',
+                     DB::raw("'recebimentos' as origem"))
             ->orderBy('r.data')
             ->get();
 
@@ -414,6 +416,31 @@ class RelatorioController extends Controller
                      'p.numero as processo_numero', 'pe.nome as cliente_nome')
             ->orderBy('pg.data')
             ->get();
+
+        // Novo módulo financeiro (financeiro_lancamentos) — receitas do período
+        $lancamentosNovos = DB::table('financeiro_lancamentos as fl')
+            ->join('pessoas as p', 'p.id', '=', 'fl.cliente_id')
+            ->where('fl.tenant_id', tenant_id())
+            ->where('fl.tipo', 'receita')
+            ->whereNotIn('fl.status', ['cancelado'])
+            ->whereBetween('fl.vencimento', [$ini->toDateString(), $fim->toDateString()])
+            ->select(
+                'fl.vencimento as data',
+                'fl.descricao',
+                'fl.valor',
+                'fl.valor_pago as valor_recebido',
+                DB::raw("CASE WHEN fl.status = 'recebido' THEN 1 ELSE 0 END as recebido"),
+                DB::raw("null as processo_numero"),
+                'p.nome as cliente_nome',
+                DB::raw("'financeiro_lancamentos' as origem")
+            )
+            ->orderBy('fl.vencimento')
+            ->get();
+
+        // Merge: legado + novo módulo, ordenado por data
+        $recebimentos = $recebimentos->concat($lancamentosNovos)
+            ->sortBy('data')
+            ->values();
 
         $totalRecebido = $recebimentos->where('recebido', true)->sum('valor_recebido');
         $totalAReceber = $recebimentos->where('recebido', false)->sum('valor');
