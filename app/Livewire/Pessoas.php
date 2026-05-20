@@ -37,7 +37,8 @@ class Pessoas extends Component
     public string $nome              = '';
     public string $cpf_cnpj          = '';
     public string $rg                = '';  // Pessoa Física
-    public string $inscricaoEstadual = '';  // Pessoa Jurídica
+    public string $inscricaoEstadual  = '';  // Pessoa Jurídica
+    public string $inscricaoMunicipal = '';  // Pessoa Física
     public string $data_nascimento   = '';
     public string $telefone          = '';
     public string $celular           = '';
@@ -112,9 +113,10 @@ class Pessoas extends Component
     public function setTipoPessoa(string $tipo): void
     {
         $this->tipoPessoa        = $tipo;
-        $this->cpf_cnpj          = '';
-        $this->rg                = '';
-        $this->inscricaoEstadual = '';
+        $this->cpf_cnpj           = '';
+        $this->rg                 = '';
+        $this->inscricaoEstadual  = '';
+        $this->inscricaoMunicipal = '';
     }
 
     public function abrirModal(?int $id = null): void
@@ -130,6 +132,7 @@ class Pessoas extends Component
             $this->cpf_cnpj            = $p->cpf_cnpj ?? '';
             $this->rg                  = $p->rg ?? '';
             $this->inscricaoEstadual   = $p->inscricao_estadual ?? '';
+            $this->inscricaoMunicipal  = $p->inscricao_municipal ?? '';
             $this->data_nascimento     = $p->data_nascimento?->format('Y-m-d') ?? '';
             $this->telefone            = $p->telefone ?? '';
             $this->celular             = $p->celular ?? '';
@@ -168,7 +171,8 @@ class Pessoas extends Component
             'nome'           => $this->nome,
             'cpf_cnpj'       => $this->cpf_cnpj ?: null,
             'rg'             => $this->tipoPessoa === 'fisica' ? ($this->rg ?: null) : null,
-            'inscricao_estadual' => $this->tipoPessoa === 'juridica' ? ($this->inscricaoEstadual ?: null) : null,
+            'inscricao_estadual'    => $this->inscricaoEstadual ?: null,
+            'inscricao_municipal'   => $this->tipoPessoa === 'fisica'   ? ($this->inscricaoMunicipal ?: null) : null,
             'data_nascimento'=> $this->data_nascimento ?: null,
             'telefone'       => $this->telefone ?: null,
             'celular'        => $this->celular ?: null,
@@ -432,7 +436,7 @@ Use linguagem profissional e objetiva.";
     {
         $this->pessoaId          = null;
         $this->tipoPessoa        = 'fisica';
-        $this->nome              = $this->cpf_cnpj = $this->rg = $this->inscricaoEstadual = $this->data_nascimento = '';
+        $this->nome              = $this->cpf_cnpj = $this->rg = $this->inscricaoEstadual = $this->inscricaoMunicipal = $this->data_nascimento = '';
         $this->telefone          = $this->celular = $this->email = '';
         $this->logradouro        = $this->cidade = $this->estado = $this->cep = '';
         $this->oab               = $this->observacoes = '';

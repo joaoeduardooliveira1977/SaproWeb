@@ -14,7 +14,7 @@ class Pessoa extends Model
     protected $table = 'pessoas';
 
     protected $fillable = [
-        'nome', 'tipo_pessoa', 'cpf_cnpj', 'rg', 'inscricao_estadual', 'data_nascimento',
+        'nome', 'tipo_pessoa', 'cpf_cnpj', 'rg', 'inscricao_estadual', 'inscricao_municipal', 'data_nascimento',
         'telefone', 'celular', 'email',
         'logradouro', 'cidade', 'estado', 'cep',
         'oab', 'observacoes', 'ativo', 'administradora_id', 'indicador_id',
