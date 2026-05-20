@@ -567,7 +567,10 @@ class FinanceiroCentral extends Component
 
         $totalPrevisto = (clone $base)->where('tipo', 'receita')->whereIn('status', ['previsto','atrasado'])->sum('valor');
         $totalRecebido = (clone $base)->where('tipo', 'receita')->where('status', 'recebido')->sum('valor_pago');
-        $totalAtrasado = (clone $base)->where('tipo', 'receita')->where('status', 'atrasado')->sum('valor');
+        $totalAtrasado = (clone $base)->where('tipo', 'receita')
+            ->whereIn('status', ['previsto', 'atrasado'])
+            ->where('vencimento', '<', today())
+            ->sum('valor');
         $totalDespesa  = (clone $base)->where('tipo', 'despesa')->whereIn('status', ['previsto','atrasado','recebido'])->sum('valor');
 
         $clientes     = $this->clientes;
