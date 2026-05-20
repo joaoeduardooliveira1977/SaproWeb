@@ -18,139 +18,174 @@ class VerificarProcessoDatajud implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $timeout = 60;
-    public int $tries   = 3;
+    public int $tries         = 3;
+    public int $timeout       = 90;
+    public int $maxExceptions = 3;
 
     public function __construct(
         public string $processoNumero,
         public int    $loteId
     ) {}
 
+    public function backoff(): array
+    {
+        return [60, 300, 900]; // 1min, 5min, 15min
+    }
+
     public function handle(): void
     {
         $lote = LoteVerificacao::find($this->loteId);
         if (!$lote) {
-            Log::warning("VerificarProcessoDatajud: lote_id={$this->loteId} não encontrado.");
+            Log::warning('DATAJUD lote não encontrado', ['lote_id' => $this->loteId]);
             return;
         }
 
         $lote->update(['status' => 'verificando']);
 
+        $novosAndamentos = 0;
+        $numeroLimpo     = preg_replace('/\D/', '', $this->processoNumero);
+        $tribunal        = $this->detectarTribunal($this->processoNumero);
+        $endpoint        = "https://api-publica.datajud.cnj.jus.br/api_publica_{$tribunal}/_search";
+        $apiKey          = config('services.datajud.key');
+
+        if (!$apiKey) {
+            throw new \RuntimeException('DATAJUD_API_KEY não configurada.');
+        }
+        if (!str_starts_with($apiKey, 'APIKey ')) {
+            $apiKey = 'APIKey ' . $apiKey;
+        }
+
         try {
+            $response = Http::timeout(15)
+                ->withHeaders([
+                    'Authorization' => $apiKey,
+                    'Content-Type'  => 'application/json',
+                ])
+                ->post($endpoint, [
+                    'query' => ['match' => ['numeroProcesso' => $numeroLimpo]],
+                ]);
 
-	Log::info("DATAJUD iniciando", ['numero' => $this->processoNumero]);
-
-            $numeroLimpo = preg_replace('/\D/', '', $this->processoNumero);
-            $tribunal = $this->detectarTribunal($this->processoNumero);
-            $endpoint = "https://api-publica.datajud.cnj.jus.br/api_publica_{$tribunal}/_search";
-            $apiKey   = config('services.datajud.key');
-            if (!$apiKey) {
-                throw new \RuntimeException('DATAJUD_API_KEY nao configurada.');
-            }
-            if (!str_starts_with($apiKey, 'APIKey ')) {
-                $apiKey = 'APIKey ' . $apiKey;
-            }
-
-            $response = Http::withHeaders([
-                'Authorization' => $apiKey,
-                'Content-Type'  => 'application/json',
-            ])->post($endpoint, [
-                'query' => [
-                    'match' => [
-                        'numeroProcesso' => $numeroLimpo,
-                    ],
-                ],
-            ]);
-
-            if (!$response->successful()) {
-                throw new \Exception("HTTP {$response->status()}: {$response->body()}");
-            }
-
-            $hits = $response->json('hits.hits') ?? [];
-
-            if (empty($hits)) {
-                $lote->update(['status' => 'verificado']);
+            if ($response->status() === 429) {
+                Log::warning('DATAJUD rate limit atingido', ['numero' => $this->processoNumero]);
+                $this->release(300);
                 return;
             }
 
-            $dadosProcesso = $hits[0]['_source'] ?? [];
-            $movimentos    = $dadosProcesso['movimentos'] ?? [];
-
-            $processo = Processo::whereRaw("regexp_replace(numero, '[^0-9]', '', 'g') = ?", [$numeroLimpo])->first();
-
-
-Log::info("DATAJUD DEBUG", [
-    'numero'     => $this->processoNumero,
-    'processo'   => $processo?->id,
-    'movimentos' => count($movimentos),
-    'hits'       => count($hits),
-]);
-
-
-            if ($processo && !empty($movimentos)) {
-               foreach (array_slice(array_reverse($movimentos), 0, 5) as $mov) {
-                    $descricao      = $mov['nome'] ?? $mov['complementosTabelados'][0]['descricao'] ?? 'Andamento registrado';
-                    $data           = $mov['dataHora'] ?? now();
-                    $dataFormatada  = substr($data, 0, 10);
-
-                    $jaExiste = Andamento::where('processo_id', $processo->id)
-                        ->whereDate('data', $dataFormatada)
-                        ->where('descricao', $descricao)
-                        ->exists();
-
-
-
-		Log::info("DATAJUD JAEXISTE", [
-    		'descricao' => $descricao,
-    		'data'      => $dataFormatada,
-    		'ja_existe' => $jaExiste,
-		]);
-
-
-		Log::info("DATAJUD MOV", [
-        		'descricao' => $descricao,
-        		'data'      => $dataFormatada,
-    		]);
-
-
-
-                    if (!$jaExiste) {
-                        Andamento::create([
-                            'processo_id' => $processo->id,
-                            'data'        => $dataFormatada,
-                            'descricao'   => $descricao,
-                            'usuario_id'  => null,
-                            'tenant_id'   => $processo->tenant_id ?? null,
-                        ]);
-
-                        $score = $this->detectarScore($descricao);
-
-                        Notificacao::create([
-                            'tipo'        => $score === 'critico' ? 'decisao' : 'andamento',
-                            'titulo'      => $score === 'critico' ? 'Decisão importante detectada' : 'Novo andamento',
-                            'mensagem'    => $descricao,
-                            'processo_id' => $processo->id,
-                            'usuario_id'  => null,
-                            'lida'        => false,
-                        ]);
-
-                        $processo->update([
-                            'score'                      => $score,
-                            'ultima_verificacao_datajud' => now(),
-                        ]);
-                    }
-                }
-
-                $processo->update(['ultima_verificacao_datajud' => now()]);
+            if ($response->status() === 503 || $response->serverError()) {
+                Log::warning('DATAJUD indisponível', [
+                    'status' => $response->status(),
+                    'numero' => $this->processoNumero,
+                ]);
+                throw new \RuntimeException('DATAJUD retornou ' . $response->status());
             }
 
-            $lote->update(['status' => 'verificado']);
+            if (!$response->successful()) {
+                Log::error('DATAJUD erro inesperado', [
+                    'status' => $response->status(),
+                    'numero' => $this->processoNumero,
+                ]);
+                throw new \RuntimeException('DATAJUD erro HTTP ' . $response->status());
+            }
 
-        } catch (\Throwable $e) {
-            Log::error("VerificarProcessoDatajud erro [{$this->processoNumero}]: " . $e->getMessage());
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('DATAJUD timeout/conexão', [
+                'numero' => $this->processoNumero,
+                'erro'   => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+
+        $hits = $response->json('hits.hits') ?? [];
+
+        if (empty($hits)) {
+            $lote->update(['status' => 'verificado']);
+            Log::info('DATAJUD verificação concluída', [
+                'numero'           => $this->processoNumero,
+                'novos_andamentos' => 0,
+                'tentativa'        => $this->attempts(),
+            ]);
+            return;
+        }
+
+        $dadosProcesso = $hits[0]['_source'] ?? [];
+        $movimentos    = $dadosProcesso['movimentos'] ?? [];
+
+        $processo = Processo::whereRaw("regexp_replace(numero, '[^0-9]', '', 'g') = ?", [$numeroLimpo])->first();
+
+        if ($processo && !empty($movimentos)) {
+            foreach (array_slice(array_reverse($movimentos), 0, 5) as $mov) {
+                $descricao     = $mov['nome'] ?? $mov['complementosTabelados'][0]['descricao'] ?? 'Andamento registrado';
+                $data          = $mov['dataHora'] ?? now();
+                $dataFormatada = substr($data, 0, 10);
+
+                $jaExiste = Andamento::where('processo_id', $processo->id)
+                    ->whereDate('data', $dataFormatada)
+                    ->where('descricao', $descricao)
+                    ->exists();
+
+                if (!$jaExiste) {
+                    Andamento::create([
+                        'processo_id' => $processo->id,
+                        'data'        => $dataFormatada,
+                        'descricao'   => $descricao,
+                        'usuario_id'  => null,
+                        'tenant_id'   => $processo->tenant_id ?? null,
+                    ]);
+
+                    Log::info('DATAJUD andamento novo importado', [
+                        'processo_id' => $processo->id,
+                        'numero'      => $this->processoNumero,
+                        'data'        => $dataFormatada,
+                        'descricao'   => $descricao,
+                    ]);
+
+                    $score = $this->detectarScore($descricao);
+
+                    Notificacao::create([
+                        'tipo'        => $score === 'critico' ? 'decisao' : 'andamento_novo',
+                        'titulo'      => 'Novo andamento: ' . $descricao,
+                        'mensagem'    => 'Processo ' . $processo->numero . ' — ' . $descricao . ' em ' . $dataFormatada,
+                        'processo_id' => $processo->id,
+                        'usuario_id'  => $lote->user_id ?? null,
+                        'user_id'     => $lote->user_id ?? null,
+                        'tenant_id'   => $processo->tenant_id ?? null,
+                        'lida'        => false,
+                    ]);
+
+                    $processo->update([
+                        'score'                      => $score,
+                        'ultima_verificacao_datajud' => now(),
+                    ]);
+
+                    $novosAndamentos++;
+                }
+            }
+
+            $processo->update(['ultima_verificacao_datajud' => now()]);
+        }
+
+        $lote->update(['status' => 'verificado']);
+
+        Log::info('DATAJUD verificação concluída', [
+            'numero'           => $this->processoNumero,
+            'novos_andamentos' => $novosAndamentos,
+            'tentativa'        => $this->attempts(),
+        ]);
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('DATAJUD falha permanente após todas as tentativas', [
+            'numero'  => $this->processoNumero,
+            'lote_id' => $this->loteId,
+            'erro'    => $exception->getMessage(),
+        ]);
+
+        $lote = LoteVerificacao::find($this->loteId);
+        if ($lote) {
             $lote->update([
                 'status'        => 'erro',
-                'erro_mensagem' => $e->getMessage(),
+                'erro_mensagem' => $exception->getMessage(),
             ]);
         }
     }
