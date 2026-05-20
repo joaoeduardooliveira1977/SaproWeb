@@ -94,6 +94,8 @@ class VerificarVencimentosMensalidades extends Command
                     if ($m->financeiro_lancamento_id) {
                         FinanceiroLancamento::withoutGlobalScopes()
                             ->where('id', $m->financeiro_lancamento_id)
+                            ->where('status', 'previsto')
+                            ->where('vencimento', '<', $hoje)
                             ->update(['status' => 'atrasado', 'updated_at' => now()]);
                     }
 

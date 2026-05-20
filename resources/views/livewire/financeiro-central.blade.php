@@ -144,9 +144,17 @@
             </tr>
         </thead>
         <tbody>
+        @php $__hoje = \Carbon\Carbon::today(); @endphp
         @forelse($lancamentos as $l)
         @php
-            $stCor = match($l->status) {
+            // Status efetivo para exibição: DB pode ter dado stale por atraso do cron
+            $__efetivo = $l->status;
+            if ($l->status === 'atrasado' && $l->vencimento && !$l->vencimento->lt($__hoje)) {
+                $__efetivo = 'previsto'; // cron ainda não reverteu; vencimento é hoje ou futuro
+            } elseif ($l->status === 'previsto' && $l->vencimento && $l->vencimento->lt($__hoje)) {
+                $__efetivo = 'atrasado'; // cron ainda não marcou; vencimento já passou
+            }
+            $stCor = match($__efetivo) {
                 'recebido' => ['#dcfce7','#16a34a'],
                 'atrasado' => ['#fef2f2','#dc2626'],
                 'cancelado'=> ['#f1f5f9','#94a3b8'],
@@ -157,7 +165,7 @@
         <tr style="border-bottom:1px solid var(--border);transition:background .1s;"
             onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
             <td style="padding:11px 14px;white-space:nowrap;">
-                <div style="font-weight:600;color:{{ $l->status==='atrasado' ? '#dc2626' : 'var(--text)' }};">
+                <div style="font-weight:600;color:{{ $__efetivo==='atrasado' ? '#dc2626' : 'var(--text)' }};">
                     {{ $l->vencimento->format('d/m/Y') }}
                 </div>
                 @if($l->numero_parcela)
@@ -221,7 +229,7 @@
             </td>
             <td style="padding:11px 14px;text-align:center;">
                 <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;background:{{ $stCor[0] }};color:{{ $stCor[1] }};">
-                    {{ ucfirst($l->status) }}
+                    {{ ucfirst($__efetivo) }}
                 </span>
                 @if($l->status === 'recebido' && $l->data_pagamento)
                 <div style="font-size:10px;color:var(--muted);margin-top:2px;">{{ $l->data_pagamento->format('d/m/Y') }}</div>
