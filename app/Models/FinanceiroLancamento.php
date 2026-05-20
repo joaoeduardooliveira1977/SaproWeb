@@ -69,13 +69,13 @@ class FinanceiroLancamento extends Model
 
     public function isAtrasado(): bool
     {
-        return $this->status === 'previsto' && $this->vencimento->isPast();
+        return $this->status === 'previsto' && $this->vencimento->lt(\Carbon\Carbon::today());
     }
 
     public static function atualizarAtrasados(): void
     {
         static::where('status', 'previsto')
-            ->where('vencimento', '<', now()->toDateString())
+            ->where('vencimento', '<', today()->toDateString())
             ->update(['status' => 'atrasado', 'updated_at' => now()]);
     }
 

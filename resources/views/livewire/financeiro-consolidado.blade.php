@@ -518,7 +518,7 @@ $abas = [
             </thead>
             <tbody>
                 @foreach($pagar ?? [] as $row)
-                @php $vencido = !$row->pago && $row->data_vencimento && \Carbon\Carbon::parse($row->data_vencimento)->isPast(); @endphp
+                @php $vencido = !$row->pago && $row->data_vencimento && \Carbon\Carbon::parse($row->data_vencimento)->lt(\Carbon\Carbon::today()); @endphp
                 <tr style="border-bottom:1px solid #f1f5f9;">
                     <td style="padding:12px 16px;white-space:nowrap;font-size:13px;{{ $vencido ? 'color:#dc2626;font-weight:600;' : '' }}">
                         {{ $row->data_vencimento ? \Carbon\Carbon::parse($row->data_vencimento)->format('d/m/Y') : '—' }}

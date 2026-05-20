@@ -330,7 +330,7 @@ class FinanceiroConsolidado extends Component
                 fputs($out, "\xEF\xBB\xBF");
                 fputcsv($out, ['Vencimento','Processo','Cliente','Fornecedor','Descrição','Valor','Status'], ';');
                 foreach ($rows as $r) {
-                    $vencido = !$r->pago && $r->data_vencimento && Carbon::parse($r->data_vencimento)->isPast();
+                    $vencido = !$r->pago && $r->data_vencimento && Carbon::parse($r->data_vencimento)->lt(Carbon::today());
                     fputcsv($out, [
                         $r->data_vencimento ? Carbon::parse($r->data_vencimento)->format('d/m/Y') : '',
                         $r->processo_numero ?? '',

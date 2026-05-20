@@ -130,7 +130,8 @@
       "Bash(Get-ChildItem \"c:\\\\projetos\\\\SaproWeb\\\\app\\\\Console\\\\Commands\")",
       "Bash(Get-ChildItem \"c:\\\\projetos\\\\SaproWeb\\\\app\\\\Livewire\\\\Admin\")",
       "Bash(php -l c:\\\\projetos\\\\SaproWeb\\\\app\\\\Jobs\\\\VerificarProcessoDatajud.php)",
-      "Bash(php -l app/Jobs/VerificarProcessoDatajud.php)"
+      "Bash(php -l app/Jobs/VerificarProcessoDatajud.php)",
+      "Bash(grep -n \"status.*previsto\\\\|previsto.*status\\\\|'status'\\\\s*=>\\\\s*\\\\$\\\\|status.*vencimento\\\\|vencimento.*status\" c:/projetos/SaproWeb/app/Models/FinanceiroLancamento.php)"
     ]
   }
 }

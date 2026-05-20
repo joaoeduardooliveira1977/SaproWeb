@@ -115,7 +115,7 @@
                     </td>
                     <td class="hide-sm" style="padding:13px 16px;text-align:center;font-size:12px;color:var(--muted);">
                         @if($d->data_vencimento)
-                            @php $atrasado = !$d->pago && $d->data_vencimento->isPast(); @endphp
+                            @php $atrasado = !$d->pago && $d->data_vencimento->lt(\Carbon\Carbon::today()); @endphp
                             <span style="color:{{ $atrasado ? '#dc2626' : 'var(--muted)' }};font-weight:{{ $atrasado ? '700' : '400' }};">
                                 {{ $d->data_vencimento->format('d/m/Y') }}
                             </span>
