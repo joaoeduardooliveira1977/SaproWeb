@@ -172,7 +172,7 @@ class Pessoas extends Component
             'cpf_cnpj'       => $this->cpf_cnpj ?: null,
             'rg'             => $this->tipoPessoa === 'fisica' ? ($this->rg ?: null) : null,
             'inscricao_estadual'    => $this->inscricaoEstadual ?: null,
-            'inscricao_municipal'   => $this->tipoPessoa === 'fisica'   ? ($this->inscricaoMunicipal ?: null) : null,
+            'inscricao_municipal'   => $this->inscricaoMunicipal ?: null,
             'data_nascimento'=> $this->data_nascimento ?: null,
             'telefone'       => $this->telefone ?: null,
             'celular'        => $this->celular ?: null,

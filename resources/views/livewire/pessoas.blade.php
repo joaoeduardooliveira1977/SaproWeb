@@ -530,11 +530,11 @@
                 <label class="lbl">Inscrição Estadual <span style="font-weight:400;color:var(--muted);">(IE)</span></label>
                 <input type="text" wire:model="inscricaoEstadual" placeholder="Número da IE" style="{{ $inp }}">
             </div>
+            @endif
             <div class="form-field">
                 <label class="lbl">Inscrição Municipal <span style="font-weight:400;color:var(--muted);">(IM)</span></label>
                 <input type="text" wire:model="inscricaoMunicipal" placeholder="Número da IM" style="{{ $inp }}">
             </div>
-            @endif
             <div class="form-field">
                 <label class="lbl">OAB <span style="font-weight:400;color:var(--muted);">(se Advogado)</span></label>
                 <input type="text" wire:model="oab" placeholder="Número da OAB" style="{{ $inp }}">
