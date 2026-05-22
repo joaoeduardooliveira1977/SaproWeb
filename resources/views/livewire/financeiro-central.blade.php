@@ -278,8 +278,7 @@
 {{-- ════ MODAL: Novo/Editar Lançamento ════ --}}
 @if($modal)
 <div style="position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;">
-    <div wire:click="fecharModal" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
-    <div style="position:relative;background:var(--white);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);z-index:1;">
+        <div style="position:relative;background:var(--white);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);z-index:1;">
 
         <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);z-index:2;">
             <h3 style="font-size:16px;font-weight:700;color:{{ $lancamentoId ? 'var(--text)' : ($tipo === 'despesa' ? '#dc2626' : '#16a34a') }};margin:0;">
