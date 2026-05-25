@@ -511,24 +511,57 @@ class FinanceiroCentral extends Component
             'valorPago'     => 'required',
         ]);
 
+        $tenantId   = Auth::guard('usuarios')->user()?->tenant_id;
+        $valorPago  = (float) str_replace(['.', ','], ['', '.'], $this->valorPago);
+
+        $lancamento = DB::table('financeiro_lancamentos')
+            ->where('id', $this->pagamentoLancId)
+            ->where('tenant_id', $tenantId)
+            ->first();
+
+        if (! $lancamento) {
+            $this->fecharPagamento();
+            return;
+        }
+
+        $saldo = round($lancamento->valor - $valorPago, 2);
+
         DB::table('financeiro_lancamentos')
             ->where('id', $this->pagamentoLancId)
-            ->where('tenant_id', Auth::guard('usuarios')->user()?->tenant_id)
+            ->where('tenant_id', $tenantId)
             ->update([
                 'status'          => 'recebido',
                 'data_pagamento'  => $this->dataPagamento,
-                'valor_pago'      => (float) str_replace(['.', ','], ['', '.'], $this->valorPago),
+                'valor_pago'      => $valorPago,
                 'forma_pagamento' => $this->formaPagamento,
                 'updated_at'      => now(),
             ]);
 
-        // Gerar comissão se aplicável
-        $lancamento = DB::table('financeiro_lancamentos')
-            ->where('id', $this->pagamentoLancId)
-            ->first();
+        app(ComissaoService::class)->gerarParaLancamento($lancamento);
 
-        if ($lancamento) {
-            app(ComissaoService::class)->gerarParaLancamento($lancamento);
+        if ($saldo > 0) {
+            DB::table('financeiro_lancamentos')->insert([
+                'tenant_id'           => $lancamento->tenant_id,
+                'cliente_id'          => $lancamento->cliente_id,
+                'contrato_id'         => $lancamento->contrato_id,
+                'contrato_servico_id' => $lancamento->contrato_servico_id,
+                'processo_id'         => $lancamento->processo_id,
+                'tipo'                => $lancamento->tipo,
+                'descricao'           => $lancamento->descricao . ' (saldo residual)',
+                'valor'               => $saldo,
+                'vencimento'          => $lancamento->vencimento,
+                'status'              => 'previsto',
+                'observacoes'         => $lancamento->observacoes,
+                'numero_parcela'      => $lancamento->numero_parcela,
+                'total_parcelas'      => $lancamento->total_parcelas,
+                'origem_tipo'         => $lancamento->origem_tipo,
+                'created_at'          => now(),
+                'updated_at'          => now(),
+            ]);
+
+            $this->fecharPagamento();
+            $this->dispatch('toast', message: 'Pagamento parcial registrado. Saldo de R$ ' . number_format($saldo, 2, ',', '.') . ' criado como novo lançamento.', type: 'success');
+            return;
         }
 
         $this->fecharPagamento();

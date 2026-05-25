@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\{Processo, Fase, GrauRisco};
-use Illuminate\Support\Facades\{Artisan, Auth};
+use Illuminate\Support\Facades\{Artisan, Auth, DB, Hash, Storage};
 
 class Processos extends Component
 {
@@ -20,6 +20,12 @@ class Processos extends Component
     public string  $filtroScore = '';
     public bool    $confirmandoExclusao = false;
     public ?int    $processoParaExcluir = null;
+
+    // ── Exclusão de processo (admin + senha) ──────────────────────────────────
+    public bool   $modalExcluirProcesso     = false;
+    public ?int   $excluirProcessoId        = null;
+    public string $senhaExcluirProcesso     = '';
+    public string $erroSenhaExcluirProcesso = '';
 
     public string  $perguntaIA = '';
     public ?string $respostaIA = null;
@@ -153,6 +159,76 @@ Responda em 1-3 frases objetivas. Se a pergunta pedir para filtrar ou mostrar al
         $this->respostaIA = null;
     }
 
+    // ── Excluir processo em cascata (admin + senha) ───────────────────────────
+    public function excluirProcesso(int $id): void
+    {
+        $usuario = Auth::guard('usuarios')->user();
+        if (! in_array($usuario?->perfil, ['admin', 'administrador', 'super_admin'])) {
+            $this->dispatch('toast', message: 'Apenas administradores podem excluir processos.', type: 'error');
+            return;
+        }
+
+        $this->excluirProcessoId        = $id;
+        $this->senhaExcluirProcesso     = '';
+        $this->erroSenhaExcluirProcesso = '';
+        $this->modalExcluirProcesso     = true;
+    }
+
+    public function confirmarExclusaoProcesso(): void
+    {
+        $usuario  = Auth::guard('usuarios')->user();
+        $tenantId = $usuario?->tenant_id;
+
+        if (! in_array($usuario?->perfil, ['admin', 'administrador', 'super_admin'])) {
+            $this->erroSenhaExcluirProcesso = 'Apenas administradores podem excluir processos.';
+            return;
+        }
+
+        if (! Hash::check($this->senhaExcluirProcesso, $usuario->password)) {
+            $this->erroSenhaExcluirProcesso = 'Senha incorreta.';
+            return;
+        }
+
+        $id = $this->excluirProcessoId;
+
+        $processo = DB::table('processos')->where('id', $id)->where('tenant_id', $tenantId)->first();
+        if (! $processo) {
+            $this->erroSenhaExcluirProcesso = 'Processo não encontrado ou sem permissão.';
+            return;
+        }
+
+        // Excluir arquivos físicos dos documentos
+        $docs = DB::table('documentos')->where('processo_id', $id)->get(['arquivo']);
+        foreach ($docs as $doc) {
+            Storage::disk('public')->delete($doc->arquivo);
+        }
+
+        // Exclusão em cascata na ordem correta
+        DB::table('andamentos')->where('processo_id', $id)->delete();
+        DB::table('documentos')->where('processo_id', $id)->delete();
+        DB::table('prazos')->where('processo_id', $id)->delete();
+        DB::table('audiencias')->where('processo_id', $id)->delete();
+        DB::table('agenda')->where('processo_id', $id)->delete();
+        DB::table('recebimentos')->where('processo_id', $id)->delete();
+        DB::table('pagamentos')->where('processo_id', $id)->delete();
+        DB::table('financeiro_lancamentos')->where('processo_id', $id)->where('tenant_id', $tenantId)->delete();
+        DB::table('honorarios')->where('processo_id', $id)->delete();
+        DB::table('custas')->where('processo_id', $id)->delete();
+        DB::table('processo_advogado')->where('processo_id', $id)->delete();
+        DB::table('processos')->where('id', $id)->where('tenant_id', $tenantId)->delete();
+
+        $this->fecharModalExcluirProcesso();
+        $this->redirect(route('processos'));
+    }
+
+    public function fecharModalExcluirProcesso(): void
+    {
+        $this->modalExcluirProcesso     = false;
+        $this->excluirProcessoId        = null;
+        $this->senhaExcluirProcesso     = '';
+        $this->erroSenhaExcluirProcesso = '';
+    }
+
     public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $rows = Processo::with(['cliente', 'advogado', 'fase', 'risco'])
@@ -218,6 +294,9 @@ Responda em 1-3 frases objetivas. Se a pergunta pedir para filtrar ou mostrar al
             ->groupBy('risco_id')
             ->pluck('total', 'risco_id');
 
+        $usuario     = Auth::guard('usuarios')->user();
+        $podeExcluir = $usuario && in_array($usuario->perfil, ['admin', 'administrador', 'super_admin']);
+
         return view('livewire.processos', [
             'processos'   => $processos,
             'fases'       => Fase::orderBy('ordem')->get(),
@@ -228,6 +307,7 @@ Responda em 1-3 frases objetivas. Se a pergunta pedir para filtrar ou mostrar al
             'parados'     => $parados,
             'faseCounts'  => $faseCounts,
             'riscoCounts' => $riscoCounts,
+            'podeExcluir' => $podeExcluir,
         ]);
     }
 }

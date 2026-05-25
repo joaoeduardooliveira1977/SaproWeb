@@ -8,19 +8,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        foreach (['assuntos', 'reparticoes', 'secretarias', 'varas'] as $tabela) {
-            Schema::table($tabela, function (Blueprint $table) {
-                $table->unsignedBigInteger('tenant_id')->nullable()->after('updated_at');
-            });
+        foreach (['fases', 'graus_risco', 'tipos_acao', 'tipos_processo', 'assuntos', 'reparticoes', 'secretarias', 'varas'] as $tabela) {
+            if (Schema::hasTable($tabela) && !Schema::hasColumn($tabela, 'tenant_id')) {
+                Schema::table($tabela, function (Blueprint $table) {
+                    $table->unsignedBigInteger('tenant_id')->nullable()->after('updated_at');
+                });
+            }
         }
     }
 
     public function down(): void
     {
-        foreach (['assuntos', 'reparticoes', 'secretarias', 'varas'] as $tabela) {
-            Schema::table($tabela, function (Blueprint $table) {
-                $table->dropColumn('tenant_id');
-            });
+        foreach (['fases', 'graus_risco', 'tipos_acao', 'tipos_processo', 'assuntos', 'reparticoes', 'secretarias', 'varas'] as $tabela) {
+            if (Schema::hasTable($tabela) && Schema::hasColumn($tabela, 'tenant_id')) {
+                Schema::table($tabela, function (Blueprint $table) {
+                    $table->dropColumn('tenant_id');
+                });
+            }
         }
     }
 };

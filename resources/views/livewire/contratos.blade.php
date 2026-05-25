@@ -264,6 +264,13 @@
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                                 </button>
                                 @endif
+                                @if($podeValidar)
+                                <button wire:click="excluirContrato({{ $c->id }})" title="Excluir contrato"
+                                    style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#fef2f2;color:#dc2626;border:none;cursor:pointer;transition:background .15s;"
+                                    onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fef2f2'">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                                </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -967,6 +974,52 @@
                 style="padding:9px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
                 <span wire:loading.remove wire:target="salvarRepasse">Salvar Repasse</span>
                 <span wire:loading wire:target="salvarRepasse">Salvando...</span>
+            </button>
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- ════════════════════════════════════════════════
+     MODAL: Excluir Contrato (admin + senha)
+════════════════════════════════════════════════ --}}
+@if($modalExclusaoContrato)
+<div style="position:fixed;inset:0;z-index:1300;display:flex;align-items:center;justify-content:center;padding:16px;">
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
+    <div style="position:relative;background:var(--white);border-radius:14px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2);z-index:1;">
+
+        <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#fef2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <h3 style="font-size:15px;font-weight:700;color:var(--text);margin:0;">Excluir Contrato</h3>
+        </div>
+
+        <div style="padding:20px 24px;display:flex;flex-direction:column;gap:12px;">
+            <p style="font-size:13px;color:var(--muted);margin:0;line-height:1.6;">
+                Esta ação é <strong style="color:#dc2626;">irreversível</strong>. Serão excluídos o contrato, todos os lançamentos financeiros e serviços vinculados. Digite sua senha de administrador para confirmar.
+            </p>
+            <div>
+                <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Senha *</label>
+                <input type="password" wire:model="senhaExclusaoContrato"
+                    wire:keydown.enter="confirmarExclusaoContrato"
+                    placeholder="Digite sua senha..."
+                    style="width:100%;padding:9px 12px;border:1.5px solid {{ $erroSenhaExclusaoContrato ? 'var(--danger)' : 'var(--border)' }};border-radius:8px;font-size:13px;box-sizing:border-box;">
+                @if($erroSenhaExclusaoContrato)
+                <span style="color:var(--danger);font-size:11px;display:block;margin-top:4px;">{{ $erroSenhaExclusaoContrato }}</span>
+                @endif
+            </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);">
+            <button wire:click="fecharModalExclusaoContrato"
+                style="padding:9px 18px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);">
+                Cancelar
+            </button>
+            <button wire:click="confirmarExclusaoContrato" wire:loading.attr="disabled"
+                style="padding:9px 20px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+                <span wire:loading.remove wire:target="confirmarExclusaoContrato">Excluir contrato</span>
+                <span wire:loading wire:target="confirmarExclusaoContrato">Verificando...</span>
             </button>
         </div>
     </div>

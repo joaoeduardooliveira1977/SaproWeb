@@ -409,6 +409,14 @@
                                         <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
                                     </button>
 
+                                    @if($podeExcluir)
+                                    <button wire:click="excluirProcesso({{ $p->id }})" title="Excluir processo"
+                                        style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#fef2f2;color:#dc2626;border:none;cursor:pointer;transition:background .15s;"
+                                        onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fef2f2'">
+                                        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                                    </button>
+                                    @endif
+
                                 </div>
                             </td>
                         </tr>
@@ -472,6 +480,71 @@
         <div class="modal-footer">
             <button wire:click="cancelarExclusao" class="btn btn-outline">Cancelar</button>
             <button wire:click="arquivar" class="btn btn-danger">Arquivar</button>
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- ════════════════════════════════════════════════
+     MODAL: Excluir Processo (admin + senha)
+════════════════════════════════════════════════ --}}
+@if($modalExcluirProcesso)
+<div style="position:fixed;inset:0;z-index:1100;display:flex;align-items:center;justify-content:center;padding:16px;">
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,.5);"></div>
+    <div style="position:relative;background:var(--white);border-radius:14px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.25);z-index:1;">
+
+        {{-- Header --}}
+        <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+            <div style="width:38px;height:38px;border-radius:9px;background:#fef2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+                <h3 style="font-size:15px;font-weight:700;color:var(--text);margin:0;">Excluir Processo</h3>
+                <div style="font-size:12px;color:var(--muted);margin-top:1px;">Ação irreversível — requer senha de administrador</div>
+            </div>
+        </div>
+
+        <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px;">
+
+            {{-- Aviso de destaque --}}
+            <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 16px;">
+                <div style="font-size:13px;font-weight:700;color:#dc2626;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Esta ação é irreversível
+                </div>
+                <div style="font-size:12px;color:#991b1b;line-height:1.6;">
+                    Todos os <strong>andamentos, documentos, prazos, audiências</strong> e <strong>lançamentos financeiros</strong> vinculados serão excluídos permanentemente.
+                </div>
+            </div>
+
+            {{-- Campo de senha --}}
+            <div>
+                <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px;">Senha de administrador *</label>
+                <input type="password" wire:model="senhaExcluirProcesso"
+                    wire:keydown.enter="confirmarExclusaoProcesso"
+                    placeholder="Digite sua senha para confirmar..."
+                    style="width:100%;padding:9px 12px;border:1.5px solid {{ $erroSenhaExcluirProcesso ? '#dc2626' : 'var(--border)' }};border-radius:8px;font-size:13px;box-sizing:border-box;outline:none;"
+                    onfocus="this.style.borderColor='#dc2626'" onblur="this.style.borderColor='{{ $erroSenhaExcluirProcesso ? '#dc2626' : 'var(--border)' }}'">
+                @if($erroSenhaExcluirProcesso)
+                <span style="color:#dc2626;font-size:11px;display:block;margin-top:4px;">{{ $erroSenhaExcluirProcesso }}</span>
+                @endif
+            </div>
+        </div>
+
+        {{-- Footer --}}
+        <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);">
+            <button wire:click="fecharModalExcluirProcesso"
+                style="padding:9px 18px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);">
+                Cancelar
+            </button>
+            <button wire:click="confirmarExclusaoProcesso" wire:loading.attr="disabled"
+                style="padding:9px 20px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                <span wire:loading.remove wire:target="confirmarExclusaoProcesso" style="display:flex;align-items:center;gap:6px;">
+                    <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                    Excluir processo
+                </span>
+                <span wire:loading wire:target="confirmarExclusaoProcesso">Excluindo...</span>
+            </button>
         </div>
     </div>
 </div>

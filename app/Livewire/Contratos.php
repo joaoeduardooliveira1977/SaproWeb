@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\{Contrato, ContratoServico, ContratoRepasse, FinanceiroLancamento, ModeloContrato, Pessoa, Processo};
-use Illuminate\Support\Facades\{Auth, DB, Storage};
+use Illuminate\Support\Facades\{Auth, DB, Hash, Storage};
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -69,6 +69,12 @@ class Contratos extends Component
 
     // â”€â”€ ValidaÃ§Ã£o (admin/financeiro) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public bool   $podeValidar    = false;
+
+    // Exclusão de contrato (admin)
+    public bool   $modalExclusaoContrato     = false;
+    public ?int   $excluirContratoId         = null;
+    public string $senhaExclusaoContrato     = '';
+    public string $erroSenhaExclusaoContrato = '';
 
     // â”€â”€ Repasses â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public bool   $modalRepasse      = false;
@@ -896,6 +902,68 @@ class Contratos extends Component
         }
 
         $this->dispatch('toast', message: $msg, type: 'success');
+    }
+
+    // ── Excluir contrato inteiro (admin) ─────────────────────────────────────
+    public function excluirContrato(int $id): void
+    {
+        $usuario = Auth::guard('usuarios')->user();
+        if (! in_array($usuario->perfil, ['admin', 'administrador', 'super_admin'])) {
+            $this->dispatch('toast', message: 'Apenas administradores podem excluir contratos.', type: 'error');
+            return;
+        }
+
+        $this->excluirContratoId         = $id;
+        $this->senhaExclusaoContrato     = '';
+        $this->erroSenhaExclusaoContrato = '';
+        $this->modalExclusaoContrato     = true;
+    }
+
+    public function confirmarExclusaoContrato(): void
+    {
+        $usuario  = Auth::guard('usuarios')->user();
+        $tenantId = $usuario->tenant_id;
+
+        if (! in_array($usuario->perfil, ['admin', 'administrador', 'super_admin'])) {
+            $this->erroSenhaExclusaoContrato = 'Apenas administradores podem excluir contratos.';
+            return;
+        }
+
+        if (! Hash::check($this->senhaExclusaoContrato, $usuario->password)) {
+            $this->erroSenhaExclusaoContrato = 'Senha incorreta.';
+            return;
+        }
+
+        $id = $this->excluirContratoId;
+
+        DB::table('financeiro_lancamentos')
+            ->where('contrato_id', $id)
+            ->where('tenant_id', $tenantId)
+            ->delete();
+
+        DB::table('contrato_servicos')
+            ->whereIn('contrato_id', [$id])
+            ->delete();
+
+        DB::table('contrato_repasses')
+            ->where('contrato_id', $id)
+            ->delete();
+
+        DB::table('contratos')
+            ->where('id', $id)
+            ->where('tenant_id', $tenantId)
+            ->delete();
+
+        $this->fecharModalExclusaoContrato();
+        $this->dispatch('toast', message: 'Contrato e lançamentos excluídos com sucesso.', type: 'success');
+    }
+
+    public function fecharModalExclusaoContrato(): void
+    {
+        $this->modalExclusaoContrato     = false;
+        $this->excluirContratoId         = null;
+        $this->senhaExclusaoContrato     = '';
+        $this->erroSenhaExclusaoContrato = '';
     }
 
     public function updatingBusca(): void      { $this->resetPage(); }
