@@ -516,7 +516,7 @@ class Cliente extends Component
             ->when($this->filtroOrigem, fn($q) => $q->where('origem_tipo', $this->filtroOrigem))
             ->when($this->filtroAno, fn($q) => $q->whereYear('vencimento', $this->filtroAno))
             ->when($this->filtroMes, fn($q) => $q->whereMonth('vencimento', $this->filtroMes))
-            ->orderBy('vencimento', 'desc')
+            ->orderBy('vencimento', 'asc')
             ->paginate(15);
 
         // ── Contratos e Receitas para info adicional ─────────────

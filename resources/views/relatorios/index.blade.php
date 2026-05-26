@@ -688,6 +688,81 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // ── Autocomplete de cliente ────────────────────────────────────────
+    var _CLI = @json($clientes->values());
+
+    function _initClienteAC(sel) {
+        var isReq  = sel.required;
+        var defTxt = sel.options[0] ? sel.options[0].textContent.trim() : 'Todos os Clientes';
+
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'position:relative;';
+
+        var txt = document.createElement('input');
+        txt.type = 'text';
+        txt.placeholder = defTxt;
+        txt.autocomplete = 'off';
+        txt.style.cssText = 'width:100%;box-sizing:border-box;';
+
+        var hid = document.createElement('input');
+        hid.type = 'hidden';
+        hid.name = 'cliente_id';
+
+        var ddl = document.createElement('div');
+        ddl.style.cssText = 'position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:1000;max-height:180px;overflow-y:auto;display:none;margin-top:2px;';
+
+        sel.parentNode.insertBefore(wrap, sel);
+        sel.parentNode.removeChild(sel);
+        wrap.appendChild(txt);
+        wrap.appendChild(hid);
+        wrap.appendChild(ddl);
+
+        function renderDDL(q) {
+            ddl.innerHTML = '';
+            var lq = q.toLowerCase().trim();
+            if (!isReq) {
+                var all = document.createElement('div');
+                all.textContent = defTxt;
+                all.style.cssText = 'padding:8px 12px;font-size:13px;cursor:pointer;color:var(--muted);border-bottom:1px solid var(--border);';
+                all.addEventListener('mouseover', function () { this.style.background = '#f1f5f9'; });
+                all.addEventListener('mouseout',  function () { this.style.background = ''; });
+                all.addEventListener('mousedown', function (e) { e.preventDefault(); hid.value = ''; txt.value = ''; ddl.style.display = 'none'; });
+                ddl.appendChild(all);
+            }
+            var res = lq ? _CLI.filter(function (c) { return c.nome.toLowerCase().indexOf(lq) !== -1; }) : _CLI;
+            res.forEach(function (c) {
+                var it = document.createElement('div');
+                it.textContent = c.nome;
+                it.style.cssText = 'padding:8px 12px;font-size:13px;cursor:pointer;color:var(--text);border-bottom:1px solid #f1f5f9;';
+                it.addEventListener('mouseover', function () { this.style.background = '#f1f5f9'; });
+                it.addEventListener('mouseout',  function () { this.style.background = ''; });
+                it.addEventListener('mousedown', function (e) { e.preventDefault(); hid.value = c.id; txt.value = c.nome; ddl.style.display = 'none'; });
+                ddl.appendChild(it);
+            });
+            ddl.style.display = (res.length > 0 || !isReq) ? 'block' : 'none';
+        }
+
+        txt.addEventListener('focus', function () { renderDDL(this.value); });
+        txt.addEventListener('input', function () { hid.value = ''; renderDDL(this.value); });
+        txt.addEventListener('blur',  function () { setTimeout(function () { ddl.style.display = 'none'; }, 150); });
+
+        if (isReq) {
+            var frm = txt.closest('form');
+            if (frm) {
+                frm.addEventListener('submit', function (e) {
+                    if (!hid.value) {
+                        e.preventDefault();
+                        txt.style.outline = '2px solid #dc2626';
+                        txt.focus();
+                        setTimeout(function () { txt.style.outline = ''; }, 2000);
+                    }
+                });
+            }
+        }
+    }
+
+    document.querySelectorAll('select[name="cliente_id"]').forEach(_initClienteAC);
+    // ──────────────────────────────────────────────────────────────────
     const botoes = document.querySelectorAll('[data-filtro]');
     const cards  = document.querySelectorAll('[data-categoria]');
 

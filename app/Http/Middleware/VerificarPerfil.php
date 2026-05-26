@@ -14,7 +14,7 @@ class VerificarPerfil
         'super_admin'   => '*',
         'advogado' => [
             'geral', 'processos', 'pessoas', 'documentos', 'minutas',
-            'financeiro', 'honorarios', 'relatorios',
+            'honorarios', 'relatorios',
             'ferramentas', 'usuarios', 'aasp-publicacoes',
         ],
         'estagiario' => [
