@@ -57,6 +57,10 @@
                 </span>
             @endif
             <a href="{{ route('tjsp') }}" class="btn btn-secondary btn-sm" title="Consultar andamentos no DATAJUD" style="display:inline-flex;align-items:center;gap:5px;"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg> DATAJUD</a>
+<a href="{{ route('processos.pdf', $processo->id) }}" target="_blank" class="btn btn-secondary btn-sm" title="Exportar PDF" style="display:inline-flex;align-items:center;gap:5px;">
+    <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+    PDF
+</a>
 <a href="{{ route('processos.editar', $processo->id) }}" class="btn btn-primary btn-sm">Editar</a>
             <a href="{{ route('processos') }}" class="btn btn-secondary btn-sm">&larr; Voltar</a>
         </div>

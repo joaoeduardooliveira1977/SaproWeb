@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Custa, FinanceiroLancamento, Processo, Prazo};
 use App\Services\AIService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\{Auth, DB, Schema};
 
@@ -171,6 +172,29 @@ class ProcessoController extends Controller
         $timeline = $timeline->sortByDesc('data')->values();
 
         return view('processo-show', compact('processo', 'prazos', 'documentos', 'timeline', 'rentabilidade', 'contratosVinculados'));
+    }
+
+    public function exportarPdf(int $id)
+    {
+        $processo = Processo::with([
+            'cliente', 'advogado', 'advogados',
+            'tipoAcao', 'tipoProcesso', 'fase', 'risco', 'reparticao',
+            'andamentos.usuario.pessoa',
+            'audiencias.juiz', 'audiencias.advogado',
+            'custas',
+        ])->findOrFail($id);
+
+        $prazos = Prazo::with('responsavel')
+            ->where('processo_id', $id)
+            ->orderBy('data_prazo')
+            ->get();
+
+        $pdf = Pdf::loadView('relatorios.processo-pdf', compact('processo', 'prazos'))
+            ->setPaper('a4', 'portrait');
+
+        $filename = 'processo-' . str_replace('/', '-', $processo->numero ?? $id) . '.pdf';
+
+        return $pdf->download($filename);
     }
 
     public function andamentos(int $id)

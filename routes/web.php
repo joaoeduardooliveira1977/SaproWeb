@@ -87,6 +87,7 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::post('/processos/{id}/custas/{custaId}/reembolso', [ProcessoController::class, 'alternarReembolsoCusta'])->name('processos.custas.reembolso');
         Route::post('/processos/{id}/custas/{custaId}/cobranca', [ProcessoController::class, 'gerarCobrancaCusta'])->name('processos.custas.cobranca');
 	Route::get('/processos/{id}/resumo-ia', [ProcessoController::class, 'gerarResumo']);
+        Route::get('/processos/{id}/pdf', [ProcessoController::class, 'exportarPdf'])->name('processos.pdf');
     });
 
     // ── Contratos ───────────────────────────────────────────────
