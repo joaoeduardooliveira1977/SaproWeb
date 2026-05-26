@@ -21,13 +21,6 @@
         </p>
     </div>
     <div style="display:flex;gap:8px;">
-        @if($podeExcluir && $totalLixeira > 0)
-        <button wire:click="$toggle('lixeira')" title="Lixeira"
-            style="display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid {{ $lixeira ? '#fecaca' : 'var(--border)' }};background:{{ $lixeira ? '#fef2f2' : 'var(--white)' }};color:{{ $lixeira ? '#dc2626' : 'var(--muted)' }};">
-            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-            Lixeira ({{ $totalLixeira }})
-        </button>
-        @endif
         <button wire:click="exportarCsv" wire:loading.attr="disabled"
             class="btn btn-sm btn-secondary-outline" title="Exportar CSV">
             <span wire:loading.remove wire:target="exportarCsv" style="display:flex;align-items:center;gap:5px;">
@@ -277,9 +270,18 @@
         @endif
         @endif
 
-        <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
-            <strong style="color:var(--text);font-size:13px;">{{ $processos->total() }}</strong> processo(s)
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+            @if($podeExcluir && $totalLixeira > 0)
+            <button wire:click="$toggle('lixeira')" title="{{ $lixeira ? 'Voltar para lista' : 'Ver processos na lixeira' }}"
+                style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid {{ $lixeira ? '#fecaca' : '#e2e8f0' }};background:{{ $lixeira ? '#fef2f2' : 'var(--white)' }};color:{{ $lixeira ? '#dc2626' : '#64748b' }};">
+                <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                Lixeira ({{ $totalLixeira }})
+            </button>
+            @endif
+            <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                <strong style="color:var(--text);font-size:13px;">{{ $processos->total() }}</strong> processo(s)
+            </span>
         </div>
     </div>
 </div>
@@ -432,7 +434,7 @@
                                         @else
                                         {{-- Mover para lixeira (reversível) --}}
                                         <button wire:click="moverParaLixeira({{ $p->id }})"
-                                            wire:confirm="Mover '{{ $p->numero }}' para a lixeira? Você poderá restaurar depois."
+                                            onclick="return confirm('Mover o processo {{ addslashes($p->numero) }} para a lixeira?\nVocê poderá restaurar depois.')"
                                             title="Mover para lixeira"
                                             style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#fef2f2;color:#dc2626;border:none;cursor:pointer;transition:background .15s;"
                                             onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fef2f2'">
