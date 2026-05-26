@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany};
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\BelongsToTenant;
 
 
 class Processo extends Model
 {
-    
-	use BelongsToTenant;
+    use BelongsToTenant, SoftDeletes;
     
 	protected $table = 'processos';
 

@@ -38,6 +38,15 @@ class VerificarPerfil
         'recepcionista' => ['agenda.editar', 'pessoas.editar'],
     ];
 
+    public static function perfilTemAcesso(string $perfil, string $modulo): bool
+    {
+        if (in_array($perfil, ['admin', 'administrador', 'super_admin'])) {
+            return true;
+        }
+        $permissoes = self::PERMISSOES[$perfil] ?? [];
+        return $permissoes === '*' || in_array($modulo, $permissoes);
+    }
+
     public function handle(Request $request, Closure $next, string $modulo = null)
     {
         $usuario = auth('usuarios')->user() ?? auth()->user();

@@ -92,12 +92,51 @@
         <option value="repasse">Repasse</option>
     </select>
 
-    <select wire:model.live="filtroCliente" style="width:160px;">
-        <option value="">Todos os clientes</option>
-        @foreach($clientes as $cl)
-        <option value="{{ $cl['id'] }}">{{ $cl['nome'] }}</option>
-        @endforeach
-    </select>
+    <div x-data="{
+            open: false,
+            busca: '',
+            lista: @js($clientes),
+            get filtrados() {
+                if (!this.busca.trim()) return this.lista;
+                const q = this.busca.toLowerCase();
+                return this.lista.filter(c => c.nome.toLowerCase().includes(q));
+            },
+            selecionar(id, nome) {
+                this.busca = nome || '';
+                this.open = false;
+                $wire.set('filtroCliente', id ? String(id) : '');
+            }
+        }"
+        style="position:relative;flex:0 1 200px;min-width:140px;">
+        <div style="position:relative;">
+            <input type="text" x-model="busca" @focus="open=true" @blur="setTimeout(()=>open=false,150)"
+                placeholder="Todos os clientes"
+                style="width:100%;padding:7px 26px 7px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:var(--white);color:var(--text);outline:none;box-sizing:border-box;">
+            <button x-show="busca" @mousedown.prevent="selecionar('','')" type="button"
+                style="position:absolute;right:7px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);padding:0;line-height:1;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div x-show="open" x-cloak
+            style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:200;max-height:200px;overflow-y:auto;margin-top:2px;">
+            <div @mousedown.prevent="selecionar('','')"
+                style="padding:8px 12px;font-size:12px;color:var(--muted);cursor:pointer;border-bottom:1px solid var(--border);"
+                @mouseover="$el.style.background='#f1f5f9'" @mouseout="$el.style.background=''">
+                Todos os clientes
+            </div>
+            <template x-for="c in filtrados" :key="c.id">
+                <div @mousedown.prevent="selecionar(c.id, c.nome)"
+                    style="padding:8px 12px;font-size:12px;color:var(--text);cursor:pointer;border-bottom:1px solid #f1f5f9;"
+                    @mouseover="$el.style.background='#f1f5f9'" @mouseout="$el.style.background=''">
+                    <span x-text="c.nome"></span>
+                </div>
+            </template>
+            <div x-show="filtrados.length === 0"
+                style="padding:8px 12px;font-size:12px;color:var(--muted);text-align:center;">
+                Nenhum cliente encontrado
+            </div>
+        </div>
+    </div>
 
     <select wire:model.live="filtroProcesso" style="width:160px;">
         <option value="">Todos os processos</option>

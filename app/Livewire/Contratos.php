@@ -936,23 +936,25 @@ class Contratos extends Component
 
         $id = $this->excluirContratoId;
 
-        DB::table('financeiro_lancamentos')
-            ->where('contrato_id', $id)
-            ->where('tenant_id', $tenantId)
-            ->delete();
+        DB::transaction(function () use ($id, $tenantId) {
+            DB::table('financeiro_lancamentos')
+                ->where('contrato_id', $id)
+                ->where('tenant_id', $tenantId)
+                ->delete();
 
-        DB::table('contrato_servicos')
-            ->whereIn('contrato_id', [$id])
-            ->delete();
+            DB::table('contrato_servicos')
+                ->where('contrato_id', $id)
+                ->delete();
 
-        DB::table('contrato_repasses')
-            ->where('contrato_id', $id)
-            ->delete();
+            DB::table('contrato_repasses')
+                ->where('contrato_id', $id)
+                ->delete();
 
-        DB::table('contratos')
-            ->where('id', $id)
-            ->where('tenant_id', $tenantId)
-            ->delete();
+            DB::table('contratos')
+                ->where('id', $id)
+                ->where('tenant_id', $tenantId)
+                ->delete();
+        });
 
         $this->fecharModalExclusaoContrato();
         $this->dispatch('toast', message: 'Contrato e lançamentos excluídos com sucesso.', type: 'success');

@@ -21,6 +21,13 @@
         </p>
     </div>
     <div style="display:flex;gap:8px;">
+        @if($podeExcluir && $totalLixeira > 0)
+        <button wire:click="$toggle('lixeira')" title="Lixeira"
+            style="display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid {{ $lixeira ? '#fecaca' : 'var(--border)' }};background:{{ $lixeira ? '#fef2f2' : 'var(--white)' }};color:{{ $lixeira ? '#dc2626' : 'var(--muted)' }};">
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+            Lixeira ({{ $totalLixeira }})
+        </button>
+        @endif
         <button wire:click="exportarCsv" wire:loading.attr="disabled"
             class="btn btn-sm btn-secondary-outline" title="Exportar CSV">
             <span wire:loading.remove wire:target="exportarCsv" style="display:flex;align-items:center;gap:5px;">
@@ -410,11 +417,28 @@
                                     </button>
 
                                     @if($podeExcluir)
-                                    <button wire:click="excluirProcesso({{ $p->id }})" title="Excluir processo"
-                                        style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#fef2f2;color:#dc2626;border:none;cursor:pointer;transition:background .15s;"
-                                        onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fef2f2'">
-                                        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-                                    </button>
+                                        @if($lixeira)
+                                        {{-- Ações da lixeira --}}
+                                        <button wire:click="restaurarProcesso({{ $p->id }})" title="Restaurar processo"
+                                            style="display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 10px;height:30px;border-radius:6px;background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;">
+                                            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                            Restaurar
+                                        </button>
+                                        <button wire:click="excluirProcesso({{ $p->id }})" title="Excluir permanentemente"
+                                            style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#fef2f2;color:#dc2626;border:none;cursor:pointer;transition:background .15s;"
+                                            onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fef2f2'">
+                                            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                                        </button>
+                                        @else
+                                        {{-- Mover para lixeira (reversível) --}}
+                                        <button wire:click="moverParaLixeira({{ $p->id }})"
+                                            wire:confirm="Mover '{{ $p->numero }}' para a lixeira? Você poderá restaurar depois."
+                                            title="Mover para lixeira"
+                                            style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#fef2f2;color:#dc2626;border:none;cursor:pointer;transition:background .15s;"
+                                            onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fef2f2'">
+                                            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                                        </button>
+                                        @endif
                                     @endif
 
                                 </div>
@@ -499,8 +523,8 @@
                 <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             </div>
             <div>
-                <h3 style="font-size:15px;font-weight:700;color:var(--text);margin:0;">Excluir Processo</h3>
-                <div style="font-size:12px;color:var(--muted);margin-top:1px;">Ação irreversível — requer senha de administrador</div>
+                <h3 style="font-size:15px;font-weight:700;color:var(--text);margin:0;">Excluir Permanentemente</h3>
+                <div style="font-size:12px;color:var(--muted);margin-top:1px;">Remove o processo e todos os dados vinculados — requer senha de administrador</div>
             </div>
         </div>
 

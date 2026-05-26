@@ -5,13 +5,14 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\{Processo, Fase, GrauRisco};
-use Illuminate\Support\Facades\{Artisan, Auth, DB, Hash, Storage};
+use Illuminate\Support\Facades\{Artisan, Auth, Cache, DB, Hash, Storage};
 
 class Processos extends Component
 {
     use WithPagination;
 
     public bool     $embutido   = false;
+    public bool     $lixeira    = false;
 
     public string  $busca      = '';
     public string  $status     = '';
@@ -63,12 +64,40 @@ class Processos extends Component
         $this->confirmandoExclusao  = false;
         $this->processoParaExcluir  = null;
         $this->dispatch('toast', message: "Processo {$processo->numero} arquivado.", type: 'success');
+        Cache::forget('processos.metricas.' . tenant_id());
     }
 
     public function cancelarExclusao(): void
     {
         $this->confirmandoExclusao  = false;
         $this->processoParaExcluir  = null;
+    }
+
+    // ── Lixeira (soft delete) ─────────────────────────────────────────
+    public function moverParaLixeira(int $id): void
+    {
+        $usuario = Auth::guard('usuarios')->user();
+        abort_unless(in_array($usuario?->perfil, ['admin', 'administrador', 'super_admin']), 403);
+
+        $processo = Processo::findOrFail($id);
+        $processo->delete(); // soft-delete
+        $usuario->registrarAuditoria('Moveu processo para lixeira', 'processos', $id);
+
+        Cache::forget('processos.metricas.' . tenant_id());
+        $this->dispatch('toast', message: "Processo {$processo->numero} movido para a lixeira.", type: 'warning');
+    }
+
+    public function restaurarProcesso(int $id): void
+    {
+        $usuario = Auth::guard('usuarios')->user();
+        abort_unless(in_array($usuario?->perfil, ['admin', 'administrador', 'super_admin']), 403);
+
+        $processo = Processo::withTrashed()->findOrFail($id);
+        $processo->restore();
+        $usuario->registrarAuditoria('Restaurou processo da lixeira', 'processos', $id);
+
+        Cache::forget('processos.metricas.' . tenant_id());
+        $this->dispatch('toast', message: "Processo {$processo->numero} restaurado.", type: 'success');
     }
 
     public function perguntarIA(): void
@@ -197,26 +226,31 @@ Responda em 1-3 frases objetivas. Se a pergunta pedir para filtrar ou mostrar al
             return;
         }
 
-        // Excluir arquivos físicos dos documentos
+        // Coletar caminhos dos arquivos antes da transação
         $docs = DB::table('documentos')->where('processo_id', $id)->get(['arquivo']);
+
+        // Exclusão em cascata dentro de transação — garante atomicidade
+        DB::transaction(function () use ($id, $tenantId) {
+            DB::table('andamentos')->where('processo_id', $id)->delete();
+            DB::table('documentos')->where('processo_id', $id)->delete();
+            DB::table('prazos')->where('processo_id', $id)->delete();
+            DB::table('audiencias')->where('processo_id', $id)->delete();
+            DB::table('agenda')->where('processo_id', $id)->delete();
+            DB::table('recebimentos')->where('processo_id', $id)->delete();
+            DB::table('pagamentos')->where('processo_id', $id)->delete();
+            DB::table('financeiro_lancamentos')->where('processo_id', $id)->where('tenant_id', $tenantId)->delete();
+            DB::table('honorarios')->where('processo_id', $id)->delete();
+            DB::table('custas')->where('processo_id', $id)->delete();
+            DB::table('processo_advogado')->where('processo_id', $id)->delete();
+            DB::table('processos')->where('id', $id)->where('tenant_id', $tenantId)->delete();
+        });
+
+        // Excluir arquivos físicos só após o commit do banco
         foreach ($docs as $doc) {
             Storage::disk('public')->delete($doc->arquivo);
         }
 
-        // Exclusão em cascata na ordem correta
-        DB::table('andamentos')->where('processo_id', $id)->delete();
-        DB::table('documentos')->where('processo_id', $id)->delete();
-        DB::table('prazos')->where('processo_id', $id)->delete();
-        DB::table('audiencias')->where('processo_id', $id)->delete();
-        DB::table('agenda')->where('processo_id', $id)->delete();
-        DB::table('recebimentos')->where('processo_id', $id)->delete();
-        DB::table('pagamentos')->where('processo_id', $id)->delete();
-        DB::table('financeiro_lancamentos')->where('processo_id', $id)->where('tenant_id', $tenantId)->delete();
-        DB::table('honorarios')->where('processo_id', $id)->delete();
-        DB::table('custas')->where('processo_id', $id)->delete();
-        DB::table('processo_advogado')->where('processo_id', $id)->delete();
-        DB::table('processos')->where('id', $id)->where('tenant_id', $tenantId)->delete();
-
+        Cache::forget('processos.metricas.' . tenant_id());
         $this->fecharModalExcluirProcesso();
         $this->redirect(route('processos'));
     }
@@ -262,52 +296,67 @@ Responda em 1-3 frases objetivas. Se a pergunta pedir para filtrar ou mostrar al
 
     public function render()
     {
-        $processos = Processo::with(['cliente', 'advogado', 'fase', 'risco'])
-            ->when($this->busca,       fn($q) => $q->busca($this->busca))
-            ->when($this->status,      fn($q) => $q->where('status', $this->status))
-            ->when($this->fase_id,     fn($q) => $q->where('fase_id', $this->fase_id))
-            ->when($this->risco_id,    fn($q) => $q->where('risco_id', $this->risco_id))
-            ->when($this->filtroScore, fn($q) => $q->where('score', $this->filtroScore))
-            ->orderByDesc('created_at')
-            ->paginate(15);
+        $tid = tenant_id();
 
-        // Métricas
-        $totalAtivos = Processo::where('status', 'Ativo')->count();
-        $valorTotal  = Processo::where('status', 'Ativo')->sum('valor_causa');
-        $riscoAlto   = Processo::where('status', 'Ativo')
-            ->whereHas('risco', fn($q) => $q->where('descricao', 'ilike', '%alto%'))
-            ->count();
-        $parados = Processo::where('status', 'Ativo')
-            ->whereDoesntHave('andamentos', fn($q) => $q->where('data', '>=', now()->subDays(30)))
-            ->count();
+        // Lixeira: mostra só os soft-deleted; normal: aplica filtros
+        if ($this->lixeira) {
+            $processos = Processo::onlyTrashed()
+                ->with(['cliente', 'advogado', 'fase', 'risco'])
+                ->orderByDesc('deleted_at')
+                ->paginate(15);
+        } else {
+            $processos = Processo::with(['cliente', 'advogado', 'fase', 'risco'])
+                ->when($this->busca,       fn($q) => $q->busca($this->busca))
+                ->when($this->status,      fn($q) => $q->where('status', $this->status))
+                ->when($this->fase_id,     fn($q) => $q->where('fase_id', $this->fase_id))
+                ->when($this->risco_id,    fn($q) => $q->where('risco_id', $this->risco_id))
+                ->when($this->filtroScore, fn($q) => $q->where('score', $this->filtroScore))
+                ->orderByDesc('created_at')
+                ->paginate(15);
+        }
 
-        // Contagens por fase e risco (apenas processos ativos)
-        $faseCounts  = Processo::where('status', 'Ativo')
-            ->whereNotNull('fase_id')
-            ->selectRaw('fase_id, count(*) as total')
-            ->groupBy('fase_id')
-            ->pluck('total', 'fase_id');
+        $totalLixeira = Processo::onlyTrashed()->count();
 
-        $riscoCounts = Processo::where('status', 'Ativo')
-            ->whereNotNull('risco_id')
-            ->selectRaw('risco_id, count(*) as total')
-            ->groupBy('risco_id')
-            ->pluck('total', 'risco_id');
+        // Métricas — cacheadas 2 min por tenant (re-renderizadas em cada filtro)
+        $metricas = Cache::remember("processos.metricas.{$tid}", 120, function () {
+            return [
+                'totalAtivos' => Processo::where('status', 'Ativo')->count(),
+                'valorTotal'  => (float) Processo::where('status', 'Ativo')->sum('valor_causa'),
+                'riscoAlto'   => Processo::where('status', 'Ativo')
+                    ->whereHas('risco', fn($q) => $q->where('descricao', 'ilike', '%alto%'))->count(),
+                'parados'     => Processo::where('status', 'Ativo')
+                    ->whereDoesntHave('andamentos', fn($q) => $q->where('data', '>=', now()->subDays(30)))->count(),
+                'faseCounts'  => Processo::where('status', 'Ativo')
+                    ->whereNotNull('fase_id')
+                    ->selectRaw('fase_id, count(*) as total')
+                    ->groupBy('fase_id')
+                    ->pluck('total', 'fase_id'),
+                'riscoCounts' => Processo::where('status', 'Ativo')
+                    ->whereNotNull('risco_id')
+                    ->selectRaw('risco_id, count(*) as total')
+                    ->groupBy('risco_id')
+                    ->pluck('total', 'risco_id'),
+            ];
+        });
+
+        $fases  = Cache::remember("processos.fases.{$tid}",  3600, fn() => Fase::orderBy('ordem')->get());
+        $riscos = Cache::remember("processos.riscos.{$tid}", 3600, fn() => GrauRisco::all());
 
         $usuario     = Auth::guard('usuarios')->user();
         $podeExcluir = $usuario && in_array($usuario->perfil, ['admin', 'administrador', 'super_admin']);
 
         return view('livewire.processos', [
-            'processos'   => $processos,
-            'fases'       => Fase::orderBy('ordem')->get(),
-            'riscos'      => GrauRisco::all(),
-            'totalAtivos' => $totalAtivos,
-            'valorTotal'  => (float) $valorTotal,
-            'riscoAlto'   => $riscoAlto,
-            'parados'     => $parados,
-            'faseCounts'  => $faseCounts,
-            'riscoCounts' => $riscoCounts,
-            'podeExcluir' => $podeExcluir,
+            'processos'    => $processos,
+            'fases'        => $fases,
+            'riscos'       => $riscos,
+            'totalAtivos'  => $metricas['totalAtivos'],
+            'valorTotal'   => $metricas['valorTotal'],
+            'riscoAlto'    => $metricas['riscoAlto'],
+            'parados'      => $metricas['parados'],
+            'faseCounts'   => $metricas['faseCounts'],
+            'riscoCounts'  => $metricas['riscoCounts'],
+            'podeExcluir'  => $podeExcluir,
+            'totalLixeira' => $totalLixeira,
         ]);
     }
 }

@@ -586,7 +586,7 @@
     $perfil     = auth('usuarios')->user()?->perfil ?? 'estagiario';
     $isAdmin    = in_array($perfil, ['admin', 'administrador', 'super_admin']);
     $isAdvogado = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado']);
-    $isFinanc   = in_array($perfil, ['admin', 'administrador', 'super_admin', 'financeiro']);
+    $isFinanc   = \App\Http\Middleware\VerificarPerfil::perfilTemAcesso($perfil, 'financeiro');
     $hubAtivo   = '';
     $rotasProcessos  = ['processos','processos.novo','processos.editar','processos.show','documentos','minutas','assinatura-digital','audiencias','prazos','sla','agenda','processos.hub','processos.monitoramento'];
     $rotasCadastros  = ['cadastros.hub','correspondentes','procuracoes','administradoras','tabelas','indicadores'];
