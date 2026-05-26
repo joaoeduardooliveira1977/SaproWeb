@@ -22,6 +22,11 @@ class Processos extends Component
     public bool    $confirmandoExclusao = false;
     public ?int    $processoParaExcluir = null;
 
+    // ── Lixeira: confirmação modal ────────────────────────────────────────────
+    public bool    $modalConfirmarLixeira   = false;
+    public ?int    $lixeiraProcessoId       = null;
+    public string  $lixeiraProcessoNumero   = '';
+
     // ── Exclusão de processo (admin + senha) ──────────────────────────────────
     public bool   $modalExcluirProcesso     = false;
     public ?int   $excluirProcessoId        = null;
@@ -74,16 +79,37 @@ class Processos extends Component
     }
 
     // ── Lixeira (soft delete) ─────────────────────────────────────────
-    public function moverParaLixeira(int $id): void
+    public function abrirConfirmarLixeira(int $id): void
     {
         $usuario = Auth::guard('usuarios')->user();
         abort_unless(in_array($usuario?->perfil, ['admin', 'administrador', 'super_admin']), 403);
 
         $processo = Processo::findOrFail($id);
-        $processo->delete(); // soft-delete
-        $usuario->registrarAuditoria('Moveu processo para lixeira', 'processos', $id);
+        $this->lixeiraProcessoId     = $id;
+        $this->lixeiraProcessoNumero = $processo->numero;
+        $this->modalConfirmarLixeira = true;
+    }
+
+    public function cancelarLixeira(): void
+    {
+        $this->modalConfirmarLixeira = false;
+        $this->lixeiraProcessoId     = null;
+        $this->lixeiraProcessoNumero = '';
+    }
+
+    public function moverParaLixeira(): void
+    {
+        $usuario = Auth::guard('usuarios')->user();
+        abort_unless(in_array($usuario?->perfil, ['admin', 'administrador', 'super_admin']), 403);
+
+        $processo = Processo::findOrFail($this->lixeiraProcessoId);
+        $processo->delete();
+        $usuario->registrarAuditoria('Moveu processo para lixeira', 'processos', $this->lixeiraProcessoId);
 
         Cache::forget('processos.metricas.' . tenant_id());
+        $this->modalConfirmarLixeira = false;
+        $this->lixeiraProcessoId     = null;
+        $this->lixeiraProcessoNumero = '';
         $this->dispatch('toast', message: "Processo {$processo->numero} movido para a lixeira.", type: 'warning');
     }
 

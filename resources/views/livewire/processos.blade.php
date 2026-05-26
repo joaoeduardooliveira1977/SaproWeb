@@ -433,7 +433,7 @@
                                         </button>
                                         @else
                                         {{-- Mover para lixeira (reversível) --}}
-                                        <button x-on:click="confirm('Mover o processo {{ addslashes($p->numero) }} para a lixeira?\nVocê poderá restaurar depois.') && $wire.moverParaLixeira({{ $p->id }})"
+                                        <button wire:click="abrirConfirmarLixeira({{ $p->id }})"
                                             title="Mover para lixeira"
                                             style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#fef2f2;color:#dc2626;border:none;cursor:pointer;transition:background .15s;"
                                             onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fef2f2'">
@@ -486,6 +486,30 @@
         </div>
 
 </div>
+
+{{-- Modal confirmacao lixeira --}}
+@if($modalConfirmarLixeira)
+<div class="modal-backdrop">
+    <div class="modal" style="max-width:400px;">
+        <div class="modal-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:8px;background:#fef2f2;display:flex;align-items:center;justify-content:center;">
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                </div>
+                <span class="modal-title">Mover para a Lixeira</span>
+            </div>
+        </div>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
+            Mover o processo <strong style="color:var(--text);">{{ $lixeiraProcessoNumero }}</strong> para a lixeira?<br>
+            <span style="font-size:12px;">Você poderá restaurá-lo a qualquer momento.</span>
+        </p>
+        <div class="modal-footer">
+            <button wire:click="cancelarLixeira" class="btn btn-outline">Cancelar</button>
+            <button wire:click="moverParaLixeira" class="btn btn-danger">Mover para Lixeira</button>
+        </div>
+    </div>
+</div>
+@endif
 
 {{-- Modal confirmacao arquivar --}}
 @if($confirmandoExclusao)
