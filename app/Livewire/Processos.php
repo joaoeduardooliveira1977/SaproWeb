@@ -97,6 +97,11 @@ class Processos extends Component
         $usuario->registrarAuditoria('Restaurou processo da lixeira', 'processos', $id);
 
         Cache::forget('processos.metricas.' . tenant_id());
+
+        if (Processo::onlyTrashed()->count() === 0) {
+            $this->lixeira = false;
+        }
+
         $this->dispatch('toast', message: "Processo {$processo->numero} restaurado.", type: 'success');
     }
 

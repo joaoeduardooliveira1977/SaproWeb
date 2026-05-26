@@ -433,8 +433,7 @@
                                         </button>
                                         @else
                                         {{-- Mover para lixeira (reversível) --}}
-                                        <button wire:click="moverParaLixeira({{ $p->id }})"
-                                            onclick="return confirm('Mover o processo {{ addslashes($p->numero) }} para a lixeira?\nVocê poderá restaurar depois.')"
+                                        <button x-on:click="confirm('Mover o processo {{ addslashes($p->numero) }} para a lixeira?\nVocê poderá restaurar depois.') && $wire.moverParaLixeira({{ $p->id }})"
                                             title="Mover para lixeira"
                                             style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:#fef2f2;color:#dc2626;border:none;cursor:pointer;transition:background .15s;"
                                             onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fef2f2'">
