@@ -255,70 +255,36 @@ class AaspPublicacoes extends Component
 
         $html  = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
         $html .= "<style>
-            @page { margin: 14mm; }
+            @page { margin: 20mm 15mm; }
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9pt; color: #1e293b; background: #fff;
-                   padding: 14mm; }
+            body { font-family: DejaVu Sans, sans-serif; font-size: 9pt; color: #000; background: #fff; }
 
-            /* ── Capa ── */
-            .capa { text-align: center; padding: 50pt 0 36pt; border-bottom: 3pt solid #1a3a5c; margin-bottom: 30pt; }
-            .capa-escritorio { font-size: 8pt; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 2.5pt; margin-bottom: 18pt; }
-            .capa-logo   { font-size: 30pt; color: #1a3a5c; font-weight: bold; letter-spacing: 1pt; margin-bottom: 2pt; }
-            .capa-sub    { font-size: 10pt; color: #64748b; letter-spacing: 1pt; text-transform: uppercase; margin-bottom: 28pt; }
-            .capa-titulo { font-size: 17pt; color: #1a3a5c; font-weight: bold; margin-bottom: 8pt; }
-            .capa-data   { font-size: 13pt; color: #334155; margin-bottom: 22pt; }
-            .capa-stats  { background: #1a3a5c; color: #fff; padding: 10pt 28pt; font-size: 10pt; }
-            .capa-gerado { font-size: 7.5pt; color: #94a3b8; margin-top: 18pt; }
+            /* ── Cabeçalho ── */
+            .cabecalho { border-bottom: 1pt solid #000; margin-bottom: 14pt; padding-bottom: 7pt; }
+            .cabecalho-escritorio { font-size: 11pt; font-weight: bold; margin-bottom: 2pt; }
+            .cabecalho-titulo { font-size: 9pt; margin-bottom: 2pt; }
+            .cabecalho-info { font-size: 8pt; }
 
             /* ── Seção advogado ── */
-            .secao-adv {
-                background: #1a3a5c;
-                color: #fff;
-                padding: 8pt 14pt;
-                font-size: 12pt;
-                font-weight: bold;
-                margin-top: 24pt;
-                margin-bottom: 0;
-            }
-            .secao-adv-count {
-                background: #e8eef4;
-                color: #1a3a5c;
-                font-size: 8pt;
-                padding: 4pt 14pt;
-                border-left: 3pt solid #1a3a5c;
-                margin-bottom: 12pt;
-            }
+            .secao-adv { font-weight: bold; font-size: 10pt; margin-top: 20pt; margin-bottom: 1pt; }
+            .secao-adv-count { font-size: 8.5pt; margin-bottom: 10pt; }
 
             /* ── Publicação ── */
-            .pub { margin-bottom: 0; page-break-inside: avoid; padding: 10pt 14pt; }
-            .pub-numero { font-size: 7.5pt; font-weight: bold; color: #94a3b8; margin-bottom: 5pt; }
-            .pub-campo { font-size: 8pt; color: #475569; margin-bottom: 2.5pt; line-height: 1.4; }
-            .pub-campo strong { color: #1a3a5c; }
-            .pub-processo { font-size: 9pt; font-weight: bold; color: #1a3a5c; font-family: DejaVu Sans Mono, monospace; margin-bottom: 5pt; }
-            .pub-titulo-pub { font-size: 9pt; font-weight: bold; color: #1e293b; margin-bottom: 5pt; }
-            .pub-texto { font-size: 8.5pt; color: #334155; text-align: left; line-height: 1.55; white-space: pre-wrap; padding-top: 6pt; border-top: 0.5pt solid #e2e8f0; }
-            .pub-sep { border: none; border-top: 1pt solid #cbd5e1; margin: 10pt 14pt; }
+            .pub { margin-bottom: 2pt; page-break-inside: avoid; }
+            .pub-meta { line-height: 1.7; margin-bottom: 4pt; }
+            .pub-jornal { font-weight: bold; margin-bottom: 5pt; }
+            .pub-texto { text-align: justify; line-height: 1.65; white-space: pre-wrap; }
+            .pub-sep { border: none; border-top: 0.5pt solid #000; margin: 12pt 0; }
 
             /* ── Rodapé ── */
-            .rodape {
-                margin-top: 28pt;
-                padding-top: 8pt;
-                border-top: 1.5pt solid #e2e8f0;
-                text-align: center;
-                font-size: 7.5pt;
-                color: #94a3b8;
-            }
+            .rodape { margin-top: 22pt; padding-top: 6pt; border-top: 0.5pt solid #000; font-size: 7.5pt; text-align: center; }
         </style></head><body>";
 
-        // ── Capa ──
-        $html .= "<div class='capa'>";
-        $html .= "<div class='capa-escritorio'>Escritório de Advocacia Ferreira</div>";
-       // $html .= "<div class='capa-logo'>Software Jur�dico</div>";
-        $html .= "<div class='capa-sub'>Software Jur�dico</div>";
-        $html .= "<div class='capa-titulo'>Publicações AASP</div>";
-        $html .= "<div class='capa-data'>{$dataFmt}</div>";
-        $html .= "<div class='capa-stats'>{$totalPubs} publicação(ões) &nbsp;&nbsp;|&nbsp;&nbsp; {$totalAdvs} advogado(s)</div>";
-        $html .= "<div class='capa-gerado'>Gerado em {$geradoEm}</div>";
+        // ── Cabeçalho simples ──
+        $html .= "<div class='cabecalho'>";
+        $html .= "<div class='cabecalho-escritorio'>Escritório de Advocacia Ferreira</div>";
+        $html .= "<div class='cabecalho-titulo'>Publicações AASP &mdash; {$dataFmt}</div>";
+        $html .= "<div class='cabecalho-info'>{$totalPubs} publicação(ões) &nbsp;|&nbsp; {$totalAdvs} advogado(s) &nbsp;|&nbsp; Gerado em {$geradoEm}</div>";
         $html .= "</div>";
 
         // ── Publicações agrupadas por advogado ──
@@ -329,25 +295,31 @@ class AaspPublicacoes extends Component
             $html .= "<div class='secao-adv'>" . htmlspecialchars($nomeAdv) . "</div>";
             $html .= "<div class='secao-adv-count'>{$qtd} publicação(ões)</div>";
 
-            $seq    = 1;
-            $total  = $pubs->count();
+            $seq   = 1;
+            $total = $pubs->count();
             foreach ($pubs as $pub) {
+                // Data por extenso em português
+                $dataPorExtenso = $pub->data
+                    ? Carbon::parse($pub->data)->isoFormat('dddd, D [de] MMMM [de] YYYY')
+                    : '—';
+
                 $html .= "<div class='pub'>";
-                $html .= "<div class='pub-numero'>Publicação #{$seq}</div>";
 
-                if ($pub->numero_processo) {
-                    $html .= "<div class='pub-processo'>Processo: " . htmlspecialchars($pub->numero_processo) . "</div>";
-                }
-
-                $html .= "<div class='pub-campo'><strong>Jornal:</strong> " . htmlspecialchars($pub->jornal ?? '—') . "</div>";
-                $html .= "<div class='pub-campo'><strong>Data de disponibilização:</strong> " . ($pub->data ? $pub->data->format('d/m/Y') : '—') . "</div>";
+                // Campos de metadados
+                $html .= "<div class='pub-meta'>";
+                $html .= "<strong>Disponibilização:</strong> {$dataPorExtenso}.<br>";
+                $html .= "<strong>Arquivo:</strong> {$seq}<br>";
                 if ($pub->numero_publicacao) {
-                    $html .= "<div class='pub-campo'><strong>Número da publicação:</strong> " . htmlspecialchars($pub->numero_publicacao) . "</div>";
+                    $html .= "<strong>Publicação:</strong> " . htmlspecialchars($pub->numero_publicacao) . "<br>";
+                }
+                $html .= "</div>";
+
+                // Jornal em negrito
+                if ($pub->jornal) {
+                    $html .= "<div class='pub-jornal'>" . htmlspecialchars($pub->jornal) . "</div>";
                 }
 
-                if ($pub->titulo) {
-                    $html .= "<div class='pub-titulo-pub'>" . htmlspecialchars($pub->titulo) . "</div>";
-                }
+                // Texto completo justificado, com nome do advogado em negrito
                 if ($pub->texto) {
                     $textoEscapado = htmlspecialchars($this->limparTexto($pub->texto));
                     $nomeEscapado  = htmlspecialchars($nomeAdv);
@@ -371,7 +343,7 @@ class AaspPublicacoes extends Component
         }
 
         // ── Rodapé ──
-        $html .= "<div class='rodape'>Gerado pelo Software Jur�dico &nbsp;·&nbsp; {$geradoEm} &nbsp;·&nbsp; Publicações AASP referentes a {$dataFmt}</div>";
+        $html .= "<div class='rodape'>Gerado em {$geradoEm} &nbsp;·&nbsp; Publicações AASP referentes a {$dataFmt}</div>";
 
         $html .= "</body></html>";
 
