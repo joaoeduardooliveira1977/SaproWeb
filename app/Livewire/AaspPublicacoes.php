@@ -270,15 +270,15 @@ class AaspPublicacoes extends Component
             .cabecalho-total { font-size: 8pt; margin-top: 2pt; }
 
             /* Seção advogado */
-            .secao-adv { font-size: 10pt; font-weight: bold; margin-top: 18pt; margin-bottom: 2pt; }
-            .secao-adv-count { font-size: 8pt; margin-bottom: 10pt; }
+            .secao-adv { font-size: 10pt; font-weight: bold; margin-top: 12pt; margin-bottom: 0pt; }
+            .secao-adv-count { font-size: 8pt; margin-bottom: 6pt; }
 
             /* Publicação */
-            .pub { margin-bottom: 8pt; }
-            .pub-linha { font-size: 9pt; line-height: 1.6; margin-bottom: 2pt; }
-            .pub-jornal { font-size: 9pt; font-weight: bold; margin-bottom: 4pt; }
-            .pub-texto { font-size: 9pt; line-height: 1.6; text-align: left; margin-top: 4pt; }
-            .pub-sep { border: none; border-top: 0.5pt solid #000; margin: 10pt 0; }
+            .pub { margin-bottom: 4pt; }
+            .pub-linha { font-size: 9pt; line-height: 1.2; margin-bottom: 1pt; }
+            .pub-jornal { font-size: 9pt; font-weight: bold; margin-bottom: 2pt; margin-top: 1pt; }
+            .pub-texto { font-size: 9pt; line-height: 1.4; text-align: left; margin-top: 2pt; }
+            .pub-sep { border: none; border-top: 0.5pt solid #000; margin: 6pt 0; }
 
             /* Rodapé */
             .rodape { margin-top: 20pt; padding-top: 6pt; border-top: 0.5pt solid #000; font-size: 7.5pt; text-align: center; }
