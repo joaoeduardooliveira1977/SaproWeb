@@ -257,11 +257,10 @@ class AaspPublicacoes extends Component
         $diasSemana = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
         $meses      = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 
-        $html  = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
-        $html .= "<style>
-            @page { margin: 20mm; }
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { margin: 0; padding: 0; font-family: DejaVu Sans, sans-serif; font-size: 9pt; color: #000; background: #fff; }
+        $html  = "<!DOCTYPE html><html><head><meta charset='utf-8'><style>";
+        $html .= "@page { margin-top: 20mm; margin-bottom: 20mm; margin-left: 20mm; margin-right: 20mm; }
+            body { font-family: DejaVu Sans, sans-serif; font-size: 9pt; color: #000; background: #fff; margin: 0; padding: 0; }
+            * { box-sizing: border-box; }
 
             /* Cabeçalho */
             .cabecalho { text-align: center; margin-bottom: 20pt; border-bottom: 1pt solid #000; padding-bottom: 10pt; }
@@ -363,13 +362,7 @@ class AaspPublicacoes extends Component
 
         $nomeArquivo = 'publicacoes-aasp-' . Carbon::parse($data)->format('Y-m-d') . '.pdf';
 
-        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait')->setOptions([
-            'defaultPaperSize' => 'a4',
-            'margin_top'       => 20,
-            'margin_bottom'    => 20,
-            'margin_left'      => 20,
-            'margin_right'     => 20,
-        ]);
+        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait');
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
