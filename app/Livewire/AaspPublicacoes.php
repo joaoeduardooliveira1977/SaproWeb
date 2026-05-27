@@ -259,9 +259,9 @@ class AaspPublicacoes extends Component
 
         $html  = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
         $html .= "<style>
-            @page { margin: 20mm 20mm 20mm 20mm; }
+            @page { margin: 20mm; }
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: DejaVu Sans, sans-serif; font-size: 9pt; color: #000; background: #fff; }
+            body { margin: 0; padding: 0; font-family: DejaVu Sans, sans-serif; font-size: 9pt; color: #000; background: #fff; }
 
             /* Cabeçalho */
             .cabecalho { text-align: center; margin-bottom: 20pt; border-bottom: 1pt solid #000; padding-bottom: 10pt; }
@@ -363,7 +363,13 @@ class AaspPublicacoes extends Component
 
         $nomeArquivo = 'publicacoes-aasp-' . Carbon::parse($data)->format('Y-m-d') . '.pdf';
 
-        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait')->setOptions([
+            'defaultPaperSize' => 'a4',
+            'margin_top'       => 20,
+            'margin_bottom'    => 20,
+            'margin_left'      => 20,
+            'margin_right'     => 20,
+        ]);
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
