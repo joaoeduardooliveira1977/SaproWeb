@@ -253,38 +253,44 @@ class AaspPublicacoes extends Component
         $totalAdvs   = $agrupadas->count();
         $geradoEm    = now()->format('d/m/Y \à\s H:i');
 
+        // Tabelas para data por extenso em português (sem depender do locale do sistema)
+        $diasSemana = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+        $meses      = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
         $html  = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
         $html .= "<style>
-            @page { margin: 20mm 15mm; }
+            @page { margin: 20mm 20mm 20mm 20mm; }
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: DejaVu Sans, sans-serif; font-size: 9pt; color: #000; background: #fff; }
 
-            /* ── Cabeçalho ── */
-            .cabecalho { border-bottom: 1pt solid #000; margin-bottom: 14pt; padding-bottom: 7pt; }
-            .cabecalho-escritorio { font-size: 11pt; font-weight: bold; margin-bottom: 2pt; }
-            .cabecalho-titulo { font-size: 9pt; margin-bottom: 2pt; }
-            .cabecalho-info { font-size: 8pt; }
+            /* Cabeçalho */
+            .cabecalho { text-align: center; margin-bottom: 20pt; border-bottom: 1pt solid #000; padding-bottom: 10pt; }
+            .cabecalho-escritorio { font-size: 10pt; font-weight: bold; }
+            .cabecalho-subtitulo { font-size: 8pt; }
+            .cabecalho-data { font-size: 8pt; margin-top: 4pt; }
+            .cabecalho-total { font-size: 8pt; margin-top: 2pt; }
 
-            /* ── Seção advogado ── */
-            .secao-adv { font-weight: bold; font-size: 10pt; margin-top: 20pt; margin-bottom: 1pt; }
-            .secao-adv-count { font-size: 8.5pt; margin-bottom: 10pt; }
+            /* Seção advogado */
+            .secao-adv { font-size: 10pt; font-weight: bold; margin-top: 18pt; margin-bottom: 2pt; }
+            .secao-adv-count { font-size: 8pt; margin-bottom: 10pt; }
 
-            /* ── Publicação ── */
-            .pub { margin-bottom: 2pt; page-break-inside: avoid; }
-            .pub-meta { line-height: 1.7; margin-bottom: 4pt; }
-            .pub-jornal { font-weight: bold; margin-bottom: 5pt; }
-            .pub-texto { text-align: justify; line-height: 1.65; white-space: pre-wrap; }
-            .pub-sep { border: none; border-top: 0.5pt solid #000; margin: 12pt 0; }
+            /* Publicação */
+            .pub { margin-bottom: 8pt; }
+            .pub-linha { font-size: 9pt; line-height: 1.6; margin-bottom: 2pt; }
+            .pub-jornal { font-size: 9pt; font-weight: bold; margin-bottom: 4pt; }
+            .pub-texto { font-size: 9pt; line-height: 1.6; text-align: left; margin-top: 4pt; }
+            .pub-sep { border: none; border-top: 0.5pt solid #000; margin: 10pt 0; }
 
-            /* ── Rodapé ── */
-            .rodape { margin-top: 22pt; padding-top: 6pt; border-top: 0.5pt solid #000; font-size: 7.5pt; text-align: center; }
+            /* Rodapé */
+            .rodape { margin-top: 20pt; padding-top: 6pt; border-top: 0.5pt solid #000; font-size: 7.5pt; text-align: center; }
         </style></head><body>";
 
-        // ── Cabeçalho simples ──
+        // ── Cabeçalho centralizado ──
         $html .= "<div class='cabecalho'>";
         $html .= "<div class='cabecalho-escritorio'>Escritório de Advocacia Ferreira</div>";
-        $html .= "<div class='cabecalho-titulo'>Publicações AASP &mdash; {$dataFmt}</div>";
-        $html .= "<div class='cabecalho-info'>{$totalPubs} publicação(ões) &nbsp;|&nbsp; {$totalAdvs} advogado(s) &nbsp;|&nbsp; Gerado em {$geradoEm}</div>";
+        $html .= "<div class='cabecalho-subtitulo'>Publicações AASP</div>";
+        $html .= "<div class='cabecalho-data'>{$dataFmt}</div>";
+        $html .= "<div class='cabecalho-total'>{$totalPubs} publicação(ões) &nbsp;|&nbsp; {$totalAdvs} advogado(s) &nbsp;|&nbsp; Gerado em {$geradoEm}</div>";
         $html .= "</div>";
 
         // ── Publicações agrupadas por advogado ──
@@ -298,28 +304,36 @@ class AaspPublicacoes extends Component
             $seq   = 1;
             $total = $pubs->count();
             foreach ($pubs as $pub) {
-                // Data por extenso em português
-                $dataPorExtenso = $pub->data
-                    ? Carbon::parse($pub->data)->isoFormat('dddd, D [de] MMMM [de] YYYY')
-                    : '—';
+                // Data por extenso em português sem isoFormat (evita dependência de locale)
+                if ($pub->data) {
+                    $carbon     = Carbon::parse($pub->data);
+                    $dataExtenso = $diasSemana[$carbon->dayOfWeek] . ', ' . $carbon->day . ' de ' . $meses[$carbon->month - 1] . ' de ' . $carbon->year . '.';
+                } else {
+                    $dataExtenso = '—';
+                }
+
+                $jornalMaiusculo = strtoupper($pub->jornal ?? '');
 
                 $html .= "<div class='pub'>";
 
-                // Campos de metadados
-                $html .= "<div class='pub-meta'>";
-                $html .= "<strong>Disponibilização:</strong> {$dataPorExtenso}.<br>";
-                $html .= "<strong>Arquivo:</strong> {$seq}<br>";
+                // Linha identificadora: seq. D J E N - JORNAL EM MAIÚSCULAS
+                $html .= "<div class='pub-linha'><strong>{$seq}. D J E N"
+                       . ($jornalMaiusculo ? " - {$jornalMaiusculo}" : '')
+                       . "</strong></div>";
+
+                // Metadados
+                $html .= "<div class='pub-linha'><strong>Disponibilização:</strong> {$dataExtenso}</div>";
+                $html .= "<div class='pub-linha'><strong>Arquivo:</strong> 1</div>";
                 if ($pub->numero_publicacao) {
-                    $html .= "<strong>Publicação:</strong> " . htmlspecialchars($pub->numero_publicacao) . "<br>";
+                    $html .= "<div class='pub-linha'><strong>Publicação:</strong> " . htmlspecialchars($pub->numero_publicacao) . "</div>";
                 }
-                $html .= "</div>";
 
                 // Jornal em negrito
                 if ($pub->jornal) {
                     $html .= "<div class='pub-jornal'>" . htmlspecialchars($pub->jornal) . "</div>";
                 }
 
-                // Texto completo justificado, com nome do advogado em negrito
+                // Texto da publicação alinhado à esquerda, com nome do advogado em negrito
                 if ($pub->texto) {
                     $textoEscapado = htmlspecialchars($this->limparTexto($pub->texto));
                     $nomeEscapado  = htmlspecialchars($nomeAdv);
