@@ -53,7 +53,7 @@ class BuscarAasp extends Command
                 $count = 0;
                 foreach ($pubs as $pub) {
                     $numPub = $pub['numeroPublicacao'] ?? $pub['numero_publicacao'] ?? $pub['NumeroPublicacao'] ?? null;
-                    if ($numPub && AaspPublicacao::where('numero_publicacao', $numPub)->exists()) continue;
+                    if ($numPub && AaspPublicacao::where('numero_publicacao', $numPub)->where('codigo_aasp', $adv->codigo_aasp)->exists()) continue;
 
                     try { $dataPub = Carbon::parse($pub['data'] ?? $pub['dataPublicacao'] ?? $data)->format('Y-m-d'); }
                     catch (\Exception) { $dataPub = $data->format('Y-m-d'); }
