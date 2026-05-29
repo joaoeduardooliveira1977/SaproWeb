@@ -24,11 +24,16 @@ use App\Http\Controllers\IAController;
 		Route::get('/voltar',             [\App\Http\Controllers\SuperAdminController::class, 'voltarSuperAdmin'])->name('voltar');
 		Route::get('/novo',               [\App\Http\Controllers\SuperAdminController::class, 'criar'])->name('criar');
 		Route::post('/novo',              [\App\Http\Controllers\SuperAdminController::class, 'salvar'])->name('salvar');
-		Route::get('/{id}',               [\App\Http\Controllers\SuperAdminController::class, 'show'])->name('show');
-		Route::post('/{id}/plano',        [\App\Http\Controllers\SuperAdminController::class, 'atualizarPlano'])->name('plano');
-		Route::post('/{id}/toggle',       [\App\Http\Controllers\SuperAdminController::class, 'toggleAtivo'])->name('toggle');
-		Route::get('/{id}/login',         [\App\Http\Controllers\SuperAdminController::class, 'loginComoTenant'])->name('login-tenant');
-		Route::delete('/{id}',            [\App\Http\Controllers\SuperAdminController::class, 'excluir'])->name('excluir');
+
+		// Rotas estáticas ANTES do parâmetro dinâmico {id}
+		Route::get('/branding',           \App\Livewire\Admin\TenantBranding::class)->name('branding');
+
+		// Rotas dinâmicas com restrição numérica para evitar conflito com rotas estáticas
+		Route::get('/{id}',               [\App\Http\Controllers\SuperAdminController::class, 'show'])->where('id', '[0-9]+')->name('show');
+		Route::post('/{id}/plano',        [\App\Http\Controllers\SuperAdminController::class, 'atualizarPlano'])->where('id', '[0-9]+')->name('plano');
+		Route::post('/{id}/toggle',       [\App\Http\Controllers\SuperAdminController::class, 'toggleAtivo'])->where('id', '[0-9]+')->name('toggle');
+		Route::get('/{id}/login',         [\App\Http\Controllers\SuperAdminController::class, 'loginComoTenant'])->where('id', '[0-9]+')->name('login-tenant');
+		Route::delete('/{id}',            [\App\Http\Controllers\SuperAdminController::class, 'excluir'])->where('id', '[0-9]+')->name('excluir');
 	});
 
 // ─── Planos ────────────────────────────────────
@@ -191,10 +196,6 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/admin/backup', \App\Livewire\Admin\Backup::class)->name('admin.backup');
     });
 
-    // ── Super Admin — branding de tenants ──────────────────────
-    Route::middleware('super_admin')->group(function () {
-        Route::get('/super-admin/branding', \App\Livewire\Admin\TenantBranding::class)->name('super-admin.branding');
-    });
 
 });
 
