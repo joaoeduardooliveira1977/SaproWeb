@@ -140,6 +140,8 @@ class TenantBranding extends Component
             ->orderBy('nome')
             ->get();
 
-        return view('livewire.admin.tenant-branding', compact('tenants'));
+        return view('livewire.admin.tenant-branding', compact('tenants'))
+            ->extends('layouts.app')
+            ->section('content');
     }
 }
