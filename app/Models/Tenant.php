@@ -9,6 +9,7 @@ class Tenant extends Model
 {
     protected $fillable = [
         'nome', 'slug', 'email', 'telefone', 'cnpj', 'logo',
+        'dominio', 'cor_primaria', 'cor_secundaria',
         'endereco', 'cidade', 'oab',
         'plano', 'trial_expira_em', 'ativo', 'onboarding_concluido',
         'limite_processos', 'limite_usuarios',
@@ -25,6 +26,26 @@ class Tenant extends Model
         'whatsapp_habilitado'  => 'boolean',
         'configuracoes'        => 'array',
     ];
+
+    // ── Scopes ───────────────────────────────────────────────────
+
+    public function scopeAtivo($query)
+    {
+        return $query->where('ativo', true);
+    }
+
+    // ── Accessors ────────────────────────────────────────────────
+
+    public function getLogoUrlAttribute(): string
+    {
+        if ($this->logo && file_exists(storage_path('app/public/' . $this->logo))) {
+            return asset('storage/' . $this->logo);
+        }
+
+        return asset('images/logo-default.png');
+    }
+
+    // ── Relationships ────────────────────────────────────────────
 
     public function usuarios(): HasMany
     {

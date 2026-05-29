@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — SISTEMA JURÍDICO</title>
+    <title>Login — {{ $tenant->nome ?? 'SISTEMA JURÍDICO' }}</title>
     <style>
+        :root {
+            --cor-primaria:   {{ $tenant->cor_primaria  ?? '#1a3a5c' }};
+            --cor-secundaria: {{ $tenant->cor_secundaria ?? '#c9a84c' }};
+            --cor-primaria-dark: color-mix(in srgb, var(--cor-primaria) 80%, #000);
+        }
+
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
@@ -123,6 +129,15 @@
 
         .logo-wrap { text-align: center; margin-bottom: 32px; }
 
+        .logo-img {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            border-radius: 14px;
+            margin: 0 auto 14px;
+            display: block;
+        }
+
         .logo-icon {
             width: 64px; height: 64px;
             border-radius: 16px;
@@ -166,8 +181,8 @@
         }
 
         .inp:focus {
-            border-color: #2563a8;
-            box-shadow: 0 0 0 3px rgba(37,99,168,.1);
+            border-color: var(--cor-primaria);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-primaria) 20%, transparent);
             background: #fff;
         }
 
@@ -189,12 +204,12 @@
             cursor: pointer;
         }
 
-        .check-lbl input { accent-color: #2563a8; width: 14px; height: 14px; }
+        .check-lbl input { accent-color: var(--cor-primaria); width: 14px; height: 14px; }
 
         .btn-entrar {
             width: 100%;
             padding: 13px;
-            background: linear-gradient(135deg, #0d2040, #2563a8);
+            background: var(--cor-primaria);
             color: #fff;
             border: none;
             border-radius: 10px;
@@ -205,7 +220,7 @@
             transition: opacity .2s, transform .1s;
         }
 
-        .btn-entrar:hover { opacity: .9; transform: translateY(-1px); }
+        .btn-entrar:hover { opacity: .88; transform: translateY(-1px); }
 
         .err {
             background: #fef2f2;
@@ -218,7 +233,7 @@
         }
 
         .foot { text-align: center; margin-top: 18px; font-size: 13px; color: #64748b; }
-        .foot a { color: #2563a8; font-weight: 700; text-decoration: none; }
+        .foot a { color: var(--cor-primaria); font-weight: 700; text-decoration: none; }
         .foot a:hover { text-decoration: underline; }
 
         .version { text-align: center; margin-top: 24px; font-size: 11px; color: #94a3b8; }
@@ -278,9 +293,21 @@
         <div class="form-card">
 
             <div class="logo-wrap">
-                <div class="logo-icon">⚖️</div>
-                <h2>SISTEMA JURÍDICO</h2>
-                <p>Sistema de acompanhamento de processos com controle moderno e visão profissional.</p>
+                @isset($tenant)
+                    @if($tenant->logo && file_exists(storage_path('app/public/' . $tenant->logo)))
+                        <img src="{{ asset('storage/' . $tenant->logo) }}"
+                             alt="{{ $tenant->nome }}"
+                             class="logo-img">
+                    @else
+                        <div class="logo-icon">⚖️</div>
+                    @endif
+                    <h2>{{ Str::upper($tenant->nome) }}</h2>
+                    <p>Sistema de acompanhamento de processos com controle moderno e visão profissional.</p>
+                @else
+                    <div class="logo-icon">⚖️</div>
+                    <h2>SISTEMA JURÍDICO</h2>
+                    <p>Sistema de acompanhamento de processos com controle moderno e visão profissional.</p>
+                @endisset
             </div>
 
             @if($errors->any())
@@ -312,7 +339,7 @@
                         <input type="checkbox" name="lembrar" value="1" {{ old('lembrar') ? 'checked' : '' }}>
                         Manter conectado
                     </label>
-                    <a href="#" style="font-size:13px;color:#2563a8;font-weight:600;text-decoration:none;">Esqueci minha senha</a>
+                    <a href="#" style="font-size:13px;color:var(--cor-primaria);font-weight:600;text-decoration:none;">Esqueci minha senha</a>
                 </div>
 
                 <button type="submit" class="btn-entrar">Entrar no Sistema</button>
@@ -322,7 +349,7 @@
                 Não tem conta? <a href="{{ route('registro') }}">Criar conta grátis</a>
             </div>
 
-            <div class="version">SISTEMA JURÍDICO — versão 1.0</div>
+            <div class="version">{{ $tenant->nome ?? 'SISTEMA JURÍDICO' }} — versão 1.0</div>
         </div>
     </div>
 

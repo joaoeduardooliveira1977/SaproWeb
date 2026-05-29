@@ -191,6 +191,11 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/admin/backup', \App\Livewire\Admin\Backup::class)->name('admin.backup');
     });
 
+    // ── Super Admin — branding de tenants ──────────────────────
+    Route::middleware('super_admin')->group(function () {
+        Route::get('/super-admin/branding', \App\Livewire\Admin\TenantBranding::class)->name('super-admin.branding');
+    });
+
 });
 
 
