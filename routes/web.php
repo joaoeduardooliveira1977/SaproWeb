@@ -18,6 +18,15 @@ use App\Http\Controllers\IAController;
 	Route::post('/login', [AuthController::class, 'login']);
 	Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
 
+// ─── Master Admin (SaaS) ───────────────────────
+    Route::prefix('master-admin')->name('master-admin.')->middleware(['auth:usuarios', 'super_admin'])->group(function () {
+        Route::get('/',           \App\Livewire\MasterAdmin\Dashboard::class)->name('dashboard');
+        Route::get('/tenants',    \App\Livewire\MasterAdmin\Tenants::class)->name('tenants');
+        Route::get('/tenants/{id}', \App\Livewire\MasterAdmin\TenantShow::class)->where('id', '[0-9]+')->name('tenant-show');
+        Route::get('/infra',      \App\Livewire\MasterAdmin\Infra::class)->name('infra');
+        Route::get('/alertas',    \App\Livewire\MasterAdmin\Alertas::class)->name('alertas');
+    });
+
 // ─── Super Admin ───────────────────────────────
 	Route::prefix('super-admin')->name('super-admin.')->middleware(['auth:usuarios', 'super_admin'])->group(function () {
 		Route::get('/',                   [\App\Http\Controllers\SuperAdminController::class, 'index'])->name('index');
