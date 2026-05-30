@@ -70,7 +70,9 @@
                     <td>
                         <div style="display:flex;gap:5px;flex-wrap:wrap;">
                             <a href="{{ route('master-admin.tenant-show', $t->id) }}" class="btn btn-sm btn-outline">Ver</a>
-                            <a href="{{ route('master-admin.tenants') }}?editar={{ $t->id }}" class="btn btn-sm" style="background:#f1f5f9;color:#374151;">Branding</a>
+                            <button wire:click="editarConfiguracoes({{ $t->id }})"
+                                    wire:confirm="Entrar como admin de {{ $t->nome }} para editar configurações?"
+                                    class="btn btn-sm" style="background:#f1f5f9;color:#374151;">Configurações</button>
                             <button wire:click="loginComoTenant({{ $t->id }})"
                                     wire:confirm="Entrar como administrador de {{ $t->nome }}?"
                                     class="btn btn-sm btn-primary">Entrar</button>

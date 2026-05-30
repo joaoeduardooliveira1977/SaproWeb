@@ -42,6 +42,7 @@ class SlaMonitor extends Component
         // ── Prazos ──────────────────────────────────────────────
         if (in_array($this->filtroTipo, ['todos', 'prazo'])) {
             $q = Prazo::with(['processo:id,numero,cliente_id', 'processo.cliente:id,nome', 'responsavel:id,nome'])
+                ->select(['id','processo_id','responsavel_id','titulo','data_prazo','prazo_fatal','status','tipo'])
                 ->where('status', 'aberto')
                 ->where('data_prazo', '<=', $ate);
 
@@ -76,6 +77,7 @@ class SlaMonitor extends Component
         // ── Audiências ──────────────────────────────────────────
         if (in_array($this->filtroTipo, ['todos', 'audiencia'])) {
             $q = Audiencia::with(['processo:id,numero,cliente_id', 'processo.cliente:id,nome'])
+                ->select(['id','processo_id','advogado_id','data_hora','tipo','local','sala','status'])
                 ->where('tenant_id', $tenantId)
                 ->where('status', 'agendada')
                 ->whereDate('data_hora', '<=', $ate);
@@ -112,6 +114,7 @@ class SlaMonitor extends Component
         // ── Agenda ──────────────────────────────────────────────
         if (in_array($this->filtroTipo, ['todos', 'agenda'])) {
             $q = Agenda::with(['processo:id,numero,cliente_id', 'processo.cliente:id,nome', 'responsavel:id,nome'])
+                ->select(['id','processo_id','responsavel_id','titulo','data_hora','tipo','urgente','concluido'])
                 ->where('concluido', false)
                 ->whereDate('data_hora', '<=', $ate);
 

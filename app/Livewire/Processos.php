@@ -346,7 +346,7 @@ Responda em 1-3 frases objetivas. Se a pergunta pedir para filtrar ou mostrar al
                 ->paginate(15);
         }
 
-        $totalLixeira = Processo::onlyTrashed()->count();
+        $totalLixeira = Cache::remember("processos.lixeira.{$tid}", 60, fn() => Processo::onlyTrashed()->count());
 
         // Métricas — cacheadas 2 min por tenant (re-renderizadas em cada filtro)
         $metricas = Cache::remember("processos.metricas.{$tid}", 120, function () {

@@ -59,6 +59,28 @@ class Tenants extends Component
         return redirect()->route('dashboard');
     }
 
+    public function editarConfiguracoes(int $id): mixed
+    {
+        $tenant  = Tenant::findOrFail($id);
+        $usuario = Usuario::where('tenant_id', $id)->where('perfil', 'administrador')->first();
+
+        if (!$usuario) {
+            $this->dispatch('toast', message: 'Nenhum administrador encontrado neste tenant.', type: 'error');
+            return null;
+        }
+
+        MasterAdminLog::registrar(
+            'login_como_tenant',
+            $tenant->id,
+            $tenant->nome,
+            "Entrou para editar configurações: {$usuario->nome}"
+        );
+
+        session(['super_admin_id' => auth('usuarios')->id()]);
+        Auth::guard('usuarios')->login($usuario);
+        return redirect()->route('configuracoes.escritorio');
+    }
+
     public function render(): \Illuminate\View\View
     {
         $tenants = Tenant::query()

@@ -319,11 +319,12 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
             'atrasados' => AgendaModel::where('data_hora', '<', now())->where('concluido', false)->count(),
         ];
 
-        // Contagem por tipo (pendentes)
-        $tipoCounts = [];
-        foreach (['Audiência', 'Prazo', 'Reunião', 'Consulta', 'Despacho', 'Outros'] as $t) {
-            $tipoCounts[$t] = AgendaModel::where('tipo', $t)->where('concluido', false)->count();
-        }
+        // Contagem por tipo (pendentes) — 1 query com GROUP BY em vez de 6 queries
+        $tipoCounts = AgendaModel::where('concluido', false)
+            ->selectRaw('tipo, count(*) as total')
+            ->groupBy('tipo')
+            ->pluck('total', 'tipo')
+            ->toArray();
 
         return view('livewire.agenda', [
             'eventos'       => $eventos,
@@ -331,7 +332,7 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
             'prazosMes'     => $prazosMes,
             'audienciasMes' => $audienciasMes,
             'inicioMes'     => $inicioMes,
-            'processos'     => Processo::where('status', 'Ativo')->orderBy('numero')->get(),
+            'processos'     => Processo::where('status', 'Ativo')->orderBy('numero')->get(['id', 'numero']),
             'responsaveis'  => $responsaveis,
             'metricas'      => $metricas,
             'tipoCounts'    => $tipoCounts,
