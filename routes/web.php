@@ -66,8 +66,8 @@ Route::get('/teste-config', fn() => 'funcionou');
     // ── Onboarding ─────────────────────────────────────────────
     Route::get('/onboarding', \App\Livewire\Onboarding::class)->name('onboarding');
 
-    // ── Configurações ───────────────────────────────────────────
-    Route::get('/configuracoes/escritorio', \App\Livewire\Configuracoes\EscritorioConfig::class)->name('configuracoes.escritorio');
+    // ── Configurações (admin e administrador apenas) ────────────
+    Route::middleware('perfil:admin')->get('/configuracoes/escritorio', \App\Livewire\Configuracoes\EscritorioConfig::class)->name('configuracoes.escritorio');
 
     // ── Geral (todos os perfis autenticados) ───────────────────
     	Route::middleware('perfil:geral')->group(function () {
