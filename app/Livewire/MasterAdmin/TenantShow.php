@@ -48,10 +48,18 @@ class TenantShow extends Component
             ->toArray();
 
         $this->auditoria = DB::table('auditorias')
-            ->where('tenant_id', $tid)
-            ->orderByDesc('created_at')
+            ->join('usuarios', 'auditorias.usuario_id', '=', 'usuarios.id')
+            ->where('usuarios.tenant_id', $tid)
+            ->orderByDesc('auditorias.created_at')
             ->limit(10)
-            ->get(['acao', 'descricao', 'created_at', 'usuario_nome'])
+            ->get([
+                'auditorias.acao',
+                'auditorias.tabela',
+                'auditorias.login',
+                'auditorias.ip',
+                'auditorias.created_at',
+                'usuarios.nome as usuario_nome',
+            ])
             ->toArray();
     }
 

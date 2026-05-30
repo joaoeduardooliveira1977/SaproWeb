@@ -276,7 +276,7 @@
 
 {{-- Rodapé --}}
 <div class="footer">
-    <div class="left">SAPRO &nbsp;·&nbsp; Relatório do Processo {{ $processo->numero }}</div>
+    <div class="left">Software Jurídico &nbsp;·&nbsp; Relatório do Processo {{ $processo->numero }}</div>
     <div class="right">Gerado em {{ now()->format('d/m/Y H:i') }}</div>
 </div>
 

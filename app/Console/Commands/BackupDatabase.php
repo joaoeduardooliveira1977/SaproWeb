@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 class BackupDatabase extends Command
 {
     protected $signature   = 'backup:database';
-    protected $description = 'Gera backup do banco PostgreSQL do SAPRO';
+    protected $description = 'Gera backup do banco PostgreSQL do Software Jurídico';
 
     public function handle(): int
     {

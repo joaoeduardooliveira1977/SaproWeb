@@ -1,5 +1,5 @@
 <?php
-// Coloque este arquivo na raiz do projeto SAPRO e rode:
+// Coloque este arquivo na raiz do projeto e rode:
 // php inspecionar_financeiro.php
 
 require __DIR__ . '/vendor/autoload.php';

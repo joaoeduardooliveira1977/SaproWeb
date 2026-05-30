@@ -12,7 +12,7 @@ class TenantSeeder extends Seeder
         Tenant::firstOrCreate(
             ['slug' => 'demo'],
             [
-                'nome'          => 'SAPRO — Sistema Jurídico',
+                'nome'          => 'Software Jurídico',
                 'email'         => 'demo@sapro.com.br',
                 'dominio'       => 'kmd-ia.com.br',
                 'cor_primaria'  => '#1a3a5c',

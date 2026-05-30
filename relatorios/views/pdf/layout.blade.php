@@ -43,7 +43,7 @@
 <div class="header">
     <div class="header-top">
         <div>
-            <div class="header-logo">⚖ SAPRO — Gestão Jurídica</div>
+            <div class="header-logo">⚖ Software Jurídico</div>
             <div class="header-sub">Sistema de Acompanhamento de Processos</div>
         </div>
         <div style="text-align:right; font-size:9px; color:#93c5fd;">

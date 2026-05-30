@@ -128,13 +128,14 @@
         <div class="card-header"><span class="card-title">Atividade Recente</span></div>
         <div class="table-wrap">
             <table>
-                <thead><tr><th>Ação</th><th>Descrição</th><th>Usuário</th><th>Data</th></tr></thead>
+                <thead><tr><th>Ação</th><th>Tabela</th><th>Usuário</th><th>IP</th><th>Data</th></tr></thead>
                 <tbody>
                 @foreach($auditoria as $a)
                 <tr>
                     <td><span class="badge badge-blue">{{ $a->acao }}</span></td>
-                    <td style="font-size:12px;color:#64748b;max-width:300px;">{{ Str::limit($a->descricao ?? '—', 80) }}</td>
-                    <td style="font-size:12px;">{{ $a->usuario_nome ?? '—' }}</td>
+                    <td style="font-size:12px;color:#64748b;">{{ $a->tabela ?? '—' }}</td>
+                    <td style="font-size:12px;">{{ $a->usuario_nome ?? $a->login ?? '—' }}</td>
+                    <td style="font-size:11px;color:#94a3b8;font-family:monospace;">{{ $a->ip ?? '—' }}</td>
                     <td style="font-size:12px;color:#64748b;">{{ \Carbon\Carbon::parse($a->created_at)->format('d/m/Y H:i') }}</td>
                 </tr>
                 @endforeach

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('page-title', 'Master Admin') — SAPRO</title>
+    <title>@yield('page-title', 'Master Admin') — Master Admin</title>
     @livewireStyles
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -149,8 +149,7 @@
                 <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
             </div>
             <div>
-                <div class="sidebar-brand-text">SAPRO</div>
-                <div class="sidebar-brand-sub">Master Admin</div>
+                <div class="sidebar-brand-text">Master Admin</div>
             </div>
         </div>
 
