@@ -92,7 +92,6 @@ class AaspPublicacoes extends Component
                 $dataFormatada = Carbon::parse($this->dataBusca)->format('d/m/Y');
 
                 $response = Http::timeout(30)
-                    ->withoutVerifying()
                     ->get('https://intimacaoapi.aasp.org.br/api/Associado/intimacao/json', [
                         'chave'       => $adv->chave_aasp,
                         'data'        => $dataFormatada,
@@ -157,6 +156,7 @@ class AaspPublicacoes extends Component
                         }
 
                         AaspPublicacao::create([
+                            'tenant_id'         => auth('usuarios')->user()->tenant_id,
                             'codigo_aasp'       => $adv->codigo_aasp,
                             'processo_id'       => $processoVinculado,
                             'data'              => $dataPubl,

@@ -49,7 +49,7 @@ class VerificarPerfil
 
     public function handle(Request $request, Closure $next, string $modulo = null)
     {
-        $usuario = auth('usuarios')->user() ?? auth()->user();
+        $usuario = auth('usuarios')->user();
 
         if (! $usuario) {
             return redirect()->route('login');
@@ -59,7 +59,6 @@ class VerificarPerfil
 
         if (isset($usuario->ativo) && ! $usuario->ativo) {
             auth('usuarios')->logout();
-            auth()->logout();
             return redirect()->route('login')->with('error', 'Sua conta está desativada.');
         }
 

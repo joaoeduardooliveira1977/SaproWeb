@@ -68,16 +68,16 @@ class RegistroController extends Controller
         \Illuminate\Support\Facades\Cache::forget("tenant_{$tenant->id}");
 
         // Enviar e-mail de boas-vindas
-        $this->enviarEmailBoasVindas($tenant, $usuario, $request->senha);
+        $this->enviarEmailBoasVindas($tenant, $usuario);
 
         return redirect()->route('dashboard')
             ->with('sucesso', "Bem-vindo ao Sistema! Você tem 30 dias de teste gratuito.");
     }
 
-    private function enviarEmailBoasVindas(\App\Models\Tenant $tenant, \App\Models\Usuario $usuario, string $senha): void
+    private function enviarEmailBoasVindas(\App\Models\Tenant $tenant, \App\Models\Usuario $usuario): void
     {
         $expiracao = $tenant->trial_expira_em->format('d/m/Y');
-        $sistNome  = config('app.name', 'Software Jur�dico');
+        $sistNome  = config('app.name', 'Software Jur�dico');
         $url       = config('app.url', 'http://localhost:8000');
         $plano     = ucfirst($tenant->plano);
         $limite    = $tenant->limite_processos;
@@ -108,10 +108,6 @@ class RegistroController extends Controller
                         <tr>
                             <td style='padding:6px 0;color:#64748b;'>Login:</td>
                             <td style='padding:6px 0;font-weight:700;color:#1e293b;'>{$usuario->email}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding:6px 0;color:#64748b;'>Senha:</td>
-                            <td style='padding:6px 0;font-weight:700;color:#1e293b;'>{$senha}</td>
                         </tr>
                         <tr>
                             <td style='padding:6px 0;color:#64748b;'>Plano:</td>
@@ -146,7 +142,7 @@ class RegistroController extends Controller
                 </div>
 
                 <p style='font-size:13px;color:#94a3b8;margin:0;'>
-                    ⚠️ Guarde suas credenciais em local seguro. Recomendamos alterar a senha após o primeiro acesso em <strong>Minha Conta</strong>.
+                    🔒 Por segurança, a senha não é enviada por e-mail. Utilize a senha criada durante o cadastro e altere-a após o primeiro acesso em <strong>Minha Conta</strong>.
                 </p>
             </div>
 

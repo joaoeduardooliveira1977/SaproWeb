@@ -14,6 +14,7 @@ class Prazo extends Model
     protected $table = 'prazos';
 
     protected $fillable = [
+        'tenant_id',
         'processo_id', 'responsavel_id', 'criado_por',
         'titulo', 'descricao', 'tipo',
         'data_inicio', 'tipo_contagem', 'dias', 'data_prazo',

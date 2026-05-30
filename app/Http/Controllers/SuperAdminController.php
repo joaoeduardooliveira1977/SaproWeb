@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Tenant, Usuario};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Auth, DB, Hash};
+use Illuminate\Support\Facades\{Auth, Cache, DB, Hash};
 use Illuminate\Support\Str;
 
 class SuperAdminController extends Controller
@@ -58,6 +58,7 @@ class SuperAdminController extends Controller
         }
 
         $tenant->update($dados);
+        Cache::forget("tenant_{$tenant->id}");
 
         return back()->with('sucesso', 'Configurações atualizadas com sucesso!');
     }
@@ -66,7 +67,9 @@ class SuperAdminController extends Controller
     {
         $tenant = Tenant::findOrFail($id);
         $tenant->update(['ativo' => !$tenant->ativo]);
-        return back()->with('sucesso', $tenant->ativo ? 'Tenant ativado!' : 'Tenant suspenso!');
+        Cache::forget("tenant_{$tenant->id}");
+        Cache::forget("tenant_host_{$tenant->dominio}");
+        return back()->with('sucesso', $tenant->fresh()->ativo ? 'Tenant ativado!' : 'Tenant suspenso!');
     }
 
     public function loginComoTenant(int $id)
@@ -81,7 +84,7 @@ class SuperAdminController extends Controller
         }
 
         // Guardar super admin na sessão para poder voltar
-        session(['super_admin_id' => auth()->id()]);
+        session(['super_admin_id' => auth('usuarios')->id()]);
 
         Auth::guard('usuarios')->login($usuario);
         return redirect()->route('dashboard');
@@ -92,6 +95,7 @@ class SuperAdminController extends Controller
         $superAdminId = session('super_admin_id');
         if ($superAdminId) {
             $superAdmin = Usuario::findOrFail($superAdminId);
+            abort_unless($superAdmin->perfil === 'super_admin', 403, 'Acesso negado.');
             Auth::guard('usuarios')->login($superAdmin);
             session()->forget('super_admin_id');
         }
@@ -185,7 +189,7 @@ class SuperAdminController extends Controller
         $tenant = Tenant::findOrFail($id);
 
         // Não permitir excluir o próprio tenant do super admin
-        if (auth()->user()->tenant_id === $id) {
+        if (auth('usuarios')->user()->tenant_id === $id) {
             return back()->with('erro', 'Não é possível excluir o tenant atual.');
         }
 

@@ -69,8 +69,9 @@ class ProcessoController extends Controller
                    d.arquivo_original, d.tamanho, d.portal_visivel, d.created_at
             FROM documentos d
             WHERE d.processo_id = ?
+              AND d.tenant_id = ?
             ORDER BY d.created_at DESC
-        ", [$id]);
+        ", [$id, auth('usuarios')->user()->tenant_id]);
 
         $contratosVinculados = collect();
         if (Schema::hasColumn('contratos', 'processo_id')) {
@@ -183,6 +184,13 @@ class ProcessoController extends Controller
             'audiencias.juiz', 'audiencias.advogado',
             'custas',
         ])->findOrFail($id);
+
+        // Garante que o processo pertence ao tenant do usuário logado
+        abort_unless(
+            $processo->tenant_id === auth('usuarios')->user()->tenant_id,
+            403,
+            'Acesso negado.'
+        );
 
         $prazos = Prazo::with('responsavel')
             ->where('processo_id', $id)

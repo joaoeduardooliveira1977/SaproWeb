@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class AaspPublicacao extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'aasp_publicacoes';
 
     public $timestamps = false;
@@ -13,6 +16,7 @@ class AaspPublicacao extends Model
     const CREATED_AT = 'created_at';
 
     protected $fillable = [
+        'tenant_id',
         'codigo_aasp',
         'processo_id',
         'data',
@@ -24,7 +28,7 @@ class AaspPublicacao extends Model
     ];
 
     protected $casts = [
-        'data' => 'date',
+        'data'       => 'date',
         'created_at' => 'datetime',
     ];
 
