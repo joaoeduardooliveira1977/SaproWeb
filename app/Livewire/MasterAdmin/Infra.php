@@ -2,7 +2,8 @@
 
 namespace App\Livewire\MasterAdmin;
 
-use Illuminate\Support\Facades\DB;
+use App\Models\MasterAdminLog;
+use Illuminate\Support\Facades\{Artisan, DB};
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -138,6 +139,42 @@ class Infra extends Component
         } catch (\Exception) {
             $this->logConteudo = 'Erro ao ler o log.';
         }
+    }
+
+    public function retryJob(int $id): void
+    {
+        try {
+            $job = DB::table('failed_jobs')->find($id);
+            if (!$job) {
+                $this->dispatch('toast', message: 'Job não encontrado.', type: 'error');
+                return;
+            }
+            Artisan::call('queue:retry', ['id' => [$job->uuid]]);
+            MasterAdminLog::registrar('job_retry', null, null, "Job ID {$id} reenfileirado.");
+            $this->dispatch('toast', message: 'Job reenfileirado com sucesso.', type: 'success');
+        } catch (\Exception $e) {
+            $this->dispatch('toast', message: 'Erro ao retentar: ' . $e->getMessage(), type: 'error');
+        }
+        $this->carregarFila();
+    }
+
+    public function deleteJob(int $id): void
+    {
+        DB::table('failed_jobs')->where('id', $id)->delete();
+        MasterAdminLog::registrar('job_deletado', null, null, "Job ID {$id} removido da fila.");
+        $this->dispatch('toast', message: 'Job removido.', type: 'success');
+        $this->carregarFila();
+    }
+
+    public function retryTodos(): void
+    {
+        try {
+            Artisan::call('queue:retry', ['id' => ['all']]);
+            $this->dispatch('toast', message: 'Todos os jobs reenfileirados.', type: 'success');
+        } catch (\Exception $e) {
+            $this->dispatch('toast', message: 'Erro: ' . $e->getMessage(), type: 'error');
+        }
+        $this->carregarFila();
     }
 
     public function limparLog(): void

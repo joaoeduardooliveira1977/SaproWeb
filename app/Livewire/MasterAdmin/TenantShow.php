@@ -2,7 +2,7 @@
 
 namespace App\Livewire\MasterAdmin;
 
-use App\Models\{Tenant, Usuario};
+use App\Models\{MasterAdminLog, Tenant, Usuario};
 use Illuminate\Support\Facades\{Auth, Cache, DB, Hash};
 use Livewire\Component;
 
@@ -82,6 +82,15 @@ class TenantShow extends Component
         $this->tenant->update(['ativo' => !$this->tenant->ativo]);
         Cache::forget("tenant_{$this->tenant->id}");
         $this->tenant->refresh();
+
+        $novoStatus = $this->tenant->ativo ? 'ativado' : 'suspenso';
+        MasterAdminLog::registrar(
+            "tenant_{$novoStatus}",
+            $this->tenant->id,
+            $this->tenant->nome,
+            "Tenant {$novoStatus} via tela de detalhes."
+        );
+
         $this->dispatch('toast', message: $this->tenant->ativo ? 'Tenant reativado.' : 'Tenant suspenso.', type: 'success');
     }
 
@@ -95,6 +104,13 @@ class TenantShow extends Component
             $this->dispatch('toast', message: 'Nenhum administrador encontrado.', type: 'error');
             return null;
         }
+
+        MasterAdminLog::registrar(
+            'login_como_tenant',
+            $this->tenant->id,
+            $this->tenant->nome,
+            "Entrou como: {$usuario->nome} ({$usuario->email})"
+        );
 
         session(['super_admin_id' => auth('usuarios')->id()]);
         Auth::guard('usuarios')->login($usuario);
@@ -114,6 +130,13 @@ class TenantShow extends Component
 
         $usuario = Usuario::where('tenant_id', $this->tenantId)->findOrFail($this->usuarioSenhaId);
         $usuario->update(['password' => Hash::make($this->novaSenha)]);
+
+        MasterAdminLog::registrar(
+            'senha_resetada',
+            $this->tenant->id,
+            $this->tenant->nome,
+            "Senha redefinida para o usuário: {$usuario->nome} ({$usuario->email})"
+        );
 
         $this->modalSenha = false;
         $this->novaSenha  = '';

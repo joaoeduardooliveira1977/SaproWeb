@@ -2,7 +2,7 @@
 
 namespace App\Livewire\MasterAdmin;
 
-use App\Models\{Tenant, Usuario};
+use App\Models\{MasterAdminLog, Tenant, Usuario};
 use Illuminate\Support\Facades\{Auth, Cache, DB};
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -25,7 +25,16 @@ class Tenants extends Component
         $tenant->update(['ativo' => !$tenant->ativo]);
         Cache::forget("tenant_{$id}");
         Cache::forget("tenant_host_{$tenant->dominio}");
-        $this->dispatch('toast', message: $tenant->fresh()->ativo ? 'Tenant ativado.' : 'Tenant suspenso.', type: 'success');
+
+        $novoStatus = $tenant->fresh()->ativo ? 'ativado' : 'suspenso';
+        MasterAdminLog::registrar(
+            "tenant_{$novoStatus}",
+            $tenant->id,
+            $tenant->nome,
+            "Tenant {$novoStatus} via listagem."
+        );
+
+        $this->dispatch('toast', message: "Tenant {$novoStatus}.", type: 'success');
     }
 
     public function loginComoTenant(int $id): mixed
@@ -37,6 +46,13 @@ class Tenants extends Component
             $this->dispatch('toast', message: 'Nenhum administrador encontrado neste tenant.', type: 'error');
             return null;
         }
+
+        MasterAdminLog::registrar(
+            'login_como_tenant',
+            $tenant->id,
+            $tenant->nome,
+            "Entrou como: {$usuario->nome} ({$usuario->email})"
+        );
 
         session(['super_admin_id' => auth('usuarios')->id()]);
         Auth::guard('usuarios')->login($usuario);

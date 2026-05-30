@@ -85,16 +85,33 @@
         </div>
 
         <div class="card">
-            <div class="card-header"><span class="card-title">❌ Últimas Falhas</span></div>
-            <div style="max-height:150px;overflow-y:auto;">
+            <div class="card-header">
+                <span class="card-title">❌ Últimas Falhas</span>
+                @if(count($falhas))
+                <button wire:click="retryTodos" wire:confirm="Reenfileirar todos os jobs com falha?"
+                        class="btn btn-sm btn-primary">↻ Retentar todos</button>
+                @endif
+            </div>
+            <div style="max-height:220px;overflow-y:auto;">
                 @forelse($falhas as $f)
-                <div style="padding:8px 16px;border-bottom:1px solid var(--border);font-size:12px;">
-                    <div style="font-weight:600;color:#1e293b;">{{ $f['job'] }}</div>
-                    <div style="color:#dc2626;margin-top:2px;font-family:monospace;font-size:11px;">{{ Str::limit($f['erro'], 100) }}</div>
-                    <div style="color:#94a3b8;margin-top:2px;">{{ \Carbon\Carbon::parse($f['failed_at'])->diffForHumans() }}</div>
+                <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-size:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                        <div style="flex:1;">
+                            <div style="font-weight:600;color:#1e293b;">{{ $f['job'] }}</div>
+                            <div style="color:#dc2626;margin-top:2px;font-family:monospace;font-size:11px;word-break:break-all;">{{ Str::limit($f['erro'], 120) }}</div>
+                            <div style="color:#94a3b8;margin-top:3px;">{{ \Carbon\Carbon::parse($f['failed_at'])->diffForHumans() }} · fila: {{ $f['queue'] }}</div>
+                        </div>
+                        <div style="display:flex;gap:5px;flex-shrink:0;">
+                            <button wire:click="retryJob({{ $f['id'] }})"
+                                    class="btn btn-sm" style="background:#eff6ff;color:#2563a8;">↻ Retry</button>
+                            <button wire:click="deleteJob({{ $f['id'] }})"
+                                    wire:confirm="Remover este job permanentemente?"
+                                    class="btn btn-sm" style="background:#fee2e2;color:#dc2626;">✕</button>
+                        </div>
+                    </div>
                 </div>
                 @empty
-                <div style="padding:16px;text-align:center;color:#94a3b8;font-size:13px;">✅ Nenhuma falha registrada.</div>
+                <div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px;">✅ Nenhuma falha registrada.</div>
                 @endforelse
             </div>
         </div>

@@ -25,6 +25,7 @@ use App\Http\Controllers\IAController;
         Route::get('/tenants/{id}', \App\Livewire\MasterAdmin\TenantShow::class)->where('id', '[0-9]+')->name('tenant-show');
         Route::get('/infra',      \App\Livewire\MasterAdmin\Infra::class)->name('infra');
         Route::get('/alertas',    \App\Livewire\MasterAdmin\Alertas::class)->name('alertas');
+        Route::get('/logs',       \App\Livewire\MasterAdmin\Logs::class)->name('logs');
     });
 
 // ─── Super Admin ───────────────────────────────
