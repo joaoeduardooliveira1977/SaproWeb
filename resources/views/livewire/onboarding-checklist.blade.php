@@ -1,4 +1,5 @@
-{{-- OnboardingChecklist — card de primeiros passos no dashboard --}}
+{{-- OnboardingChecklist — Livewire exige sempre uma tag raiz --}}
+<div>
 @if($exibir && $visivel)
 <div id="onboarding-checklist" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,0,0,.06);">
 
@@ -66,3 +67,4 @@
 </div>
 @endif
 @endif
+</div>{{-- root tag Livewire --}}
