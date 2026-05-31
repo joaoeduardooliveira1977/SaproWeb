@@ -17,7 +17,7 @@ class Assistente extends Component
     {
         $this->mensagens[] = [
             'tipo'  => 'bot',
-            'texto' => '👋 Olá! Sou o assistente jurídico do Software Jur�dico. Posso te ajudar com informações sobre processos, agenda e clientes. O que deseja saber?',
+            'texto' => '👋 Olá! Sou o assistente jurídico do Software Jurídico. Posso te ajudar com informações sobre processos, agenda e clientes. O que deseja saber?',
             'hora'  => now()->format('H:i'),
         ];
     }
@@ -364,7 +364,7 @@ class Assistente extends Component
     private function perguntarIA(string $pergunta, string $contexto): string
     {
         try {
-            $system = "Você é um assistente jurídico inteligente do sistema Software Jur�dico.
+            $system = "Você é um assistente jurídico inteligente do sistema Software Jurídico.
 Responda de forma clara, objetiva e profissional em português brasileiro.
 Use os dados abaixo para responder com precisão. Não invente informações.
 Se não encontrar a informação, diga que não encontrou e sugira onde buscar.

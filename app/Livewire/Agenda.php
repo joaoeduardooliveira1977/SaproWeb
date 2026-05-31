@@ -205,7 +205,7 @@ class Agenda extends Component
             ->map(fn($e) => '- ' . $e->titulo . ' (' . $e->data_hora->format('d/m H:i') . ') [' . $e->tipo . ']')
             ->join("\n");
 
-        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jurídico. Responda de forma objetiva em português.
 
 Dados da agenda:
 - Total de eventos pendentes: {$total}

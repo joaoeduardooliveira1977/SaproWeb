@@ -206,12 +206,12 @@ class ProcessoAndamentos extends Component
 
         $numero   = $this->processo->numero ?? '—';
         $dataFmt  = \Carbon\Carbon::parse($data)->format('d/m/Y');
-        $sistNome = config('mail.from.name', 'Software Jur�dico');
+        $sistNome = config('mail.from.name', 'Software Jurídico');
 
         $corpo = "
         <div style='font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;background:#f1f5f9;border-radius:8px;overflow:hidden;'>
             <div style='background:#1a3a5c;padding:24px 32px;'>
-                <div style='color:#93c5fd;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;'>Software Jur�dico — {$sistNome}</div>
+                <div style='color:#93c5fd;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;'>Software Jurídico — {$sistNome}</div>
                 <div style='color:#fff;font-size:20px;font-weight:700;margin-top:8px;'>Atualização no seu processo</div>
             </div>
             <div style='background:#fff;padding:24px 32px;border:1px solid #e2e8f0;border-top:none;'>
@@ -253,9 +253,10 @@ class ProcessoAndamentos extends Component
 
         DB::insert(
             'INSERT INTO documentos
-                (processo_id, andamento_id, tipo, titulo, arquivo, arquivo_original, mime_type, tamanho, data_documento, uploaded_by, portal_visivel, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, false, NOW(), NOW())',
+                (tenant_id, processo_id, andamento_id, tipo, titulo, arquivo, arquivo_original, mime_type, tamanho, data_documento, uploaded_by, portal_visivel, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, false, NOW(), NOW())',
             [
+                auth('usuarios')->user()->tenant_id,
                 $this->processoId,
                 $andamentoId,
                 'outro',

@@ -8,7 +8,7 @@ use App\Models\{Apontamento, Pagamento, Recebimento, Fornecedor, OrigemRecebimen
 use Illuminate\Support\Facades\Auth;
 
 /**
- * Software Jur�dico — Módulo Financeiro por Processo
+ * Software Jurídico — Módulo Financeiro por Processo
  * Gerencia Apontamentos, Pagamentos e Recebimentos.
  */
 class Financeiro extends Component

@@ -77,7 +77,7 @@ class RegistroController extends Controller
     private function enviarEmailBoasVindas(\App\Models\Tenant $tenant, \App\Models\Usuario $usuario): void
     {
         $expiracao = $tenant->trial_expira_em->format('d/m/Y');
-        $sistNome  = config('app.name', 'Software Jur�dico');
+        $sistNome  = config('app.name', 'Software Jurídico');
         $url       = config('app.url', 'http://localhost:8000');
         $plano     = ucfirst($tenant->plano);
         $limite    = $tenant->limite_processos;

@@ -280,7 +280,7 @@ class Pessoas extends Component
         $juizes    = Pessoa::ativos()->doTipo('Juiz')->count();
         $partes    = Pessoa::ativos()->doTipo('Parte Contrária')->count();
 
-        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jurídico. Responda de forma objetiva em português.
 
 Dados do cadastro de pessoas:
 - Total de pessoas ativas: {$total}
@@ -379,7 +379,7 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
             return;
         }
 
-        $prompt = "Você é um assistente jurídico do sistema Software Jur�dico. Gere um perfil completo e objetivo deste cliente.
+        $prompt = "Você é um assistente jurídico do sistema Software Jurídico. Gere um perfil completo e objetivo deste cliente.
 
 DADOS DO CLIENTE:
 - Nome: {$pessoa->nome}

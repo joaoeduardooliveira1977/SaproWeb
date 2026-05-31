@@ -28,8 +28,14 @@ class ProcessoChecklist extends Component
     public function mount(int $processoId): void
     {
         $this->processoId = $processoId;
-        $this->usuarios   = DB::select(
-            "SELECT u.id, p.nome FROM usuarios u JOIN pessoas p ON p.id = u.pessoa_id WHERE u.ativo = true ORDER BY p.nome"
+        $tenantId = auth('usuarios')->user()->tenant_id;
+        $this->usuarios = DB::select(
+            "SELECT u.id, COALESCE(p.nome, u.nome) as nome
+             FROM usuarios u
+             LEFT JOIN pessoas p ON p.id = u.pessoa_id
+             WHERE u.ativo = true AND u.tenant_id = ?
+             ORDER BY COALESCE(p.nome, u.nome)",
+            [$tenantId]
         );
     }
 

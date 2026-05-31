@@ -132,7 +132,7 @@ class NotificacoesWhatsapp extends Component
     public function abrirTeste(): void
     {
         $this->testeTel = '';
-        $this->testeMsg = '✅ *Software Jur�dico Jurídico — Teste*\nEsta é uma mensagem de teste do sistema. Tudo funcionando!';
+        $this->testeMsg = '✅ *Software Jurídico Jurídico — Teste*\nEsta é uma mensagem de teste do sistema. Tudo funcionando!';
         $this->testeCanal  = 'whatsapp';
         $this->testeSucesso = '';
         $this->testeErro    = '';

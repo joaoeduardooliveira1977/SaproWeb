@@ -57,8 +57,8 @@ class Honorarios extends Component
     public string $honorarioNome = '';
 
     // Cálculo automático pela causa
-    public string $valorCausa    = '';   // valor_causa do processo selecionado
-    public float  $valorCalculado = 0;  // percentual_exito × valor_causa
+    public string $valorCausa    = '';
+    public float  $valorCalculado = 0;
 
     protected array $rules = [
         'cliente_id'        => 'required|integer|min:1',
@@ -72,9 +72,23 @@ class Honorarios extends Component
         'status'            => 'required',
     ];
 
+    protected array $messages = [
+        'cliente_id.required' => 'Selecione um cliente.',
+        'cliente_id.min'      => 'Selecione um cliente.',
+        'descricao.required'  => 'Informe a descrição.',
+        'descricao.min'       => 'A descrição deve ter ao menos 3 caracteres.',
+        'valor_contrato.required' => 'Informe o valor.',
+        'data_inicio.required'    => 'Informe a data de início.',
+    ];
+
+    private function tid(): int
+    {
+        return auth('usuarios')->user()->tenant_id;
+    }
+
     public function mount(): void
     {
-        $this->data_inicio = now()->format('Y-m-d');
+        $this->data_inicio    = now()->format('Y-m-d');
         $this->data_pagamento = now()->format('Y-m-d');
         $this->carregarClientes();
     }
@@ -85,30 +99,31 @@ class Honorarios extends Component
             SELECT p.id, p.nome
             FROM pessoas p
             JOIN pessoa_tipos pt ON pt.pessoa_id = p.id
-            WHERE pt.tipo = 'Cliente' AND p.ativo = true
+            WHERE pt.tipo = 'Cliente' AND p.ativo = true AND p.tenant_id = ?
             ORDER BY p.nome
-        ");
+        ", [$this->tid()]);
     }
 
     public function updatedClienteId(): void
     {
-        $this->processo_id  = null;
-        $this->contrato_id  = null;
-        $this->valorCausa   = '';
+        $tid = $this->tid();
+        $this->processo_id    = null;
+        $this->contrato_id    = null;
+        $this->valorCausa     = '';
         $this->valorCalculado = 0;
 
         if ($this->cliente_id) {
             $this->processos = DB::select("
                 SELECT id, numero, vara, valor_causa FROM processos
-                WHERE cliente_id = ? AND status = 'Ativo'
+                WHERE cliente_id = ? AND status = 'Ativo' AND tenant_id = ?
                 ORDER BY numero
-            ", [$this->cliente_id]);
+            ", [$this->cliente_id, $tid]);
 
             $this->contratos = DB::select("
                 SELECT id, descricao FROM contratos
-                WHERE cliente_id = ? AND status = 'ativo'
+                WHERE cliente_id = ? AND status = 'ativo' AND tenant_id = ?
                 ORDER BY descricao
-            ", [$this->cliente_id]);
+            ", [$this->cliente_id, $tid]);
         } else {
             $this->processos = [];
             $this->contratos = [];
@@ -121,22 +136,18 @@ class Honorarios extends Component
         $this->valorCalculado = 0;
 
         if ($this->processo_id) {
-            $proc = DB::selectOne("SELECT valor_causa FROM processos WHERE id = ?", [$this->processo_id]);
+            $proc = DB::selectOne(
+                "SELECT valor_causa FROM processos WHERE id = ? AND tenant_id = ?",
+                [$this->processo_id, $this->tid()]
+            );
             $this->valorCausa = $proc?->valor_causa ?? '';
         }
 
         $this->recalcularExito();
     }
 
-    public function updatedPercentualExito(): void
-    {
-        $this->recalcularExito();
-    }
-
-    public function updatedTipo(): void
-    {
-        $this->recalcularExito();
-    }
+    public function updatedPercentualExito(): void { $this->recalcularExito(); }
+    public function updatedTipo(): void            { $this->recalcularExito(); }
 
     private function recalcularExito(): void
     {
@@ -167,35 +178,39 @@ class Honorarios extends Component
         $this->reset(['honorarioId','processo_id','contrato_id','cliente_id','tipo','descricao',
             'valor_contrato','percentual_exito','total_parcelas','data_fim','observacoes','processos','contratos',
             'valorCausa','valorCalculado']);
-        $this->tipo = 'fixo_mensal';
+        $this->tipo           = 'fixo_mensal';
         $this->total_parcelas = 1;
-        $this->status = 'ativo';
-        $this->data_inicio = now()->format('Y-m-d');
+        $this->status         = 'ativo';
+        $this->data_inicio    = now()->format('Y-m-d');
         $this->modalHonorario = true;
     }
 
     public function editarHonorario(int $id): void
     {
-        $h = DB::selectOne("SELECT * FROM honorarios WHERE id = ?", [$id]);
+        $tid = $this->tid();
+        $h = DB::selectOne("SELECT * FROM honorarios WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         if (!$h) return;
 
-        $this->honorarioId     = $h->id;
-        $this->cliente_id      = $h->cliente_id;
-        $this->processo_id     = $h->processo_id;
-        $this->contrato_id     = $h->contrato_id ?? null;
-        $this->tipo            = $h->tipo;
-        $this->descricao       = $h->descricao;
-        $this->valor_contrato  = $h->valor_contrato;
-        $this->percentual_exito= $h->percentual_exito ?? '';
-        $this->total_parcelas  = $h->total_parcelas;
-        $this->data_inicio     = $h->data_inicio;
-        $this->data_fim        = $h->data_fim ?? '';
-        $this->status          = $h->status;
-        $this->observacoes     = $h->observacoes ?? '';
+        $this->honorarioId      = $h->id;
+        $this->cliente_id       = $h->cliente_id;
+        $this->processo_id      = $h->processo_id;
+        $this->contrato_id      = $h->contrato_id ?? null;
+        $this->tipo             = $h->tipo;
+        $this->descricao        = $h->descricao;
+        $this->valor_contrato   = $h->valor_contrato;
+        $this->percentual_exito = $h->percentual_exito ?? '';
+        $this->total_parcelas   = $h->total_parcelas;
+        $this->data_inicio      = $h->data_inicio;
+        $this->data_fim         = $h->data_fim ?? '';
+        $this->status           = $h->status;
+        $this->observacoes      = $h->observacoes ?? '';
 
         $this->updatedClienteId();
         if ($h->processo_id) {
-            $proc = DB::selectOne("SELECT valor_causa FROM processos WHERE id = ?", [$h->processo_id]);
+            $proc = DB::selectOne(
+                "SELECT valor_causa FROM processos WHERE id = ? AND tenant_id = ?",
+                [$h->processo_id, $tid]
+            );
             $this->valorCausa = $proc?->valor_causa ?? '';
         }
         $this->recalcularExito();
@@ -206,11 +221,11 @@ class Honorarios extends Component
     {
         $this->validate();
 
+        $tid   = $this->tid();
         $valor = (float) str_replace(',', '.', $this->valor_contrato);
         $perc  = $this->percentual_exito ? (float) str_replace(',', '.', $this->percentual_exito) : null;
 
         if ($this->honorarioId) {
-            $tid = auth('usuarios')->user()->tenant_id;
             DB::update("
                 UPDATE honorarios SET
                     cliente_id=?, processo_id=?, contrato_id=?, tipo=?, descricao=?, valor_contrato=?,
@@ -225,16 +240,16 @@ class Honorarios extends Component
             ]);
         } else {
             $id = DB::selectOne("
-                INSERT INTO honorarios (cliente_id, processo_id, contrato_id, tipo, descricao, valor_contrato,
+                INSERT INTO honorarios (tenant_id, cliente_id, processo_id, contrato_id, tipo, descricao, valor_contrato,
                     percentual_exito, total_parcelas, data_inicio, data_fim, status, observacoes, created_at, updated_at)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW()) RETURNING id
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW()) RETURNING id
             ", [
+                $tid,
                 $this->cliente_id, $this->processo_id ?: null, $this->contrato_id ?: null,
                 $this->tipo, $this->descricao, $valor, $perc, $this->total_parcelas,
                 $this->data_inicio, $this->data_fim ?: null, $this->status, $this->observacoes ?: null
             ])->id;
 
-            // Gera parcelas automaticamente
             $this->gerarParcelas($id, $valor, $this->total_parcelas, $this->data_inicio);
         }
 
@@ -259,26 +274,25 @@ class Honorarios extends Component
 
     public function verParcelas(int $id): void
     {
+        $tid = $this->tid();
         $h = DB::selectOne("
             SELECT h.*, p.nome as cliente_nome, pr.numero as processo_numero
             FROM honorarios h
             JOIN pessoas p ON p.id = h.cliente_id
             LEFT JOIN processos pr ON pr.id = h.processo_id
-            WHERE h.id = ?
-        ", [$id]);
+            WHERE h.id = ? AND h.tenant_id = ?
+        ", [$id, $tid]);
+
+        if (! $h) return;
 
         $this->honorarioNome = $h->cliente_nome . ($h->processo_numero ? ' — ' . $h->processo_numero : '');
-
-        $this->parcelasModal = DB::select("
-            SELECT * FROM honorario_parcelas WHERE honorario_id = ? ORDER BY numero_parcela
-        ", [$id]);
 
         // Atualiza atrasadas
         DB::update("
             UPDATE honorario_parcelas SET status = 'atrasado'
             WHERE honorario_id = ? AND honorario_id IN (SELECT id FROM honorarios WHERE tenant_id = ?)
               AND status = 'pendente' AND vencimento < CURRENT_DATE
-        ", [$id, auth('usuarios')->user()->tenant_id]);
+        ", [$id, $tid]);
 
         $this->parcelasModal = DB::select("
             SELECT * FROM honorario_parcelas WHERE honorario_id = ? ORDER BY numero_parcela
@@ -290,16 +304,24 @@ class Honorarios extends Component
     public function abrirPagamento(int $parcelaId): void
     {
         $this->parcelaId = $parcelaId;
-        $p = DB::selectOne("SELECT * FROM honorario_parcelas WHERE id = ?", [$parcelaId]);
-        $this->valor_pago = $p->valor;
-        $this->data_pagamento = now()->format('Y-m-d');
+        $p = DB::selectOne(
+            "SELECT hp.valor FROM honorario_parcelas hp
+             JOIN honorarios h ON h.id = hp.honorario_id
+             WHERE hp.id = ? AND h.tenant_id = ?",
+            [$parcelaId, $this->tid()]
+        );
+        if (!$p) return;
+
+        $this->valor_pago      = $p->valor;
+        $this->data_pagamento  = now()->format('Y-m-d');
         $this->forma_pagamento = 'pix';
-        $this->obs_pagamento = '';
-        $this->modalPagamento = true;
+        $this->obs_pagamento   = '';
+        $this->modalPagamento  = true;
     }
 
     public function registrarPagamento(): void
     {
+        $tid = $this->tid();
         DB::update("
             UPDATE honorario_parcelas SET
                 status = 'pago', data_pagamento = ?, valor_pago = ?,
@@ -308,12 +330,11 @@ class Honorarios extends Component
         ", [
             $this->data_pagamento, $this->valor_pago,
             $this->forma_pagamento, $this->obs_pagamento ?: null,
-            $this->parcelaId, auth('usuarios')->user()->tenant_id
+            $this->parcelaId, $tid
         ]);
 
         $this->modalPagamento = false;
 
-        // Atualiza parcelas do modal
         $parcela = DB::selectOne("SELECT honorario_id FROM honorario_parcelas WHERE id = ?", [$this->parcelaId]);
         if ($parcela) $this->verParcelas($parcela->honorario_id);
 
@@ -322,16 +343,17 @@ class Honorarios extends Component
 
     public function excluirHonorario(int $id): void
     {
-        $tid = auth('usuarios')->user()->tenant_id;
+        $tid = $this->tid();
         DB::delete("DELETE FROM honorario_parcelas WHERE honorario_id = ? AND honorario_id IN (SELECT id FROM honorarios WHERE tenant_id = ?)", [$id, $tid]);
         DB::delete("DELETE FROM honorarios WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         $this->dispatch('toast', message: 'Honorário excluído.', type: 'success');
     }
 
-    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    private function buildWhere(): array
     {
-        $where = "WHERE 1=1";
-        $params = [];
+        $tid    = $this->tid();
+        $where  = "WHERE h.tenant_id = ?";
+        $params = [$tid];
 
         if ($this->busca) {
             $where .= " AND (p.nome ILIKE ? OR h.descricao ILIKE ?)";
@@ -347,7 +369,14 @@ class Honorarios extends Component
             $params[] = $this->filtroTipo;
         }
 
-        $rows = \Illuminate\Support\Facades\DB::select("
+        return [$where, $params];
+    }
+
+    public function exportarCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        [$where, $params] = $this->buildWhere();
+
+        $rows = DB::select("
             SELECT h.tipo, h.descricao, h.status,
                 p.nome as cliente_nome,
                 pr.numero as processo_numero,
@@ -389,7 +418,8 @@ class Honorarios extends Component
 
     public function render()
     {
-        // Resumo financeiro
+        $tid = $this->tid();
+
         $resumo = DB::selectOne("
             SELECT
                 COALESCE(SUM(hp.valor), 0) as total_contratado,
@@ -399,26 +429,10 @@ class Honorarios extends Component
                 COUNT(DISTINCT h.id) as total_contratos
             FROM honorarios h
             JOIN honorario_parcelas hp ON hp.honorario_id = h.id
-            WHERE h.status = 'ativo'
-        ");
+            WHERE h.status = 'ativo' AND h.tenant_id = ?
+        ", [$tid]);
 
-        // Lista honorários
-        $where = "WHERE 1=1";
-        $params = [];
-
-        if ($this->busca) {
-            $where .= " AND (p.nome ILIKE ? OR h.descricao ILIKE ?)";
-            $params[] = "%{$this->busca}%";
-            $params[] = "%{$this->busca}%";
-        }
-        if ($this->filtroStatus) {
-            $where .= " AND h.status = ?";
-            $params[] = $this->filtroStatus;
-        }
-        if ($this->filtroTipo) {
-            $where .= " AND h.tipo = ?";
-            $params[] = $this->filtroTipo;
-        }
+        [$where, $params] = $this->buildWhere();
 
         $honorarios = DB::select("
             SELECT h.*,

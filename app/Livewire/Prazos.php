@@ -347,7 +347,7 @@ class Prazos extends Component
             ->map(fn($p) => '- '.$p->titulo.' (vence '.$p->data_prazo->format('d/m/Y').')'.($p->prazo_fatal ? ' [FATAL]' : ''))
             ->join("\n");
 
-        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jurídico. Responda de forma objetiva em português.
 
 Dados dos prazos:
 - Total em aberto: {$totalAbertos}
@@ -428,23 +428,35 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:sta
 
     public function render(): \Illuminate\View\View
     {
-        $prazos      = $this->buildQuery()->paginate(25);
-        $processos   = Processo::where('status', 'Ativo')->orderBy('numero')->get();
-        $usuarios    = Usuario::where('ativo', true)->orderBy('nome')->get();
+        $prazos    = $this->buildQuery()->paginate(25);
+        $processos = Processo::where('status', 'Ativo')->orderBy('numero')->get(['id', 'numero']);
+        $usuarios  = Usuario::where('ativo', true)
+                            ->where('tenant_id', tenant_id())
+                            ->orderBy('nome')
+                            ->get(['id', 'nome']);
 
-        // KPIs
-        $totalAbertos  = Prazo::where('status', 'aberto')->count();
-        $vencendoHoje  = Prazo::where('status', 'aberto')->whereDate('data_prazo', today())->count();
-        $vencidos      = Prazo::where('status', 'aberto')->whereDate('data_prazo', '<', today())->count();
-        $fatais        = Prazo::where('status', 'aberto')->where('prazo_fatal', true)
-                              ->whereDate('data_prazo', '>=', today())
-                              ->whereDate('data_prazo', '<=', today()->addDays(5))
-                              ->count();
+        // KPIs — uma query agrupa tudo (Prazo já filtrado por tenant via BelongsToTenant)
+        $kpis = Prazo::selectRaw("
+            COUNT(*) FILTER (WHERE status = 'aberto') as total_abertos,
+            COUNT(*) FILTER (WHERE status = 'aberto' AND DATE(data_prazo) = CURRENT_DATE) as vencendo_hoje,
+            COUNT(*) FILTER (WHERE status = 'aberto' AND data_prazo < CURRENT_DATE) as vencidos,
+            COUNT(*) FILTER (WHERE status = 'aberto' AND prazo_fatal = true AND data_prazo >= CURRENT_DATE AND data_prazo <= CURRENT_DATE + interval '5 days') as fatais
+        ")->first();
 
-        // Contagem por tipo (abertos)
+        $totalAbertos = (int) ($kpis->total_abertos ?? 0);
+        $vencendoHoje = (int) ($kpis->vencendo_hoje ?? 0);
+        $vencidos     = (int) ($kpis->vencidos ?? 0);
+        $fatais       = (int) ($kpis->fatais ?? 0);
+
+        // Contagem por tipo — query única com GROUP BY
+        $tipoRaw = Prazo::where('status', 'aberto')
+            ->selectRaw('tipo, COUNT(*) as total')
+            ->groupBy('tipo')
+            ->pluck('total', 'tipo');
+
         $tipoCounts = [];
         foreach (['Prazo', 'Prazo Fatal', 'Audiência', 'Diligência', 'Recurso'] as $t) {
-            $tipoCounts[$t] = Prazo::where('status', 'aberto')->where('tipo', $t)->count();
+            $tipoCounts[$t] = (int) ($tipoRaw[$t] ?? 0);
         }
 
         return view('livewire.prazos', compact(

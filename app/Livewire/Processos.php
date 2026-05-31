@@ -166,7 +166,7 @@ class Processos extends Component
             ->map(fn($a) => $a->nome . ': ' . $a->processos_como_advogado_count)
             ->join(', ');
 
-        $contexto = "Você é um analista jurídico do sistema Software Jur�dico. Responda de forma objetiva e direta em português.
+        $contexto = "Você é um analista jurídico do sistema Software Jurídico. Responda de forma objetiva e direta em português.
 
 Dados atuais do escritório:
 - Total processos ativos: {$totalAtivos}

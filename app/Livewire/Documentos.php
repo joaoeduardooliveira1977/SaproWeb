@@ -62,7 +62,7 @@ class Documentos extends Component
     public string $loteProcessoId = '';
     public string $loteClienteId  = '';
     public string $loteData       = '';
-    public array  $loteResultados = []; // ['nome', 'ok', 'msg']
+    public array  $loteResultados = [];
 
     // Dados auxiliares
     public array $processos = [];
@@ -72,8 +72,20 @@ class Documentos extends Component
         'titulo'         => 'required|min:3',
         'tipo'           => 'required',
         'data_documento' => 'nullable|date',
-        'arquivo'        => 'nullable|file|max:20480', // 20MB
+        'arquivo'        => 'nullable|file|max:20480',
     ];
+
+    protected array $messages = [
+        'titulo.required' => 'O título é obrigatório.',
+        'titulo.min'      => 'O título deve ter ao menos 3 caracteres.',
+        'tipo.required'   => 'Selecione o tipo do documento.',
+        'arquivo.max'     => 'O arquivo não pode ultrapassar 20 MB.',
+    ];
+
+    private function tid(): int
+    {
+        return auth('usuarios')->user()->tenant_id;
+    }
 
     public function mount(): void
     {
@@ -83,21 +95,23 @@ class Documentos extends Component
 
     private function carregarDados(): void
     {
+        $tid = $this->tid();
+
         $this->clientes = DB::select("
             SELECT p.id, p.nome
             FROM pessoas p
             JOIN pessoa_tipos pt ON pt.pessoa_id = p.id
-            WHERE pt.tipo = 'Cliente' AND p.ativo = true
+            WHERE pt.tipo = 'Cliente' AND p.ativo = true AND p.tenant_id = ?
             ORDER BY p.nome
-        ");
+        ", [$tid]);
 
         $this->processos = DB::select("
             SELECT p.id, p.numero, pe.nome as cliente_nome
             FROM processos p
             JOIN pessoas pe ON pe.id = p.cliente_id
-            WHERE p.status = 'Ativo'
+            WHERE p.status = 'Ativo' AND p.tenant_id = ?
             ORDER BY p.numero
-        ");
+        ", [$tid]);
     }
 
     public function novoDocumento(): void
@@ -118,7 +132,7 @@ class Documentos extends Component
 
     public function fecharLote(): void
     {
-        $this->modalLote    = false;
+        $this->modalLote      = false;
         $this->loteResultados = [];
         $this->reset(['arquivosLote']);
     }
@@ -136,18 +150,19 @@ class Documentos extends Component
 
         $this->loteResultados = [];
         $salvos = 0;
+        $tid = $this->tid();
 
         foreach ($this->arquivosLote as $arq) {
             try {
                 $nomeOriginal = $arq->getClientOriginalName();
                 $tituloArq    = pathinfo($nomeOriginal, PATHINFO_FILENAME);
-
-                $caminho = $arq->store('documentos', 'public');
+                $caminho      = $arq->store('documentos', 'public');
 
                 DB::insert(
-                    "INSERT INTO documentos (processo_id, cliente_id, tipo, titulo, data_documento, arquivo, arquivo_original, mime_type, tamanho, uploaded_by, created_at, updated_at)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+                    "INSERT INTO documentos (tenant_id, processo_id, cliente_id, tipo, titulo, data_documento, arquivo, arquivo_original, mime_type, tamanho, uploaded_by, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
                     [
+                        $tid,
                         $this->loteProcessoId ?: null,
                         $this->loteClienteId  ?: null,
                         $this->loteTipo,
@@ -161,7 +176,7 @@ class Documentos extends Component
                     ]
                 );
 
-                $this->loteResultados[] = ['nome' => $nomeOriginal, 'ok' => true,  'msg' => 'Salvo'];
+                $this->loteResultados[] = ['nome' => $nomeOriginal, 'ok' => true, 'msg' => 'Salvo'];
                 $salvos++;
             } catch (\Throwable $e) {
                 $this->loteResultados[] = ['nome' => $arq->getClientOriginalName(), 'ok' => false, 'msg' => $e->getMessage()];
@@ -177,7 +192,8 @@ class Documentos extends Component
 
     public function editarDocumento(int $id): void
     {
-        $d = DB::selectOne("SELECT * FROM documentos WHERE id = ?", [$id]);
+        $tid = $this->tid();
+        $d = DB::selectOne("SELECT * FROM documentos WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         if (!$d) return;
 
         $this->documentoId    = $d->id;
@@ -195,6 +211,8 @@ class Documentos extends Component
     {
         $this->validate();
 
+        $tid = $this->tid();
+
         $dados = [
             'processo_id'    => $this->processo_id ?: null,
             'cliente_id'     => $this->cliente_id ?: null,
@@ -205,23 +223,18 @@ class Documentos extends Component
             'uploaded_by'    => Auth::guard('usuarios')->user()?->nome ?? 'Sistema',
         ];
 
-        // Upload do arquivo
         if ($this->arquivo) {
             $nomeOriginal = $this->arquivo->getClientOriginalName();
-            $mime         = $this->arquivo->getMimeType();
-            $tamanho      = $this->arquivo->getSize();
             $caminho      = $this->arquivo->store('documentos', 'public');
 
             $dados['arquivo']          = $caminho;
             $dados['arquivo_original'] = $nomeOriginal;
-            $dados['mime_type']        = $mime;
-            $dados['tamanho']          = $tamanho;
+            $dados['mime_type']        = $this->arquivo->getMimeType();
+            $dados['tamanho']          = $this->arquivo->getSize();
         }
 
         if ($this->documentoId) {
             $sets = implode(', ', array_map(fn($k) => "{$k}=?", array_keys($dados)));
-            $dados['updated_at'] = now();
-            $tid = auth('usuarios')->user()->tenant_id;
             DB::update(
                 "UPDATE documentos SET {$sets}, updated_at=NOW() WHERE id=? AND tenant_id=?",
                 [...array_values($dados), $this->documentoId, $tid]
@@ -231,7 +244,8 @@ class Documentos extends Component
                 $this->addError('arquivo', 'O arquivo é obrigatório para novos documentos.');
                 return;
             }
-            $cols = implode(', ', array_keys($dados));
+            $dados['tenant_id'] = $tid;
+            $cols         = implode(', ', array_keys($dados));
             $placeholders = implode(', ', array_fill(0, count($dados), '?'));
             DB::insert(
                 "INSERT INTO documentos ({$cols}, created_at, updated_at) VALUES ({$placeholders}, NOW(), NOW())",
@@ -256,7 +270,8 @@ class Documentos extends Component
 
     public function abrirPreview(int $id): void
     {
-        $doc = DB::selectOne("SELECT titulo, arquivo, mime_type FROM documentos WHERE id = ?", [$id]);
+        $tid = $this->tid();
+        $doc = DB::selectOne("SELECT titulo, arquivo, mime_type FROM documentos WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         if (! $doc || ! $doc->arquivo) return;
 
         $this->previewUrl    = Storage::url($doc->arquivo);
@@ -275,7 +290,7 @@ class Documentos extends Component
 
     public function togglePortalVisivel(int $id): void
     {
-        $tid = auth('usuarios')->user()->tenant_id;
+        $tid = $this->tid();
         $doc = DB::selectOne("SELECT portal_visivel FROM documentos WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         if (! $doc) return;
 
@@ -310,13 +325,13 @@ class Documentos extends Component
                 fputcsv($out, [
                     $d->titulo,
                     $tipos[$d->tipo] ?? $d->tipo,
-                    $d->data_documento ? \Carbon\Carbon::parse($d->data_documento)->format('d/m/Y') : '',
+                    $d->data_documento ? Carbon::parse($d->data_documento)->format('d/m/Y') : '',
                     $d->cliente_nome ?? '',
                     $d->processo_numero ?? '',
                     $d->arquivo_original ?? '',
                     $kb,
                     $d->portal_visivel ? 'Sim' : 'Não',
-                    \Carbon\Carbon::parse($d->created_at)->format('d/m/Y'),
+                    Carbon::parse($d->created_at)->format('d/m/Y'),
                 ], ';');
             }
             fclose($out);
@@ -325,7 +340,7 @@ class Documentos extends Component
 
     public function excluirDocumento(int $id): void
     {
-        $tid = auth('usuarios')->user()->tenant_id;
+        $tid = $this->tid();
         $doc = DB::selectOne("SELECT arquivo FROM documentos WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         if ($doc && $doc->arquivo) {
             Storage::disk('public')->delete($doc->arquivo);
@@ -338,6 +353,7 @@ class Documentos extends Component
     {
         if (empty(trim($this->perguntaIA))) return;
 
+        $tid = $this->tid();
         $resumo = DB::selectOne("
             SELECT COUNT(*) as total,
                 SUM(tamanho) as total_tamanho,
@@ -348,13 +364,14 @@ class Documentos extends Component
                 SUM(CASE WHEN tipo='documento_cliente' THEN 1 ELSE 0 END) as docs_cliente,
                 SUM(CASE WHEN portal_visivel = true THEN 1 ELSE 0 END) as portal_visiveis
             FROM documentos
-        ");
+            WHERE tenant_id = ?
+        ", [$tid]);
 
         $tamanhoTotal = $resumo->total_tamanho
             ? number_format($resumo->total_tamanho / 1024 / 1024, 1) . ' MB'
             : '0 MB';
 
-        $contexto = "Você é um assistente jurídico do sistema Software Jur�dico. Responda de forma objetiva em português.
+        $contexto = "Você é um assistente jurídico do sistema Software Jurídico. Responda de forma objetiva em português.
 
 Dados do arquivo de documentos:
 - Total de documentos: {$resumo->total}
@@ -382,8 +399,8 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
             if (count($matches) === 3) {
                 $campo = trim($matches[1]);
                 $valor = trim($matches[2]);
-                if ($campo === 'busca')   $this->busca        = $valor;
-                if ($campo === 'tipo')    $this->filtroTipo   = $valor;
+                if ($campo === 'busca')   $this->busca         = $valor;
+                if ($campo === 'tipo')    $this->filtroTipo    = $valor;
                 if ($campo === 'vinculo') $this->filtroVinculo = $valor;
                 $resposta = trim(preg_replace('/FILTRO:\w+=.+/', '', $resposta));
             }
@@ -400,7 +417,8 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
 
     public function downloadUrl(int $id): void
     {
-        $doc = DB::selectOne("SELECT arquivo FROM documentos WHERE id = ?", [$id]);
+        $tid = $this->tid();
+        $doc = DB::selectOne("SELECT arquivo FROM documentos WHERE id = ? AND tenant_id = ?", [$id, $tid]);
         if ($doc) {
             $this->dispatch('download', url: Storage::url($doc->arquivo));
         }
@@ -408,8 +426,9 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
 
     private function buildWhere(): array
     {
-        $where  = "WHERE 1=1";
-        $params = [];
+        $tid    = $this->tid();
+        $where  = "WHERE d.tenant_id = ?";
+        $params = [$tid];
 
         if ($this->busca) {
             $where .= " AND (d.titulo ILIKE ? OR pe.nome ILIKE ? OR pr.numero ILIKE ?)";
@@ -438,6 +457,8 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
 
     public function render()
     {
+        $tid = $this->tid();
+
         $resumo = DB::selectOne("
             SELECT COUNT(*) as total,
                 SUM(tamanho) as total_tamanho,
@@ -449,7 +470,8 @@ Responda em 1-3 frases objetivas. Se pedir para filtrar, termine com: FILTRO:tip
                 SUM(CASE WHEN tipo='documento_cliente' THEN 1 ELSE 0 END) as docs_cliente,
                 SUM(CASE WHEN tipo='outro' THEN 1 ELSE 0 END) as outros
             FROM documentos
-        ");
+            WHERE tenant_id = ?
+        ", [$tid]);
 
         [$where, $params] = $this->buildWhere();
 
