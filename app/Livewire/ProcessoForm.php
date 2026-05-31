@@ -322,6 +322,8 @@ class ProcessoForm extends Component
         }
 
         $uniqueNumero = \Illuminate\Validation\Rule::unique('processos', 'numero')
+            ->where('tenant_id', tenant_id())
+            ->whereNotNull('numero')
             ->ignore($this->processoId);
 
        
@@ -348,7 +350,7 @@ class ProcessoForm extends Component
         $parteContraria = $this->parte_contraria ?: ($this->parteContrariaBusca ?: null);
 
         $dados = [
-            'numero'             => $this->numero,
+            'numero'             => $this->numero ?: null,
             'data_distribuicao'  => $this->data_distribuicao ?: null,
             'extrajudicial'      => $this->extrajudicial,
             'cliente_id'         => $this->cliente_id,

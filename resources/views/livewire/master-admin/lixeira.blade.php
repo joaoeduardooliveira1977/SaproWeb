@@ -1,5 +1,5 @@
-@section('page-title', 'Lixeira de Tenants')
 <div>
+@section('page-title', 'Lixeira de Tenants')
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <div>

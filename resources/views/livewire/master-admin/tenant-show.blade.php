@@ -1,5 +1,5 @@
-@section('page-title', $tenant->nome)
 <div>
+@section('page-title', $tenant->nome)
 
     {{-- ── Cabeçalho ── --}}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">

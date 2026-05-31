@@ -1,5 +1,5 @@
-@section('page-title', 'Tenants')
 <div>
+@section('page-title', 'Tenants')
 
     {{-- ── Filtros ── --}}
     <div class="filter-bar">

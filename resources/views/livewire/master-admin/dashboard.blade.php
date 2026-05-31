@@ -1,5 +1,5 @@
-@section('page-title', 'Dashboard')
 <div>
+@section('page-title', 'Dashboard')
 
     {{-- ── KPI Cards ── --}}
     <div class="stat-grid">

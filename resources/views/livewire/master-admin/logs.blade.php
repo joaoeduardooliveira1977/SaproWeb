@@ -1,5 +1,5 @@
-@section('page-title', 'Log de Ações Master')
 <div>
+@section('page-title', 'Log de Ações Master')
 
     {{-- ── Filtros ── --}}
     <div class="filter-bar" style="flex-wrap:wrap;gap:8px;margin-bottom:12px;">

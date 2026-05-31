@@ -1,5 +1,5 @@
-@section('page-title', 'Infraestrutura')
 <div wire:poll.30000ms="atualizar">
+@section('page-title', 'Infraestrutura')
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
         <p style="font-size:12px;color:#94a3b8;">Auto-refresh a cada 30 segundos &nbsp;Â·&nbsp; <span wire:loading>atualizandoâ€¦</span></p>

@@ -1,5 +1,5 @@
-@section('page-title', 'Comunicados')
 <div>
+@section('page-title', 'Comunicados')
 
     {{-- â”€â”€ Filtros â”€â”€ --}}
     <div class="filter-bar">
