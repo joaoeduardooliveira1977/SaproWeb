@@ -6,40 +6,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Models\{MasterAdminLog, Usuario};
-use PragmaRX\Google2FA\Google2FA;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
+use App\Support\Totp;
 
 class Master2FAController extends Controller
 {
-    private function google2fa(): Google2FA
-    {
-        return new Google2FA();
-    }
-
     // ── Configuração do 2FA ───────────────────────────────────────
 
-    public function mostrarConfigurar(Request $request)
+    public function mostrarConfigurar()
     {
         $user = Auth::guard('usuarios')->user();
 
-        // Gera secret se ainda não tem
         if (!$user->master_2fa_secret) {
-            $secret = $this->google2fa()->generateSecretKey();
+            $secret = Totp::generateSecret();
             $user->update(['master_2fa_secret' => encrypt($secret)]);
             $user->refresh();
         }
 
-        $secret     = decrypt($user->master_2fa_secret);
-        $otpauthUrl = $this->google2fa()->getQRCodeUrl(
-            config('app.name', 'Sistema Jurídico'),
-            $user->email ?? $user->login,
-            $secret
-        );
-
-        $qrCodeSvg = $this->gerarQrCode($otpauthUrl);
+        $secret    = decrypt($user->master_2fa_secret);
+        $qrUrl     = Totp::getQrCodeUrl(config('app.name', 'Sistema Jurídico'), $user->email ?? $user->login, $secret);
+        $qrCodeSvg = Totp::generateQrSvg($qrUrl, 200);
 
         return view('master.2fa.configurar', compact('secret', 'qrCodeSvg', 'user'));
     }
@@ -56,11 +41,10 @@ class Master2FAController extends Controller
         $user   = Auth::guard('usuarios')->user();
         $secret = decrypt($user->master_2fa_secret);
 
-        if (!$this->google2fa()->verifyKey($secret, $request->codigo)) {
-            return back()->withErrors(['codigo' => 'Código inválido. Verifique seu authenticator.']);
+        if (!Totp::verify($secret, $request->codigo)) {
+            return back()->withErrors(['codigo' => 'Código inválido. Verifique o horário do seu dispositivo.']);
         }
 
-        // Gera 8 códigos de recuperação
         $codigosRecuperacao = collect(range(1, 8))->map(fn() => strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4)));
         $hashesRecuperacao  = $codigosRecuperacao->map(fn($c) => bcrypt($c))->toArray();
 
@@ -85,7 +69,7 @@ class Master2FAController extends Controller
         $user   = Auth::guard('usuarios')->user();
         $secret = decrypt($user->master_2fa_secret);
 
-        if (!$this->google2fa()->verifyKey($secret, $request->codigo)) {
+        if (!Totp::verify($secret, $request->codigo)) {
             return back()->withErrors(['codigo' => 'Código inválido.']);
         }
 
@@ -96,11 +80,10 @@ class Master2FAController extends Controller
             'master_2fa_recovery_codes' => null,
         ]);
 
-        MasterAdminLog::registrar('2fa_desativado', null, null, '2FA desativado.');
+        MasterAdminLog::registrar('2fa_desativado', null, null, '2FA desativado pelo usuário.');
         session()->forget('master_2fa_verificado');
 
-        return redirect()->route('master.2fa.configurar')
-            ->with('sucesso', '2FA desativado com sucesso.');
+        return redirect()->route('master.2fa.configurar')->with('sucesso', '2FA desativado com sucesso.');
     }
 
     // ── Verificação no login ──────────────────────────────────────
@@ -133,17 +116,16 @@ class Master2FAController extends Controller
             return back()->withErrors(['codigo' => 'Código de recuperação inválido ou já utilizado.']);
         }
 
-        // Tenta código TOTP
         if (!$user->master_2fa_secret) {
             return back()->withErrors(['codigo' => '2FA não configurado.']);
         }
 
-        if (!$this->google2fa()->verifyKey(decrypt($user->master_2fa_secret), $codigo)) {
+        if (!Totp::verify(decrypt($user->master_2fa_secret), $codigo)) {
             return back()->withErrors(['codigo' => 'Código inválido. Tente novamente.']);
         }
 
         session(['master_2fa_verificado' => true]);
-        MasterAdminLog::registrar('2fa_verificado', null, null, 'Login com 2FA verificado.');
+        MasterAdminLog::registrar('2fa_verificado', null, null, 'Login com 2FA verificado com sucesso.');
 
         return redirect()->route('master.dashboard');
     }
@@ -161,18 +143,5 @@ class Master2FAController extends Controller
             }
         }
         return false;
-    }
-
-    private function gerarQrCode(string $url): string
-    {
-        try {
-            $renderer = new ImageRenderer(
-                new RendererStyle(200),
-                new SvgImageBackEnd()
-            );
-            return (new Writer($renderer))->writeString($url);
-        } catch (\Exception) {
-            return '';
-        }
     }
 }
