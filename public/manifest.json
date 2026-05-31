@@ -1,7 +1,7 @@
 {
   "id": "/dashboard",
   "name": "Software Juridico",
-  "short_name": "SaproWeb",
+  "short_name": "Software Juridico",
   "description": "Sistema de Gestao para Escritorios de Advocacia",
   "start_url": "/dashboard",
   "display": "standalone",
