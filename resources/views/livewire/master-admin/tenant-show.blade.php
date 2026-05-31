@@ -1,4 +1,4 @@
-section('page-title', $tenant->nome)
+@section('page-title', $tenant->nome)
 <div>
 
     {{-- ── Cabeçalho ── --}}

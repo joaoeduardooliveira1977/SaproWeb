@@ -1,4 +1,4 @@
-section('page-title', 'Log de AÃ§Ãµes')
+@section('page-title', 'Log de AÃ§Ãµes')
 <div>
 
     <div class="filter-bar">

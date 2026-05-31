@@ -1,4 +1,4 @@
-section('page-title', 'Infraestrutura')
+@section('page-title', 'Infraestrutura')
 <div wire:poll.30000ms="atualizar">
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">

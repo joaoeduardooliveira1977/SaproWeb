@@ -1,4 +1,4 @@
-section('page-title', 'Comunicados')
+@section('page-title', 'Comunicados')
 <div>
 
     {{-- â”€â”€ Filtros â”€â”€ --}}

@@ -1,4 +1,4 @@
-section('page-title', 'Tenants')
+@section('page-title', 'Tenants')
 <div>
 
     {{-- ── Filtros ── --}}

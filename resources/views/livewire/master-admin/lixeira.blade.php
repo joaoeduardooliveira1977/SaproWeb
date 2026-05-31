@@ -1,4 +1,4 @@
-section('page-title', 'Lixeira de Tenants')
+@section('page-title', 'Lixeira de Tenants')
 <div>
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">

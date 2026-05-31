@@ -1,4 +1,4 @@
-section('page-title', 'Alertas')
+@section('page-title', 'Alertas')
 <div>
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
