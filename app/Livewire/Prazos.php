@@ -189,6 +189,11 @@ class Prazos extends Component
             $prazo = Prazo::create($dados);
             $this->dispatch('toast', message: 'Prazo cadastrado.', type: 'success');
             $this->enviarLembreteSeNecessario($prazo);
+
+            $tenantId = Auth::guard('usuarios')->user()?->tenant_id;
+            if ($tenantId) {
+                \App\Services\OnboardingService::marcar($tenantId, 'criar_prazo');
+            }
         }
 
         $this->fecharModal();

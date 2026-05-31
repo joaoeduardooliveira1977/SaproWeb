@@ -45,11 +45,13 @@
             {{-- Atalhos rápidos --}}
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <a href="{{ route('processos.novo') }}"
+                    id="btn-novo-processo"
                     style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#1D9E75;color:#fff;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Processo
                 </a>
                 <a href="{{ route('prazos') }}"
+                    id="btn-novo-prazo"
                     style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#fff;border:1.5px solid #e2e8f0;color:#475569;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Prazo
@@ -80,7 +82,7 @@
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;" class="dash-kpis">
 
             <a href="{{ route('processos') }}" style="text-decoration:none;">
-                <div class="dash-kpi-card" style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;"
+                <div id="card-processos-ativos" class="dash-kpi-card" style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;"
                     onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(0,0,0,.08)'"
                     onmouseout="this.style.transform='';this.style.boxShadow=''">
                     <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#2563eb;border-radius:12px 12px 0 0;"></div>

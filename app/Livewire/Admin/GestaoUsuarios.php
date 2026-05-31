@@ -163,6 +163,8 @@ class GestaoUsuarios extends Component
         } else {
             Usuario::create($dados);
             $this->dispatch('toast', type: 'sucesso', msg: 'Usuário criado com sucesso!');
+            $tenantId = auth('usuarios')->user()?->tenant_id;
+            if ($tenantId) \App\Services\OnboardingService::marcar($tenantId, 'adicionar_usuario');
         }
 
         $this->modalAberto = false;

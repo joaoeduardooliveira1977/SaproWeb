@@ -256,6 +256,10 @@ class Pessoas extends Component
 
         $usuario->registrarAuditoria($acao, 'pessoas', $pessoa->id, null, ['nome' => $this->nome, 'tipos' => $this->tipos_selecionados]);
 
+        if (in_array('Cliente', $this->tipos_selecionados)) {
+            \App\Services\OnboardingService::marcar($usuario->tenant_id, 'criar_cliente');
+        }
+
         $this->fecharModal();
         $this->dispatch('toast', message: "Pessoa \"{$this->nome}\" salva com sucesso!", type: 'success');
     }

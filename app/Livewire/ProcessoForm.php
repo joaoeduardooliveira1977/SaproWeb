@@ -410,6 +410,10 @@ class ProcessoForm extends Component
             $processo = Processo::create($dados);
             $processo->advogados()->sync($this->advogados_selecionados);
             $this->dispatch('toast', message: 'Processo cadastrado com sucesso!', type: 'success');
+
+            if ($dados['tenant_id']) {
+                \App\Services\OnboardingService::marcar($dados['tenant_id'], 'criar_processo');
+            }
         }
 
         $this->redirect(route('processos.show', $processo->id));

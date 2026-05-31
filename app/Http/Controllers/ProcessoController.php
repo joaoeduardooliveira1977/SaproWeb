@@ -59,6 +59,12 @@ class ProcessoController extends Controller
 
         $processo = Processo::with($relacoes)->findOrFail($id);
 
+        // Onboarding: marcar exploração de processo
+        $tenantId = auth('usuarios')->user()?->tenant_id;
+        if ($tenantId) {
+            \App\Services\OnboardingService::marcar($tenantId, 'explorar_processo');
+        }
+
         $prazos = Prazo::with('responsavel')
             ->where('processo_id', $id)
             ->orderBy('data_prazo')

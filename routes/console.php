@@ -53,3 +53,8 @@ Schedule::job(new \App\Jobs\VerificarMonitoramentos())
 Schedule::job(new \App\Jobs\VerificarMonitoramentos())
     ->dailyAt('13:00')
     ->timezone('America/Sao_Paulo');
+
+// Sequência de emails de trial — verifica diariamente às 09:00h
+Schedule::job(new \App\Jobs\ProcessarSequenciaEmailsTrial())
+    ->dailyAt('09:00')
+    ->timezone('America/Sao_Paulo');

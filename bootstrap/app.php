@@ -12,16 +12,18 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'perfil'           => \App\Http\Middleware\VerificarPerfil::class,
-            'tenant'           => \App\Http\Middleware\IdentificarTenant::class,
-            'super_admin'      => \App\Http\Middleware\SuperAdmin::class,
-            'master_auth'      => \App\Http\Middleware\MasterAuth::class,
-            'verificar_limites'=> \App\Http\Middleware\VerificarLimitesTenant::class,
+            'perfil'            => \App\Http\Middleware\VerificarPerfil::class,
+            'tenant'            => \App\Http\Middleware\IdentificarTenant::class,
+            'super_admin'       => \App\Http\Middleware\SuperAdmin::class,
+            'master_auth'       => \App\Http\Middleware\MasterAuth::class,
+            'verificar_limites' => \App\Http\Middleware\VerificarLimitesTenant::class,
+            'trial_expirado'    => \App\Http\Middleware\VerificarTrialExpirado::class,
         ]);
-        
-	 $middleware->web(append: [
-        \App\Http\Middleware\IdentificarTenant::class,
-	]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\IdentificarTenant::class,
+            \App\Http\Middleware\VerificarTrialExpirado::class,
+        ]);
 
     })
     ->withExceptions(function (Exceptions $exceptions) {

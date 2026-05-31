@@ -19,6 +19,12 @@ use App\Http\Controllers\IAController;
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
 
+// ─── Cadastro Trial (público) ──────────────────
+    Route::get('/cadastro', \App\Livewire\CadastroTrial::class)->name('cadastro');
+
+// ─── Trial Expirado ────────────────────────────
+    Route::get('/trial-expirado', fn() => view('trial-expirado'))->name('trial.expirado');
+
 // ─── Área Master (/master) ─────────────────────────────────────────
     Route::prefix('master')->name('master.')->group(function () {
 

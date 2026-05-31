@@ -39,6 +39,10 @@ class AuthController extends Controller
         $usuario->update(['ultimo_acesso' => now()]);
         $usuario->registrarAuditoria('Login', null, null, null, null);
 
+        if ($usuario->tenant_id) {
+            \App\Services\OnboardingService::marcar($usuario->tenant_id, 'primeiro_acesso');
+        }
+
         return redirect()->intended(route('dashboard'));
     }
 

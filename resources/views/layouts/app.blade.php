@@ -3,6 +3,7 @@
 <head>
 
     <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -565,6 +566,10 @@
 </head>
 <body>
 <x-limite-plano />
+{{-- ── Banner de Trial ─────────────────────────────────────────── --}}
+@auth('usuarios')
+<x-trial-banner />
+@endauth
 <div id="lw-bar"></div>
 <div class="layout">
 
@@ -671,7 +676,7 @@
 </nav>
 
 {{-- Sidebar desktop (icone + label) --}}
-<nav class="sidebar">
+<nav class="sidebar" id="sidebar">
     <a href="{{ route('dashboard') }}" class="nav-logo" title="Software Jurídico">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 9l9-6 9 6M3 9h18M7 21h10"/><path d="M5 9l2 6H3L5 9zM19 9l2 6h-4l2-6z"/></svg>
     </a>
@@ -710,7 +715,7 @@
     <div class="nav-sep"></div>
 
     @if($isFinanc)
-    <a href="{{ route('financeiro.central') }}" class="nav-btn {{ $hubAtivo==='financeiro' ? 'active' : '' }}" title="Financeiro">
+    <a href="{{ route('financeiro.central') }}" id="menu-financeiro" class="nav-btn {{ $hubAtivo==='financeiro' ? 'active' : '' }}" title="Financeiro">
         <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
         <span class="nav-btn-label">Financeiro</span>
     </a>
@@ -1144,5 +1149,100 @@
 
 @livewireScripts
 @stack('scripts')
+
+{{-- ── Driver.js Tour ────────────────────────────────────────────── --}}
+<script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+@auth('usuarios')
+@php
+  $usuarioTourId = auth('usuarios')->id();
+  $tenantDemo    = tenant()?->plano === 'demo';
+@endphp
+@if($tenantDemo)
+<script>
+(function() {
+    var tourKey = 'tour_concluido_{{ $usuarioTourId }}';
+    if (localStorage.getItem(tourKey)) return;
+    if (!window.location.pathname.startsWith('/dashboard') && window.location.pathname !== '/') return;
+
+    setTimeout(function() {
+        if (typeof driver === 'undefined') return;
+
+        var driverObj = driver({
+            showProgress: true,
+            animate: true,
+            overlayColor: 'rgba(15,37,64,0.75)',
+            nextBtnText: 'Próximo →',
+            prevBtnText: '← Anterior',
+            doneBtnText: 'Concluir 🎉',
+            onDestroyStarted: function() {
+                localStorage.setItem(tourKey, '1');
+                driverObj.destroy();
+                if (window.Livewire) {
+                    Livewire.dispatch('onboarding:marcar', { step: 'primeiro_acesso' });
+                }
+            },
+            steps: [
+                {
+                    element: '#sidebar',
+                    popover: {
+                        title: '👋 Bem-vindo ao Software Jurídico!',
+                        description: 'Este é o menu lateral. Aqui você acessa todos os módulos do sistema.',
+                        side: 'right', align: 'start'
+                    }
+                },
+                {
+                    element: '#btn-novo-processo',
+                    popover: {
+                        title: '📋 Processos',
+                        description: 'Clique aqui para cadastrar um novo processo judicial ou extrajudicial.',
+                        side: 'bottom', align: 'start'
+                    }
+                },
+                {
+                    element: '#btn-novo-prazo',
+                    popover: {
+                        title: '⏰ Prazos',
+                        description: 'Gerencie todos os prazos processuais. Nunca perca um prazo importante.',
+                        side: 'bottom', align: 'start'
+                    }
+                },
+                {
+                    element: '#card-processos-ativos',
+                    popover: {
+                        title: '📊 Dashboard',
+                        description: 'Acompanhe aqui um resumo de tudo que está acontecendo no seu escritório.',
+                        side: 'top', align: 'start'
+                    }
+                },
+                {
+                    element: '#menu-financeiro',
+                    popover: {
+                        title: '💰 Financeiro',
+                        description: 'Controle honorários, custas e receitas do escritório.',
+                        side: 'right', align: 'start'
+                    }
+                },
+                {
+                    element: '#onboarding-checklist',
+                    popover: {
+                        title: '🎯 Seus próximos passos',
+                        description: 'Siga este checklist para aproveitar ao máximo o sistema. Cada passo te ajuda a conhecer uma funcionalidade nova.',
+                        side: 'top', align: 'start'
+                    }
+                }
+            ]
+        });
+
+        // Só inicia se os elementos existirem
+        if (document.getElementById('sidebar') || document.querySelector('[data-tour]')) {
+            driverObj.drive();
+        } else {
+            localStorage.setItem(tourKey, '1');
+        }
+    }, 1200);
+}());
+</script>
+@endif
+@endauth
 </body>
 </html>

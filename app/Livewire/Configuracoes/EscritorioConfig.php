@@ -122,6 +122,7 @@ class EscritorioConfig extends Component
 
         $tenant->update($dados);
         \Illuminate\Support\Facades\Cache::forget("tenant_{$tenant->id}");
+        \App\Services\OnboardingService::marcar($tenant->id, 'configurar_escritorio');
         $this->dispatch('toast', message: 'Identidade visual atualizada!', type: 'success');
     }
 
