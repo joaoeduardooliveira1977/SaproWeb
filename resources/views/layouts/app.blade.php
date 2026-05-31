@@ -842,28 +842,13 @@
         </div>
         @endif
 
-        <div class="content">
-            {{-- ── Comunicados globais ── --}}
-            @php
-                $comunicadosAtivos = \App\Models\Comunicado::ativos()
-                    ->orderByRaw("case tipo when 'critico' then 0 when 'aviso' then 1 else 2 end")
-                    ->get();
-            @endphp
-            @foreach($comunicadosAtivos as $_com)
-            @php
-                $_estilos = [
-                    'info'    => 'background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;',
-                    'aviso'   => 'background:#fffbeb;border:1px solid #fcd34d;color:#92400e;',
-                    'critico' => 'background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;',
-                ];
-                $_icones = ['info'=>'ℹ️','aviso'=>'⚠️','critico'=>'🔴'];
-            @endphp
-            <div style="padding:10px 16px;border-radius:8px;margin-bottom:10px;font-size:13px;{{ $_estilos[$_com->tipo] ?? $_estilos['info'] }}">
-                <strong>{{ $_icones[$_com->tipo] ?? 'ℹ️' }} {{ $_com->titulo }}</strong>
-                — {{ $_com->mensagem }}
-            </div>
-            @endforeach
+        {{-- ── Banner de comunicados (fora do .content para ocupar largura total) ── --}}
+        @auth('usuarios')
+        <livewire:comunicado-banner />
+        <livewire:comunicado-modal />
+        @endauth
 
+        <div class="content">
             @yield('content')
             @yield('conteudo')
         </div>
