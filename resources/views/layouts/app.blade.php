@@ -24,6 +24,7 @@
     {{-- PWA --}}
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1a3a5c">
+    <meta name="application-name" content="Software Jurídico">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">

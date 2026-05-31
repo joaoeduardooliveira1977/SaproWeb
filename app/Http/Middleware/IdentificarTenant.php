@@ -10,12 +10,22 @@ use App\Models\Tenant;
 
 class IdentificarTenant
 {
+    // Domínio principal da aplicação (sem subdomínio).
+    // Requisições deste host carregam o tenant padrão (slug 'demo' ou
+    // o tenant cujo campo `dominio` bate exatamente com este valor).
+    private const DOMINIO_PRINCIPAL = 'kmd-ia.com.br';
+
     public function handle(Request $request, Closure $next)
     {
-        // Para a rota de login: detecta o tenant pelo subdomínio apenas para
-        // carregar o branding (logo, cores). Não bloqueia se não encontrar.
+        // Rotas do painel master nunca precisam de tenant de escritório
+        if ($this->isMasterRoute($request)) {
+            return $next($request);
+        }
+
+        // Rota de login: detecta tenant pelo domínio para carregar branding.
+        // Não bloqueia se não encontrar — o login funciona sem tenant.
         if ($request->route()?->getName() === 'login') {
-            $tenant = $this->detectarPorSubdominio($request);
+            $tenant = $this->detectarPorDominio($request);
             if ($tenant) {
                 app()->instance('tenant', $tenant);
                 view()->share('tenant', $tenant);
@@ -23,7 +33,7 @@ class IdentificarTenant
             return $next($request);
         }
 
-        // Rotas públicas que não precisam de tenant
+        // Rotas públicas sem necessidade de tenant
         $rotasLivres = [
             'registro', 'registro.store', 'tenant.planos', 'logout',
             'super-admin.index', 'super-admin.show', 'super-admin.plano',
@@ -82,25 +92,41 @@ class IdentificarTenant
     }
 
     // Detecta o tenant a partir do host da requisição.
-    // Tenta pelo campo `dominio` primeiro (match exato), depois pelo `slug`
-    // extraído do subdomínio (ex: "escritorio1" em "escritorio1.kmd-ia.com.br").
-    private function detectarPorSubdominio(Request $request): ?Tenant
+    // Prioridade: campo `dominio` (match exato) → slug do subdomínio →
+    // para o domínio principal sem subdomínio, carrega o tenant padrão.
+    private function detectarPorDominio(Request $request): ?Tenant
     {
         $host  = $request->getHost();
         $parts = explode('.', $host);
 
         return Cache::remember("tenant_host_{$host}", now()->addMinutes(10), function () use ($host, $parts) {
-            // 1. Tenta match exato pelo campo dominio
+            // 1. Match exato pelo campo `dominio` (ex: "meuescritorio.com.br")
             $tenant = Tenant::ativo()->where('dominio', $host)->first();
             if ($tenant) return $tenant;
 
-            // 2. Para subdomínios (≥3 partes), tenta pelo slug
+            // 2. Subdomínio: ≥3 partes (ex: "slug.kmd-ia.com.br")
             if (count($parts) >= 3) {
                 $subdomain = $parts[0];
                 return Tenant::ativo()->where('slug', $subdomain)->first();
             }
 
+            // 3. Domínio principal sem subdomínio → tenant padrão (demo)
+            // Cobre PWA instalados em kmd-ia.com.br e acesso direto ao domínio principal.
+            if ($host === self::DOMINIO_PRINCIPAL) {
+                return Tenant::ativo()
+                    ->where(fn($q) => $q->where('slug', 'demo')->orWhere('dominio', $host))
+                    ->orderByRaw("CASE WHEN dominio = ? THEN 0 ELSE 1 END", [$host])
+                    ->first();
+            }
+
             return null;
         });
+    }
+
+    // Verifica se a rota pertence ao painel master (/master/*).
+    private function isMasterRoute(Request $request): bool
+    {
+        $routeName = $request->route()?->getName() ?? '';
+        return str_starts_with($routeName, 'master.');
     }
 }
