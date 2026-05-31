@@ -135,14 +135,14 @@ img { max-width: 100%; }
 
 /* ── Social Proof Bar ────────────────────────────────── */
 #logos {
-  padding: 32px 24px;
+  padding: 48px 24px;
   background: #fff;
   border-bottom: 1px solid var(--border);
 }
-.logos-label { text-align:center; color:var(--gray); font-size:13px; font-weight:500; margin-bottom:20px; }
+.logos-label { text-align:center; color:#6b7280; font-size:1rem; font-weight:500; margin-bottom:24px; }
 .logos-row { display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; }
-.logo-item { padding:8px 24px; color:#94a3b8; font-size:13px; font-weight:600; letter-spacing:.5px; white-space:nowrap; }
-.logo-sep { color:#d1d5db; font-size:18px; }
+.logo-item { padding:8px 28px; color:#374151; font-size:1.1rem; font-weight:600; white-space:nowrap; }
+.logo-sep { color:#d1d5db; font-size:20px; font-weight:300; }
 
 /* ── Section Base ────────────────────────────────────── */
 .section { padding: 96px 24px; }
@@ -576,13 +576,13 @@ footer { background:var(--navy2); padding:56px 24px 32px; border-top:1px solid r
     <h2 class="reveal">Comece hoje mesmo<br>— 15 dias grátis</h2>
     <p class="reveal reveal-delay-1">Sem cartão de crédito. Cancele quando quiser.</p>
 
-    <form class="trial-form reveal reveal-delay-2" id="trial-form" onsubmit="submitForm(event)">
+    <form class="trial-form reveal reveal-delay-2" id="cadastro-form" autocomplete="off" onsubmit="submitForm(event)">
       <div class="form-row">
-        <input type="text"  id="f-nome"       name="responsavel_nome"  placeholder="Nome completo *" required>
-        <input type="text"  id="f-escritorio" name="nome_escritorio"    placeholder="Nome do escritório *" required>
+        <input type="text"  id="f-nome"       name="responsavel_nome"  placeholder="Nome completo *" autocomplete="off" required>
+        <input type="text"  id="f-escritorio" name="nome_escritorio"    placeholder="Nome do escritório *" autocomplete="off" required>
       </div>
-      <input type="email" id="f-email"      name="email"             placeholder="Email profissional *" required>
-      <input type="tel"   id="f-telefone"   name="telefone"          placeholder="WhatsApp / Telefone">
+      <input type="email" id="f-email"      name="email"             placeholder="Email profissional *" autocomplete="off" required>
+      <input type="tel"   id="f-telefone"   name="telefone"          placeholder="WhatsApp / Telefone" autocomplete="off">
       <button type="submit" class="btn-submit">
         Criar minha conta grátis
         <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
@@ -739,6 +739,13 @@ function closeMobile() {
   hamburger.classList.remove('open');
   mobileMenu.classList.remove('open');
 }
+
+// ── Limpar campos ao carregar (evitar preenchimento automático do browser) ──
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('#cadastro-form input').forEach(function (input) {
+    input.value = '';
+  });
+});
 
 // ── Form Submit ─────────────────────────────────────────
 function submitForm(e) {
