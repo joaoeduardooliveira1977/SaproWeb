@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('page-title', 'Master Admin') — SAPRO Master</title>
+    <title>@yield('page-title', 'Master Admin') — Sistema Jurídico</title>
     @livewireStyles
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -80,10 +80,11 @@
         }
 
         .logo-text {
-            font-size: 14px;
+            font-size: 11px;
             font-weight: 800;
             color: #fff;
-            letter-spacing: .3px;
+            letter-spacing: .2px;
+            line-height: 1.2;
         }
 
         .master-badge {
@@ -427,7 +428,7 @@
                     <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 </div>
                 <div>
-                    <div class="logo-text">SAPRO</div>
+                    <div class="logo-text">Sistema Jurídico</div>
                 </div>
             </div>
             <span class="master-badge">⚡ Master</span>

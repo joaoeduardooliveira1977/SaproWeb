@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acesso Master — SAPRO</title>
+    <title>Acesso Master — Sistema Jurídico</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -80,10 +80,10 @@
         }
 
         .logo-name {
-            font-size: 24px;
-            font-weight: 900;
+            font-size: 16px;
+            font-weight: 800;
             color: #fff;
-            letter-spacing: 4px;
+            letter-spacing: 1px;
             text-transform: uppercase;
             margin-bottom: 8px;
         }
@@ -234,7 +234,7 @@
         <div class="logo-icon">
             <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
         </div>
-        <div class="logo-name">SAPRO</div>
+        <div class="logo-name">Sistema Jurídico</div>
         <span class="restricted-badge">🔒 Área Restrita — Administração do Sistema</span>
     </div>
 
@@ -286,7 +286,7 @@
     </div>
 
     <div class="foot">
-        SAPRO — Administração do Sistema &bull;
+        Sistema Jurídico — Administração &bull;
         <a href="/status" target="_blank">Status do sistema</a>
     </div>
 

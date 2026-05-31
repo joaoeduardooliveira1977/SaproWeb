@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status do Sistema — SAPRO</title>
-    <meta name="description" content="Status em tempo real do sistema SAPRO.">
+    <title>Status do Sistema — Sistema Jurídico</title>
+    <meta name="description" content="Status em tempo real do Sistema Jurídico.">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -101,7 +101,7 @@ if ($emergencial) {
                 <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
             </div>
             <div>
-                <div class="logo-name">SAPRO</div>
+                <div class="logo-name">Sistema Jurídico</div>
                 <div class="logo-sub">Status do Sistema</div>
             </div>
         </div>
@@ -210,7 +210,7 @@ if ($emergencial) {
 </div>
 
 <footer class="footer">
-    SAPRO Sistema Jurídico &bull;
+    Sistema Jurídico &bull;
     <a href="{{ route('login') }}" style="color:var(--navy);font-weight:600;">Acessar o sistema</a>
     &bull; Página atualiza automaticamente a cada 60 segundos
 </footer>
