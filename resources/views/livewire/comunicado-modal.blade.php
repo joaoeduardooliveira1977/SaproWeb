@@ -1,3 +1,4 @@
+<div>
 @if($visivel && count($modais) > 0)
 @php $m = $modais[$indice]; $ti = $m['info']; @endphp
 <div style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;">
@@ -25,3 +26,4 @@
     </div>
 </div>
 @endif
+</div>

@@ -1,3 +1,4 @@
+<div>
 @if(count($banners) > 0)
 @php $b = $banners[$indiceAtual]; $ti = $b['info']; @endphp
 <div style="padding:10px 16px;background:{{ $ti['bg'] }};border-bottom:1px solid {{ $ti['border'] }};color:{{ $ti['cor'] }};">
@@ -27,3 +28,4 @@
     </div>
 </div>
 @endif
+</div>
