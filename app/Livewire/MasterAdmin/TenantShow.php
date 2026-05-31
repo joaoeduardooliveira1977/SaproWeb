@@ -25,6 +25,13 @@ class TenantShow extends Component
     public bool   $modalExcluir   = false;
     public string $motivoExclusao = '';
 
+    // Modal: editar limites
+    public bool   $modalLimites      = false;
+    public string $editPlano          = '';
+    public int    $editLimiteUsuarios = 5;
+    public int    $editLimiteProcessos= 100;
+    public int    $editLimiteStorage  = 500;
+
     public function mount(int $id): void
     {
         $this->tenantId = $id;
@@ -132,6 +139,65 @@ class TenantShow extends Component
         );
 
         return redirect()->route('master.lixeira');
+    }
+
+    // ── Editar limites ────────────────────────────────────────────
+
+    public function abrirModalLimites(): void
+    {
+        $this->editPlano           = $this->tenant->plano;
+        $this->editLimiteUsuarios  = $this->tenant->limite_usuarios ?? 5;
+        $this->editLimiteProcessos = $this->tenant->limite_processos ?? 100;
+        $this->editLimiteStorage   = $this->tenant->limite_storage_mb ?? 500;
+        $this->modalLimites        = true;
+    }
+
+    public function fecharModalLimites(): void
+    {
+        $this->modalLimites = false;
+        $this->resetValidation();
+    }
+
+    public function aplicarPlano(string $plano): void
+    {
+        $config = config("planos.{$plano}");
+        if (!$config) {
+            $this->dispatch('toast', message: 'Plano inválido.', type: 'error');
+            return;
+        }
+        $this->editPlano           = $plano;
+        $this->editLimiteUsuarios  = $config['limite_usuarios'];
+        $this->editLimiteProcessos = $config['limite_processos'];
+        $this->editLimiteStorage   = $config['limite_storage_mb'];
+    }
+
+    public function salvarLimites(): void
+    {
+        $this->validate([
+            'editLimiteUsuarios'  => 'required|integer|min:1',
+            'editLimiteProcessos' => 'required|integer|min:1',
+            'editLimiteStorage'   => 'required|integer|min:1',
+        ]);
+
+        $this->tenant->update([
+            'plano'              => $this->editPlano,
+            'limite_usuarios'    => $this->editLimiteUsuarios,
+            'limite_processos'   => $this->editLimiteProcessos,
+            'limite_storage_mb'  => $this->editLimiteStorage,
+        ]);
+
+        Cache::forget("tenant_{$this->tenant->id}");
+        $this->tenant->refresh();
+
+        MasterAdminLog::registrar(
+            'limites_alterados',
+            $this->tenant->id,
+            $this->tenant->nome,
+            "Plano: {$this->editPlano}. Usuários: {$this->editLimiteUsuarios}. Processos: {$this->editLimiteProcessos}. Storage: {$this->editLimiteStorage}MB"
+        );
+
+        $this->fecharModalLimites();
+        $this->dispatch('toast', message: 'Limites atualizados com sucesso.', type: 'success');
     }
 
     // ── Impersonation ─────────────────────────────────────────────

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AssinaturaWebhookController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MasterLoginController;
+use App\Http\Controllers\Master2FAController;
 use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\RelatorioController;
 use App\Livewire\Portal\PortalLogin;
@@ -26,7 +27,13 @@ use App\Http\Controllers\IAController;
         Route::post('/login', [MasterLoginController::class, 'login'])->name('login.submit');
         Route::post('/logout',[MasterLoginController::class, 'logout'])->name('logout');
 
-        // Área autenticada (somente super_admin)
+        // Verificação 2FA (requer autenticação mas não verificação 2FA)
+        Route::middleware(['auth:usuarios'])->group(function () {
+            Route::get('/2fa/verificar',  [Master2FAController::class, 'mostrarVerificar'])->name('2fa.verificar');
+            Route::post('/2fa/verificar', [Master2FAController::class, 'verificar'])->name('2fa.verificar.post');
+        });
+
+        // Área autenticada completa (somente super_admin + 2FA)
         Route::middleware(['master_auth'])->group(function () {
             Route::get('/', fn() => redirect()->route('master.dashboard'));
             Route::get('/dashboard',       \App\Livewire\MasterAdmin\Dashboard::class)->name('dashboard');
@@ -36,6 +43,12 @@ use App\Http\Controllers\IAController;
             Route::get('/comunicados',     \App\Livewire\MasterAdmin\Comunicados::class)->name('comunicados');
             Route::get('/infra',           \App\Livewire\MasterAdmin\Infra::class)->name('infra');
             Route::get('/alertas',         \App\Livewire\MasterAdmin\Alertas::class)->name('alertas');
+            Route::get('/logs',            \App\Livewire\MasterAdmin\Logs::class)->name('logs');
+
+            // 2FA configuração (dentro do master autenticado)
+            Route::get('/2fa/configurar',  [Master2FAController::class, 'mostrarConfigurar'])->name('2fa.configurar');
+            Route::post('/2fa/confirmar',  [Master2FAController::class, 'confirmarSetup'])->name('2fa.confirmar');
+            Route::post('/2fa/desativar',  [Master2FAController::class, 'desativar'])->name('2fa.desativar');
         });
     });
 
@@ -52,10 +65,12 @@ use App\Http\Controllers\IAController;
     Route::redirect('/super-admin/novo', '/master/tenants', 301);
     Route::redirect('/super-admin/branding', '/master/tenants', 301);
 
-// ─── Planos ────────────────────────────────────────────────────────
+// ─── Planos / Expirado ────────────────────────────────────────────
     Route::get('/planos', function() {
         return view('planos');
     })->name('tenant.planos');
+
+    Route::get('/plano-expirado', fn() => view('plano-expirado'))->name('plano.expirado');
 
 // ─── Registro ──────────────────────────────────────────────────────
     Route::get('/registro', \App\Livewire\Auth\RegistroTenant::class)->name('registro');

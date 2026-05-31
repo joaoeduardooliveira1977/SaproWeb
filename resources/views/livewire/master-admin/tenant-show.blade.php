@@ -29,8 +29,9 @@
     {{-- ── Tabs ── --}}
     <div class="tabs">
         <button class="tab {{ $aba === 'geral' ? 'active' : '' }}" wire:click="mudarAba('geral')">🏢 Geral</button>
+        <button class="tab {{ $aba === 'limites' ? 'active' : '' }}" wire:click="mudarAba('limites')">📊 Limites</button>
         <button class="tab {{ $aba === 'usuarios' ? 'active' : '' }}" wire:click="mudarAba('usuarios')">👥 Usuários</button>
-        <button class="tab {{ $aba === 'atividade' ? 'active' : '' }}" wire:click="mudarAba('atividade')">📊 Atividade</button>
+        <button class="tab {{ $aba === 'atividade' ? 'active' : '' }}" wire:click="mudarAba('atividade')">📋 Atividade</button>
         <button class="tab {{ $aba === 'branding' ? 'active' : '' }}" wire:click="mudarAba('branding')">🎨 Branding</button>
     </div>
 
@@ -110,6 +111,78 @@
                     </div>
                 </div>
             </div>
+
+        </div>
+    </div>
+    @endif
+
+    {{-- ── Aba: Limites e Uso ── --}}
+    @if($aba === 'limites')
+    @php
+        $limUsuarios  = $tenant->limite_usuarios  ?? 5;
+        $limProcessos = $tenant->limite_processos ?? 100;
+        $limStorage   = $tenant->limite_storage_mb ?? 500;
+        $usoUsuarios  = $metricas['usuarios'];
+        $usoProcessos = $metricas['processos'];
+        $usoStorage   = $metricas['disco_mb'];
+        $pctUsr = $limUsuarios  ? min(100, round(($usoUsuarios  / $limUsuarios)  * 100)) : 0;
+        $pctPrc = $limProcessos ? min(100, round(($usoProcessos / $limProcessos) * 100)) : 0;
+        $pctStg = $limStorage   ? min(100, round(($usoStorage   / $limStorage)   * 100)) : 0;
+        $corPct = fn($p) => $p >= 90 ? '#dc2626' : ($p >= 70 ? '#d97706' : '#16a34a');
+    @endphp
+
+    <div class="card" style="margin-bottom:16px;">
+        <div class="card-header">
+            <span class="card-title">Limites e Uso — Plano {{ ucfirst($tenant->plano) }}</span>
+            <button wire:click="abrirModalLimites" class="btn btn-sm btn-outline">✏️ Editar Limites</button>
+        </div>
+        <div class="card-body">
+
+            @foreach([
+                ['Usuários',        $usoUsuarios,  $limUsuarios,  $pctUsr, 'usuários'],
+                ['Processos',       $usoProcessos, $limProcessos, $pctPrc, 'processos'],
+                ['Storage (MB)',    $usoStorage,   $limStorage,   $pctStg, 'MB usados'],
+            ] as [$label, $uso, $limite, $pct, $unit])
+            <div style="margin-bottom:18px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <span style="font-size:13px;font-weight:600;color:#374151;">{{ $label }}</span>
+                    <span style="font-size:12px;color:#64748b;">
+                        <strong style="color:{{ $corPct($pct) }};">{{ number_format($uso) }}</strong>
+                        / {{ number_format($limite) }} {{ $unit }}
+                        <span style="color:{{ $corPct($pct) }};font-weight:700;">({{ $pct }}%)</span>
+                    </span>
+                </div>
+                <div style="height:10px;background:#f1f5f9;border-radius:99px;overflow:hidden;">
+                    <div style="height:100%;width:{{ $pct }}%;background:{{ $corPct($pct) }};border-radius:99px;transition:width .4s;"></div>
+                </div>
+                @if($pct >= 90)
+                <div style="font-size:11px;color:#dc2626;margin-top:3px;">⚠️ Limite crítico atingido</div>
+                @elseif($pct >= 70)
+                <div style="font-size:11px;color:#d97706;margin-top:3px;">⚡ Uso elevado</div>
+                @endif
+            </div>
+            @endforeach
+
+            @if($tenant->trial_expira_em || $tenant->plano_expira_em)
+            <div style="border-top:1px solid #f1f5f9;padding-top:14px;margin-top:4px;">
+                @if($tenant->trial_expira_em)
+                <div style="font-size:13px;color:#64748b;margin-bottom:4px;">
+                    Trial expira em: <strong style="color:{{ $tenant->trial_expira_em->isPast() ? '#dc2626' : '#374151' }};">
+                        {{ $tenant->trial_expira_em->format('d/m/Y') }}
+                        {{ $tenant->trial_expira_em->isPast() ? '(EXPIRADO)' : '(' . $tenant->trial_expira_em->diffForHumans() . ')' }}
+                    </strong>
+                </div>
+                @endif
+                @if($tenant->plano_expira_em)
+                <div style="font-size:13px;color:#64748b;">
+                    Plano expira em: <strong style="color:{{ $tenant->plano_expira_em->isPast() ? '#dc2626' : '#374151' }};">
+                        {{ $tenant->plano_expira_em->format('d/m/Y') }}
+                        {{ $tenant->plano_expira_em->isPast() ? '(EXPIRADO)' : '(' . $tenant->plano_expira_em->diffForHumans() . ')' }}
+                    </strong>
+                </div>
+                @endif
+            </div>
+            @endif
 
         </div>
     </div>
@@ -278,6 +351,64 @@
             </div>
         </div>
 
+    </div>
+    @endif
+
+    {{-- ── Modal: Editar Limites ── --}}
+    @if($modalLimites)
+    <div class="modal-overlay" wire:click.self="fecharModalLimites">
+        <div class="modal" style="max-width:500px;">
+            <div class="modal-header">
+                <span class="modal-title">📊 Editar Limites — {{ $tenant->nome }}</span>
+                <button class="modal-close" wire:click="fecharModalLimites">✕</button>
+            </div>
+            <div class="modal-body">
+
+                {{-- Aplicar plano predefinido --}}
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Aplicar plano predefinido</div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                        @foreach(config('planos') as $slug => $plano)
+                        <button wire:click="aplicarPlano('{{ $slug }}')"
+                                class="btn btn-sm {{ $editPlano === $slug ? 'btn-primary' : 'btn-ghost' }}">
+                            {{ $plano['nome'] }}
+                        </button>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div style="height:1px;background:#f1f5f9;margin:14px 0;"></div>
+
+                <div class="fg-row">
+                    <div class="fg">
+                        <label>Limite de Usuários</label>
+                        <input wire:model="editLimiteUsuarios" type="number" min="1">
+                        @error('editLimiteUsuarios') <span class="err">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="fg">
+                        <label>Limite de Processos</label>
+                        <input wire:model="editLimiteProcessos" type="number" min="1">
+                        @error('editLimiteProcessos') <span class="err">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="fg">
+                    <label>Limite de Storage (MB)</label>
+                    <input wire:model="editLimiteStorage" type="number" min="1">
+                    <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
+                        Atual: {{ $metricas['disco_mb'] ?? 0 }} MB usados
+                    </div>
+                    @error('editLimiteStorage') <span class="err">{{ $message }}</span> @enderror
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button wire:click="fecharModalLimites" class="btn btn-outline">Cancelar</button>
+                <button wire:click="salvarLimites" wire:loading.attr="disabled" class="btn btn-primary">
+                    Salvar Limites
+                </button>
+            </div>
+        </div>
     </div>
     @endif
 

@@ -160,4 +160,23 @@ composer install --no-dev --optimize-autoloader
 ############################ icaro serviços #############################
 
 
+mas nao ficou confuso? Porque tem
+master-admin
+super-admin
+
+Administrador master
+Administrador hub
+
+
+
+
+
+
+https://kmd-ia.com.br/master
+
+
+
+
+
+
 

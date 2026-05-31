@@ -1,16 +1,31 @@
-@section('page-title', 'Log de AÃ§Ãµes')
+@section('page-title', 'Log de Ações Master')
 <div>
 
-    <div class="filter-bar">
-        <input wire:model.live.debounce.300ms="busca" type="text" placeholder="Buscar por admin, tenant ou detalheâ€¦">
+    {{-- ── Filtros ── --}}
+    <div class="filter-bar" style="flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <input wire:model.live.debounce.300ms="busca" type="text"
+               placeholder="Buscar por usuário, tenant, IP ou detalhe…" style="min-width:220px;">
         <select wire:model.live="filtroAcao">
-            <option value="">Todas as aÃ§Ãµes</option>
+            <option value="">Todas as ações</option>
             @foreach($acoes as $a)
             <option value="{{ $a }}">{{ $a }}</option>
             @endforeach
         </select>
+        <select wire:model.live="filtroContexto">
+            <option value="">Todos os contextos</option>
+            <option value="login_ok">Login OK</option>
+            <option value="login_falha">Login Falha</option>
+            <option value="logout">Logout</option>
+            <option value="login_sem_permissao">Sem Permissão</option>
+        </select>
+        <input wire:model.live="dataInicio" type="date" title="Data início" style="width:140px;">
+        <input wire:model.live="dataFim"    type="date" title="Data fim"    style="width:140px;">
+        <button wire:click="exportarCsv" class="btn btn-ghost btn-sm" style="white-space:nowrap;">
+            📥 Exportar CSV
+        </button>
     </div>
 
+    {{-- ── Tabela ── --}}
     <div class="card">
         <div class="card-header">
             <span class="card-title">{{ $logs->total() }} registro(s)</span>
@@ -20,8 +35,8 @@
                 <thead>
                     <tr>
                         <th>Data/Hora</th>
-                        <th>Admin</th>
-                        <th>AÃ§Ã£o</th>
+                        <th>Usuário</th>
+                        <th>Ação</th>
                         <th>Tenant</th>
                         <th>Detalhes</th>
                         <th>IP</th>
@@ -35,26 +50,24 @@
                     </td>
                     <td style="font-weight:600;font-size:13px;">{{ $log->admin_nome }}</td>
                     <td>
-                        @php
-                            $cor = match(true) {
-                                str_contains($log->acao, 'suspenso')  => 'badge-red',
-                                str_contains($log->acao, 'ativado')   => 'badge-green',
-                                str_contains($log->acao, 'login')     => 'badge-blue',
-                                str_contains($log->acao, 'senha')     => 'badge-yellow',
-                                str_contains($log->acao, 'retry')     => 'badge-purple',
-                                default                               => 'badge-gray',
-                            };
-                        @endphp
-                        <span class="badge {{ $cor }}">{{ $log->acao }}</span>
+                        @php $cor = \App\Models\MasterAdminLog::badgeClass($log->acao); @endphp
+                        <span class="badge {{ $cor }}" style="font-size:10px;">{{ $log->acao }}</span>
+                        @if($log->contexto)
+                        <span class="badge badge-gray" style="font-size:9px;margin-left:3px;">{{ $log->contexto }}</span>
+                        @endif
                     </td>
-                    <td style="font-size:12px;">{{ $log->tenant_nome ?? 'â€”' }}</td>
-                    <td style="font-size:12px;color:#64748b;max-width:280px;">{{ $log->detalhes ?? 'â€”' }}</td>
-                    <td style="font-size:11px;color:#94a3b8;font-family:monospace;">{{ $log->ip ?? 'â€”' }}</td>
+                    <td style="font-size:12px;">{{ $log->tenant_nome ?? '—' }}</td>
+                    <td style="font-size:12px;color:#64748b;max-width:260px;">
+                        <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $log->detalhes }}">
+                            {{ $log->detalhes ?? '—' }}
+                        </div>
+                    </td>
+                    <td style="font-size:11px;color:#94a3b8;font-family:monospace;">{{ $log->ip ?? '—' }}</td>
                 </tr>
                 @empty
                 <tr>
                     <td colspan="6" style="text-align:center;padding:32px;color:#94a3b8;">
-                        Nenhuma aÃ§Ã£o registrada ainda.
+                        Nenhuma ação registrada.
                     </td>
                 </tr>
                 @endforelse
@@ -69,4 +82,3 @@
     </div>
 
 </div>
-

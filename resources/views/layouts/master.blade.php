@@ -459,6 +459,12 @@
             <div class="nav-sep"></div>
             <div class="nav-section">Sistema</div>
 
+            <a href="{{ route('master.logs') }}"
+               class="nav-item {{ request()->routeIs('master.logs') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Logs
+            </a>
+
             <a href="{{ route('master.comunicados') }}"
                class="nav-item {{ request()->routeIs('master.comunicados') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -487,6 +493,15 @@
         </nav>
 
         <div class="sidebar-bottom">
+            <a href="{{ route('master.2fa.configurar') }}"
+               class="nav-item {{ request()->routeIs('master.2fa.*') ? 'active' : '' }}"
+               style="margin-bottom:2px;">
+                <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 118 0v4"/></svg>
+                <span>2FA</span>
+                @if(!auth('usuarios')->user()?->master_2fa_ativo)
+                <span class="badge-count" style="background:#d97706;">!</span>
+                @endif
+            </a>
             <a href="{{ route('dashboard') }}" class="nav-item" style="margin-bottom:4px;">
                 <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
                 Voltar ao Sistema
@@ -529,5 +544,75 @@
 @livewireScripts
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 @stack('scripts')
+
+{{-- ── Session Timeout: aviso 5min antes, expiração em 30min ── --}}
+<script>
+(function () {
+    const TIMEOUT_MS   = 30 * 60 * 1000; // 30 minutos
+    const AVISO_MS     = 25 * 60 * 1000; // aviso aos 25 min
+    let timerAviso, timerExpiry, avisoBanner;
+
+    function resetTimer() {
+        clearTimeout(timerAviso);
+        clearTimeout(timerExpiry);
+
+        // Remove banner se estiver visível
+        if (avisoBanner) { avisoBanner.remove(); avisoBanner = null; }
+
+        timerAviso = setTimeout(mostrarAviso, AVISO_MS);
+        timerExpiry = setTimeout(expirar, TIMEOUT_MS);
+    }
+
+    function mostrarAviso() {
+        avisoBanner = document.createElement('div');
+        avisoBanner.id = 'session-aviso';
+        avisoBanner.innerHTML = `
+            <div style="position:fixed;top:60px;right:20px;z-index:9999;background:#fff;border:1.5px solid #fcd34d;border-radius:12px;padding:16px 20px;box-shadow:0 8px 32px rgba(0,0,0,.15);max-width:320px;font-family:sans-serif;">
+                <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">⚠️ Sessão expirando</div>
+                <div id="session-countdown" style="font-size:12px;color:#64748b;margin-bottom:12px;">Sua sessão master expira em <strong id="session-secs">5:00</strong></div>
+                <button onclick="document.location.reload()" style="background:#1a3a5c;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;width:100%;">
+                    Manter sessão ativa
+                </button>
+            </div>`;
+        document.body.appendChild(avisoBanner);
+
+        // Countdown
+        let secsLeft = 5 * 60;
+        const interval = setInterval(() => {
+            secsLeft--;
+            const el = document.getElementById('session-secs');
+            if (el) {
+                const m = Math.floor(secsLeft / 60);
+                const s = secsLeft % 60;
+                el.textContent = m + ':' + String(s).padStart(2, '0');
+            }
+            if (secsLeft <= 0) clearInterval(interval);
+        }, 1000);
+    }
+
+    function expirar() {
+        window.location.href = '{{ route('master.login') }}?expirado=1';
+    }
+
+    // Reinicia o timer em qualquer interação
+    ['click', 'keydown', 'scroll', 'mousemove'].forEach(ev => {
+        document.addEventListener(ev, resetTimer, { passive: true });
+    });
+
+    resetTimer();
+})();
+</script>
+
+{{-- Aviso 2FA não configurado --}}
+@if(session('master_2fa_aviso') && !auth('usuarios')->user()?->master_2fa_ativo)
+<div style="position:fixed;bottom:20px;right:20px;z-index:9998;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:12px;padding:14px 18px;box-shadow:0 4px 20px rgba(0,0,0,.1);max-width:300px;">
+    <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:4px;">🔐 2FA não configurado</div>
+    <div style="font-size:12px;color:#78350f;margin-bottom:10px;">Configure o 2FA para aumentar a segurança do acesso master.</div>
+    <a href="{{ route('master.2fa.configurar') }}"
+       style="display:block;background:#d97706;color:#fff;text-align:center;padding:7px;border-radius:7px;font-size:12px;font-weight:700;text-decoration:none;">
+        Configurar agora
+    </a>
+</div>
+@endif
 </body>
 </html>
