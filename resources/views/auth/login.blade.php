@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — {{ $tenant->nome ?? 'SISTEMA JURÍDICO' }}</title>
+    <title>{{ $tenant->nome ? $tenant->nome.' — ' : '' }}Software Jurídico</title>
     <style>
         :root {
             --cor-primaria:   {{ $tenant->cor_primaria  ?? '#1a3a5c' }};
