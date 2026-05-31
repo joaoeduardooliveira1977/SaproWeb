@@ -1,7 +1,6 @@
-{{-- CadastroTrial — página pública de cadastro para trial gratuito --}}
-<div class="cadastro-trial-page">
+{{-- CadastroTrial — layouts.guest já fornece fundo e flex-center no body --}}
+<div>
 <style>
-  .cadastro-trial-page { min-height:100vh; background:linear-gradient(135deg,#0f2540 0%,#1a3a5c 60%,#0f2540 100%); display:flex; align-items:center; justify-content:center; padding:24px 16px; }
   .ct-card { background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.3); padding:48px 40px; max-width:520px; width:100%; }
   .ct-logo { text-align:center; margin-bottom:32px; }
   .ct-logo-icon { font-size:48px; }

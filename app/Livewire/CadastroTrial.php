@@ -132,6 +132,6 @@ class CadastroTrial extends Component
     public function render()
     {
         return view('livewire.cadastro-trial')
-            ->layout('layouts.auth');
+            ->layout('layouts.guest');
     }
 }
