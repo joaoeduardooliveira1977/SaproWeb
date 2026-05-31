@@ -14,6 +14,19 @@ use App\Livewire\PortalAcesso;
 use App\Http\Controllers\IAController;
 
 
+// ─── Raiz: landing para visitantes, dashboard para autenticados ──────
+    Route::get('/', function () {
+        if (auth('usuarios')->check()) {
+            return redirect()->route('dashboard');
+        }
+        return redirect()->route('landing');
+    })->name('home');
+
+// ─── Landing page pública ──────────────────────────────────────────
+    Route::get('/landing', function () {
+        return response()->file(public_path('landing.html'));
+    })->name('landing');
+
 // ─── Login / Logout ────────────────────────────
     Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
@@ -98,7 +111,7 @@ Route::get('/teste-config', fn() => 'funcionou');
 
     // ── Geral (todos os perfis autenticados) ───────────────────
         Route::middleware('perfil:geral')->group(function () {
-        Route::get('/', fn() => view('dashboard'))->name('dashboard');
+        Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
         Route::get('/dashboard-preview', fn() => view('dashboard-preview'))->name('dashboard.preview');
         Route::get('/agenda',     fn() => view('agenda'))->name('agenda');
         Route::get('/prazos',     fn() => view('prazos'))->name('prazos');
