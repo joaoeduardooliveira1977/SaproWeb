@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Models\{MasterAdminLog, Usuario};
+use PragmaRX\Google2FA\Google2FA;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
@@ -13,6 +14,11 @@ use BaconQrCode\Writer;
 
 class Master2FAController extends Controller
 {
+    private function google2fa(): Google2FA
+    {
+        return new Google2FA();
+    }
+
     // ── Configuração do 2FA ───────────────────────────────────────
 
     public function mostrarConfigurar(Request $request)
@@ -21,18 +27,13 @@ class Master2FAController extends Controller
 
         // Gera secret se ainda não tem
         if (!$user->master_2fa_secret) {
-            $google2fa = app(\PragmaRX\Google2FALaravel\Google2FA::class);
-            $secret    = $google2fa->generateSecretKey();
-
-            $user->update([
-                'master_2fa_secret' => encrypt($secret),
-            ]);
+            $secret = $this->google2fa()->generateSecretKey();
+            $user->update(['master_2fa_secret' => encrypt($secret)]);
             $user->refresh();
         }
 
-        $secret    = decrypt($user->master_2fa_secret);
-        $google2fa = app(\PragmaRX\Google2FALaravel\Google2FA::class);
-        $otpauthUrl = $google2fa->getQRCodeUrl(
+        $secret     = decrypt($user->master_2fa_secret);
+        $otpauthUrl = $this->google2fa()->getQRCodeUrl(
             config('app.name', 'Sistema Jurídico'),
             $user->email ?? $user->login,
             $secret
@@ -47,13 +48,15 @@ class Master2FAController extends Controller
     {
         $request->validate([
             'codigo' => 'required|digits:6',
-        ], ['codigo.required' => 'Digite o código de 6 dígitos.', 'codigo.digits' => 'O código deve ter 6 dígitos.']);
+        ], [
+            'codigo.required' => 'Digite o código de 6 dígitos.',
+            'codigo.digits'   => 'O código deve ter 6 dígitos.',
+        ]);
 
-        $user      = Auth::guard('usuarios')->user();
-        $secret    = decrypt($user->master_2fa_secret);
-        $google2fa = app(\PragmaRX\Google2FALaravel\Google2FA::class);
+        $user   = Auth::guard('usuarios')->user();
+        $secret = decrypt($user->master_2fa_secret);
 
-        if (!$google2fa->verifyKey($secret, $request->codigo)) {
+        if (!$this->google2fa()->verifyKey($secret, $request->codigo)) {
             return back()->withErrors(['codigo' => 'Código inválido. Verifique seu authenticator.']);
         }
 
@@ -62,13 +65,12 @@ class Master2FAController extends Controller
         $hashesRecuperacao  = $codigosRecuperacao->map(fn($c) => bcrypt($c))->toArray();
 
         $user->update([
-            'master_2fa_ativo'         => true,
-            'master_2fa_confirmado_em' => now(),
-            'master_2fa_recovery_codes'=> $hashesRecuperacao,
+            'master_2fa_ativo'          => true,
+            'master_2fa_confirmado_em'  => now(),
+            'master_2fa_recovery_codes' => $hashesRecuperacao,
         ]);
 
-        MasterAdminLog::registrar('2fa_ativado', null, null, '2FA configurado e ativado com sucesso.');
-
+        MasterAdminLog::registrar('2fa_ativado', null, null, '2FA configurado e ativado.');
         session(['master_2fa_verificado' => true]);
 
         return view('master.2fa.codigos-recuperacao', [
@@ -78,15 +80,12 @@ class Master2FAController extends Controller
 
     public function desativar(Request $request)
     {
-        $request->validate([
-            'codigo' => 'required|digits:6',
-        ]);
+        $request->validate(['codigo' => 'required|digits:6']);
 
-        $user      = Auth::guard('usuarios')->user();
-        $secret    = decrypt($user->master_2fa_secret);
-        $google2fa = app(\PragmaRX\Google2FALaravel\Google2FA::class);
+        $user   = Auth::guard('usuarios')->user();
+        $secret = decrypt($user->master_2fa_secret);
 
-        if (!$google2fa->verifyKey($secret, $request->codigo)) {
+        if (!$this->google2fa()->verifyKey($secret, $request->codigo)) {
             return back()->withErrors(['codigo' => 'Código inválido.']);
         }
 
@@ -97,10 +96,10 @@ class Master2FAController extends Controller
             'master_2fa_recovery_codes' => null,
         ]);
 
-        MasterAdminLog::registrar('2fa_desativado', null, null, '2FA desativado pelo usuário.');
+        MasterAdminLog::registrar('2fa_desativado', null, null, '2FA desativado.');
         session()->forget('master_2fa_verificado');
 
-        return redirect()->route('master.configuracoes')
+        return redirect()->route('master.2fa.configurar')
             ->with('sucesso', '2FA desativado com sucesso.');
     }
 
@@ -119,14 +118,12 @@ class Master2FAController extends Controller
 
     public function verificar(Request $request)
     {
-        $request->validate([
-            'codigo' => 'required|string',
-        ], ['codigo.required' => 'Digite o código.']);
+        $request->validate(['codigo' => 'required|string'], ['codigo.required' => 'Digite o código.']);
 
         $user   = Auth::guard('usuarios')->user();
         $codigo = trim($request->codigo);
 
-        // Tenta código de recuperação
+        // Tenta código de recuperação (formato XXXX-XXXX)
         if (strlen($codigo) === 9 && str_contains($codigo, '-')) {
             if ($this->verificarCodigoRecuperacao($user, $codigo)) {
                 session(['master_2fa_verificado' => true]);
@@ -141,10 +138,7 @@ class Master2FAController extends Controller
             return back()->withErrors(['codigo' => '2FA não configurado.']);
         }
 
-        $secret    = decrypt($user->master_2fa_secret);
-        $google2fa = app(\PragmaRX\Google2FALaravel\Google2FA::class);
-
-        if (!$google2fa->verifyKey($secret, $codigo)) {
+        if (!$this->google2fa()->verifyKey(decrypt($user->master_2fa_secret), $codigo)) {
             return back()->withErrors(['codigo' => 'Código inválido. Tente novamente.']);
         }
 
@@ -161,7 +155,6 @@ class Master2FAController extends Controller
         $hashes = $user->master_2fa_recovery_codes ?? [];
         foreach ($hashes as $i => $hash) {
             if (password_verify(strtoupper($codigo), $hash)) {
-                // Remove o código usado
                 unset($hashes[$i]);
                 $user->update(['master_2fa_recovery_codes' => array_values($hashes)]);
                 return true;
@@ -177,8 +170,7 @@ class Master2FAController extends Controller
                 new RendererStyle(200),
                 new SvgImageBackEnd()
             );
-            $writer = new Writer($renderer);
-            return $writer->writeString($url);
+            return (new Writer($renderer))->writeString($url);
         } catch (\Exception) {
             return '';
         }
