@@ -20,11 +20,12 @@ use App\Http\Controllers\IAController;
 
 // ─── Master Admin (SaaS) ───────────────────────
     Route::prefix('master-admin')->name('master-admin.')->middleware(['auth:usuarios', 'super_admin'])->group(function () {
-        Route::get('/',           \App\Livewire\MasterAdmin\Dashboard::class)->name('dashboard');
-        Route::get('/tenants',    \App\Livewire\MasterAdmin\Tenants::class)->name('tenants');
-        Route::get('/tenants/{id}', \App\Livewire\MasterAdmin\TenantShow::class)->where('id', '[0-9]+')->name('tenant-show');
-        Route::get('/infra',      \App\Livewire\MasterAdmin\Infra::class)->name('infra');
-        Route::get('/alertas',    \App\Livewire\MasterAdmin\Alertas::class)->name('alertas');
+        Route::get('/',              \App\Livewire\MasterAdmin\Dashboard::class)->name('dashboard');
+        Route::get('/tenants',       \App\Livewire\MasterAdmin\Tenants::class)->name('tenants');
+        Route::get('/tenants/{id}',  \App\Livewire\MasterAdmin\TenantShow::class)->where('id', '[0-9]+')->name('tenant-show');
+        Route::get('/infra',         \App\Livewire\MasterAdmin\Infra::class)->name('infra');
+        Route::get('/alertas',       \App\Livewire\MasterAdmin\Alertas::class)->name('alertas');
+        Route::get('/comunicados',   \App\Livewire\MasterAdmin\Comunicados::class)->name('comunicados');
     });
 
 // ─── Super Admin ───────────────────────────────
@@ -203,6 +204,7 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/admin/portal-mensagens',    fn() => view('portal-mensagens'))->name('admin.portal-mensagens');
         Route::get('/admin/notificacoes-whatsapp', fn() => view('notificacoes-whatsapp'))->name('admin.notificacoes-whatsapp');
         Route::get('/admin/backup', \App\Livewire\Admin\Backup::class)->name('admin.backup');
+        Route::get('/admin/comunicados', \App\Livewire\Admin\ComunicadosCliente::class)->name('admin.comunicados');
     });
 
 
@@ -210,6 +212,9 @@ Route::get('/teste-config', fn() => 'funcionou');
 
 
 // ─── Webhooks (sem auth/csrf) ──────────────────────────────────
+// ─── Status público (sem autenticação) ────────────────────────
+Route::get('/status', fn() => view('status'))->name('status');
+
 Route::post('/webhooks/clicksign', [AssinaturaWebhookController::class, 'handle'])
     ->name('webhooks.clicksign')
     ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);

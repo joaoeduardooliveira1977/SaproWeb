@@ -189,6 +189,13 @@
             <span class="nav-btn-label">Alertas</span>
         </a>
 
+        {{-- Comunicados --}}
+        <a href="{{ route('master-admin.comunicados') }}"
+           class="nav-btn {{ request()->routeIs('master-admin.comunicados') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <span class="nav-btn-label">Comunicados</span>
+        </a>
+
         {{-- Infra --}}
         <a href="{{ route('master-admin.infra') }}"
            class="nav-btn {{ request()->routeIs('master-admin.infra') ? 'active' : '' }}">
