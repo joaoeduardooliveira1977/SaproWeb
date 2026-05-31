@@ -1,14 +1,14 @@
-@section('page-title', 'Infraestrutura')
+section('page-title', 'Infraestrutura')
 <div wire:poll.30000ms="atualizar">
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-        <p style="font-size:12px;color:#94a3b8;">Auto-refresh a cada 30 segundos &nbsp;·&nbsp; <span wire:loading>atualizando…</span></p>
-        <button wire:click="atualizar" class="btn btn-sm btn-outline">↻ Atualizar agora</button>
+        <p style="font-size:12px;color:#94a3b8;">Auto-refresh a cada 30 segundos &nbsp;Â·&nbsp; <span wire:loading>atualizandoâ€¦</span></p>
+        <button wire:click="atualizar" class="btn btn-sm btn-outline">â†» Atualizar agora</button>
     </div>
 
-    {{-- ── Servidor ── --}}
+    {{-- â”€â”€ Servidor â”€â”€ --}}
     <div class="card" style="margin-bottom:16px;">
-        <div class="card-header"><span class="card-title">🖥️ Servidor</span></div>
+        <div class="card-header"><span class="card-title">ðŸ–¥ï¸ Servidor</span></div>
         <div class="card-body">
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
 
@@ -30,7 +30,7 @@
                 {{-- RAM --}}
                 <div>
                     <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-                        <span style="font-size:13px;font-weight:600;">Memória RAM</span>
+                        <span style="font-size:13px;font-weight:600;">MemÃ³ria RAM</span>
                         <span style="font-size:13px;font-weight:700;color:{{ $servidor['ram_percent'] > 85 ? '#dc2626' : ($servidor['ram_percent'] > 70 ? '#d97706' : '#16a34a') }};">
                             {{ $servidor['ram_percent'] }}%
                         </span>
@@ -63,15 +63,15 @@
 
             </div>
             <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:#64748b;">
-                ⏱️ Uptime: <strong>{{ $servidor['uptime'] ?: 'N/A' }}</strong>
+                â±ï¸ Uptime: <strong>{{ $servidor['uptime'] ?: 'N/A' }}</strong>
             </div>
         </div>
     </div>
 
-    {{-- ── Fila de Jobs ── --}}
+    {{-- â”€â”€ Fila de Jobs â”€â”€ --}}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
         <div class="card">
-            <div class="card-header"><span class="card-title">📬 Fila de Jobs</span></div>
+            <div class="card-header"><span class="card-title">ðŸ“¬ Fila de Jobs</span></div>
             <div class="card-body" style="display:flex;gap:20px;">
                 <div style="text-align:center;flex:1;">
                     <div style="font-size:28px;font-weight:700;color:var(--primary);">{{ $fila['pendentes'] }}</div>
@@ -86,10 +86,10 @@
 
         <div class="card">
             <div class="card-header">
-                <span class="card-title">❌ Últimas Falhas</span>
+                <span class="card-title">âŒ Ãšltimas Falhas</span>
                 @if(count($falhas))
                 <button wire:click="retryTodos" wire:confirm="Reenfileirar todos os jobs com falha?"
-                        class="btn btn-sm btn-primary">↻ Retentar todos</button>
+                        class="btn btn-sm btn-primary">â†» Retentar todos</button>
                 @endif
             </div>
             <div style="max-height:220px;overflow-y:auto;">
@@ -99,30 +99,30 @@
                         <div style="flex:1;">
                             <div style="font-weight:600;color:#1e293b;">{{ $f['job'] }}</div>
                             <div style="color:#dc2626;margin-top:2px;font-family:monospace;font-size:11px;word-break:break-all;">{{ Str::limit($f['erro'], 120) }}</div>
-                            <div style="color:#94a3b8;margin-top:3px;">{{ \Carbon\Carbon::parse($f['failed_at'])->diffForHumans() }} · fila: {{ $f['queue'] }}</div>
+                            <div style="color:#94a3b8;margin-top:3px;">{{ \Carbon\Carbon::parse($f['failed_at'])->diffForHumans() }} Â· fila: {{ $f['queue'] }}</div>
                         </div>
                         <div style="display:flex;gap:5px;flex-shrink:0;">
                             <button wire:click="retryJob({{ $f['id'] }})"
-                                    class="btn btn-sm" style="background:#eff6ff;color:#2563a8;">↻ Retry</button>
+                                    class="btn btn-sm" style="background:#eff6ff;color:#2563a8;">â†» Retry</button>
                             <button wire:click="deleteJob({{ $f['id'] }})"
                                     wire:confirm="Remover este job permanentemente?"
-                                    class="btn btn-sm" style="background:#fee2e2;color:#dc2626;">✕</button>
+                                    class="btn btn-sm" style="background:#fee2e2;color:#dc2626;">âœ•</button>
                         </div>
                     </div>
                 </div>
                 @empty
-                <div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px;">✅ Nenhuma falha registrada.</div>
+                <div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px;">âœ… Nenhuma falha registrada.</div>
                 @endforelse
             </div>
         </div>
     </div>
 
-    {{-- ── Logs ── --}}
+    {{-- â”€â”€ Logs â”€â”€ --}}
     <div class="card">
         <div class="card-header">
-            <span class="card-title">📋 Laravel Log (últimas 20 linhas)</span>
+            <span class="card-title">ðŸ“‹ Laravel Log (Ãºltimas 20 linhas)</span>
             <button wire:click="limparLog" wire:confirm="Limpar o arquivo de log?"
-                    class="btn btn-sm btn-danger">🗑️ Limpar Log</button>
+                    class="btn btn-sm btn-danger">ðŸ—‘ï¸ Limpar Log</button>
         </div>
         <div style="background:#0f172a;border-radius:0 0 10px 10px;padding:16px;overflow-x:auto;">
             <pre style="font-family:monospace;font-size:11px;color:#94a3b8;white-space:pre-wrap;word-break:break-all;margin:0;max-height:300px;overflow-y:auto;">{{ $logConteudo ?: 'Log vazio.' }}</pre>
@@ -130,3 +130,4 @@
     </div>
 
 </div>
+

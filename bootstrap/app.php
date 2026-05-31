@@ -12,9 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'perfil'      => \App\Http\Middleware\VerificarPerfil::class,
-            'tenant'      => \App\Http\Middleware\IdentificarTenant::class,
-            'super_admin' => \App\Http\Middleware\SuperAdmin::class,
+            'perfil'       => \App\Http\Middleware\VerificarPerfil::class,
+            'tenant'       => \App\Http\Middleware\IdentificarTenant::class,
+            'super_admin'  => \App\Http\Middleware\SuperAdmin::class,
+            'master_auth'  => \App\Http\Middleware\MasterAuth::class,
         ]);
         
 	 $middleware->web(append: [

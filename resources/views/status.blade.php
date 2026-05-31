@@ -3,194 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="60">
-    <title>Status do Sistema — Software Jurídico</title>
+    <title>Status do Sistema — SAPRO</title>
+    <meta name="description" content="Status em tempo real do sistema SAPRO.">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f4f8; color: #1e293b; min-height: 100vh; }
 
-        .header { background: #0f2540; padding: 20px 0; }
-        .header-inner { max-width: 860px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; gap: 14px; }
-        .header-logo { width: 40px; height: 40px; background: #c9a84c; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-        .header-logo svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; }
-        .header-title { color: #fff; font-size: 16px; font-weight: 700; }
-        .header-sub { color: rgba(255,255,255,.5); font-size: 12px; }
+        :root {
+            --bg:     #f8fafc;
+            --white:  #ffffff;
+            --text:   #1e293b;
+            --muted:  #64748b;
+            --border: #e2e8f0;
+            --green:  #16a34a;
+            --yellow: #d97706;
+            --red:    #dc2626;
+            --blue:   #2563eb;
+            --navy:   #1a3a5c;
+        }
 
-        .container { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-        /* Status geral */
-        .status-geral { border-radius: 14px; padding: 28px 32px; margin-bottom: 28px; display: flex; align-items: center; gap: 20px; }
-        .status-geral.verde   { background: #f0fdf4; border: 1.5px solid #86efac; }
-        .status-geral.amarelo { background: #fffbeb; border: 1.5px solid #fcd34d; }
-        .status-geral.vermelho{ background: #fef2f2; border: 1.5px solid #fca5a5; }
-        .status-geral.azul    { background: #eff6ff; border: 1.5px solid #bfdbfe; }
-        .status-icone { font-size: 44px; flex-shrink: 0; }
-        .status-texto-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: .7; margin-bottom: 4px; }
-        .status-texto-desc  { font-size: 20px; font-weight: 800; }
-        .status-atualizado  { font-size: 11px; opacity: .6; margin-top: 4px; }
+        /* Header */
+        .header { background: var(--navy); color: #fff; padding: 0 24px; }
+        .header-inner { max-width: 860px; margin: 0 auto; padding: 20px 0; display: flex; align-items: center; justify-content: space-between; }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-box { width: 40px; height: 40px; background: rgba(255,255,255,.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .logo-box svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2; }
+        .logo-name { font-size: 18px; font-weight: 800; letter-spacing: 1px; }
+        .logo-sub  { font-size: 12px; color: rgba(255,255,255,.5); }
+        .refresh-info { font-size: 12px; color: rgba(255,255,255,.45); text-align: right; }
 
-        /* Componentes */
-        .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,.06); margin-bottom: 20px; overflow: hidden; }
-        .card-header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; font-size: 14px; font-weight: 700; color: #1a3a5c; }
-        .comp-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 20px; border-bottom: 1px solid #f1f5f9; }
-        .comp-row:last-child { border-bottom: none; }
-        .comp-nome { font-size: 13px; font-weight: 600; color: #1e293b; }
-        .comp-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; }
-        .badge-ok   { background: #dcfce7; color: #16a34a; }
-        .badge-warn { background: #fffbeb; color: #d97706; }
-        .badge-down { background: #fee2e2; color: #dc2626; }
+        /* Hero */
+        .hero { background: var(--white); border-bottom: 1px solid var(--border); padding: 36px 24px; text-align: center; }
+        .hero-inner { max-width: 860px; margin: 0 auto; }
 
-        /* Incidentes */
-        .incidente { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; }
-        .incidente:last-child { border-bottom: none; }
-        .incidente-data   { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
-        .incidente-titulo { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-        .incidente-msg    { font-size: 12px; color: #64748b; line-height: 1.6; }
+        .status-overall { display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; border-radius: 99px; font-size: 16px; font-weight: 700; margin-bottom: 12px; border: 1.5px solid; }
+        .status-overall.ok    { background: #f0fdf4; color: var(--green); border-color: #bbf7d0; }
+        .status-overall.warn  { background: #fffbeb; color: var(--yellow); border-color: #fcd34d; }
+        .status-overall.error { background: #fff5f5; color: var(--red); border-color: #fecaca; }
+        .hero-sub { font-size: 13px; color: var(--muted); }
 
-        .footer { text-align: center; padding: 24px; font-size: 12px; color: #94a3b8; }
-        .footer a { color: #1a3a5c; text-decoration: none; font-weight: 600; }
+        /* Content */
+        .content { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+        .section-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; }
+
+        /* Components list */
+        .comp-list { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 28px; }
+        .comp-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+        .comp-item:last-child { border-bottom: none; }
+        .comp-name { font-size: 14px; font-weight: 600; color: var(--text); }
+        .comp-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+        .comp-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; }
+        .comp-badge.ok    { background: #f0fdf4; color: var(--green); }
+        .comp-badge.warn  { background: #fffbeb; color: var(--yellow); }
+        .comp-badge.error { background: #fff5f5; color: var(--red); }
+        .comp-badge.info  { background: #eff6ff; color: var(--blue); }
+
+        /* Incidents */
+        .incident-card { border-radius: 10px; padding: 16px 18px; margin-bottom: 10px; border: 1px solid; }
+        .incident-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+        .incident-meta  { font-size: 12px; margin-bottom: 8px; opacity: .7; }
+        .incident-body  { font-size: 13px; line-height: 1.6; }
+
+        /* Footer */
+        .footer { text-align: center; padding: 24px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 20px; }
 
         @media (max-width: 600px) {
-            .status-geral { flex-direction: column; text-align: center; }
+            .header-inner { flex-direction: column; gap: 10px; text-align: center; }
+            .refresh-info { text-align: center; }
         }
     </style>
+    <script>setTimeout(() => location.reload(), 60000);</script>
 </head>
 <body>
 
-<div class="header">
+@php
+use App\Models\Comunicado;
+
+$comunicadosAtivos = Comunicado::ativos()->orderByDesc('created_at')->get();
+$emergencial = $comunicadosAtivos->firstWhere('tipo', 'manutencao_emergencial');
+$programada  = $comunicadosAtivos->firstWhere('tipo', 'manutencao_programada');
+
+if ($emergencial) {
+    $sg = ['class' => 'error', 'icon' => '🔴', 'texto' => 'Degradação de Serviço'];
+} elseif ($programada) {
+    $sg = ['class' => 'warn',  'icon' => '🔧', 'texto' => 'Manutenção em Andamento'];
+} else {
+    $sg = ['class' => 'ok',    'icon' => '✅', 'texto' => 'Todos os sistemas operacionais'];
+}
+@endphp
+
+<header class="header">
     <div class="header-inner">
-        <div class="header-logo">
-            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <div class="logo-area">
+            <div class="logo-box">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <div>
+                <div class="logo-name">SAPRO</div>
+                <div class="logo-sub">Status do Sistema</div>
+            </div>
         </div>
-        <div>
-            <div class="header-title">Software Jurídico</div>
-            <div class="header-sub">Página de Status do Sistema</div>
-        </div>
-    </div>
-</div>
-
-<div class="container">
-
-    {{-- ── Status geral ── --}}
-    @php
-        $tipos_criticos = ['manutencao_emergencial', 'pagamento_pendente'];
-        $tipos_manutencao = ['manutencao_programada'];
-        $tipos_ok = ['sistema_restaurado', 'nova_funcionalidade'];
-
-        $comunicadosAtivos = \App\Models\Comunicado::ativos()
-            ->where('destino', 'todos')
-            ->orderByRaw("case tipo
-                when 'manutencao_emergencial' then 0
-                when 'pagamento_pendente'     then 1
-                when 'manutencao_programada'  then 2
-                else 3 end")
-            ->get();
-
-        $critico    = $comunicadosAtivos->whereIn('tipo', $tipos_criticos)->first();
-        $manutencao = $comunicadosAtivos->whereIn('tipo', $tipos_manutencao)->first();
-
-        if ($critico) {
-            $statusClasse = 'vermelho';
-            $statusIcone  = '🔴';
-            $statusDesc   = 'Interrupção de serviço';
-        } elseif ($manutencao) {
-            $statusClasse = 'azul';
-            $statusIcone  = '🔧';
-            $statusDesc   = 'Manutenção em andamento';
-        } else {
-            $statusClasse = 'verde';
-            $statusIcone  = '✅';
-            $statusDesc   = 'Todos os sistemas operacionais';
-        }
-    @endphp
-
-    <div class="status-geral {{ $statusClasse }}">
-        <div class="status-icone">{{ $statusIcone }}</div>
-        <div>
-            <div class="status-texto-label">Status atual</div>
-            <div class="status-texto-desc">{{ $statusDesc }}</div>
-            <div class="status-atualizado">Atualizado em {{ now()->format('d/m/Y H:i') }} — página atualiza automaticamente a cada 60s</div>
+        <div class="refresh-info">
+            Atualizado: {{ now()->format('d/m/Y H:i:s') }}<br>
+            <span style="color:rgba(255,255,255,.25);">Refresh automático em 60s</span>
         </div>
     </div>
+</header>
 
-    {{-- Comunicado ativo em destaque --}}
-    @if($critico || $manutencao)
-    @php $destaque = $critico ?? $manutencao; $ti = $destaque->tipoInfo(); @endphp
-    <div style="padding:14px 18px;border-radius:10px;background:{{ $ti['bg'] }};border:1px solid {{ $ti['border'] }};color:{{ $ti['cor'] }};margin-bottom:20px;font-size:13px;line-height:1.6;">
-        <strong>{{ $ti['icon'] }} {{ $destaque->titulo }}</strong><br>
-        {{ $destaque->mensagem }}
-        @if($destaque->data_fim)
-        <div style="margin-top:6px;font-size:11px;opacity:.8;">Previsão de resolução: {{ $destaque->data_fim->format('d/m/Y H:i') }}</div>
-        @endif
+<section class="hero">
+    <div class="hero-inner">
+        <div class="status-overall {{ $sg['class'] }}">
+            {{ $sg['icon'] }} {{ $sg['texto'] }}
+        </div>
+        <div class="hero-sub">{{ now()->format('d/m/Y \à\s H:i') }}</div>
     </div>
-    @endif
+</section>
 
-    {{-- ── Componentes ── --}}
-    <div class="card">
-        <div class="card-header">Componentes do Sistema</div>
+<div class="content">
+
+    {{-- Componentes --}}
+    <div class="section-title">Componentes do Sistema</div>
+    <div class="comp-list">
         @php
-            $componentesDown = $critico ? true : false;
-            $componentesDeg  = $manutencao ? true : false;
-
-            $componentes = [
-                'Sistema Principal'              => $componentesDown ? 'down' : ($componentesDeg ? 'warn' : 'ok'),
-                'Autenticação'                   => $componentesDown ? 'down' : 'ok',
-                'Processamento de Documentos'    => ($componentesDown || $componentesDeg) ? 'warn' : 'ok',
-                'Notificações'                   => $componentesDeg ? 'warn' : 'ok',
-                'API AASP'                       => 'ok',
-            ];
+        $statusComp = $emergencial ? 'error' : ($programada ? 'warn' : 'ok');
+        $labelMap = [
+            'ok'    => ['class' => 'ok',    'icon' => '●', 'label' => 'Operacional'],
+            'warn'  => ['class' => 'warn',  'icon' => '◐', 'label' => 'Degradado'],
+            'error' => ['class' => 'error', 'icon' => '●', 'label' => 'Fora do ar'],
+        ];
+        $comps = [
+            ['Sistema Principal',   'Acesso e autenticação de usuários',        $statusComp],
+            ['Gestão de Processos', 'Cadastro e acompanhamento de processos',    $statusComp],
+            ['Módulo Financeiro',   'Lançamentos, honorários e relatórios',      $statusComp],
+            ['Portal do Cliente',   'Acesso para clientes externos',             $statusComp],
+            ['Notificações',        'E-mail, WhatsApp e alertas',                'ok'],
+            ['Monitoramento TJSP',  'Consulta automática de andamentos TJSP',    'ok'],
+            ['Armazenamento',       'Upload e acesso a documentos',              'ok'],
+            ['IA e Assistente',     'Análise de processos e minutas com IA',     'ok'],
+        ];
         @endphp
-        @foreach($componentes as $nome => $status)
-        <div class="comp-row">
-            <div class="comp-nome">{{ $nome }}</div>
-            @if($status === 'ok')
-                <span class="comp-badge badge-ok">✅ Operacional</span>
-            @elseif($status === 'warn')
-                <span class="comp-badge badge-warn">⚠️ Degradado</span>
-            @else
-                <span class="comp-badge badge-down">🔴 Fora</span>
-            @endif
+        @foreach($comps as [$nome, $desc, $status])
+        @php $st = $labelMap[$status]; @endphp
+        <div class="comp-item">
+            <div>
+                <div class="comp-name">{{ $nome }}</div>
+                <div class="comp-desc">{{ $desc }}</div>
+            </div>
+            <span class="comp-badge {{ $st['class'] }}">{{ $st['icon'] }} {{ $st['label'] }}</span>
         </div>
         @endforeach
     </div>
 
-    {{-- ── Incidentes recentes ── --}}
+    {{-- Comunicados ativos --}}
+    @if($comunicadosAtivos->isNotEmpty())
+    <div class="section-title">Comunicados Ativos</div>
+    @foreach($comunicadosAtivos as $c)
+    @php $info = $c->tipoInfo(); @endphp
+    <div class="incident-card" style="background:{{ $info['bg'] }};border-color:{{ $info['border'] }};">
+        <div class="incident-title" style="color:{{ $info['cor'] }};">{{ $info['icon'] }} {{ $c->titulo }}</div>
+        <div class="incident-meta" style="color:{{ $info['cor'] }};">
+            {{ $info['label'] }} &bull;
+            Desde {{ $c->data_inicio->format('d/m/Y H:i') }}
+            @if($c->data_fim) &bull; Encerramento previsto: {{ $c->data_fim->format('d/m/Y H:i') }} @endif
+        </div>
+        <div class="incident-body" style="color:{{ $info['cor'] }};">{{ $c->mensagem }}</div>
+    </div>
+    @endforeach
+    <div style="margin-bottom:28px;"></div>
+    @endif
+
+    {{-- Histórico --}}
     @php
-        $incidentes = \App\Models\Comunicado::where('ativo', true)
-            ->whereIn('tipo', ['manutencao_emergencial','manutencao_programada','sistema_restaurado'])
-            ->where('data_inicio', '>=', now()->subDays(30))
-            ->orderByDesc('data_inicio')
-            ->limit(10)
-            ->get();
+    $historico = Comunicado::where('data_inicio', '>=', now()->subDays(30))
+        ->where(function($q) { $q->whereNotNull('data_fim')->where('data_fim', '<', now()); })
+        ->orderByDesc('data_inicio')
+        ->limit(15)
+        ->get();
     @endphp
 
-    <div class="card">
-        <div class="card-header">Histórico de Incidentes (últimos 30 dias)</div>
-        @forelse($incidentes as $inc)
-        @php $ti = $inc->tipoInfo(); @endphp
-        <div class="incidente">
-            <div class="incidente-data">{{ $inc->data_inicio->format('d/m/Y H:i') }}
-                @if($inc->data_fim) → {{ $inc->data_fim->format('d/m/Y H:i') }} @endif
+    <div class="section-title">Histórico — Últimos 30 dias</div>
+    <div class="comp-list">
+        @forelse($historico as $c)
+        @php $info = $c->tipoInfo(); @endphp
+        <div class="comp-item">
+            <div>
+                <div class="comp-name" style="color:{{ $info['cor'] }};">{{ $info['icon'] }} {{ $c->titulo }}</div>
+                <div class="comp-desc">
+                    {{ $c->data_inicio->format('d/m/Y H:i') }}
+                    @if($c->data_fim) — {{ $c->data_fim->format('d/m/Y H:i') }} @endif
+                </div>
             </div>
-            <div class="incidente-titulo">
-                <span style="color:{{ $ti['cor'] }};">{{ $ti['icon'] }}</span>
-                {{ $inc->titulo }}
-            </div>
-            <div class="incidente-msg">{{ $inc->mensagem }}</div>
+            <span class="comp-badge info">{{ $info['label'] }}</span>
         </div>
         @empty
-        <div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">
-            ✅ Nenhum incidente nos últimos 30 dias.
+        <div class="comp-item">
+            <div>
+                <div class="comp-name" style="color:var(--green);">✅ Sem incidentes registrados</div>
+                <div class="comp-desc">Nenhuma ocorrência nos últimos 30 dias.</div>
+            </div>
         </div>
         @endforelse
     </div>
 
 </div>
 
-<div class="footer">
-    Software Jurídico &nbsp;·&nbsp; <a href="/login">Acessar o sistema</a>
-    &nbsp;·&nbsp; Página atualiza automaticamente
-</div>
+<footer class="footer">
+    SAPRO Sistema Jurídico &bull;
+    <a href="{{ route('login') }}" style="color:var(--navy);font-weight:600;">Acessar o sistema</a>
+    &bull; Página atualiza automaticamente a cada 60 segundos
+</footer>
 
 </body>
 </html>

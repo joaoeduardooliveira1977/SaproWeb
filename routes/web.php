@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AssinaturaWebhookController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MasterLoginController;
 use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\RelatorioController;
 use App\Livewire\Portal\PortalLogin;
@@ -12,57 +13,61 @@ use App\Livewire\PortalAcesso;
 use App\Http\Controllers\IAController;
 
 
-
 // ─── Login / Logout ────────────────────────────
-	Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
-	Route::post('/login', [AuthController::class, 'login']);
-	Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
+    Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
 
-// ─── Master Admin (SaaS) ───────────────────────
-    Route::prefix('master-admin')->name('master-admin.')->middleware(['auth:usuarios', 'super_admin'])->group(function () {
-        Route::get('/',              \App\Livewire\MasterAdmin\Dashboard::class)->name('dashboard');
-        Route::get('/tenants',       \App\Livewire\MasterAdmin\Tenants::class)->name('tenants');
-        Route::get('/tenants/{id}',  \App\Livewire\MasterAdmin\TenantShow::class)->where('id', '[0-9]+')->name('tenant-show');
-        Route::get('/infra',         \App\Livewire\MasterAdmin\Infra::class)->name('infra');
-        Route::get('/alertas',       \App\Livewire\MasterAdmin\Alertas::class)->name('alertas');
-        Route::get('/comunicados',   \App\Livewire\MasterAdmin\Comunicados::class)->name('comunicados');
+// ─── Área Master (/master) ─────────────────────────────────────────
+    Route::prefix('master')->name('master.')->group(function () {
+
+        // Login público da área master
+        Route::get('/login',  [MasterLoginController::class, 'showLogin'])->name('login');
+        Route::post('/login', [MasterLoginController::class, 'login'])->name('login.submit');
+        Route::post('/logout',[MasterLoginController::class, 'logout'])->name('logout');
+
+        // Área autenticada (somente super_admin)
+        Route::middleware(['master_auth'])->group(function () {
+            Route::get('/', fn() => redirect()->route('master.dashboard'));
+            Route::get('/dashboard',       \App\Livewire\MasterAdmin\Dashboard::class)->name('dashboard');
+            Route::get('/tenants',         \App\Livewire\MasterAdmin\Tenants::class)->name('tenants');
+            Route::get('/tenants/{id}',    \App\Livewire\MasterAdmin\TenantShow::class)->where('id', '[0-9]+')->name('tenant-show');
+            Route::get('/lixeira',         \App\Livewire\MasterAdmin\Lixeira::class)->name('lixeira');
+            Route::get('/comunicados',     \App\Livewire\MasterAdmin\Comunicados::class)->name('comunicados');
+            Route::get('/infra',           \App\Livewire\MasterAdmin\Infra::class)->name('infra');
+            Route::get('/alertas',         \App\Livewire\MasterAdmin\Alertas::class)->name('alertas');
+        });
     });
 
-// ─── Super Admin ───────────────────────────────
-	Route::prefix('super-admin')->name('super-admin.')->middleware(['auth:usuarios', 'super_admin'])->group(function () {
-		Route::get('/',                   [\App\Http\Controllers\SuperAdminController::class, 'index'])->name('index');
-		Route::get('/voltar',             [\App\Http\Controllers\SuperAdminController::class, 'voltarSuperAdmin'])->name('voltar');
-		Route::get('/novo',               [\App\Http\Controllers\SuperAdminController::class, 'criar'])->name('criar');
-		Route::post('/novo',              [\App\Http\Controllers\SuperAdminController::class, 'salvar'])->name('salvar');
+// ─── Redirecionamentos 301: /master-admin → /master ────────────────
+    Route::redirect('/master-admin', '/master', 301);
+    Route::redirect('/master-admin/dashboard', '/master/dashboard', 301);
+    Route::redirect('/master-admin/tenants', '/master/tenants', 301);
+    Route::redirect('/master-admin/infra', '/master/infra', 301);
+    Route::redirect('/master-admin/alertas', '/master/alertas', 301);
+    Route::redirect('/master-admin/comunicados', '/master/comunicados', 301);
 
-		// Rotas estáticas ANTES do parâmetro dinâmico {id}
-		Route::get('/branding',           \App\Livewire\Admin\TenantBranding::class)->name('branding');
+// ─── Redirecionamentos 301: /super-admin → /master ─────────────────
+    Route::redirect('/super-admin', '/master/tenants', 301);
+    Route::redirect('/super-admin/novo', '/master/tenants', 301);
+    Route::redirect('/super-admin/branding', '/master/tenants', 301);
 
-		// Rotas dinâmicas com restrição numérica para evitar conflito com rotas estáticas
-		Route::get('/{id}',               [\App\Http\Controllers\SuperAdminController::class, 'show'])->where('id', '[0-9]+')->name('show');
-		Route::post('/{id}/plano',        [\App\Http\Controllers\SuperAdminController::class, 'atualizarPlano'])->where('id', '[0-9]+')->name('plano');
-		Route::post('/{id}/toggle',       [\App\Http\Controllers\SuperAdminController::class, 'toggleAtivo'])->where('id', '[0-9]+')->name('toggle');
-		Route::get('/{id}/login',         [\App\Http\Controllers\SuperAdminController::class, 'loginComoTenant'])->where('id', '[0-9]+')->name('login-tenant');
-		Route::delete('/{id}',            [\App\Http\Controllers\SuperAdminController::class, 'excluir'])->where('id', '[0-9]+')->name('excluir');
-	});
+// ─── Planos ────────────────────────────────────────────────────────
+    Route::get('/planos', function() {
+        return view('planos');
+    })->name('tenant.planos');
 
-// ─── Planos ────────────────────────────────────
-	Route::get('/planos', function() {
-    	return view('planos');
-	})->name('tenant.planos');
-
-// ─── Registro ──────────────────────────────────
-	Route::get('/registro', \App\Livewire\Auth\RegistroTenant::class)->name('registro');
-	Route::post('/registro', [\App\Http\Controllers\RegistroController::class, 'store'])->name('registro.store');
+// ─── Registro ──────────────────────────────────────────────────────
+    Route::get('/registro', \App\Livewire\Auth\RegistroTenant::class)->name('registro');
+    Route::post('/registro', [\App\Http\Controllers\RegistroController::class, 'store'])->name('registro.store');
 
 
-// ─── Área Autenticada ──────────────────────────
-
+// ─── Área Autenticada ──────────────────────────────────────────────
 
 Route::get('/teste-config', fn() => 'funcionou');
 
 
-	Route::middleware('auth:usuarios')->group(function () {
+    Route::middleware('auth:usuarios')->group(function () {
 
     // ── Onboarding ─────────────────────────────────────────────
     Route::get('/onboarding', \App\Livewire\Onboarding::class)->name('onboarding');
@@ -71,7 +76,7 @@ Route::get('/teste-config', fn() => 'funcionou');
     Route::middleware('perfil:admin')->get('/configuracoes/escritorio', \App\Livewire\Configuracoes\EscritorioConfig::class)->name('configuracoes.escritorio');
 
     // ── Geral (todos os perfis autenticados) ───────────────────
-    	Route::middleware('perfil:geral')->group(function () {
+        Route::middleware('perfil:geral')->group(function () {
         Route::get('/', fn() => view('dashboard'))->name('dashboard');
         Route::get('/dashboard-preview', fn() => view('dashboard-preview'))->name('dashboard.preview');
         Route::get('/agenda',     fn() => view('agenda'))->name('agenda');
@@ -101,7 +106,7 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::post('/processos/{id}/custas',                    [ProcessoController::class, 'storeCusta'])->name('processos.custas.store');
         Route::post('/processos/{id}/custas/{custaId}/reembolso', [ProcessoController::class, 'alternarReembolsoCusta'])->name('processos.custas.reembolso');
         Route::post('/processos/{id}/custas/{custaId}/cobranca', [ProcessoController::class, 'gerarCobrancaCusta'])->name('processos.custas.cobranca');
-	Route::get('/processos/{id}/resumo-ia', [ProcessoController::class, 'gerarResumo']);
+        Route::get('/processos/{id}/resumo-ia', [ProcessoController::class, 'gerarResumo']);
         Route::get('/processos/{id}/pdf', [ProcessoController::class, 'exportarPdf'])->name('processos.pdf');
     });
 
@@ -211,8 +216,8 @@ Route::get('/teste-config', fn() => 'funcionou');
 });
 
 
-// ─── Webhooks (sem auth/csrf) ──────────────────────────────────
-// ─── Status público (sem autenticação) ────────────────────────
+// ─── Webhooks (sem auth/csrf) ──────────────────────────────────────
+// ─── Status público (sem autenticação) ─────────────────────────────
 Route::get('/status', fn() => view('status'))->name('status');
 
 Route::post('/webhooks/clicksign', [AssinaturaWebhookController::class, 'handle'])
@@ -225,5 +230,5 @@ Route::prefix('portal')->name('portal.')->group(function () {
     Route::get('/dashboard', PortalDashboard::class)->name('dashboard');
 });
 
-// ─── IA (teste) ────────────────────────────────────────────
+// ─── IA (teste) ────────────────────────────────────────────────────
 Route::get('/ia-teste', [IAController::class, 'teste'])->middleware('auth:usuarios');

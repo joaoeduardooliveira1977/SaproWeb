@@ -31,7 +31,8 @@ class Logs extends Component
         $acoes = MasterAdminLog::selectRaw('distinct acao')->orderBy('acao')->pluck('acao');
 
         return view('livewire.master-admin.logs', compact('logs', 'acoes'))
-            ->extends('layouts.master-admin')
+            ->extends('layouts.master')
             ->section('content');
     }
 }
+

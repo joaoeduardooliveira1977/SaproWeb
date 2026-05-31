@@ -1,54 +1,54 @@
-@section('page-title', 'Dashboard')
+section('page-title', 'Dashboard')
 <div>
 
-    {{-- ── KPI Cards ── --}}
+    {{-- â”€â”€ KPI Cards â”€â”€ --}}
     <div class="stat-grid">
         <div class="stat-card accent">
             <div class="stat-val">{{ $stats['ativos'] }}</div>
-            <div class="stat-label">🏢 Tenants Ativos</div>
+            <div class="stat-label">ðŸ¢ Tenants Ativos</div>
         </div>
         <div class="stat-card danger">
             <div class="stat-val">{{ $stats['inativos'] }}</div>
-            <div class="stat-label">🔴 Tenants Suspensos</div>
+            <div class="stat-label">ðŸ”´ Tenants Suspensos</div>
         </div>
         <div class="stat-card">
             <div class="stat-val">{{ number_format($stats['usuarios']) }}</div>
-            <div class="stat-label">👤 Total de Usuários</div>
+            <div class="stat-label">ðŸ‘¤ Total de UsuÃ¡rios</div>
         </div>
         <div class="stat-card">
             <div class="stat-val">{{ number_format($stats['processos']) }}</div>
-            <div class="stat-label">📁 Total de Processos</div>
+            <div class="stat-label">ðŸ“ Total de Processos</div>
         </div>
         <div class="stat-card warn">
             <div class="stat-val">{{ $stats['disco_mb'] }} MB</div>
-            <div class="stat-label">💾 Disco (storage)</div>
+            <div class="stat-label">ðŸ’¾ Disco (storage)</div>
         </div>
         <div class="stat-card gold">
             <div class="stat-val">{{ $stats['novos_30d'] }}</div>
-            <div class="stat-label">✨ Novos (últimos 30 dias)</div>
+            <div class="stat-label">âœ¨ Novos (Ãºltimos 30 dias)</div>
         </div>
     </div>
 
-    {{-- ── Gráficos ── --}}
+    {{-- â”€â”€ GrÃ¡ficos â”€â”€ --}}
     <div class="charts-grid">
         <div class="chart-card">
-            <div class="chart-title">📈 Novos Tenants por Mês</div>
+            <div class="chart-title">ðŸ“ˆ Novos Tenants por MÃªs</div>
             <canvas id="chartTenants" height="120"></canvas>
         </div>
         <div class="chart-card">
-            <div class="chart-title">📊 Processos Cadastrados por Mês</div>
+            <div class="chart-title">ðŸ“Š Processos Cadastrados por MÃªs</div>
             <canvas id="chartProcessos" height="120"></canvas>
         </div>
     </div>
 
-    {{-- ── Acesso rápido ── --}}
+    {{-- â”€â”€ Acesso rÃ¡pido â”€â”€ --}}
     <div class="card">
-        <div class="card-header"><span class="card-title">Acesso Rápido</span></div>
+        <div class="card-header"><span class="card-title">Acesso RÃ¡pido</span></div>
         <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;">
-            <a href="{{ route('master-admin.tenants') }}" class="btn btn-primary">🏢 Tenants</a>
-            <a href="{{ route('master-admin.infra') }}"  class="btn btn-outline">🖥️ Infraestrutura</a>
-            <a href="{{ route('master-admin.alertas') }}" class="btn btn-outline">🔔 Alertas</a>
-            <a href="{{ route('super-admin.index') }}"   class="btn" style="background:#f1f5f9;color:#374151;">⚙️ Super Admin</a>
+            <a href="{{ route('master.tenants') }}" class="btn btn-primary">ðŸ¢ Tenants</a>
+            <a href="{{ route('master.infra') }}"  class="btn btn-outline">ðŸ–¥ï¸ Infraestrutura</a>
+            <a href="{{ route('master.alertas') }}" class="btn btn-outline">ðŸ”” Alertas</a>
+            <a href="{{ route('master.index') }}"   class="btn" style="background:#f1f5f9;color:#374151;">âš™ï¸ Super Admin</a>
         </div>
     </div>
 
@@ -92,3 +92,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
+

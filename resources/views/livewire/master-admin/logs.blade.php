@@ -1,10 +1,10 @@
-@section('page-title', 'Log de Ações')
+section('page-title', 'Log de AÃ§Ãµes')
 <div>
 
     <div class="filter-bar">
-        <input wire:model.live.debounce.300ms="busca" type="text" placeholder="Buscar por admin, tenant ou detalhe…">
+        <input wire:model.live.debounce.300ms="busca" type="text" placeholder="Buscar por admin, tenant ou detalheâ€¦">
         <select wire:model.live="filtroAcao">
-            <option value="">Todas as ações</option>
+            <option value="">Todas as aÃ§Ãµes</option>
             @foreach($acoes as $a)
             <option value="{{ $a }}">{{ $a }}</option>
             @endforeach
@@ -21,7 +21,7 @@
                     <tr>
                         <th>Data/Hora</th>
                         <th>Admin</th>
-                        <th>Ação</th>
+                        <th>AÃ§Ã£o</th>
                         <th>Tenant</th>
                         <th>Detalhes</th>
                         <th>IP</th>
@@ -47,14 +47,14 @@
                         @endphp
                         <span class="badge {{ $cor }}">{{ $log->acao }}</span>
                     </td>
-                    <td style="font-size:12px;">{{ $log->tenant_nome ?? '—' }}</td>
-                    <td style="font-size:12px;color:#64748b;max-width:280px;">{{ $log->detalhes ?? '—' }}</td>
-                    <td style="font-size:11px;color:#94a3b8;font-family:monospace;">{{ $log->ip ?? '—' }}</td>
+                    <td style="font-size:12px;">{{ $log->tenant_nome ?? 'â€”' }}</td>
+                    <td style="font-size:12px;color:#64748b;max-width:280px;">{{ $log->detalhes ?? 'â€”' }}</td>
+                    <td style="font-size:11px;color:#94a3b8;font-family:monospace;">{{ $log->ip ?? 'â€”' }}</td>
                 </tr>
                 @empty
                 <tr>
                     <td colspan="6" style="text-align:center;padding:32px;color:#94a3b8;">
-                        Nenhuma ação registrada ainda.
+                        Nenhuma aÃ§Ã£o registrada ainda.
                     </td>
                 </tr>
                 @endforelse
@@ -69,3 +69,4 @@
     </div>
 
 </div>
+

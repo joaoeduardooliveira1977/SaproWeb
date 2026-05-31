@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Tenant extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'nome', 'slug', 'email', 'telefone', 'cnpj', 'logo',
         'dominio', 'cor_primaria', 'cor_secundaria',
@@ -15,6 +18,7 @@ class Tenant extends Model
         'limite_processos', 'limite_usuarios',
         'ia_habilitada', 'datajud_habilitado', 'whatsapp_habilitado',
         'timezone', 'gemini_api_key', 'configuracoes',
+        'deleted_by', 'delete_reason',
     ];
 
     protected $casts = [

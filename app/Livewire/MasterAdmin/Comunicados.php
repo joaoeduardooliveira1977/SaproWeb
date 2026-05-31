@@ -8,12 +8,12 @@ use Livewire\Component;
 
 class Comunicados extends Component
 {
-    // ── Filtros ─────────────────────────────────────────────────
+    // â”€â”€ Filtros â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public string $filtroTipo      = '';
     public string $filtroPrioridade = '';
     public string $filtroStatus    = '';
 
-    // ── Modal ───────────────────────────────────────────────────
+    // â”€â”€ Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public bool   $modalAberto = false;
     public bool   $preview     = false;
     public ?int   $editandoId  = null;
@@ -34,7 +34,7 @@ class Comunicados extends Component
         $this->dataInicio = now()->format('Y-m-d\TH:i');
     }
 
-    // ── Abrir / fechar ──────────────────────────────────────────
+    // â”€â”€ Abrir / fechar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function novo(): void
     {
@@ -70,7 +70,7 @@ class Comunicados extends Component
         $this->resetForm();
     }
 
-    // ── Salvar ──────────────────────────────────────────────────
+    // â”€â”€ Salvar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function salvar(): void
     {
@@ -85,11 +85,11 @@ class Comunicados extends Component
             'dataInicio' => 'required|date',
             'dataFim'    => 'nullable|date|after:dataInicio',
         ], [
-            'titulo.required'     => 'Informe o título.',
+            'titulo.required'     => 'Informe o tÃ­tulo.',
             'mensagem.required'   => 'Informe a mensagem.',
             'tenantAlvo.required_if' => 'Selecione o tenant.',
             'planoAlvo.required_if'  => 'Selecione o plano.',
-            'dataFim.after'       => 'A data fim deve ser após a data de início.',
+            'dataFim.after'       => 'A data fim deve ser apÃ³s a data de inÃ­cio.',
         ]);
 
         $dados = [
@@ -114,7 +114,7 @@ class Comunicados extends Component
             $comunicado = Comunicado::create($dados);
             $acao = 'comunicado_criado';
 
-            // Dispara e-mail para manutenções
+            // Dispara e-mail para manutenÃ§Ãµes
             if (in_array($this->tipo, ['manutencao_emergencial', 'manutencao_programada']) && $this->ativo) {
                 EnviarEmailComunicado::dispatch($comunicado);
             }
@@ -138,7 +138,7 @@ class Comunicados extends Component
         $c = Comunicado::findOrFail($id);
         MasterAdminLog::registrar('comunicado_excluido', null, null, "Comunicado #{$id}: {$c->titulo}");
         $c->delete();
-        $this->dispatch('toast', message: 'Comunicado excluído.', type: 'success');
+        $this->dispatch('toast', message: 'Comunicado excluÃ­do.', type: 'success');
     }
 
     private function resetForm(): void
@@ -169,7 +169,8 @@ class Comunicados extends Component
         $tenants = Tenant::orderBy('nome')->get(['id', 'nome']);
 
         return view('livewire.master-admin.comunicados', compact('comunicados', 'tenants'))
-            ->extends('layouts.master-admin')
+            ->extends('layouts.master')
             ->section('content');
     }
 }
+

@@ -28,9 +28,7 @@ class Infra extends Component
 
     private function carregarServidor(): void
     {
-        // CPU — via /proc/loadavg (Linux)
-        $cpuLoad    = 0;
-        $cpuPercent = 0;
+        $cpuLoad = $cpuPercent = 0;
         if (@file_exists('/proc/loadavg')) {
             $raw     = explode(' ', file_get_contents('/proc/loadavg'));
             $cpuLoad = (float) ($raw[0] ?? 0);
@@ -38,7 +36,6 @@ class Infra extends Component
             $cpuPercent = min(100, round(($cpuLoad / $cores) * 100, 1));
         }
 
-        // RAM — via /proc/meminfo (Linux)
         $ramTotal = $ramUsed = $ramPercent = 0;
         if (@file_exists('/proc/meminfo')) {
             $info = [];
@@ -53,25 +50,22 @@ class Infra extends Component
             $ramPercent = $ramTotal ? round(($ramUsed / $ramTotal) * 100, 1) : 0;
         }
 
-        // Disco
         $diskTotal = @disk_total_space('/') ?: 0;
-        $diskFree  = @disk_free_space('/')  ?: 0;
+        $diskFree  = @disk_free_space('/') ?: 0;
         $diskUsed  = $diskTotal - $diskFree;
         $diskPct   = $diskTotal ? round(($diskUsed / $diskTotal) * 100, 1) : 0;
-
-        // Uptime
-        $uptime = trim(@shell_exec('uptime -p 2>/dev/null') ?: (@shell_exec('uptime 2>/dev/null') ?: 'N/A'));
+        $uptime    = trim(@shell_exec('uptime -p 2>/dev/null') ?: (@shell_exec('uptime 2>/dev/null') ?: 'N/A'));
 
         $this->servidor = [
-            'cpu_percent'  => $cpuPercent,
-            'cpu_load'     => $cpuLoad,
-            'ram_total_mb' => round($ramTotal / 1024),
-            'ram_used_mb'  => round($ramUsed  / 1024),
-            'ram_percent'  => $ramPercent,
-            'disk_total_gb'=> round($diskTotal / 1024 / 1024 / 1024, 1),
-            'disk_used_gb' => round($diskUsed  / 1024 / 1024 / 1024, 1),
-            'disk_percent' => $diskPct,
-            'uptime'       => $uptime,
+            'cpu_percent'   => $cpuPercent,
+            'cpu_load'      => $cpuLoad,
+            'ram_total_mb'  => round($ramTotal / 1024),
+            'ram_used_mb'   => round($ramUsed  / 1024),
+            'ram_percent'   => $ramPercent,
+            'disk_total_gb' => round($diskTotal / 1024 / 1024 / 1024, 1),
+            'disk_used_gb'  => round($diskUsed  / 1024 / 1024 / 1024, 1),
+            'disk_percent'  => $diskPct,
+            'uptime'        => $uptime,
         ];
     }
 
@@ -102,11 +96,11 @@ class Infra extends Component
                 ->map(function ($j) {
                     $payload = json_decode($j->payload, true);
                     return [
-                        'id'         => $j->id,
-                        'queue'      => $j->queue,
-                        'job'        => $payload['displayName'] ?? $payload['job'] ?? 'Desconhecido',
-                        'erro'       => Str_limit($j->exception ?? '', 200),
-                        'failed_at'  => $j->failed_at,
+                        'id'        => $j->id,
+                        'queue'     => $j->queue,
+                        'job'       => $payload['displayName'] ?? $payload['job'] ?? 'Desconhecido',
+                        'erro'      => Str::limit($j->exception ?? '', 200),
+                        'failed_at' => $j->failed_at,
                     ];
                 })
                 ->toArray();
@@ -123,7 +117,6 @@ class Infra extends Component
             return;
         }
 
-        // Lê as últimas 20 linhas
         try {
             $file  = new \SplFileObject($logPath, 'r');
             $file->seek(PHP_INT_MAX);
@@ -161,7 +154,7 @@ class Infra extends Component
     public function deleteJob(int $id): void
     {
         DB::table('failed_jobs')->where('id', $id)->delete();
-        MasterAdminLog::registrar('job_deletado', null, null, "Job ID {$id} removido da fila.");
+        MasterAdminLog::registrar('job_deletado', null, null, "Job ID {$id} removido.");
         $this->dispatch('toast', message: 'Job removido.', type: 'success');
         $this->carregarFila();
     }
@@ -190,7 +183,7 @@ class Infra extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.master-admin.infra')
-            ->extends('layouts.master-admin')
+            ->extends('layouts.master')
             ->section('content');
     }
 }

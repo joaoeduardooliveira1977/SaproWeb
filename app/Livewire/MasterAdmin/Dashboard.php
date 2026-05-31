@@ -34,13 +34,13 @@ class Dashboard extends Component
 
     private function carregarCharts(): void
     {
-        // Últimos 12 meses
+        // Ãšltimos 12 meses
         $meses = collect();
         for ($i = 11; $i >= 0; $i--) {
             $meses->push(now()->subMonths($i)->format('Y-m'));
         }
 
-        // Tenants por mês
+        // Tenants por mÃªs
         $rawTenants = DB::table('tenants')
             ->selectRaw("to_char(created_at, 'YYYY-MM') as mes, count(*) as total")
             ->where('created_at', '>=', now()->subMonths(12)->startOfMonth())
@@ -48,7 +48,7 @@ class Dashboard extends Component
             ->orderBy('mes')
             ->pluck('total', 'mes');
 
-        // Processos por mês
+        // Processos por mÃªs
         $rawProcessos = DB::table('processos')
             ->selectRaw("to_char(created_at, 'YYYY-MM') as mes, count(*) as total")
             ->where('created_at', '>=', now()->subMonths(12)->startOfMonth())
@@ -86,7 +86,8 @@ class Dashboard extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.master-admin.dashboard')
-            ->extends('layouts.master-admin')
+            ->extends('layouts.master')
             ->section('content');
     }
 }
+
