@@ -1,5 +1,5 @@
-<div>
 @section('page-title', 'Alertas')
+<div>
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
         <p style="font-size:13px;color:#64748b;">{{ count($alertas) }} alerta(s) ativo(s)</p>

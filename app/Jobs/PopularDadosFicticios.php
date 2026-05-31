@@ -147,19 +147,45 @@ class PopularDadosFicticios implements ShouldQueue
             return $id;
         }
 
-        // 3. Criar fase para este tenant — após a migration, (codigo, tenant_id)
-        //    é único, então 'CON' pode existir para cada tenant separadamente.
-        $id = DB::table('fases')->insertGetId([
-            'tenant_id'  => $tid,
-            'descricao'  => 'Conhecimento',
-            'codigo'     => 'CON',
-            'ordem'      => 1,
-            'ativo'      => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        Log::info("PopularDados [{$tid}]: fase criada (CON), id={$id}");
-        return $id;
+        // 3. Criar para este tenant com tratamento de unique violation
+        //    Após a migration fix_fases_unique_constraint, (codigo, tenant_id)
+        //    é composto e único — 'CON' pode existir por tenant.
+        //    Porém, se a migration ainda não rodou, usamos fallback com código único.
+        try {
+            $id = DB::table('fases')->insertGetId([
+                'tenant_id'  => $tid,
+                'descricao'  => 'Conhecimento',
+                'codigo'     => 'CON',
+                'ordem'      => 1,
+                'ativo'      => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            Log::info("PopularDados [{$tid}]: fase criada (CON), id={$id}");
+            return $id;
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            // Unique constraint ainda é global (migration não aplicada)
+            // Inserir com código único por tenant
+            Log::warning("PopularDados [{$tid}]: unique violation em fases.codigo, usando fallback com código por tenant");
+            $codigoFallback = 'C' . str_pad((string) $tid, 4, '0', STR_PAD_LEFT); // C0008
+            try {
+                $id = DB::table('fases')->insertGetId([
+                    'tenant_id'  => $tid,
+                    'descricao'  => 'Conhecimento',
+                    'codigo'     => $codigoFallback,
+                    'ordem'      => 1,
+                    'ativo'      => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                Log::info("PopularDados [{$tid}]: fase criada com fallback ({$codigoFallback}), id={$id}");
+                return $id;
+            } catch (\Throwable $e2) {
+                // Se mesmo o fallback falhar, retornar null e seguir sem fase
+                Log::error("PopularDados [{$tid}]: falha ao criar fase: " . $e2->getMessage());
+                return null;
+            }
+        }
     }
 
     private function garantirRisco(int $tid): ?int
@@ -173,13 +199,24 @@ class PopularDadosFicticios implements ShouldQueue
         if ($id) return $id;
 
         // 3. Criar — codigo unique foi removido de graus_risco em migration anterior
-        $id = DB::table('graus_risco')->insertGetId([
-            'tenant_id'  => $tid,
-            'descricao'  => 'Médio',
-            'codigo'     => 'MED',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        try {
+            $id = DB::table('graus_risco')->insertGetId([
+                'tenant_id'  => $tid,
+                'descricao'  => 'Médio',
+                'codigo'     => 'MED',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            // Fallback com código único por tenant
+            $id = DB::table('graus_risco')->insertGetId([
+                'tenant_id'  => $tid,
+                'descricao'  => 'Médio',
+                'codigo'     => 'M' . $tid,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
         Log::info("PopularDados [{$tid}]: risco criado id={$id}");
         return $id;
     }
