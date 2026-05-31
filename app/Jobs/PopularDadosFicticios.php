@@ -133,58 +133,50 @@ class PopularDadosFicticios implements ShouldQueue
 
     private function garantirFase(int $tid): ?int
     {
-        // 1. Fase própria do tenant
+        // 1. Fase do próprio tenant
         $id = DB::table('fases')->where('tenant_id', $tid)->orderBy('ordem')->value('id');
         if ($id) {
-            Log::info("PopularDados [{$tid}]: fase encontrada no tenant: {$id}");
+            Log::info("PopularDados [{$tid}]: fase do tenant encontrada: {$id}");
             return $id;
         }
 
-        // 2. Fase global (sem tenant)
+        // 2. Fase global (tenant_id IS NULL)
         $id = DB::table('fases')->whereNull('tenant_id')->orderBy('ordem')->value('id');
         if ($id) {
             Log::info("PopularDados [{$tid}]: fase global encontrada: {$id}");
             return $id;
         }
 
-        // 3. Qualquer fase disponível no banco
-        $id = DB::table('fases')->orderBy('id')->value('id');
-        if ($id) {
-            Log::info("PopularDados [{$tid}]: fase de outro tenant reutilizada: {$id}");
-            return $id;
-        }
-
-        // 4. Banco sem nenhuma fase — criar com código único por tenant
-        $codigo = 'F' . str_pad((string) $tid, 5, '0', STR_PAD_LEFT); // F00008, max 7 chars
+        // 3. Criar fase para este tenant — após a migration, (codigo, tenant_id)
+        //    é único, então 'CON' pode existir para cada tenant separadamente.
         $id = DB::table('fases')->insertGetId([
             'tenant_id'  => $tid,
-            'descricao'  => 'Instrução',
-            'codigo'     => $codigo,
+            'descricao'  => 'Conhecimento',
+            'codigo'     => 'CON',
             'ordem'      => 1,
             'ativo'      => true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        Log::info("PopularDados [{$tid}]: fase criada com codigo={$codigo}, id={$id}");
+        Log::info("PopularDados [{$tid}]: fase criada (CON), id={$id}");
         return $id;
     }
 
     private function garantirRisco(int $tid): ?int
     {
+        // 1. Risco do próprio tenant
         $id = DB::table('graus_risco')->where('tenant_id', $tid)->orderBy('id')->value('id');
         if ($id) return $id;
 
+        // 2. Risco global
         $id = DB::table('graus_risco')->whereNull('tenant_id')->orderBy('id')->value('id');
         if ($id) return $id;
 
-        $id = DB::table('graus_risco')->orderBy('id')->value('id');
-        if ($id) return $id;
-
-        // Criar — codigo unique foi removido da tabela graus_risco
+        // 3. Criar — codigo unique foi removido de graus_risco em migration anterior
         $id = DB::table('graus_risco')->insertGetId([
             'tenant_id'  => $tid,
             'descricao'  => 'Médio',
-            'codigo'     => 'M' . $tid,
+            'codigo'     => 'MED',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -194,24 +186,37 @@ class PopularDadosFicticios implements ShouldQueue
 
     private function garantirTipoAcao(int $tid, string $descricao, string $codigoBase): ?int
     {
-        // Tenta match por descricao (tenant próprio → global → qualquer)
-        foreach ([
-            fn($q) => $q->where('tenant_id', $tid)->where('descricao', $descricao),
-            fn($q) => $q->whereNull('tenant_id')->where('descricao', $descricao),
-            fn($q) => $q->where('descricao', $descricao),
-            fn($q) => $q->where('tenant_id', $tid),
-            fn($q) => $q->whereNull('tenant_id'),
-            fn($q) => $q,
-        ] as $scope) {
-            $id = DB::table('tipos_acao')->tap($scope)->orderBy('id')->value('id');
-            if ($id) return $id;
-        }
+        // 1. Tipo do próprio tenant com a descrição exata
+        $id = DB::table('tipos_acao')
+            ->where('tenant_id', $tid)
+            ->where('descricao', $descricao)
+            ->orderBy('id')->value('id');
+        if ($id) return $id;
 
-        // Criar — codigo unique foi removido da tabela tipos_acao
+        // 2. Tipo global com a descrição exata
+        $id = DB::table('tipos_acao')
+            ->whereNull('tenant_id')
+            ->where('descricao', $descricao)
+            ->orderBy('id')->value('id');
+        if ($id) return $id;
+
+        // 3. Qualquer tipo do próprio tenant
+        $id = DB::table('tipos_acao')
+            ->where('tenant_id', $tid)
+            ->orderBy('id')->value('id');
+        if ($id) return $id;
+
+        // 4. Qualquer tipo global
+        $id = DB::table('tipos_acao')
+            ->whereNull('tenant_id')
+            ->orderBy('id')->value('id');
+        if ($id) return $id;
+
+        // 5. Criar — codigo unique foi removido de tipos_acao em migration anterior
         $id = DB::table('tipos_acao')->insertGetId([
             'tenant_id'  => $tid,
             'descricao'  => $descricao,
-            'codigo'     => $codigoBase . $tid,
+            'codigo'     => $codigoBase,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
