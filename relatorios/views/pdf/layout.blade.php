@@ -57,7 +57,7 @@
 @yield('content')
 
 <div class="footer">
-    <span>SAPRO — Sistema de Acompanhamento de Processos</span>
+    <span>Software Jurídico</span>
     <span>{{ $gerado_em }}</span>
 </div>
 

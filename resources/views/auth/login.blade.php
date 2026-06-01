@@ -6,8 +6,8 @@
     <title>{{ (isset($tenant) && $tenant->nome) ? $tenant->nome . ' — ' : '' }}Software Jurídico</title>
     <style>
         :root {
-            --cor-primaria:   {{ $tenant->cor_primaria  ?? '#1a3a5c' }};
-            --cor-secundaria: {{ $tenant->cor_secundaria ?? '#c9a84c' }};
+            --cor-primaria:   {{ isset($tenant) ? ($tenant->cor_primaria  ?? '#1a3a5c') : '#1a3a5c' }};
+            --cor-secundaria: {{ isset($tenant) ? ($tenant->cor_secundaria ?? '#c9a84c') : '#c9a84c' }};
             --cor-primaria-dark: color-mix(in srgb, var(--cor-primaria) 80%, #000);
         }
 
@@ -349,7 +349,7 @@
                 Não tem conta? <a href="{{ route('registro') }}">Criar conta grátis</a>
             </div>
 
-            <div class="version">{{ $tenant->nome ?? 'SISTEMA JURÍDICO' }} — versão 1.0</div>
+            <div class="version">{{ (isset($tenant) && $tenant->nome) ? $tenant->nome : 'SISTEMA JURÍDICO' }} — versão 1.0</div>
         </div>
     </div>
 
