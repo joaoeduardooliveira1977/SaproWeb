@@ -91,10 +91,17 @@ public function username(): string
         return $acoes === '*' || in_array($acao, $acoes, true);
     }
 
-    public function getNomeAttribute(): string
-    {
-        return $this->attributes['nome'] ?? $this->pessoa?->nome ?? $this->login ?? 'Usuário';
-    }
+   
+
+	public function getNomeAttribute(): string
+	{
+    return $this->attributes['nome'] 
+        ?? $this->pessoa?->nome 
+        ?? $this->login 
+        ?? 'Usuário';
+	}
+
+
 
     // ── Scope ──────────────────────────────────────
     public function scopeAtivos($query)
