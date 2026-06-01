@@ -454,13 +454,15 @@ class Contratos extends Component
             'formaCobranca'=> 'required|string',
             'valor'        => 'required',
             'dataInicio'   => 'required|date',
-            'arquivo'      => 'nullable|file|max:20480',
+            'arquivo'      => 'nullable|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,webp',
         ], [
-            'clienteId.min'    => 'Selecione o cliente.',
-            'advogadoResponsavelId.min' => 'Selecione o advogado responsÃ¡vel.',
-            'descricao.required' => 'A descriÃ§Ã£o Ã© obrigatÃ³ria.',
-            'valor.required'   => 'Informe o valor.',
-            'dataInicio.required' => 'Informe a data de inÃ­cio.',
+            'clienteId.min'              => 'Selecione o cliente.',
+            'advogadoResponsavelId.min'  => 'Selecione o advogado responsável.',
+            'descricao.required'         => 'A descrição é obrigatória.',
+            'valor.required'             => 'Informe o valor.',
+            'dataInicio.required'        => 'Informe a data de início.',
+            'arquivo.mimes'              => 'Formato não permitido. Use: PDF, Word ou imagem.',
+            'arquivo.max'                => 'O arquivo não pode ultrapassar 10 MB.',
         ]);
 
         $valorNum = (float) str_replace(['.', ','], ['', '.'], $this->valor);

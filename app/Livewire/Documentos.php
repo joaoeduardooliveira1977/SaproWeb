@@ -72,14 +72,15 @@ class Documentos extends Component
         'titulo'         => 'required|min:3',
         'tipo'           => 'required',
         'data_documento' => 'nullable|date',
-        'arquivo'        => 'nullable|file|max:20480',
+        'arquivo'        => 'nullable|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,webp,txt',
     ];
 
     protected array $messages = [
         'titulo.required' => 'O título é obrigatório.',
         'titulo.min'      => 'O título deve ter ao menos 3 caracteres.',
         'tipo.required'   => 'Selecione o tipo do documento.',
-        'arquivo.max'     => 'O arquivo não pode ultrapassar 20 MB.',
+        'arquivo.max'     => 'O arquivo não pode ultrapassar 10 MB.',
+        'arquivo.mimes'   => 'Formato não permitido. Use: PDF, Word, Excel, imagem ou TXT.',
     ];
 
     private function tid(): int
@@ -141,9 +142,12 @@ class Documentos extends Component
     {
         $this->validate([
             'arquivosLote'   => 'required|array|min:1',
-            'arquivosLote.*' => 'file|max:20480',
+            'arquivosLote.*' => 'file|max:10240|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,webp,txt',
             'loteTipo'       => 'required',
-        ], [], [
+        ], [
+            'arquivosLote.*.max'   => 'Cada arquivo não pode ultrapassar 10 MB.',
+            'arquivosLote.*.mimes' => 'Formato não permitido. Use: PDF, Word, Excel, imagem ou TXT.',
+        ], [
             'arquivosLote'   => 'arquivos',
             'arquivosLote.*' => 'arquivo',
         ]);

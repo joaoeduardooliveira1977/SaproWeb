@@ -93,7 +93,7 @@ public function username(): string
 
     public function getNomeAttribute(): string
     {
-        return $this->attributes['nome'] ?? $this->pessoa?->nome ?? $this->login;
+        return $this->attributes['nome'] ?? $this->pessoa?->nome ?? $this->login ?? 'Usuário';
     }
 
     // ── Scope ──────────────────────────────────────

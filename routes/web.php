@@ -32,6 +32,9 @@ use App\Http\Controllers\IAController;
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
 
+// ─── Política de Privacidade (pública) ────────────────────────
+    Route::get('/privacidade', fn() => view('privacidade'))->name('privacidade');
+
 // ─── Cadastro Trial (público) ──────────────────
     Route::get('/cadastro', \App\Livewire\CadastroTrial::class)->name('cadastro');
 
@@ -108,6 +111,7 @@ Route::get('/teste-config', fn() => 'funcionou');
 
     // ── Configurações (admin e administrador apenas) ────────────
     Route::middleware('perfil:admin')->get('/configuracoes/escritorio', \App\Livewire\Configuracoes\EscritorioConfig::class)->name('configuracoes.escritorio');
+    Route::middleware('perfil:admin')->get('/configuracoes/privacidade', \App\Livewire\Configuracoes\Privacidade::class)->name('configuracoes.privacidade');
 
     // ── Geral (todos os perfis autenticados) ───────────────────
         Route::middleware('perfil:geral')->group(function () {

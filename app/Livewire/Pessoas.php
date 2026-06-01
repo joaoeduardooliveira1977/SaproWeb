@@ -91,7 +91,7 @@ class Pessoas extends Component
             'honorarioDescricao'  => 'nullable|string|max:200',
             'honorarioDataInicio' => 'nullable|date',
             // Contrato de validação
-            'contratoArquivo'    => 'nullable|file|max:20480',
+            'contratoArquivo'    => 'nullable|file|max:10240|mimes:pdf,jpg,jpeg,png,webp',
         ];
     }
 

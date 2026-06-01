@@ -226,12 +226,16 @@ class EscritorioConfig extends Component
         $id     = $this->usuarioEditId;
         $tenant = $this->tenant();
 
+        $senhaRule = $id
+            ? ($this->uSenha ? 'nullable|min:8|regex:/[A-Z]/|regex:/[0-9]/' : 'nullable')
+            : 'required|min:8|regex:/[A-Z]/|regex:/[0-9]/';
+
         $rules = [
             'uNome'   => 'required|string|min:3|max:150',
             'uEmail'  => 'required|email|max:150' . ($id ? "|unique:usuarios,email,{$id}" : '|unique:usuarios,email'),
             'uLogin'  => 'required|min:3|max:60' . ($id ? "|unique:usuarios,login,{$id}" : '|unique:usuarios,login'),
             'uPerfil' => 'required|in:' . implode(',', array_keys($this->perfisDisponiveis)),
-            'uSenha'  => $id ? 'nullable|min:8' : 'required|min:8',
+            'uSenha'  => $senhaRule,
         ];
 
         $this->validate($rules, [
@@ -240,6 +244,7 @@ class EscritorioConfig extends Component
             'uLogin.unique'   => 'Este login já está em uso.',
             'uSenha.required' => 'A senha é obrigatória para novos usuários.',
             'uSenha.min'      => 'A senha deve ter ao menos 8 caracteres.',
+            'uSenha.regex'    => 'A senha deve conter ao menos uma letra maiúscula e um número.',
         ]);
 
         if (!$id) {

@@ -45,12 +45,20 @@ class GestaoUsuarios extends Component
             'senhaConfirmacao' => 'same:senha',
         ];
 
+        $regexSenha = ['regex:/[A-Z]/', 'regex:/[0-9]/'];
+
         if (!$this->usuarioId) {
-            $rules['senha'] = 'required|min:8';
+            $rules['senha'] = array_merge(['required', 'min:8'], $regexSenha);
             $rules['email'] = "required|email|unique:usuarios,email";
             $rules['login'] = "required|string|unique:usuarios,login";
         } else {
-            $rules['senha'] = 'nullable|min:8';
+            $rules['senha'] = array_merge(['nullable', 'min:8'], array_map(fn($r) => "sometimes|$r", $regexSenha));
+            // quando senha em branco, ignora as regras extras
+            if (!$this->senha) {
+                $rules['senha'] = 'nullable|min:8';
+            } else {
+                $rules['senha'] = array_merge(['nullable', 'min:8'], $regexSenha);
+            }
             $rules['email'] = "required|email|unique:usuarios,email,{$this->usuarioId}";
             $rules['login'] = "required|string|unique:usuarios,login,{$this->usuarioId}";
         }
@@ -69,6 +77,7 @@ class GestaoUsuarios extends Component
         'login.unique'          => 'Este login já está em uso.',
         'senha.required'        => 'A senha é obrigatória para novos usuários.',
         'senha.min'             => 'A senha deve ter ao menos 8 caracteres.',
+        'senha.regex'           => 'A senha deve conter ao menos uma letra maiúscula e um número.',
         'senhaConfirmacao.same' => 'As senhas não coincidem.',
         'perfil.required'       => 'Selecione um perfil.',
         'perfil.in'             => 'Perfil inválido.',

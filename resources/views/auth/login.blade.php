@@ -350,6 +350,9 @@
             </div>
 
             <div class="version">{{ (isset($tenant) && $tenant->nome) ? $tenant->nome : 'SISTEMA JURÍDICO' }} — versão 1.0</div>
+            <div style="text-align:center;margin-top:8px;font-size:11px;color:#94a3b8;">
+                <a href="{{ route('privacidade') }}" target="_blank" style="color:#94a3b8;text-decoration:none;">🔒 Política de Privacidade</a>
+            </div>
         </div>
     </div>
 

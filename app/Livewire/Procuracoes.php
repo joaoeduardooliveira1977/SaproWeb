@@ -44,7 +44,7 @@ class Procuracoes extends Component
             'tipo'          => 'required|string|max:60',
             'data_emissao'  => 'required|date',
             'data_validade' => 'nullable|date|after_or_equal:data_emissao',
-            'arquivo'       => 'nullable|file|max:20480',
+            'arquivo'       => 'nullable|file|max:10240|mimes:pdf,jpg,jpeg,png,webp',
         ];
     }
 
