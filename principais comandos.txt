@@ -177,6 +177,16 @@ https://kmd-ia.com.br/master
 
 
 
+dns_cloudflare_api_token = cfut_vXUIN8xsGOeuT4reHkUEO5Viqld8dj8ztc8Xb8ofc1e40785
 
 
 
+\App\Models\Fase::where('tenant_id', 8)->count();
+
+
+
+cd /var/www/saproweb
+php artisan migrate
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear

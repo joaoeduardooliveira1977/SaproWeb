@@ -107,6 +107,19 @@ class IdentificarTenant
             // 2. Subdomínio: ≥3 partes (ex: "slug.kmd-ia.com.br")
             if (count($parts) >= 3) {
                 $subdomain = $parts[0];
+
+                // 'www' não é slug de cliente — tratar como domínio principal
+                if ($subdomain === 'www') {
+                    $baseDomain = implode('.', array_slice($parts, 1));
+                    if ($baseDomain === self::DOMINIO_PRINCIPAL) {
+                        return Tenant::ativo()
+                            ->where(fn($q) => $q->where('slug', 'demo')->orWhere('dominio', $baseDomain))
+                            ->orderByRaw("CASE WHEN dominio = ? THEN 0 ELSE 1 END", [$baseDomain])
+                            ->first();
+                    }
+                    return null;
+                }
+
                 return Tenant::ativo()->where('slug', $subdomain)->first();
             }
 
