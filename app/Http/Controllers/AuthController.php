@@ -50,7 +50,23 @@ class AuthController extends Controller
 
         $usuario = Usuario::where('login', $credentials['login'])->first();
 
-        if (!$usuario || !$usuario->ativo) {
+        if (!$usuario) {
+            RateLimiter::hit($throttleKey, self::DECAY_SECONDS);
+            return back()->withErrors(['login' => 'Usuário não encontrado ou inativo.']);
+        }
+
+        // Aguardando verificação de email (cadastro pela landing)
+        if (!$usuario->email_verificado && $usuario->email_token_verificacao) {
+            session([
+                'verificacao_usuario_id' => $usuario->id,
+                'verificacao_email'      => $usuario->email,
+                'verificacao_tentativas' => 0,
+            ]);
+            return redirect()->route('verificar-email')
+                ->with('info', "Seu email ainda não foi verificado. Enviamos um código para {$usuario->email}.");
+        }
+
+        if (!$usuario->ativo) {
             RateLimiter::hit($throttleKey, self::DECAY_SECONDS);
             return back()->withErrors(['login' => 'Usuário não encontrado ou inativo.']);
         }

@@ -15,6 +15,7 @@ class Usuario extends Authenticatable
     // Laravel espera 'password' para autenticação automática
     protected $fillable = [
         'tenant_id', 'pessoa_id', 'nome', 'login', 'email', 'password', 'perfil', 'telefone', 'ativo', 'ultimo_acesso',
+        'email_verificado', 'email_token_verificacao', 'email_token_expira_em',
         'master_2fa_secret', 'master_2fa_ativo', 'master_2fa_confirmado_em', 'master_2fa_recovery_codes',
     ];
 
@@ -22,6 +23,8 @@ class Usuario extends Authenticatable
 
     protected $casts = [
         'ativo'                     => 'boolean',
+        'email_verificado'          => 'boolean',
+        'email_token_expira_em'     => 'datetime',
         'ultimo_acesso'             => 'datetime',
         'master_2fa_ativo'          => 'boolean',
         'master_2fa_confirmado_em'  => 'datetime',

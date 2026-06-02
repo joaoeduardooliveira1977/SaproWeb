@@ -214,6 +214,11 @@ img { max-width: 100%; }
 }
 .trial-form input::placeholder { color:rgba(255,255,255,.4); }
 .trial-form input:focus { border-color:var(--gold); background:rgba(255,255,255,.1); }
+.trial-form .terms-row { display:flex; align-items:flex-start; gap:10px; }
+.trial-form .terms-row input[type=checkbox] { width:18px; height:18px; margin-top:2px; flex-shrink:0; accent-color:var(--gold); cursor:pointer; }
+.trial-form .terms-row label { font-size:13px; color:rgba(255,255,255,.7); cursor:pointer; line-height:1.5; }
+.trial-form .terms-row a { color:var(--gold); text-decoration:none; }
+.form-error { background:rgba(220,38,38,.15); border:1px solid rgba(220,38,38,.4); border-radius:8px; padding:10px 14px; font-size:13px; color:#fca5a5; display:none; }
 .btn-submit { background:var(--gold); color:var(--navy2); font-size:16px; font-weight:800; padding:15px; border-radius:10px; border:none; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
 .btn-submit:hover { background:var(--gold2); transform:translateY(-2px); box-shadow:0 8px 32px rgba(201,168,76,.4); }
 .form-security { color:rgba(255,255,255,.5); font-size:13px; margin-top:16px; display:flex; align-items:center; gap:6px; justify-content:center; }
@@ -576,14 +581,22 @@ footer { background:var(--navy2); padding:56px 24px 32px; border-top:1px solid r
     <h2 class="reveal">Comece hoje mesmo<br>— 15 dias grátis</h2>
     <p class="reveal reveal-delay-1">Sem cartão de crédito. Cancele quando quiser.</p>
 
-    <form class="trial-form reveal reveal-delay-2" id="cadastro-form" autocomplete="off" onsubmit="submitForm(event)">
+    <div class="form-error reveal reveal-delay-2" id="form-error"></div>
+    <form class="trial-form reveal reveal-delay-2" id="cadastro-form" autocomplete="off" onsubmit="submitForm(event)" method="POST" action="https://kmd-ia.com.br/cadastro-landing">
+      <input type="hidden" name="_token" id="csrf-token" value="">
       <div class="form-row">
-        <input type="text"  id="f-nome"       name="responsavel_nome"  placeholder="Nome completo *" autocomplete="off" required>
-        <input type="text"  id="f-escritorio" name="nome_escritorio"    placeholder="Nome do escritório *" autocomplete="off" required>
+        <input type="text"     id="f-nome"       name="responsavel_nome"  placeholder="Nome completo *" autocomplete="off" required>
+        <input type="text"     id="f-escritorio" name="nome_escritorio"    placeholder="Nome do escritório *" autocomplete="off" required>
       </div>
-      <input type="email" id="f-email"      name="email"             placeholder="Email profissional *" autocomplete="off" required>
-      <input type="tel"   id="f-telefone"   name="telefone"          placeholder="WhatsApp / Telefone" autocomplete="off">
-      <button type="submit" class="btn-submit">
+      <input type="email"    id="f-email"      name="email"             placeholder="Email profissional *" autocomplete="off" required>
+      <input type="tel"      id="f-telefone"   name="telefone"          placeholder="WhatsApp / Telefone" autocomplete="off">
+      <input type="password" id="f-senha"      name="senha"             placeholder="Crie uma senha *" autocomplete="new-password" required minlength="8">
+      <input type="password" id="f-senha2"     name="senha_confirmacao" placeholder="Confirme sua senha *" autocomplete="new-password" required minlength="8">
+      <div class="terms-row">
+        <input type="checkbox" id="f-termos" name="aceitar_termos" value="1" required>
+        <label for="f-termos">Li e aceito os <a href="https://kmd-ia.com.br/privacidade" target="_blank">Termos de Uso e Política de Privacidade</a></label>
+      </div>
+      <button type="submit" class="btn-submit" id="btn-submit">
         Criar minha conta grátis
         <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
       </button>
@@ -750,18 +763,38 @@ document.addEventListener('DOMContentLoaded', function () {
 // ── Form Submit ─────────────────────────────────────────
 function submitForm(e) {
   e.preventDefault();
-  const btn = e.target.querySelector('.btn-submit');
+  const errorDiv = document.getElementById('form-error');
+  errorDiv.style.display = 'none';
+
+  const senha  = document.getElementById('f-senha').value;
+  const senha2 = document.getElementById('f-senha2').value;
+
+  if (senha.length < 8) {
+    errorDiv.textContent = 'A senha deve ter ao menos 8 caracteres.';
+    errorDiv.style.display = 'block';
+    return;
+  }
+  if (senha !== senha2) {
+    errorDiv.textContent = 'As senhas não coincidem.';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('btn-submit');
   btn.disabled = true;
   btn.innerHTML = '⏳ Criando sua conta...';
 
-  const params = new URLSearchParams({
-    responsavel_nome: document.getElementById('f-nome').value,
-    nome_escritorio:  document.getElementById('f-escritorio').value,
-    email:            document.getElementById('f-email').value,
-    telefone:         document.getElementById('f-telefone').value,
-  });
-
-  window.location.href = 'https://kmd-ia.com.br/cadastro?' + params.toString();
+  // Busca o CSRF token do sistema e submete o form
+  fetch('https://kmd-ia.com.br/api/csrf-token', { credentials: 'include' })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => {
+      document.getElementById('csrf-token').value = data.token;
+      e.target.submit();
+    })
+    .catch(() => {
+      // fallback: submete sem CSRF (servidor vai rejeitar — redireciona para /cadastro)
+      e.target.submit();
+    });
 }
 </script>
 </body>

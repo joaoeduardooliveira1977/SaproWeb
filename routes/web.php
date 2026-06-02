@@ -35,8 +35,13 @@ use App\Http\Controllers\IAController;
 // ─── Política de Privacidade (pública) ────────────────────────
     Route::get('/privacidade', fn() => view('privacidade'))->name('privacidade');
 
+// ─── CSRF token para a landing page (estática) ─────────────────
+    Route::get('/api/csrf-token', fn() => response()->json(['token' => csrf_token()]))->name('api.csrf');
+
 // ─── Cadastro Trial (público) ──────────────────
     Route::get('/cadastro', \App\Livewire\CadastroTrial::class)->name('cadastro');
+    Route::post('/cadastro-landing', [\App\Http\Controllers\CadastroLandingController::class, 'store'])->name('cadastro.landing');
+    Route::get('/verificar-email', \App\Livewire\VerificarEmail::class)->name('verificar-email');
 
 // ─── Trial Expirado ────────────────────────────
     Route::get('/trial-expirado', fn() => view('trial-expirado'))->name('trial.expirado');
