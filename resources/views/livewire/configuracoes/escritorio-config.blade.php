@@ -102,6 +102,7 @@
             ['dominio',    '🌐', 'Domínio'],
             ['usuarios',   '👥', 'Usuários'],
             ['seguranca',  '🔒', 'Segurança'],
+            ['lgpd',       '⚖️', 'LGPD'],
         ] as [$id, $icon, $label])
         <button type="button" wire:click="mudarAba('{{ $id }}')"
                 class="cfg-tab {{ $abaAtiva === $id ? 'active' : '' }}">
@@ -538,6 +539,29 @@
             @endforelse
         </div>
 
+    </div>
+    @endif
+
+    {{-- ══════════════════════════════════════════════════════════ --}}
+    {{-- Aba 6 — LGPD                                             --}}
+    {{-- ══════════════════════════════════════════════════════════ --}}
+    @if($abaAtiva === 'lgpd')
+    <div class="cfg-card" style="margin-bottom:16px;">
+        <div class="cfg-sec-title">⚖️ Privacidade & LGPD</div>
+        <p style="font-size:13px;color:#64748b;margin:0 0 20px;">
+            Gerencie os direitos dos titulares de dados conforme a Lei 13.709/2018.
+            Exporte, anonimize ou exclua dados de clientes, e consulte a política de privacidade.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;">
+            <a href="{{ route('configuracoes.privacidade') }}"
+               style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#0f2540;color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
+                🔒 Acessar módulo LGPD
+            </a>
+            <a href="{{ route('privacidade') }}" target="_blank"
+               style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#f1f5f9;color:#374151;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">
+                📄 Ver Política de Privacidade
+            </a>
+        </div>
     </div>
     @endif
 
