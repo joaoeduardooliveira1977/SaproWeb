@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('page-title', 'Dashboard')
+@section('page-title', 'Meu Painel')
 @section('content')
 
 @livewire('dashboard')

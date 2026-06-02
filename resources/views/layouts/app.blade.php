@@ -18,7 +18,7 @@
             } catch (\Exception $e) {}
         }
     @endphp
-    <title>{{ $prazosHoje > 0 ? "({$prazosHoje}) " : '' }}@yield('page-title', 'Dashboard') — Software Jurídico</title>
+    <title>{{ $prazosHoje > 0 ? "({$prazosHoje}) " : '' }}@yield('page-title', 'Meu Painel') — Software Jurídico</title>
     {{-- Anti-FOUC: aplica tema antes do render --}}
     <script>(function(){var t=localStorage.getItem('software-juridico-theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}());</script>
 
@@ -773,7 +773,7 @@
     <div class="main">
         <div class="topbar">
             <button class="hamburger" onclick="toggleDrawer()" aria-label="Abrir menu"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-            <span class="topbar-title" style="flex-shrink:0;">@yield('page-title', 'Dashboard')</span>
+            <span class="topbar-title" style="flex-shrink:0;">@yield('page-title', 'Meu Painel')</span>
             @if($canProc)
             
 	<div class="quick-add" id="quickAdd">
@@ -1210,7 +1210,7 @@
                 {
                     element: '#card-processos-ativos',
                     popover: {
-                        title: '📊 Dashboard',
+                        title: '📊 Meu Painel',
                         description: 'Acompanhe aqui um resumo de tudo que está acontecendo no seu escritório.',
                         side: 'top', align: 'start'
                     }
