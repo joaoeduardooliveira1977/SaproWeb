@@ -49,6 +49,8 @@ class Pessoas extends Component
     public string $cep               = '';
     public string $oab               = '';
     public string $observacoes       = '';
+    public ?int   $filialId          = null;
+    public string $referencia        = '';
     public array  $tipos_selecionados   = [];
     public array  $advogados_ids        = [];
     public ?int   $administradoraId     = null;
@@ -143,6 +145,8 @@ class Pessoas extends Component
             $this->cep                 = $p->cep ?? '';
             $this->oab                 = $p->oab ?? '';
             $this->observacoes         = $p->observacoes ?? '';
+            $this->filialId            = $p->filial_id;
+            $this->referencia          = $p->referencia ?? '';
             $this->tipos_selecionados  = $p->listaTipos();
             $this->administradoraId    = $p->administradora_id;
             $this->advogados_ids       = $p->advogadosResponsaveis()->pluck('pessoas.id')->map(fn($id) => (string) $id)->toArray();
@@ -183,6 +187,8 @@ class Pessoas extends Component
             'cep'            => $this->cep ?: null,
             'oab'            => $this->oab ?: null,
             'observacoes'    => $this->observacoes ?: null,
+            'filial_id'      => $this->filialId ?: null,
+            'referencia'     => $this->referencia ?: null,
             'administradora_id' => $this->administradoraId ?: null,
             'indicador_id'      => in_array('Cliente', $this->tipos_selecionados) ? ($this->indicadorId ?: null) : null,
         ];
@@ -443,7 +449,8 @@ Use linguagem profissional e objetiva.";
         $this->nome              = $this->cpf_cnpj = $this->rg = $this->inscricaoEstadual = $this->inscricaoMunicipal = $this->data_nascimento = '';
         $this->telefone          = $this->celular = $this->email = '';
         $this->logradouro        = $this->cidade = $this->estado = $this->cep = '';
-        $this->oab               = $this->observacoes = '';
+        $this->oab               = $this->observacoes = $this->referencia = '';
+        $this->filialId          = null;
         $this->tipos_selecionados = [];
         $this->advogados_ids      = [];
         $this->administradoraId   = null;

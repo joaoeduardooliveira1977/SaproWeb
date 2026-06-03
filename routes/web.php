@@ -214,6 +214,10 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/lista-geral',           [RelatorioController::class, 'listaGeral'])->name('lista-geral');
         Route::get('/financeiro-mensal',     [RelatorioController::class, 'relatorioFinanceiroMensal'])->name('financeiro-mensal');
         Route::get('/extrato-cliente',       [RelatorioController::class, 'extratoCliente'])->name('extrato-cliente');
+        Route::get('/despesas',              [RelatorioController::class, 'filtrosDespesas'])->name('despesas');
+        Route::get('/despesas/pdf',          [RelatorioController::class, 'despesasClientePdf'])->name('despesas.pdf');
+        Route::get('/reembolso',             [RelatorioController::class, 'filtrosReembolso'])->name('reembolso');
+        Route::get('/reembolso/pdf',         [RelatorioController::class, 'pedidoReembolsoPdf'])->name('reembolso.pdf');
     });
 
     // ── Analytics & Produtividade ────────────────────────────────
@@ -238,6 +242,12 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/modelos-contrato', \App\Livewire\ModelosContrato::class)->name('modelos-contrato');
         Route::get('/workflow-regras', \App\Livewire\WorkflowRegras::class)->name('workflow.regras');
     });
+
+    // ── Despesas & Reembolsos ────────────────────────────────────
+    Route::middleware('perfil:financeiro')->get('/despesas-reembolsos', \App\Livewire\DespesasReembolsos::class)->name('despesas-reembolsos');
+
+    // ── Filiais (Tabelas Auxiliares) ─────────────────────────────
+    Route::middleware('perfil:admin')->get('/cadastros/filiais', \App\Livewire\Cadastros\GestaoFiliais::class)->name('cadastros.filiais');
 
     // ── Administração (admin only) ──────────────────────────────
     Route::middleware('perfil:admin')->group(function () {

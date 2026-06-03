@@ -540,6 +540,21 @@
                 <input type="text" wire:model="oab" placeholder="Número da OAB" style="{{ $inp }}">
             </div>
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+            <div class="form-field">
+                <label class="lbl">Filial</label>
+                <select wire:model="filialId" style="{{ $inp }}background:#fff;">
+                    <option value="">— Nenhuma —</option>
+                    @foreach(\App\Models\Filial::where('ativo', true)->orderBy('nome')->get() as $fil)
+                    <option value="{{ $fil->id }}">{{ $fil->nome }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-field">
+                <label class="lbl">Referência</label>
+                <input type="text" wire:model="referencia" placeholder="Código de referência..." style="{{ $inp }}">
+            </div>
+        </div>
 
         </div>
 

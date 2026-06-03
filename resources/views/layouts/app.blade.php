@@ -645,6 +645,9 @@
     <a href="{{ route('config.financeiro') }}" class="nav-drawer-item {{ $rota==='config.financeiro' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h4m-4 3h8m-8 3h5"/><circle cx="17" cy="12" r="3"/></svg>Config. PIX
     </a>
+    <a href="{{ route('despesas-reembolsos') }}" class="nav-drawer-item {{ $rota==='despesas-reembolsos' ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Despesas / Reembolsos
+    </a>
     @endif
     <a href="{{ route('relatorios.index') }}" class="nav-drawer-item {{ $rota==='relatorios.index' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>Relatórios
@@ -722,6 +725,10 @@
     <a href="{{ route('financeiro.contratos-mensais') }}" class="nav-btn {{ in_array($rota, ['contratos-mensais.index','contratos-mensais.mensalidades','financeiro.contratos-mensais','financeiro.cliente']) ? 'active' : '' }}" title="Contratos Mensais">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="M3 9h18"/></svg>
         <span class="nav-btn-label">Mensais</span>
+    </a>
+    <a href="{{ route('despesas-reembolsos') }}" class="nav-btn {{ $rota==='despesas-reembolsos' ? 'active' : '' }}" title="Despesas / Reembolsos">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span class="nav-btn-label">Despesas</span>
     </a>
     @endif
 

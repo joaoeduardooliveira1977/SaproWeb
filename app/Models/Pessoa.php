@@ -14,7 +14,7 @@ class Pessoa extends Model
     protected $table = 'pessoas';
 
     protected $fillable = [
-        'tenant_id',
+        'tenant_id', 'filial_id', 'modelo_relatorio', 'referencia',
         'nome', 'tipo_pessoa', 'cpf_cnpj', 'rg', 'inscricao_estadual', 'inscricao_municipal', 'data_nascimento',
         'telefone', 'celular', 'email',
         'logradouro', 'cidade', 'estado', 'cep',
@@ -95,6 +95,11 @@ class Pessoa extends Model
     public function processosComoAdvogado(): HasMany
     {
         return $this->hasMany(Processo::class, 'advogado_id');
+    }
+
+    public function filial(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Filial::class, 'filial_id');
     }
 
     public function usuario(): \Illuminate\Database\Eloquent\Relations\HasOne

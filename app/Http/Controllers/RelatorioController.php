@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\{Orcamento, Processo, Pessoa, Agenda, Custa, TipoAcao};
+use App\Models\{Orcamento, Processo, Pessoa, Agenda, Custa, TipoAcao, DespesaReembolso, Tenant};
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
@@ -898,5 +898,85 @@ class RelatorioController extends Controller
             'contrato' => $contrato,
             'tenant'   => $tenant,
         ], "Contrato — {$contrato->cliente?->nome}");
+    }
+
+    // ── Filtros Despesas / Reembolso ───────────────────────────
+
+    public function filtrosDespesas()
+    {
+        $clientes = Pessoa::doTipo('Cliente')->orderBy('nome')->get(['id', 'nome']);
+        return view('relatorios.filtros-despesas', compact('clientes'));
+    }
+
+    public function filtrosReembolso()
+    {
+        $clientes = Pessoa::doTipo('Cliente')->orderBy('nome')->get(['id', 'nome']);
+        return view('relatorios.filtros-reembolso', compact('clientes'));
+    }
+
+    // ── PDF Despesas por Cliente ───────────────────────────────
+
+    public function despesasClientePdf(Request $request)
+    {
+        $request->validate([
+            'cliente_id' => 'required|integer',
+            'data_ini'   => 'required|date',
+            'data_fim'   => 'required|date|after_or_equal:data_ini',
+        ]);
+
+        [$ini, $fim] = $this->datas($request);
+
+        $cliente = Pessoa::with('filial')->findOrFail($request->cliente_id);
+
+        $lancamentos = DespesaReembolso::where('tenant_id', tenant_id())
+            ->where('cliente_id', $cliente->id)
+            ->whereBetween('data_lancamento', [$ini->toDateString(), $fim->toDateString()])
+            ->with('responsavel:id,nome')
+            ->orderBy('data_lancamento')
+            ->get();
+
+        return $this->pdf('pdf.despesas-cliente', [
+            'cliente'     => $cliente,
+            'lancamentos' => $lancamentos,
+            'dataIni'     => $ini->toDateString(),
+            'dataFim'     => $fim->toDateString(),
+        ], "Relatório de Despesas — {$cliente->nome}");
+    }
+
+    // ── PDF Pedido de Reembolso ────────────────────────────────
+
+    public function pedidoReembolsoPdf(Request $request)
+    {
+        $request->validate([
+            'cliente_id' => 'required|integer',
+            'data_ini'   => 'required|date',
+            'data_fim'   => 'required|date|after_or_equal:data_ini',
+        ]);
+
+        [$ini, $fim] = $this->datas($request);
+
+        $cliente    = Pessoa::with('filial')->findOrFail($request->cliente_id);
+        $tenantId   = tenant_id();
+        $tenant     = Tenant::find($tenantId);
+        $usuario    = auth('usuarios')->user();
+
+        $lancamentos = DespesaReembolso::where('tenant_id', $tenantId)
+            ->where('cliente_id', $cliente->id)
+            ->whereBetween('data_lancamento', [$ini->toDateString(), $fim->toDateString()])
+            ->with('responsavel:id,nome')
+            ->orderBy('data_lancamento')
+            ->get();
+
+        $dadosBancarios = $tenant?->dados_bancarios ?? null;
+
+        return $this->pdf('pdf.pedido-reembolso', [
+            'cliente'        => $cliente,
+            'tenant'         => $tenant,
+            'lancamentos'    => $lancamentos,
+            'dataIni'        => $ini->toDateString(),
+            'dataFim'        => $fim->toDateString(),
+            'dadosBancarios' => $dadosBancarios,
+            'responsavel'    => $usuario->nome ?? $usuario->login,
+        ], "Pedido de Reembolso — {$cliente->nome}");
     }
 }
