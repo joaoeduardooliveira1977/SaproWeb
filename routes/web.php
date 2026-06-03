@@ -214,9 +214,9 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/lista-geral',           [RelatorioController::class, 'listaGeral'])->name('lista-geral');
         Route::get('/financeiro-mensal',     [RelatorioController::class, 'relatorioFinanceiroMensal'])->name('financeiro-mensal');
         Route::get('/extrato-cliente',       [RelatorioController::class, 'extratoCliente'])->name('extrato-cliente');
-        Route::get('/despesas',              [RelatorioController::class, 'filtrosDespesas'])->name('despesas');
+        Route::get('/despesas',              \App\Livewire\Relatorios\FiltrosDespesas::class)->name('despesas');
         Route::get('/despesas/pdf',          [RelatorioController::class, 'despesasClientePdf'])->name('despesas.pdf');
-        Route::get('/reembolso',             [RelatorioController::class, 'filtrosReembolso'])->name('reembolso');
+        Route::get('/reembolso',             \App\Livewire\Relatorios\FiltrosReembolso::class)->name('reembolso');
         Route::get('/reembolso/pdf',         [RelatorioController::class, 'pedidoReembolsoPdf'])->name('reembolso.pdf');
     });
 
