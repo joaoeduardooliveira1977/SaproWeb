@@ -207,23 +207,10 @@
                 @endif
             </div>
 
-            {{-- Linha: Data + Tipo --}}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div>
-                    <label style="display:block;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Data *</label>
-                    <input wire:model="dataLancamento" type="date" style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
-                </div>
-                <div>
-                    <label style="display:block;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Tipo *</label>
-                    <div style="display:flex;gap:8px;">
-                        <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px 12px;border:1.5px solid {{ $tipo==='despesa'?'#1a3a5c':'#e5e7eb' }};border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">
-                            <input type="radio" wire:model="tipo" value="despesa"> 💸 Despesa
-                        </label>
-                        <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px 12px;border:1.5px solid {{ $tipo==='reembolso'?'#1a3a5c':'#e5e7eb' }};border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">
-                            <input type="radio" wire:model="tipo" value="reembolso"> 🔄 Reembolso
-                        </label>
-                    </div>
-                </div>
+            {{-- Data --}}
+            <div>
+                <label style="display:block;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Data *</label>
+                <input wire:model="dataLancamento" type="date" style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
             </div>
 
             {{-- Descrição --}}
@@ -234,22 +221,12 @@
                 @error('descricao') <span style="font-size:12px;color:#dc2626;">{{ $message }}</span> @enderror
             </div>
 
-            {{-- Linha: Valor + Responsável --}}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div>
-                    <label style="display:block;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Valor *</label>
-                    <input wire:model="valor" type="text" placeholder="0,00"
-                        style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
-                    @error('valor') <span style="font-size:12px;color:#dc2626;">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label style="display:block;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Responsável</label>
-                    <select wire:model="responsavelId" style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;background:#fff;box-sizing:border-box;">
-                        @foreach($usuarios as $u)
-                        <option value="{{ $u->id }}">{{ $u->nome }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            {{-- Valor --}}
+            <div>
+                <label style="display:block;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Valor *</label>
+                <input wire:model="valor" type="text" placeholder="0,00"
+                    style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
+                @error('valor') <span style="font-size:12px;color:#dc2626;">{{ $message }}</span> @enderror
             </div>
 
             {{-- Observações --}}
