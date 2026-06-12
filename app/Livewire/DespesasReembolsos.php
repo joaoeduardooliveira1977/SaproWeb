@@ -211,6 +211,19 @@ class DespesasReembolsos extends Component
             $this->dispatch('toast', type: 'sucesso', msg: 'Lançamento atualizado!');
         } else {
             $despesa = DespesaReembolso::create(array_merge($dados, ['status' => 'pendente']));
+            // Gera automaticamente Contas Pagas (desembolso do escritório)
+            FinanceiroLancamento::create([
+                'cliente_id'     => $despesa->cliente_id,
+                'tipo'           => 'despesa',
+                'origem_tipo'    => 'manual',
+                'descricao'      => $despesa->descricao,
+                'valor'          => $despesa->valor,
+                'vencimento'     => $despesa->data_lancamento->format('Y-m-d'),
+                'data_pagamento' => $despesa->data_lancamento->format('Y-m-d'),
+                'valor_pago'     => $despesa->valor,
+                'status'         => 'recebido',
+                'observacoes'    => 'Gerado de Despesa #' . $despesa->id,
+            ]);
             $usuario->registrarAuditoria('Despesa/Reembolso criado', 'despesas_reembolsos', $despesa->id, null, $dados);
             $this->dispatch('toast', type: 'sucesso', msg: 'Lançamento criado!');
         }
@@ -307,15 +320,33 @@ class DespesasReembolsos extends Component
         $despesa = DespesaReembolso::findOrFail($id);
         $usuario = auth('usuarios')->user();
 
-        $despesa->update([
-            'status'      => 'aprovado',
+        $updates = [
+            'status'       => 'aprovado',
             'aprovado_por' => $usuario->id,
             'aprovado_em'  => now(),
-        ]);
+        ];
+
+        // Gera Contas a Receber apenas se ainda não foi gerado
+        if (!$despesa->financeiro_id) {
+            $lancamento = FinanceiroLancamento::create([
+                'cliente_id'  => $despesa->cliente_id,
+                'tipo'        => 'receita',
+                'origem_tipo' => 'manual',
+                'descricao'   => $despesa->descricao,
+                'valor'       => $despesa->valor,
+                'vencimento'  => now()->addDays(30)->format('Y-m-d'),
+                'status'      => 'previsto',
+                'observacoes' => 'A receber - Despesa #' . $despesa->id,
+            ]);
+            $updates['financeiro_id']   = $lancamento->id;
+            $updates['financeiro_tipo'] = 'recebimento';
+        }
+
+        $despesa->update($updates);
 
         $usuario->registrarAuditoria('Despesa/Reembolso aprovado', 'despesas_reembolsos', $id, ['status' => 'pendente'], ['status' => 'aprovado']);
         $this->confirmarAprovarId = null;
-        $this->dispatch('toast', type: 'sucesso', msg: 'Lançamento aprovado para cobrança!');
+        $this->dispatch('toast', type: 'sucesso', msg: 'Lançamento aprovado! Título gerado em Contas a Receber.');
     }
 
     public function marcarNaoCobrar(int $id): void

@@ -92,7 +92,12 @@ table.itens tr:last-child td { border-bottom:none; }
         @foreach($lancamentos as $l)
         <tr>
             <td>{{ $l->data_lancamento->format('d/m/Y') }}</td>
-            <td>{{ $l->descricao }}</td>
+            <td>
+                {{ $l->descricao }}
+                @if($l->observacoes)
+                <br><span style="font-size:8.5px;color:#666;">{{ $l->observacoes }}</span>
+                @endif
+            </td>
             <td class="right">{{ number_format($l->valor, 2, ',', '.') }}</td>
             <td class="center">
                 @php $st = match($l->status) {

@@ -108,14 +108,30 @@ table.itens tfoot tr td.right { text-align:right; font-weight:bold; }
             <th style="width:80px;">Data</th>
             <th>Descrição</th>
             <th class="right" style="width:110px;">Valor (R$)</th>
+            <th class="right" style="width:90px;">Status</th>
         </tr>
     </thead>
     <tbody>
         @foreach($lancamentos as $l)
         <tr>
             <td>{{ $l->data_lancamento->format('d/m/Y') }}</td>
-            <td>{{ $l->descricao }}</td>
+            <td>
+                {{ $l->descricao }}
+                @if($l->observacoes)
+                <br><span style="font-size:8.5px;color:#666;">{{ $l->observacoes }}</span>
+                @endif
+            </td>
             <td class="right">{{ number_format($l->valor, 2, ',', '.') }}</td>
+            <td class="right">
+                @php $st = match($l->status) {
+                    'pendente'   => 'Pendente',
+                    'aprovado'   => 'Aprovado',
+                    'nao_cobrar' => 'Não cobrar',
+                    'ja_cobrado' => 'Já cobrado',
+                    default      => $l->status,
+                }; @endphp
+                {{ $st }}
+            </td>
         </tr>
         @endforeach
     </tbody>

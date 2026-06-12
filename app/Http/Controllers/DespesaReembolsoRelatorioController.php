@@ -30,7 +30,6 @@ class DespesaReembolsoRelatorioController extends Controller
 
         $lancamentos = DespesaReembolso::where('tenant_id', $tenantId)
             ->where('cliente_id', $cliente->id)
-            ->where('tipo', 'despesa')
             ->whereBetween('data_lancamento', [$ini->toDateString(), $fim->toDateString()])
             ->orderBy('data_lancamento')
             ->get();
@@ -70,7 +69,6 @@ class DespesaReembolsoRelatorioController extends Controller
 
         $lancamentos = DespesaReembolso::where('tenant_id', $tenantId)
             ->where('cliente_id', $cliente->id)
-            ->where('tipo', 'reembolso')
             ->whereBetween('data_lancamento', [$ini->toDateString(), $fim->toDateString()])
             ->orderBy('data_lancamento')
             ->get();
