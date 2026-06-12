@@ -58,6 +58,14 @@ class EscritorioConfig extends Component
     public string $senhaNova    = '';
     public string $senhaConfirm = '';
 
+    // ── Aba 7: Dados Bancários ────────────────────────────────────
+    public string $bancoBanco          = '';
+    public string $bancoAgencia        = '';
+    public string $bancoContaCorrente  = '';
+    public string $bancoFavorecido     = '';
+    public string $bancoCnpj           = '';
+    public string $bancoCodigoContabil = '';
+
     // ── Mount ─────────────────────────────────────────────────────
 
     public function mount(): void
@@ -76,6 +84,14 @@ class EscritorioConfig extends Component
         $this->cidade       = $tenant->cidade   ?? '';
         $this->oab          = $tenant->oab      ?? '';
         $this->site         = $tenant->configuracoes['site'] ?? '';
+
+        $db = $tenant->configuracoes['dados_bancarios'] ?? [];
+        $this->bancoBanco          = $db['banco']           ?? '';
+        $this->bancoAgencia        = $db['agencia']         ?? '';
+        $this->bancoContaCorrente  = $db['conta_corrente']  ?? '';
+        $this->bancoFavorecido     = $db['favorecido']      ?? '';
+        $this->bancoCnpj           = $db['cnpj']            ?? '';
+        $this->bancoCodigoContabil = $db['codigo_contabil'] ?? '';
     }
 
     public function mudarAba(string $aba): void
@@ -358,6 +374,35 @@ class EscritorioConfig extends Component
         DB::table('sessions')->whereIn('user_id', $ids)->delete();
 
         $this->dispatch('toast', message: "Sessões encerradas para {$ids->count()} usuário(s).", type: 'success');
+    }
+
+    // ── Aba 7: Dados Bancários ────────────────────────────────────
+
+    public function salvarDadosBancarios(): void
+    {
+        $this->validate([
+            'bancoBanco'          => 'nullable|string|max:100',
+            'bancoAgencia'        => 'nullable|string|max:20',
+            'bancoContaCorrente'  => 'nullable|string|max:30',
+            'bancoFavorecido'     => 'nullable|string|max:150',
+            'bancoCnpj'           => 'nullable|string|max:18',
+            'bancoCodigoContabil' => 'nullable|string|max:30',
+        ]);
+
+        $tenant = $this->tenant();
+        $cfg    = $tenant->configuracoes ?? [];
+        $cfg['dados_bancarios'] = [
+            'banco'           => $this->bancoBanco          ?: null,
+            'agencia'         => $this->bancoAgencia        ?: null,
+            'conta_corrente'  => $this->bancoContaCorrente  ?: null,
+            'favorecido'      => $this->bancoFavorecido     ?: null,
+            'cnpj'            => $this->bancoCnpj           ?: null,
+            'codigo_contabil' => $this->bancoCodigoContabil ?: null,
+        ];
+
+        $tenant->update(['configuracoes' => $cfg]);
+        \Illuminate\Support\Facades\Cache::forget("tenant_{$tenant->id}");
+        $this->dispatch('toast', message: 'Dados bancários salvos!', type: 'success');
     }
 
     // ── Helpers ───────────────────────────────────────────────────

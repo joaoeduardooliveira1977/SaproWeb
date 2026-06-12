@@ -101,6 +101,45 @@ class AuthController extends Controller
         return redirect()->intended(route('dashboard'));
     }
 
+    public function trocarSenha(Request $request)
+    {
+        $request->validate([
+            'senha_atual'   => 'required',
+            'nova_senha'    => 'required|min:8|confirmed',
+            'nova_senha_confirmation' => 'required',
+        ], [
+            'senha_atual.required'  => 'Informe a senha atual.',
+            'nova_senha.required'   => 'Informe a nova senha.',
+            'nova_senha.min'        => 'A nova senha deve ter ao menos 8 caracteres.',
+            'nova_senha.confirmed'  => 'As senhas não coincidem.',
+        ]);
+
+        $usuario = Auth::guard('usuarios')->user();
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->senha_atual, $usuario->password)) {
+            return back()->with('erro', 'Senha atual incorreta.');
+        }
+
+        $usuario->update(['password' => \Illuminate\Support\Facades\Hash::make($request->nova_senha)]);
+
+        return back()->with('sucesso', 'Senha alterada com sucesso!');
+    }
+
+    public function salvarPerfil(Request $request)
+    {
+        $request->validate([
+            'nome'  => 'nullable|string|max:150',
+            'cargo' => 'nullable|string|max:100',
+        ]);
+
+        Auth::guard('usuarios')->user()->update([
+            'nome'  => $request->nome  ?: null,
+            'cargo' => $request->cargo ?: null,
+        ]);
+
+        return back()->with('sucesso', 'Perfil atualizado com sucesso!');
+    }
+
     public function logout(Request $request)
     {
         Auth::guard('usuarios')->logout();

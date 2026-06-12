@@ -42,6 +42,14 @@ class DespesasReembolsos extends Component
     public bool  $modalAnexos      = false;
     public ?int  $despesaAnexosId  = null;
 
+    // ── Filtro de relatórios ──────────────────────────────────────
+    public string $relClienteBusca     = '';
+    public ?int   $relClienteId        = null;
+    public string $relClienteNome      = '';
+    public array  $relClienteSugestoes = [];
+    public string $relDataIni          = '';
+    public string $relDataFim          = '';
+
     // ── Confirmações ─────────────────────────────────────────────
     public ?int  $confirmarAprovarId  = null;
     public ?int  $confirmarNaoCobrarId = null;
@@ -59,6 +67,8 @@ class DespesasReembolsos extends Component
         $this->responsavelId  = auth('usuarios')->id();
         $this->filtroDataIni  = now()->startOfMonth()->format('Y-m-d');
         $this->filtroDataFim  = now()->endOfMonth()->format('Y-m-d');
+        $this->relDataIni     = now()->startOfMonth()->format('Y-m-d');
+        $this->relDataFim     = now()->endOfMonth()->format('Y-m-d');
     }
 
     // ── Autocomplete cliente ──────────────────────────────────────
@@ -80,6 +90,59 @@ class DespesasReembolsos extends Component
         $this->clienteId      = $id;
         $this->clienteBusca   = $nome;
         $this->clienteSugestoes = [];
+    }
+
+    // ── Autocomplete cliente (relatório) ─────────────────────────
+    public function updatedRelClienteBusca(): void
+    {
+        if (strlen($this->relClienteBusca) < 2) {
+            $this->relClienteSugestoes = [];
+            return;
+        }
+        $this->relClienteSugestoes = Pessoa::where('tenant_id', $this->tid())
+            ->busca($this->relClienteBusca)
+            ->limit(8)
+            ->get(['id', 'nome', 'cpf_cnpj'])
+            ->toArray();
+    }
+
+    public function selecionarRelCliente(int $id, string $nome): void
+    {
+        $this->relClienteId        = $id;
+        $this->relClienteNome      = $nome;
+        $this->relClienteBusca     = $nome;
+        $this->relClienteSugestoes = [];
+    }
+
+    public function limparRelCliente(): void
+    {
+        $this->relClienteId        = null;
+        $this->relClienteNome      = '';
+        $this->relClienteBusca     = '';
+        $this->relClienteSugestoes = [];
+    }
+
+    public function abrirRelatorio(string $tipo): void
+    {
+        $this->validate([
+            'relClienteId' => 'required|integer',
+            'relDataIni'   => 'required|date',
+            'relDataFim'   => 'required|date|after_or_equal:relDataIni',
+        ], [
+            'relClienteId.required'      => 'Selecione um cliente.',
+            'relDataIni.required'        => 'Informe a data de início.',
+            'relDataFim.required'        => 'Informe a data de fim.',
+            'relDataFim.after_or_equal'  => 'A data final deve ser igual ou posterior à inicial.',
+        ]);
+
+        $routeName = $tipo === 'reembolso' ? 'despesas.relatorio.reembolso' : 'despesas.relatorio.despesas';
+        $url = route($routeName, [
+            'cliente_id'  => $this->relClienteId,
+            'data_inicio' => $this->relDataIni,
+            'data_fim'    => $this->relDataFim,
+        ]);
+
+        $this->dispatch('abrir-relatorio', url: $url);
     }
 
     // ── CRUD ──────────────────────────────────────────────────────

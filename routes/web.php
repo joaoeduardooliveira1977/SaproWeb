@@ -128,6 +128,7 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/audiencias', fn() => view('audiencias'))->name('audiencias');
         Route::get('/minha-conta', fn() => view('minha-conta'))->name('minha-conta');
         Route::post('/minha-conta', [AuthController::class, 'trocarSenha'])->name('minha-conta.salvar');
+        Route::post('/minha-conta/perfil', [AuthController::class, 'salvarPerfil'])->name('minha-conta.perfil');
         Route::get('/processos-hub',   fn() => view('hubs.processos'))->name('processos.hub');
         Route::get('/cadastros-hub',   fn() => view('hubs.cadastros'))->name('cadastros.hub');
     });
@@ -245,6 +246,14 @@ Route::get('/teste-config', fn() => 'funcionou');
 
     // ── Despesas & Reembolsos ────────────────────────────────────
     Route::middleware('perfil:financeiro')->get('/despesas-reembolsos', \App\Livewire\DespesasReembolsos::class)->name('despesas-reembolsos');
+    Route::middleware('perfil:financeiro')->group(function () {
+        Route::get('/despesas-reembolsos/relatorio/despesas',
+            [\App\Http\Controllers\DespesaReembolsoRelatorioController::class, 'relatorioDespesas'])
+            ->name('despesas.relatorio.despesas');
+        Route::get('/despesas-reembolsos/relatorio/reembolso',
+            [\App\Http\Controllers\DespesaReembolsoRelatorioController::class, 'relatorioReembolso'])
+            ->name('despesas.relatorio.reembolso');
+    });
 
     // ── Filiais (Tabelas Auxiliares) ─────────────────────────────
     Route::middleware('perfil:admin')->get('/cadastros/filiais', \App\Livewire\Cadastros\GestaoFiliais::class)->name('cadastros.filiais');

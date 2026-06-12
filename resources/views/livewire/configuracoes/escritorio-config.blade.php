@@ -103,6 +103,7 @@
             ['usuarios',   '👥', 'Usuários'],
             ['seguranca',  '🔒', 'Segurança'],
             ['lgpd',       '⚖️', 'LGPD'],
+            ['financeiro', '🏦', 'Dados Bancários'],
         ] as [$id, $icon, $label])
         <button type="button" wire:click="mudarAba('{{ $id }}')"
                 class="cfg-tab {{ $abaAtiva === $id ? 'active' : '' }}">
@@ -562,6 +563,63 @@
                 📄 Ver Política de Privacidade
             </a>
         </div>
+    </div>
+    @endif
+
+
+    {{-- ══════════════════════════════════════════════════════════ --}}
+    {{-- Aba 7 — Dados Bancários                                  --}}
+    {{-- ══════════════════════════════════════════════════════════ --}}
+    @if($abaAtiva === 'financeiro')
+    <div class="cfg-card">
+        <div class="cfg-sec-title">🏦 Dados Bancários do Escritório</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
+            Estas informações aparecem nos relatórios PDF de despesas e pedidos de reembolso.
+        </p>
+
+        <div class="cfg-grid-2" style="margin-bottom:14px;">
+            <div class="cfg-field">
+                <label class="cfg-label">Banco (nome e código)</label>
+                <input wire:model="bancoBanco" type="text" class="cfg-input" placeholder="Ex: Bradesco — 237">
+                @error('bancoBanco') <span class="cfg-err">{{ $message }}</span> @enderror
+            </div>
+            <div class="cfg-field">
+                <label class="cfg-label">Agência</label>
+                <input wire:model="bancoAgencia" type="text" class="cfg-input" placeholder="Ex: 1234-5">
+                @error('bancoAgencia') <span class="cfg-err">{{ $message }}</span> @enderror
+            </div>
+        </div>
+
+        <div class="cfg-grid-2" style="margin-bottom:14px;">
+            <div class="cfg-field">
+                <label class="cfg-label">Conta Corrente</label>
+                <input wire:model="bancoContaCorrente" type="text" class="cfg-input" placeholder="Ex: 12345-6">
+                @error('bancoContaCorrente') <span class="cfg-err">{{ $message }}</span> @enderror
+            </div>
+            <div class="cfg-field">
+                <label class="cfg-label">Código Contábil (opcional)</label>
+                <input wire:model="bancoCodigoContabil" type="text" class="cfg-input" placeholder="Ex: 4.1.02.001">
+                @error('bancoCodigoContabil') <span class="cfg-err">{{ $message }}</span> @enderror
+            </div>
+        </div>
+
+        <div class="cfg-grid-2" style="margin-bottom:20px;">
+            <div class="cfg-field">
+                <label class="cfg-label">Favorecido (nome)</label>
+                <input wire:model="bancoFavorecido" type="text" class="cfg-input" placeholder="Nome completo ou razão social">
+                @error('bancoFavorecido') <span class="cfg-err">{{ $message }}</span> @enderror
+            </div>
+            <div class="cfg-field">
+                <label class="cfg-label">CNPJ do favorecido</label>
+                <input wire:model="bancoCnpj" type="text" class="cfg-input" placeholder="00.000.000/0001-00">
+                @error('bancoCnpj') <span class="cfg-err">{{ $message }}</span> @enderror
+            </div>
+        </div>
+
+        <button wire:click="salvarDadosBancarios" wire:loading.attr="disabled" class="cfg-btn">
+            <span wire:loading.remove wire:target="salvarDadosBancarios">💾 Salvar dados bancários</span>
+            <span wire:loading wire:target="salvarDadosBancarios">Salvando…</span>
+        </button>
     </div>
     @endif
 

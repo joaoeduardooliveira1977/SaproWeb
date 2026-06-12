@@ -75,6 +75,84 @@
     </div>
 </div>
 
+{{-- ══ GERADOR DE RELATÓRIOS ══ --}}
+<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:16px;">
+    <div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">📊 Gerar Relatório em PDF</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+
+        {{-- Cliente autocomplete --}}
+        <div style="flex:2;min-width:200px;position:relative;">
+            <label style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">Cliente</label>
+            <div style="position:relative;">
+                <input wire:model.live.debounce.300ms="relClienteBusca"
+                    type="text"
+                    placeholder="Digite para buscar..."
+                    autocomplete="off"
+                    style="width:100%;padding:8px 32px 8px 10px;border:1.5px solid {{ $relClienteId ? '#22c55e' : '#e5e7eb' }};border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
+                @if($relClienteId)
+                <button wire:click="limparRelCliente" type="button"
+                    style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:14px;line-height:1;">✕</button>
+                @endif
+            </div>
+            @if($relClienteId)
+            <div style="font-size:11px;color:#16a34a;margin-top:2px;">✓ {{ $relClienteNome }}</div>
+            @endif
+            @error('relClienteId') <div style="font-size:11px;color:#dc2626;margin-top:2px;">{{ $message }}</div> @enderror
+
+            @if(count($relClienteSugestoes))
+            <div style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:100;max-height:200px;overflow-y:auto;">
+                @foreach($relClienteSugestoes as $c)
+                <div wire:click="selecionarRelCliente({{ $c['id'] }}, '{{ addslashes($c['nome']) }}')"
+                    style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f1f5f9;font-size:13px;"
+                    onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+                    <strong>{{ $c['nome'] }}</strong>
+                    @if($c['cpf_cnpj'])<span style="color:#94a3b8;font-size:11px;"> — {{ $c['cpf_cnpj'] }}</span>@endif
+                </div>
+                @endforeach
+            </div>
+            @endif
+        </div>
+
+        {{-- Data início --}}
+        <div style="min-width:120px;">
+            <label style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">De</label>
+            <input wire:model="relDataIni" type="date"
+                style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;outline:none;">
+            @error('relDataIni') <div style="font-size:11px;color:#dc2626;margin-top:2px;">{{ $message }}</div> @enderror
+        </div>
+
+        {{-- Data fim --}}
+        <div style="min-width:120px;">
+            <label style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">Até</label>
+            <input wire:model="relDataFim" type="date"
+                style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;outline:none;">
+            @error('relDataFim') <div style="font-size:11px;color:#dc2626;margin-top:2px;">{{ $message }}</div> @enderror
+        </div>
+
+        {{-- Botões --}}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button wire:click="abrirRelatorio('despesas')" wire:loading.attr="disabled" wire:target="abrirRelatorio"
+                style="padding:8px 14px;background:#1a3a5c;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">
+                <span wire:loading.remove wire:target="abrirRelatorio('despesas')">📊 Rel. Despesas</span>
+                <span wire:loading wire:target="abrirRelatorio('despesas')">Gerando...</span>
+            </button>
+            <button wire:click="abrirRelatorio('reembolso')" wire:loading.attr="disabled" wire:target="abrirRelatorio"
+                style="padding:8px 14px;background:#0f5132;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">
+                <span wire:loading.remove wire:target="abrirRelatorio('reembolso')">📄 Pedido Reembolso</span>
+                <span wire:loading wire:target="abrirRelatorio('reembolso')">Gerando...</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('livewire:initialized', () => {
+    Livewire.on('abrir-relatorio', ({ url }) => {
+        window.open(url, '_blank');
+    });
+});
+</script>
+
 {{-- ══ TABELA ══ --}}
 <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
