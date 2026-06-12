@@ -233,6 +233,7 @@ Route::get('/teste-config', fn() => 'funcionou');
         Route::get('/tjsp', \App\Livewire\Processos\Monitoramento::class)->name('tjsp');
         Route::get('/assistente',   fn() => view('assistente'))->name('assistente');
         Route::get('/aasp-publicacoes', fn() => view('aasp-publicacoes'))->name('aasp-publicacoes');
+        Route::get('/aasp/publicacoes/word', [\App\Http\Controllers\AaspWordController::class, 'download'])->name('aasp.publicacoes.word');
         Route::get('/calculadora',  fn() => view('calculadora'))->name('calculadora');
         Route::get('/monitoramento', \App\Livewire\Processos\Monitoramento::class)->name('monitoramento');
         Route::get('/conciliacao-bancaria', fn() => view('conciliacao-bancaria'))->name('conciliacao-bancaria');

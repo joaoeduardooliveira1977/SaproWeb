@@ -160,6 +160,16 @@
                     <span wire:loading.remove wire:target="gerarPdf" style="display:inline-flex;align-items:center;gap:6px;">Gerar PDF</span>
                     <span wire:loading wire:target="gerarPdf" style="display:inline-flex;align-items:center;gap:6px;">Gerando...</span>
                 </button>
+                <a href="{{ route('aasp.publicacoes.word', array_filter([
+                        'filtro_data'      => $filtroData,
+                        'filtro_advogado'  => $filtroAdvogado,
+                        'filtro_vinculo'   => $filtroVinculo,
+                    ])) }}"
+                    class="btn btn-secondary-outline btn-sm"
+                    style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;"
+                    target="_blank">
+                    ⬇ Word
+                </a>
                 <button class="btn btn-primary btn-sm" wire:click="enviarEmail" wire:loading.attr="disabled"
                         wire:confirm="Enviar as publicações por e-mail para os destinatários configurados?">
                     <span wire:loading.remove wire:target="enviarEmail" style="display:inline-flex;align-items:center;gap:6px;">Enviar por e-mail</span>
