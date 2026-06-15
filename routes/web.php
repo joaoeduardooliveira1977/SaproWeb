@@ -14,11 +14,16 @@ use App\Livewire\PortalAcesso;
 use App\Http\Controllers\IAController;
 
 
-// ─── Raiz: landing para visitantes, dashboard para autenticados ──────
+// ─── Raiz: comportamento depende do host ──────────────────────────────
     Route::get('/', function () {
         if (auth('usuarios')->check()) {
             return redirect()->route('dashboard');
         }
+        // Subdomínio de tenant (ex: bittar-arruda.kmd-ia.com.br) → login do escritório
+        if (\App\Http\Middleware\IdentificarTenant::ehHostTenant(request())) {
+            return redirect()->route('login');
+        }
+        // Domínio principal ou subdomínio reservado → landing pública
         return redirect()->route('landing');
     })->name('home');
 
@@ -92,6 +97,9 @@ use App\Http\Controllers\IAController;
     Route::redirect('/super-admin/novo', '/master/tenants', 301);
     Route::redirect('/super-admin/branding', '/master/tenants', 301);
 
+// ─── Módulo indisponível ──────────────────────────────────────────
+    Route::get('/modulo-indisponivel', fn() => view('modulo-indisponivel'))->name('modulo.indisponivel');
+
 // ─── Planos / Expirado ────────────────────────────────────────────
     Route::get('/planos', function() {
         return view('planos');
@@ -134,8 +142,8 @@ Route::get('/teste-config', fn() => 'funcionou');
     });
 
     // ── Hubs de seção ──────────────────────────────────────────
-    Route::middleware('perfil:financeiro')->get('/financeiro-hub',   fn() => view('hubs.financeiro'))->name('financeiro.hub');
-    Route::middleware('perfil:ferramentas')->get('/ferramentas-hub', fn() => view('hubs.ferramentas'))->name('ferramentas.hub');
+    Route::middleware(['perfil:financeiro', 'modulo:financeiro'])->get('/financeiro-hub',   fn() => view('hubs.financeiro'))->name('financeiro.hub');
+    Route::middleware(['perfil:ferramentas', 'modulo:ferramentas'])->get('/ferramentas-hub', fn() => view('hubs.ferramentas'))->name('ferramentas.hub');
     Route::middleware('perfil:admin')->get('/admin-hub',             fn() => view('hubs.admin'))->name('admin.hub');
 
     // ── Processos ───────────────────────────────────────────────
@@ -160,7 +168,7 @@ Route::get('/teste-config', fn() => 'funcionou');
     });
 
     // ── Contratos Mensais ────────────────────────────────────────
-    Route::middleware('perfil:financeiro')->group(function () {
+    Route::middleware(['perfil:financeiro', 'modulo:mensais'])->group(function () {
         Route::get('/contratos-mensais',                   \App\Livewire\ContratosMensais\Index::class)->name('contratos-mensais.index');
         Route::get('/contratos-mensais/{id}/mensalidades', \App\Livewire\ContratosMensais\Mensalidades::class)->name('contratos-mensais.mensalidades');
     });
@@ -181,23 +189,24 @@ Route::get('/teste-config', fn() => 'funcionou');
     });
 
     // ── Financeiro ──────────────────────────────────────────────
-    Route::middleware('perfil:financeiro')->group(function () {
+    Route::middleware(['perfil:financeiro', 'modulo:financeiro'])->group(function () {
         Route::get('/financeiro',             fn() => view('financeiro'))->name('financeiro');
         Route::get('/financeiro-consolidado', fn() => view('financeiro-consolidado'))->name('financeiro.consolidado');
         Route::get('/financeiro-central',     fn() => view('financeiro-central'))->name('financeiro.central');
         Route::get('/financeiro/custas-reembolso', \App\Livewire\Financeiro\CustasReembolso::class)->name('financeiro.custas-reembolso');
         Route::get('/financeiro/despesas-escritorio', \App\Livewire\Financeiro\DespesasEscritorio::class)->name('financeiro.despesas-escritorio');
-        Route::get('/financeiro/contratos-mensais', \App\Livewire\Financeiro\ContratosMensaisIndex::class)->name('financeiro.contratos-mensais');
-        Route::get('/financeiro/clientes/{clienteId}', \App\Livewire\Financeiro\Cliente::class)->name('financeiro.cliente');
         Route::get('/config/financeiro', \App\Livewire\Config\Financeiro::class)->name('config.financeiro');
         Route::get('/honorarios',             fn() => view('honorarios'))->name('honorarios');
         Route::get('/inadimplencia',          fn() => view('inadimplencia'))->name('inadimplencia');
         Route::get('/indicadores',            fn() => view('indicadores'))->name('indicadores');
         Route::get('/comissoes',              fn() => view('comissoes'))->name('comissoes');
+        // módulo mensais
+        Route::get('/financeiro/contratos-mensais', \App\Livewire\Financeiro\ContratosMensaisIndex::class)->name('financeiro.contratos-mensais')->middleware('modulo:mensais');
+        Route::get('/financeiro/clientes/{clienteId}', \App\Livewire\Financeiro\Cliente::class)->name('financeiro.cliente')->middleware('modulo:mensais');
     });
 
     // ── Relatórios ──────────────────────────────────────────────
-    Route::middleware('perfil:relatorios')->prefix('relatorios')->name('relatorios.')->group(function () {
+    Route::middleware(['perfil:relatorios', 'modulo:relatorios'])->prefix('relatorios')->name('relatorios.')->group(function () {
         Route::get('/',                   [RelatorioController::class, 'index'])->name('index');
         Route::get('/por-fase',           [RelatorioController::class, 'processosPorFase'])->name('por-fase');
         Route::get('/por-advogado',       [RelatorioController::class, 'processosPorAdvogado'])->name('por-advogado');
@@ -222,32 +231,36 @@ Route::get('/teste-config', fn() => 'funcionou');
     });
 
     // ── Analytics & Produtividade ────────────────────────────────
-    Route::middleware('perfil:relatorios')->group(function () {
+    Route::middleware(['perfil:relatorios', 'modulo:relatorios'])->group(function () {
         Route::get('/analytics',     fn() => view('analytics'))->name('analytics');
         Route::get('/produtividade', fn() => view('produtividade'))->name('produtividade');
         Route::get('/horas',         fn() => view('horas'))->name('horas');
     });
 
     // ── Ferramentas ─────────────────────────────────────────────
-    Route::middleware('perfil:ferramentas')->group(function () {
+    Route::middleware(['perfil:ferramentas', 'modulo:ferramentas'])->group(function () {
         Route::get('/tjsp', \App\Livewire\Processos\Monitoramento::class)->name('tjsp');
-        Route::get('/assistente',   fn() => view('assistente'))->name('assistente');
-        Route::get('/aasp-publicacoes', fn() => view('aasp-publicacoes'))->name('aasp-publicacoes');
-        Route::get('/aasp/publicacoes/word', [\App\Http\Controllers\AaspWordController::class, 'download'])->name('aasp.publicacoes.word');
         Route::get('/calculadora',  fn() => view('calculadora'))->name('calculadora');
         Route::get('/monitoramento', \App\Livewire\Processos\Monitoramento::class)->name('monitoramento');
         Route::get('/conciliacao-bancaria', fn() => view('conciliacao-bancaria'))->name('conciliacao-bancaria');
-        Route::get('/crm', fn() => view('crm'))->name('crm');
         Route::get('/orcamentos', fn() => view('orcamentos'))->name('orcamentos');
         Route::get('/orcamentos/{id}/pdf', [\App\Http\Controllers\RelatorioController::class, 'orcamentoPdf'])->name('orcamentos.pdf');
         Route::get('/contratos/{id}/pdf', [\App\Http\Controllers\RelatorioController::class, 'contratoPdf'])->name('contratos.pdf');
         Route::get('/modelos-contrato', \App\Livewire\ModelosContrato::class)->name('modelos-contrato');
-        Route::get('/workflow-regras', \App\Livewire\WorkflowRegras::class)->name('workflow.regras');
+        // módulo aasp
+        Route::get('/aasp-publicacoes', fn() => view('aasp-publicacoes'))->name('aasp-publicacoes')->middleware('modulo:aasp');
+        Route::get('/aasp/publicacoes/word', [\App\Http\Controllers\AaspWordController::class, 'download'])->name('aasp.publicacoes.word')->middleware('modulo:aasp');
+        // módulo assistente_ia
+        Route::get('/assistente', fn() => view('assistente'))->name('assistente')->middleware('modulo:assistente_ia');
+        // módulo pipeline_crm
+        Route::get('/crm', fn() => view('crm'))->name('crm')->middleware('modulo:pipeline_crm');
+        // módulo automacao
+        Route::get('/workflow-regras', \App\Livewire\WorkflowRegras::class)->name('workflow.regras')->middleware('modulo:automacao');
     });
 
     // ── Despesas & Reembolsos ────────────────────────────────────
-    Route::middleware('perfil:financeiro')->get('/despesas-reembolsos', \App\Livewire\DespesasReembolsos::class)->name('despesas-reembolsos');
-    Route::middleware('perfil:financeiro')->group(function () {
+    Route::middleware(['perfil:financeiro', 'modulo:despesas_reembolsos'])->group(function () {
+        Route::get('/despesas-reembolsos', \App\Livewire\DespesasReembolsos::class)->name('despesas-reembolsos');
         Route::get('/despesas-reembolsos/relatorio/despesas',
             [\App\Http\Controllers\DespesaReembolsoRelatorioController::class, 'relatorioDespesas'])
             ->name('despesas.relatorio.despesas');

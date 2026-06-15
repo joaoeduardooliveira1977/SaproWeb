@@ -190,3 +190,28 @@ php artisan migrate
 php artisan config:clear
 php artisan cache:clear
 php artisan view:clear
+
+
+
+
+
+
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_CONNECTION=pgsql
+DB_DATABASE=sapro_db
+DB_USERNAME=sapro
+DB_PASSWORD=sapro2025
+root@vps64992:/var/www/saproweb#
+
+
+
+
+
+
+
+
+
+
+
+

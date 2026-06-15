@@ -6,6 +6,7 @@ use App\Jobs\PopularDadosFicticios;
 use App\Jobs\ProcessarSequenciaEmailsTrial;
 use App\Mail\TrialBoasVindas;
 use App\Models\Tenant;
+use App\Services\ModuloService;
 use App\Models\TrialEmail;
 use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
@@ -92,6 +93,9 @@ class CadastroTrial extends Component
             'perfil'    => 'admin',
             'ativo'     => true,
         ]);
+
+        // Inicializa módulos conforme o plano
+        ModuloService::inicializarModulos($tenant);
 
         // Dados fictícios (queue)
         PopularDadosFicticios::dispatch($tenant->id, $usuario->id);

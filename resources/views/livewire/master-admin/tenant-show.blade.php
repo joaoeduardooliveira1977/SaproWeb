@@ -33,6 +33,7 @@
         <button class="tab {{ $aba === 'usuarios' ? 'active' : '' }}" wire:click="mudarAba('usuarios')">👥 Usuários</button>
         <button class="tab {{ $aba === 'atividade' ? 'active' : '' }}" wire:click="mudarAba('atividade')">📋 Atividade</button>
         <button class="tab {{ $aba === 'branding' ? 'active' : '' }}" wire:click="mudarAba('branding')">🎨 Branding</button>
+        <button class="tab {{ $aba === 'modulos' ? 'active' : '' }}" wire:click="mudarAba('modulos')">🧩 Módulos</button>
     </div>
 
     {{-- ── Aba: Geral ── --}}
@@ -351,6 +352,61 @@
             </div>
         </div>
 
+    </div>
+    @endif
+
+    {{-- ── Aba: Módulos ── --}}
+    @if($aba === 'modulos')
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Módulos — {{ $tenant->nome }} (Plano: {{ ucfirst($tenant->plano) }})</span>
+            <div style="display:flex;gap:8px;">
+                <button wire:click="aplicarPlanoModulos"
+                        wire:confirm="Aplicar os módulos padrão do plano {{ $tenant->plano }}? Isso sobrescreverá os módulos ativos."
+                        class="btn btn-sm btn-outline">
+                    ↺ Aplicar plano
+                </button>
+                <button wire:click="salvarModulos" class="btn btn-sm btn-primary">
+                    Salvar módulos
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+
+            @if(count($modulos) === 0)
+            <div style="text-align:center;color:#94a3b8;padding:32px;">
+                Nenhum módulo cadastrado. Execute o <code>ModulosSeeder</code> primeiro.
+            </div>
+            @else
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">
+                @foreach($modulos as $modulo)
+                @php $ativo = in_array($modulo['chave'], $modulosAtivos); @endphp
+                <label style="display:flex;align-items:flex-start;gap:10px;padding:12px;border:1.5px solid {{ $ativo ? '#3b82f6' : '#e2e8f0' }};border-radius:10px;cursor:pointer;background:{{ $ativo ? '#eff6ff' : '#fff' }};transition:all .15s;">
+                    <input type="checkbox"
+                           wire:model="modulosAtivos"
+                           value="{{ $modulo['chave'] }}"
+                           style="margin-top:2px;accent-color:#3b82f6;width:16px;height:16px;flex-shrink:0;">
+                    <div>
+                        <div style="font-size:13px;font-weight:700;color:#0f172a;">
+                            @if($modulo['icone']) {{ $modulo['icone'] }} @endif
+                            {{ $modulo['nome'] }}
+                        </div>
+                        @if($modulo['descricao'])
+                        <div style="font-size:11px;color:#64748b;margin-top:2px;">{{ $modulo['descricao'] }}</div>
+                        @endif
+                        <div style="font-size:10px;font-family:monospace;color:#94a3b8;margin-top:3px;">{{ $modulo['chave'] }}</div>
+                    </div>
+                </label>
+                @endforeach
+            </div>
+
+            <div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:8px;font-size:12px;color:#64748b;">
+                <strong>{{ count($modulosAtivos) }}</strong> de <strong>{{ count($modulos) }}</strong> módulos ativos.
+                Alterações afetam a sidebar e o acesso às rotas imediatamente após salvar.
+            </div>
+            @endif
+
+        </div>
     </div>
     @endif
 

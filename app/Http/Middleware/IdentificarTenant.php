@@ -13,7 +13,10 @@ class IdentificarTenant
     // Domínio principal da aplicação (sem subdomínio).
     // Requisições deste host carregam o tenant padrão (slug 'demo' ou
     // o tenant cujo campo `dominio` bate exatamente com este valor).
-    private const DOMINIO_PRINCIPAL = 'kmd-ia.com.br';
+    public const DOMINIO_PRINCIPAL = 'kmd-ia.com.br';
+
+    // Subdomínios reservados que não representam tenants de clientes.
+    private const RESERVADOS = ['www', 'master', 'app', 'api'];
 
     public function handle(Request $request, Closure $next)
     {
@@ -91,6 +94,33 @@ class IdentificarTenant
         return $next($request);
     }
 
+    /**
+     * Retorna true quando o host da requisição identifica um tenant de cliente:
+     * - Subdomínio não-reservado de DOMINIO_PRINCIPAL (ex: bittar-arruda.kmd-ia.com.br)
+     * - Domínio personalizado registrado no campo `dominio` de algum tenant
+     * Retorna false para o domínio principal puro e subdomínios reservados.
+     */
+    public static function ehHostTenant(Request $request): bool
+    {
+        $host  = $request->getHost();
+        $parts = explode('.', $host);
+
+        // Host é exatamente o domínio principal → não é tenant
+        if ($host === self::DOMINIO_PRINCIPAL) {
+            return false;
+        }
+
+        // Subdomínio do domínio principal (ex: algo.kmd-ia.com.br)
+        if (implode('.', array_slice($parts, 1)) === self::DOMINIO_PRINCIPAL) {
+            return !in_array($parts[0], self::RESERVADOS);
+        }
+
+        // Qualquer outro host → verifica domínio personalizado (com cache)
+        return Cache::remember("tenant_is_host_{$host}", now()->addMinutes(10), fn() =>
+            Tenant::ativo()->where('dominio', $host)->exists()
+        );
+    }
+
     // Detecta o tenant a partir do host da requisição.
     // Prioridade: campo `dominio` (match exato) → slug do subdomínio →
     // para o domínio principal sem subdomínio, carrega o tenant padrão.
@@ -108,8 +138,8 @@ class IdentificarTenant
             if (count($parts) >= 3) {
                 $subdomain = $parts[0];
 
-                // 'www' não é slug de cliente — tratar como domínio principal
-                if ($subdomain === 'www') {
+                // Subdomínios reservados não são slugs de cliente
+                if (in_array($subdomain, self::RESERVADOS)) {
                     $baseDomain = implode('.', array_slice($parts, 1));
                     if ($baseDomain === self::DOMINIO_PRINCIPAL) {
                         return Tenant::ativo()

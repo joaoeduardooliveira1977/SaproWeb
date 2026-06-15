@@ -593,6 +593,10 @@
     $isAdmin    = in_array($perfil, ['admin', 'administrador', 'super_admin']);
     $isAdvogado = in_array($perfil, ['admin', 'administrador', 'super_admin', 'advogado']);
     $isFinanc   = \App\Http\Middleware\VerificarPerfil::perfilTemAcesso($perfil, 'financeiro');
+    $superAdmin = $perfil === 'super_admin';
+    $tenant     = app()->bound('tenant') ? app('tenant') : null;
+    // Helper para verificar módulo: superadmin sempre passa; sem tenant bloqueia
+    $mod = fn(string $chave): bool => $superAdmin || ($tenant?->temModulo($chave) ?? false);
     $hubAtivo   = '';
     $rotasProcessos  = ['processos','processos.novo','processos.editar','processos.show','documentos','minutas','assinatura-digital','audiencias','prazos','sla','agenda','processos.hub','processos.monitoramento'];
     $rotasCadastros  = ['cadastros.hub','correspondentes','procuracoes','administradoras','tabelas','indicadores'];
@@ -635,24 +639,30 @@
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Cadastros
     </a>
     <div class="nav-drawer-sep"></div>
-    @if($isFinanc)
+    @if($isFinanc && $mod('financeiro'))
     <a href="{{ route('financeiro.central') }}" class="nav-drawer-item {{ $hubAtivo==='financeiro' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Financeiro
-    </a>
-    <a href="{{ route('financeiro.contratos-mensais') }}" class="nav-drawer-item {{ in_array($rota, ['contratos-mensais.index','contratos-mensais.mensalidades','financeiro.contratos-mensais','financeiro.cliente']) ? 'active' : '' }}" onclick="toggleDrawer()">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="M3 9h18"/></svg>Contratos Mensais
     </a>
     <a href="{{ route('config.financeiro') }}" class="nav-drawer-item {{ $rota==='config.financeiro' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h4m-4 3h8m-8 3h5"/><circle cx="17" cy="12" r="3"/></svg>Config. PIX
     </a>
+    @endif
+    @if($isFinanc && $mod('mensais'))
+    <a href="{{ route('financeiro.contratos-mensais') }}" class="nav-drawer-item {{ in_array($rota, ['contratos-mensais.index','contratos-mensais.mensalidades','financeiro.contratos-mensais','financeiro.cliente']) ? 'active' : '' }}" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="M3 9h18"/></svg>Contratos Mensais
+    </a>
+    @endif
+    @if($isFinanc && $mod('despesas_reembolsos'))
     <a href="{{ route('despesas-reembolsos') }}" class="nav-drawer-item {{ $rota==='despesas-reembolsos' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Despesas / Reembolsos
     </a>
     @endif
+    @if($mod('relatorios'))
     <a href="{{ route('relatorios.index') }}" class="nav-drawer-item {{ $rota==='relatorios.index' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>Relatórios
     </a>
-    @if($isAdvogado)
+    @endif
+    @if($isAdvogado && $mod('ferramentas'))
     <a href="{{ route('ferramentas.hub') }}" class="nav-drawer-item {{ $hubAtivo==='ferramentas' ? 'active' : '' }}" onclick="toggleDrawer()">
         <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Ferramentas
     </a>
@@ -717,27 +727,33 @@
 
     <div class="nav-sep"></div>
 
-    @if($isFinanc)
+    @if($isFinanc && $mod('financeiro'))
     <a href="{{ route('financeiro.central') }}" id="menu-financeiro" class="nav-btn {{ $hubAtivo==='financeiro' ? 'active' : '' }}" title="Financeiro">
         <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
         <span class="nav-btn-label">Financeiro</span>
     </a>
+    @endif
+    @if($isFinanc && $mod('mensais'))
     <a href="{{ route('financeiro.contratos-mensais') }}" class="nav-btn {{ in_array($rota, ['contratos-mensais.index','contratos-mensais.mensalidades','financeiro.contratos-mensais','financeiro.cliente']) ? 'active' : '' }}" title="Contratos Mensais">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="M3 9h18"/></svg>
         <span class="nav-btn-label">Mensais</span>
     </a>
+    @endif
+    @if($isFinanc && $mod('despesas_reembolsos'))
     <a href="{{ route('despesas-reembolsos') }}" class="nav-btn {{ $rota==='despesas-reembolsos' ? 'active' : '' }}" title="Despesas / Reembolsos">
         <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
         <span class="nav-btn-label">Despesas</span>
     </a>
     @endif
 
+    @if($mod('relatorios'))
     <a href="{{ route('relatorios.index') }}" class="nav-btn {{ $rota==='relatorios.index' ? 'active' : '' }}" title="Relatórios">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
         <span class="nav-btn-label">Relatórios</span>
     </a>
+    @endif
 
-    @if($isAdvogado)
+    @if($isAdvogado && $mod('ferramentas'))
     <a href="{{ route('ferramentas.hub') }}" class="nav-btn {{ $hubAtivo==='ferramentas' ? 'active' : '' }}" title="Ferramentas">
         <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
         <span class="nav-btn-label">Ferramentas</span>

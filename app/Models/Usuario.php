@@ -59,6 +59,11 @@ public function username(): string
         return $this->belongsTo(Pessoa::class, 'pessoa_id');
     }
 
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
+
     // ── Helpers de perfil ──────────────────────────
     public function isAdmin(): bool
     {

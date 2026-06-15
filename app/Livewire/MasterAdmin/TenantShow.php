@@ -2,7 +2,8 @@
 
 namespace App\Livewire\MasterAdmin;
 
-use App\Models\{MasterAdminLog, Tenant, Usuario};
+use App\Models\{MasterAdminLog, Modulo, Tenant, Usuario};
+use App\Services\ModuloService;
 use Illuminate\Support\Facades\{Auth, Cache, DB, Hash};
 use Livewire\Component;
 
@@ -12,9 +13,11 @@ class TenantShow extends Component
     public Tenant $tenant;
     public string $aba = 'geral';
 
-    public array $metricas  = [];
-    public array $usuarios  = [];
-    public array $auditoria = [];
+    public array $metricas     = [];
+    public array $usuarios     = [];
+    public array $auditoria    = [];
+    public array $modulos      = [];
+    public array $modulosAtivos = [];
 
     // Modal: reset senha
     public bool   $modalSenha     = false;
@@ -42,6 +45,9 @@ class TenantShow extends Component
     public function mudarAba(string $aba): void
     {
         $this->aba = $aba;
+        if ($aba === 'modulos') {
+            $this->carregarModulos();
+        }
     }
 
     private function carregarDados(): void
@@ -85,6 +91,48 @@ class TenantShow extends Component
             }
         } catch (\Exception) {}
         return round($bytes / 1024 / 1024, 2);
+    }
+
+    // ── Módulos ───────────────────────────────────────────────────
+
+    public function carregarModulos(): void
+    {
+        $this->modulosAtivos = DB::table('tenant_modulos')
+            ->where('tenant_modulos.tenant_id', $this->tenantId)
+            ->where('tenant_modulos.ativo', true)
+            ->join('modulos', 'modulos.id', '=', 'tenant_modulos.modulo_id')
+            ->pluck('modulos.chave')
+            ->toArray();
+
+        $this->modulos = Modulo::where('ativo', true)->orderBy('ordem')->get()->toArray();
+    }
+
+    public function salvarModulos(): void
+    {
+        foreach ($this->modulos as $modulo) {
+            $ativo = in_array($modulo['chave'], $this->modulosAtivos);
+            DB::table('tenant_modulos')->updateOrInsert(
+                ['tenant_id' => $this->tenantId, 'modulo_id' => $modulo['id']],
+                [
+                    'ativo'       => $ativo,
+                    'ativado_por' => auth('usuarios')->id(),
+                    'ativado_em'  => now(),
+                    'updated_at'  => now(),
+                    'created_at'  => now(),
+                ]
+            );
+        }
+
+        $this->tenant->invalidarCacheModulos();
+        MasterAdminLog::registrar('modulos_alterados', $this->tenant->id, $this->tenant->nome, 'Módulos atualizados manualmente.');
+        $this->dispatch('toast', message: 'Módulos atualizados com sucesso.', type: 'success');
+    }
+
+    public function aplicarPlanoModulos(): void
+    {
+        ModuloService::aplicarPlanoPadrao($this->tenant);
+        $this->carregarModulos();
+        $this->dispatch('toast', message: 'Módulos do plano ' . $this->tenant->plano . ' aplicados.', type: 'success');
     }
 
     // ── Suspender / Ativar ────────────────────────────────────────

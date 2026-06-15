@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class Tenant extends Model
 {
@@ -83,6 +84,30 @@ class Tenant extends Model
     public function trialEmails(): HasMany
     {
         return $this->hasMany(TrialEmail::class, 'tenant_id');
+    }
+
+    public function tenantModulos(): HasMany
+    {
+        return $this->hasMany(TenantModulo::class, 'tenant_id');
+    }
+
+    public function temModulo(string $chave): bool
+    {
+        $chaves = Cache::remember("tenant_modulos_{$this->id}", 300, function () {
+            return $this->tenantModulos()
+                ->where('tenant_modulos.ativo', true)
+                ->join('modulos', 'modulos.id', '=', 'tenant_modulos.modulo_id')
+                ->where('modulos.ativo', true)
+                ->pluck('modulos.chave')
+                ->toArray();
+        });
+
+        return in_array($chave, $chaves);
+    }
+
+    public function invalidarCacheModulos(): void
+    {
+        Cache::forget("tenant_modulos_{$this->id}");
     }
 
     public static function limitesPlanoCompleto(string $plano): array

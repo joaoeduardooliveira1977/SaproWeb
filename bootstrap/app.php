@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'master_auth'       => \App\Http\Middleware\MasterAuth::class,
             'verificar_limites' => \App\Http\Middleware\VerificarLimitesTenant::class,
             'trial_expirado'    => \App\Http\Middleware\VerificarTrialExpirado::class,
+            'modulo'            => \App\Http\Middleware\VerificarModulo::class,
         ]);
 
         $middleware->web(append: [
