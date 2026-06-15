@@ -3,13 +3,20 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\Pessoa;
 use Illuminate\Support\Facades\Hash;
 
 class PortalAcesso extends Component
 {
+    use WithPagination;
     public string $busca = '';
     public ?int $pessoaId = null;
+
+    public function updatedBusca(): void
+    {
+        $this->resetPage();
+    }
     public string $novaSenha = '';
     public string $confirmaSenha = '';
 
