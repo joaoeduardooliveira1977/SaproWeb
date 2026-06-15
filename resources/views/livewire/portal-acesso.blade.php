@@ -101,7 +101,7 @@
                 @endforelse
             </tbody>
         </table>
-        <div style="padding:16px;">{{ $pessoas->links() }}</div>
+        <div style="padding:12px 16px;">{{ $pessoas->links('vendor.pagination.sapro') }}</div>
     </div>
 
     {{-- Modal definir senha --}}
