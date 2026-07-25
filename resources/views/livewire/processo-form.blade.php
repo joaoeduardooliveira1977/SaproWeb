@@ -265,26 +265,78 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 
-                {{-- Repartição/Fórum --}}
+                {{-- Repartição/Fórum — Autocomplete --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Repartição / Fórum</label>
-                    <select wire:model.live="reparticao_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
-                        <option value="">— Selecione —</option>
-                        @foreach($reparticoes as $r)
-                            <option value="{{ $r->id }}">{{ $r->descricao }}</option>
-                        @endforeach
-                    </select>
+                    <div style="position:relative;" x-data x-on:click.outside="$wire.set('reparticaoSugestoes', [])">
+                        @if($reparticao_id)
+                        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);">
+                            <span style="font-size:13px;color:var(--text);flex:1;">{{ $reparticaoNome }}</span>
+                            <button type="button" wire:click="limparReparticao" {{ $disJ ? 'disabled' : '' }}
+                                style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center;"
+                                title="Remover">
+                                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                        @else
+                        <input type="text" wire:model.live.debounce.300ms="reparticaoBusca"
+                            placeholder="Digite para buscar..."
+                            style="{{ $inp }}" {{ $disJ ? 'disabled' : '' }}
+                            autocomplete="off">
+                        @if(count($reparticaoSugestoes) > 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;max-height:200px;overflow-y:auto;margin-top:2px;">
+                            @foreach($reparticaoSugestoes as $s)
+                            <div wire:click="selecionarReparticao({{ $s['id'] }}, '{{ addslashes($s['nome']) }}')"
+                                style="padding:9px 14px;font-size:13px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border);"
+                                onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+                                {{ $s['nome'] }}
+                            </div>
+                            @endforeach
+                        </div>
+                        @elseif(strlen($reparticaoBusca) >= 2 && count($reparticaoSugestoes) === 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);z-index:100;margin-top:2px;">
+                            Nenhuma repartição encontrada para "{{ $reparticaoBusca }}"
+                        </div>
+                        @endif
+                        @endif
+                    </div>
                 </div>
 
-                {{-- Vara --}}
+                {{-- Vara — Autocomplete --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Vara</label>
-                    <select wire:model.live="vara" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
-                        <option value="">— Selecione —</option>
-                        @foreach($varas as $v)
-                            <option value="{{ $v->descricao }}">{{ $v->descricao }}</option>
-                        @endforeach
-                    </select>
+                    <div style="position:relative;" x-data x-on:click.outside="$wire.set('varaSugestoes', [])">
+                        @if($vara)
+                        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);">
+                            <span style="font-size:13px;color:var(--text);flex:1;">{{ $vara }}</span>
+                            <button type="button" wire:click="limparVara" {{ $disJ ? 'disabled' : '' }}
+                                style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center;"
+                                title="Remover">
+                                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                        @else
+                        <input type="text" wire:model.live.debounce.300ms="varaBusca"
+                            placeholder="Digite para buscar..."
+                            style="{{ $inp }}" {{ $disJ ? 'disabled' : '' }}
+                            autocomplete="off">
+                        @if(count($varaSugestoes) > 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;max-height:200px;overflow-y:auto;margin-top:2px;">
+                            @foreach($varaSugestoes as $s)
+                            <div wire:click="selecionarVara('{{ addslashes($s['nome']) }}')"
+                                style="padding:9px 14px;font-size:13px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border);"
+                                onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+                                {{ $s['nome'] }}
+                            </div>
+                            @endforeach
+                        </div>
+                        @elseif(strlen($varaBusca) >= 2 && count($varaSugestoes) === 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);z-index:100;margin-top:2px;">
+                            Nenhuma vara encontrada para "{{ $varaBusca }}"
+                        </div>
+                        @endif
+                        @endif
+                    </div>
                 </div>
 
             </div>
@@ -333,26 +385,78 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                     @endif
                 </div>
 
-                {{-- Situação/Fase --}}
+                {{-- Situação/Fase — Autocomplete --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Situação / Fase</label>
-                    <select wire:model.live="fase_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
-                        <option value="">— Selecione —</option>
-                        @foreach($fases as $f)
-                            <option value="{{ $f->id }}">{{ $f->descricao }}</option>
-                        @endforeach
-                    </select>
+                    <div style="position:relative;" x-data x-on:click.outside="$wire.set('faseSugestoes', [])">
+                        @if($fase_id)
+                        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);">
+                            <span style="font-size:13px;color:var(--text);flex:1;">{{ $faseNome }}</span>
+                            <button type="button" wire:click="limparFase" {{ $disJ ? 'disabled' : '' }}
+                                style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center;"
+                                title="Remover">
+                                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                        @else
+                        <input type="text" wire:model.live.debounce.300ms="faseBusca"
+                            placeholder="Digite para buscar..."
+                            style="{{ $inp }}" {{ $disJ ? 'disabled' : '' }}
+                            autocomplete="off">
+                        @if(count($faseSugestoes) > 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;max-height:200px;overflow-y:auto;margin-top:2px;">
+                            @foreach($faseSugestoes as $s)
+                            <div wire:click="selecionarFase({{ $s['id'] }}, '{{ addslashes($s['nome']) }}')"
+                                style="padding:9px 14px;font-size:13px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border);"
+                                onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+                                {{ $s['nome'] }}
+                            </div>
+                            @endforeach
+                        </div>
+                        @elseif(strlen($faseBusca) >= 2 && count($faseSugestoes) === 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);z-index:100;margin-top:2px;">
+                            Nenhuma fase encontrada para "{{ $faseBusca }}"
+                        </div>
+                        @endif
+                        @endif
+                    </div>
                 </div>
 
-                {{-- Grau de Risco --}}
+                {{-- Grau de Risco — Autocomplete --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Grau de Risco</label>
-                    <select wire:model.live="risco_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
-                        <option value="">— Selecione —</option>
-                        @foreach($riscos as $r)
-                            <option value="{{ $r->id }}">{{ $r->descricao }}</option>
-                        @endforeach
-                    </select>
+                    <div style="position:relative;" x-data x-on:click.outside="$wire.set('riscoSugestoes', [])">
+                        @if($risco_id)
+                        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);">
+                            <span style="font-size:13px;color:var(--text);flex:1;">{{ $riscoNome }}</span>
+                            <button type="button" wire:click="limparRisco" {{ $disJ ? 'disabled' : '' }}
+                                style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center;"
+                                title="Remover">
+                                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                        @else
+                        <input type="text" wire:model.live.debounce.300ms="riscoBusca"
+                            placeholder="Digite para buscar..."
+                            style="{{ $inp }}" {{ $disJ ? 'disabled' : '' }}
+                            autocomplete="off">
+                        @if(count($riscoSugestoes) > 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;max-height:200px;overflow-y:auto;margin-top:2px;">
+                            @foreach($riscoSugestoes as $s)
+                            <div wire:click="selecionarRisco({{ $s['id'] }}, '{{ addslashes($s['nome']) }}')"
+                                style="padding:9px 14px;font-size:13px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border);"
+                                onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+                                {{ $s['nome'] }}
+                            </div>
+                            @endforeach
+                        </div>
+                        @elseif(strlen($riscoBusca) >= 2 && count($riscoSugestoes) === 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);z-index:100;margin-top:2px;">
+                            Nenhum grau de risco encontrado para "{{ $riscoBusca }}"
+                        </div>
+                        @endif
+                        @endif
+                    </div>
                     {{-- Botão sugestão IA --}}
                     <button type="button" wire:click="sugerirRisco" wire:loading.attr="disabled"
                         style="margin-top:6px;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;color:#1d4ed8;font-size:11px;font-weight:600;cursor:pointer;transition:background .15s;"
@@ -376,32 +480,78 @@ $disStyle = $disJ ? 'opacity:0.45;pointer-events:none;' : '';
                     @endif
                 </div>
 
-                {{-- Tipo de Ação com atalhos rápidos --}}
+                {{-- Tipo de Ação — Autocomplete --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Tipo de Ação</label>
-                    {{-- Atalhos rápidos --}}
-                    
-
-
-	<select wire:model.live="tipo_acao_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
-    		<option value="">— Selecione —</option>
-    		@foreach($tiposAcao as $t)
-        <option value="{{ $t->id }}">{{ $t->descricao }}</option>
-    	@endforeach
-		</select>
-
-          
+                    <div style="position:relative;" x-data x-on:click.outside="$wire.set('tipoAcaoSugestoes', [])">
+                        @if($tipo_acao_id)
+                        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);">
+                            <span style="font-size:13px;color:var(--text);flex:1;">{{ $tipoAcaoNome }}</span>
+                            <button type="button" wire:click="limparTipoAcao" {{ $disJ ? 'disabled' : '' }}
+                                style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center;"
+                                title="Remover">
+                                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                        @else
+                        <input type="text" wire:model.live.debounce.300ms="tipoAcaoBusca"
+                            placeholder="Digite para buscar..."
+                            style="{{ $inp }}" {{ $disJ ? 'disabled' : '' }}
+                            autocomplete="off">
+                        @if(count($tipoAcaoSugestoes) > 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;max-height:200px;overflow-y:auto;margin-top:2px;">
+                            @foreach($tipoAcaoSugestoes as $s)
+                            <div wire:click="selecionarTipoAcao({{ $s['id'] }}, '{{ addslashes($s['nome']) }}')"
+                                style="padding:9px 14px;font-size:13px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border);"
+                                onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+                                {{ $s['nome'] }}
+                            </div>
+                            @endforeach
+                        </div>
+                        @elseif(strlen($tipoAcaoBusca) >= 2 && count($tipoAcaoSugestoes) === 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);z-index:100;margin-top:2px;">
+                            Nenhum tipo de ação encontrado para "{{ $tipoAcaoBusca }}"
+                        </div>
+                        @endif
+                        @endif
+                    </div>
                 </div>
 
-                {{-- Tipo de Processo --}}
+                {{-- Tipo de Processo — Autocomplete --}}
                 <div class="form-field" style="{{ $disStyle }}">
                     <label class="lbl">Tipo de Processo</label>
-                    <select wire:model.live="tipo_processo_id" style="{{ $sel }}" {{ $disJ ? 'disabled' : '' }}>
-                        <option value="">— Selecione —</option>
-                        @foreach($tiposProcesso as $t)
-                            <option value="{{ $t->id }}">{{ $t->descricao }}</option>
-                        @endforeach
-                    </select>
+                    <div style="position:relative;" x-data x-on:click.outside="$wire.set('tipoProcessoSugestoes', [])">
+                        @if($tipo_processo_id)
+                        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);">
+                            <span style="font-size:13px;color:var(--text);flex:1;">{{ $tipoProcessoNome }}</span>
+                            <button type="button" wire:click="limparTipoProcesso" {{ $disJ ? 'disabled' : '' }}
+                                style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center;"
+                                title="Remover">
+                                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                        @else
+                        <input type="text" wire:model.live.debounce.300ms="tipoProcessoBusca"
+                            placeholder="Digite para buscar..."
+                            style="{{ $inp }}" {{ $disJ ? 'disabled' : '' }}
+                            autocomplete="off">
+                        @if(count($tipoProcessoSugestoes) > 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;max-height:200px;overflow-y:auto;margin-top:2px;">
+                            @foreach($tipoProcessoSugestoes as $s)
+                            <div wire:click="selecionarTipoProcesso({{ $s['id'] }}, '{{ addslashes($s['nome']) }}')"
+                                style="padding:9px 14px;font-size:13px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border);"
+                                onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+                                {{ $s['nome'] }}
+                            </div>
+                            @endforeach
+                        </div>
+                        @elseif(strlen($tipoProcessoBusca) >= 2 && count($tipoProcessoSugestoes) === 0)
+                        <div style="position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);z-index:100;margin-top:2px;">
+                            Nenhum tipo de processo encontrado para "{{ $tipoProcessoBusca }}"
+                        </div>
+                        @endif
+                        @endif
+                    </div>
                 </div>
 
                 {{-- Status — oculto, sempre salva 'Ativo' --}}

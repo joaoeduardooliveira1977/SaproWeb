@@ -60,6 +60,35 @@ class ProcessoForm extends Component
     public string  $observacoes            = '';
     public string  $status                 = 'Ativo';
 
+    // Fase — autocomplete
+    public string  $faseNome      = '';
+    public string  $faseBusca     = '';
+    public array   $faseSugestoes = [];
+
+    // Grau de Risco — autocomplete
+    public string  $riscoNome      = '';
+    public string  $riscoBusca     = '';
+    public array   $riscoSugestoes = [];
+
+    // Tipo de Ação — autocomplete
+    public string  $tipoAcaoNome      = '';
+    public string  $tipoAcaoBusca     = '';
+    public array   $tipoAcaoSugestoes = [];
+
+    // Tipo de Processo — autocomplete
+    public string  $tipoProcessoNome      = '';
+    public string  $tipoProcessoBusca     = '';
+    public array   $tipoProcessoSugestoes = [];
+
+    // Repartição/Fórum — autocomplete
+    public string  $reparticaoNome      = '';
+    public string  $reparticaoBusca     = '';
+    public array   $reparticaoSugestoes = [];
+
+    // Vara — autocomplete
+    public string  $varaBusca     = '';
+    public array   $varaSugestoes = [];
+
     // ── Helper de tenant ─────────────────────────
     private function tenantId(): int
     {
@@ -169,6 +198,210 @@ class ProcessoForm extends Component
         $this->conflitos               = [];
     }
 
+    // ── Fase autocomplete ─────────────────────────
+
+    public function updatedFaseBusca(): void
+    {
+        if (strlen($this->faseBusca) < 2) {
+            $this->faseSugestoes = [];
+            return;
+        }
+
+        $this->faseSugestoes = \App\Models\Fase::where('tenant_id', $this->tenantId())
+            ->where('descricao', 'ilike', "%{$this->faseBusca}%")
+            ->orderBy('descricao')
+            ->limit(10)
+            ->get(['id', 'descricao'])
+            ->map(fn ($f) => ['id' => $f->id, 'nome' => $f->descricao])
+            ->toArray();
+    }
+
+    public function selecionarFase(int $id, string $nome): void
+    {
+        $this->fase_id       = $id;
+        $this->faseNome      = $nome;
+        $this->faseBusca     = $nome;
+        $this->faseSugestoes = [];
+    }
+
+    public function limparFase(): void
+    {
+        $this->fase_id       = null;
+        $this->faseNome      = '';
+        $this->faseBusca     = '';
+        $this->faseSugestoes = [];
+    }
+
+    // ── Grau de Risco autocomplete ────────────────
+
+    public function updatedRiscoBusca(): void
+    {
+        if (strlen($this->riscoBusca) < 2) {
+            $this->riscoSugestoes = [];
+            return;
+        }
+
+        $this->riscoSugestoes = \App\Models\GrauRisco::where('tenant_id', $this->tenantId())
+            ->where('descricao', 'ilike', "%{$this->riscoBusca}%")
+            ->orderBy('descricao')
+            ->limit(10)
+            ->get(['id', 'descricao'])
+            ->map(fn ($r) => ['id' => $r->id, 'nome' => $r->descricao])
+            ->toArray();
+    }
+
+    public function selecionarRisco(int $id, string $nome): void
+    {
+        $this->risco_id       = $id;
+        $this->riscoNome      = $nome;
+        $this->riscoBusca     = $nome;
+        $this->riscoSugestoes = [];
+    }
+
+    public function limparRisco(): void
+    {
+        $this->risco_id       = null;
+        $this->riscoNome      = '';
+        $this->riscoBusca     = '';
+        $this->riscoSugestoes = [];
+    }
+
+    // ── Tipo de Ação autocomplete ─────────────────
+
+    public function updatedTipoAcaoBusca(): void
+    {
+        if (strlen($this->tipoAcaoBusca) < 2) {
+            $this->tipoAcaoSugestoes = [];
+            return;
+        }
+
+        $this->tipoAcaoSugestoes = \App\Models\TipoAcao::where('tenant_id', $this->tenantId())
+            ->where('descricao', 'ilike', "%{$this->tipoAcaoBusca}%")
+            ->orderBy('descricao')
+            ->limit(10)
+            ->get(['id', 'descricao'])
+            ->map(fn ($t) => ['id' => $t->id, 'nome' => $t->descricao])
+            ->toArray();
+    }
+
+    public function selecionarTipoAcao(int $id, string $nome): void
+    {
+        $this->tipo_acao_id      = $id;
+        $this->tipoAcaoNome      = $nome;
+        $this->tipoAcaoBusca     = $nome;
+        $this->tipoAcaoSugestoes = [];
+    }
+
+    public function limparTipoAcao(): void
+    {
+        $this->tipo_acao_id      = null;
+        $this->tipoAcaoNome      = '';
+        $this->tipoAcaoBusca     = '';
+        $this->tipoAcaoSugestoes = [];
+    }
+
+    // ── Tipo de Processo autocomplete ─────────────
+
+    public function updatedTipoProcessoBusca(): void
+    {
+        if (strlen($this->tipoProcessoBusca) < 2) {
+            $this->tipoProcessoSugestoes = [];
+            return;
+        }
+
+        $this->tipoProcessoSugestoes = \App\Models\TipoProcesso::where('tenant_id', $this->tenantId())
+            ->where('descricao', 'ilike', "%{$this->tipoProcessoBusca}%")
+            ->orderBy('descricao')
+            ->limit(10)
+            ->get(['id', 'descricao'])
+            ->map(fn ($t) => ['id' => $t->id, 'nome' => $t->descricao])
+            ->toArray();
+    }
+
+    public function selecionarTipoProcesso(int $id, string $nome): void
+    {
+        $this->tipo_processo_id      = $id;
+        $this->tipoProcessoNome      = $nome;
+        $this->tipoProcessoBusca     = $nome;
+        $this->tipoProcessoSugestoes = [];
+    }
+
+    public function limparTipoProcesso(): void
+    {
+        $this->tipo_processo_id      = null;
+        $this->tipoProcessoNome      = '';
+        $this->tipoProcessoBusca     = '';
+        $this->tipoProcessoSugestoes = [];
+    }
+
+    // ── Repartição/Fórum autocomplete ─────────────
+
+    public function updatedReparticaoBusca(): void
+    {
+        if (strlen($this->reparticaoBusca) < 2) {
+            $this->reparticaoSugestoes = [];
+            return;
+        }
+
+        $this->reparticaoSugestoes = \App\Models\Reparticao::where('tenant_id', $this->tenantId())
+            ->where('descricao', 'ilike', "%{$this->reparticaoBusca}%")
+            ->orderBy('descricao')
+            ->limit(10)
+            ->get(['id', 'descricao'])
+            ->map(fn ($r) => ['id' => $r->id, 'nome' => $r->descricao])
+            ->toArray();
+    }
+
+    public function selecionarReparticao(int $id, string $nome): void
+    {
+        $this->reparticao_id      = $id;
+        $this->reparticaoNome     = $nome;
+        $this->reparticaoBusca    = $nome;
+        $this->reparticaoSugestoes = [];
+    }
+
+    public function limparReparticao(): void
+    {
+        $this->reparticao_id      = null;
+        $this->reparticaoNome     = '';
+        $this->reparticaoBusca    = '';
+        $this->reparticaoSugestoes = [];
+    }
+
+    // ── Vara autocomplete ─────────────────────────
+
+    public function updatedVaraBusca(): void
+    {
+        if (strlen($this->varaBusca) < 2) {
+            $this->varaSugestoes = [];
+            return;
+        }
+
+        $this->varaSugestoes = DB::table('varas')
+            ->where('tenant_id', $this->tenantId())
+            ->where('ativo', true)
+            ->where('descricao', 'ilike', "%{$this->varaBusca}%")
+            ->orderBy('descricao')
+            ->limit(10)
+            ->get(['descricao'])
+            ->map(fn ($v) => ['nome' => $v->descricao])
+            ->toArray();
+    }
+
+    public function selecionarVara(string $nome): void
+    {
+        $this->vara          = $nome;
+        $this->varaBusca     = $nome;
+        $this->varaSugestoes = [];
+    }
+
+    public function limparVara(): void
+    {
+        $this->vara          = '';
+        $this->varaBusca     = '';
+        $this->varaSugestoes = [];
+    }
+
     // ── Sugestão de Risco por IA ─────────────────
 
     public function sugerirRisco(): void
@@ -270,7 +503,7 @@ class ProcessoForm extends Component
         $this->processoId = $processoId;
 
         if ($processoId) {
-            $processo = Processo::with(['advogados', 'cliente'])->findOrFail($processoId);
+            $processo = Processo::with(['advogados', 'cliente', 'fase', 'risco', 'tipoAcao', 'tipoProcesso', 'reparticao'])->findOrFail($processoId);
 
             $this->numero            = $processo->numero ?? '';
             $this->updatedNumero();
@@ -296,11 +529,27 @@ class ProcessoForm extends Component
             $this->advogado_id            = $processo->advogado_id;
 
             $this->tipo_acao_id     = $processo->tipo_acao_id;
-            $this->tipo_processo_id = $processo->tipo_processo_id;
-            $this->fase_id          = $processo->fase_id;
-            $this->risco_id         = $processo->risco_id;
-            $this->reparticao_id    = $processo->reparticao_id;
-            $this->vara             = $processo->vara ?? '';
+            $this->tipoAcaoNome     = $processo->tipoAcao?->descricao ?? '';
+            $this->tipoAcaoBusca    = $this->tipoAcaoNome;
+
+            $this->tipo_processo_id  = $processo->tipo_processo_id;
+            $this->tipoProcessoNome  = $processo->tipoProcesso?->descricao ?? '';
+            $this->tipoProcessoBusca = $this->tipoProcessoNome;
+
+            $this->fase_id       = $processo->fase_id;
+            $this->faseNome      = $processo->fase?->descricao ?? '';
+            $this->faseBusca     = $this->faseNome;
+
+            $this->risco_id      = $processo->risco_id;
+            $this->riscoNome     = $processo->risco?->descricao ?? '';
+            $this->riscoBusca    = $this->riscoNome;
+
+            $this->reparticao_id   = $processo->reparticao_id;
+            $this->reparticaoNome  = $processo->reparticao?->descricao ?? '';
+            $this->reparticaoBusca = $this->reparticaoNome;
+
+            $this->vara      = $processo->vara ?? '';
+            $this->varaBusca = $this->vara;
             $this->valor_causa      = $processo->valor_causa ?? '';
             $this->valor_risco      = $processo->valor_risco ?? '';
             $this->observacoes      = $processo->observacoes ?? '';
@@ -425,18 +674,8 @@ class ProcessoForm extends Component
     {
         $tid = $this->tenantId();
 
-        $advogados     = Pessoa::doTipo('Advogado')->where('tenant_id', $tid)->orderBy('nome')->get();
-        $fases         = \App\Models\Fase::where('tenant_id', $tid)->orderBy('descricao')->get();
-        $riscos        = DB::table('graus_risco')->where('tenant_id', $tid)->orderBy('descricao')->get();
-        $tiposAcao     = DB::table('tipos_acao')->where('tenant_id', $tid)->orderBy('descricao')->get();
-        $tiposProcesso = DB::table('tipos_processo')->where('tenant_id', $tid)->orderBy('descricao')->get();
-        $reparticoes   = DB::table('reparticoes')->where('tenant_id', $tid)->orderBy('descricao')->get();
-        $varas         = DB::table('varas')->where('tenant_id', $tid)->where('ativo', true)->orderBy('descricao')->get();
+        $advogados = Pessoa::doTipo('Advogado')->where('tenant_id', $tid)->orderBy('nome')->get();
 
-        return view('livewire.processo-form', compact(
-            'advogados', 'fases',
-            'riscos', 'tiposAcao', 'tiposProcesso',
-            'reparticoes', 'varas'
-        ));
+        return view('livewire.processo-form', compact('advogados'));
     }
 }

@@ -199,7 +199,7 @@
                     </div>
                     <div style="padding:12px;border:1px solid var(--border);border-radius:8px;">
                         <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Advogado</div>
-                        <div style="font-size:13px;color:var(--text);">{{ $processo->advogado?->nome ?? '—' }}</div>
+                        <div style="font-size:13px;color:var(--text);">{{ $processo->advogados->isNotEmpty() ? $processo->advogados->pluck('nome')->join(', ') : ($processo->advogado?->nome ?? '—') }}</div>
                     </div>
                 </div>
 

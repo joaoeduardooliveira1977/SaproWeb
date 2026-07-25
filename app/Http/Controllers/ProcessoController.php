@@ -50,7 +50,7 @@ class ProcessoController extends Controller
     public function show(int $id)
     {
         $relacoes = [
-            'cliente', 'advogado',
+            'cliente', 'advogado', 'advogados',
             'tipoAcao', 'tipoProcesso', 'fase',
             'risco', 'reparticao',
             'agenda', 'andamentos.usuario.pessoa',

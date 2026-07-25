@@ -448,7 +448,7 @@
 
 {{-- Modal Cadastro --}}
 @if($modalAberto)
-<div class="modal-backdrop" wire:click.self="fecharModal">
+<div class="modal-backdrop" x-data="{ dirty: false }" x-on:input.capture="dirty = true" x-on:change.capture="dirty = true">
     <div class="modal" style="max-width:720px;max-height:90vh;overflow-y:auto;">
 
         {{-- Header --}}
@@ -462,7 +462,7 @@
                     <div style="font-size:12px;color:var(--muted);margin-top:2px;">Preencha o essencial primeiro e complete os dados complementares quando necessário.</div>
                 </div>
             </div>
-            <button wire:click="fecharModal" class="modal-close" aria-label="Fechar">
+            <button type="button" x-on:click="dirty ? window.confirm('Há dados preenchidos neste cadastro. Deseja realmente fechar sem salvar?').then(ok => ok && $wire.fecharModal()) : $wire.fecharModal()" class="modal-close" aria-label="Fechar">
                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
@@ -742,7 +742,7 @@
 
         {{--- Footer --}}
         <div class="modal-footer" style="margin-top:16px;">
-            <button wire:click="fecharModal" class="btn btn-outline">Cancelar</button>
+            <button type="button" x-on:click="dirty ? window.confirm('Há dados preenchidos neste cadastro. Deseja realmente fechar sem salvar?').then(ok => ok && $wire.fecharModal()) : $wire.fecharModal()" class="btn btn-outline">Cancelar</button>
             <button wire:click="salvar" class="btn btn-primary" style="display:flex;align-items:center;gap:6px;">
                 <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 Salvar
