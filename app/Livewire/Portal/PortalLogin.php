@@ -6,7 +6,9 @@ use App\Services\WhatsAppSmsService;
 use Livewire\Component;
 use App\Models\Pessoa;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class PortalLogin extends Component
 {
@@ -28,9 +30,23 @@ class PortalLogin extends Component
     public ?int    $pessoaId     = null;
     public string  $telefoneExib = ''; // mascarado para exibição
 
+    private function throttleKey(): string
+    {
+        $cpf_limpo = preg_replace('/\D/', '', $this->cpf_cnpj);
+        return 'portal-login:' . Str::lower($cpf_limpo) . '|' . request()->ip();
+    }
+
     public function autenticar(): void
     {
         $this->erro = null;
+
+        $chave = $this->throttleKey();
+
+        if (RateLimiter::tooManyAttempts($chave, 5)) {
+            $segundos = RateLimiter::availableIn($chave);
+            $this->erro = 'Muitas tentativas de login. Tente novamente em ' . ceil($segundos / 60) . ' minuto(s).';
+            return;
+        }
 
         $cpf_limpo = preg_replace('/\D/', '', $this->cpf_cnpj);
 
@@ -42,9 +58,12 @@ class PortalLogin extends Component
             ->first();
 
         if (! $pessoa || ! Hash::check($this->senha, $pessoa->portal_senha)) {
+            RateLimiter::hit($chave, 300);
             $this->erro = 'CPF/CNPJ ou senha inválidos.';
             return;
         }
+
+        RateLimiter::clear($chave);
 
         // Verifica se há telefone para 2FA
         $telefone = $pessoa->celular ?: $pessoa->telefone;
@@ -100,6 +119,17 @@ class PortalLogin extends Component
         }
 
         if (! Hash::check($this->codigo, $dados2fa['otp'])) {
+            $tentativas = ($dados2fa['tentativas'] ?? 0) + 1;
+
+            if ($tentativas >= 5) {
+                Session::forget('portal_2fa');
+                $this->erro = 'Número máximo de tentativas excedido. Faça login novamente.';
+                $this->reiniciar();
+                return;
+            }
+
+            $dados2fa['tentativas'] = $tentativas;
+            Session::put('portal_2fa', $dados2fa);
             $this->erro = 'Código incorreto. Tente novamente.';
             $this->codigo = '';
             return;

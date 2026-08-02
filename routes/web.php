@@ -114,9 +114,6 @@ use App\Http\Controllers\IAController;
 
 // ─── Área Autenticada ──────────────────────────────────────────────
 
-Route::get('/teste-config', fn() => 'funcionou');
-
-
     Route::middleware('auth:usuarios')->group(function () {
 
     // ── Onboarding ─────────────────────────────────────────────
@@ -297,8 +294,7 @@ Route::get('/teste-config', fn() => 'funcionou');
 Route::get('/status', fn() => view('status'))->name('status');
 
 Route::post('/webhooks/clicksign', [AssinaturaWebhookController::class, 'handle'])
-    ->name('webhooks.clicksign')
-    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+    ->name('webhooks.clicksign');
 
 
 Route::prefix('portal')->name('portal.')->group(function () {

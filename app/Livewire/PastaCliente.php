@@ -107,7 +107,7 @@ class PastaCliente extends Component
             'docTitulo'   => 'required|string|max:200',
             'docTipo'     => 'required|string',
             'docData'     => 'nullable|date',
-            'docArquivo'  => $this->docId ? 'nullable|file|max:20480' : 'required|file|max:20480',
+            'docArquivo'  => ($this->docId ? 'nullable' : 'required') . '|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,webp,txt',
         ], [
             'docTitulo.required'  => 'O título é obrigatório.',
             'docArquivo.required' => 'Selecione um arquivo.',

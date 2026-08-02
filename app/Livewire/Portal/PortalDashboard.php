@@ -184,11 +184,12 @@ class PortalDashboard extends Component
     {
         $this->validate([
             'uploadTitulo'  => 'required|string|max:200',
-            'uploadArquivo' => 'required|file|max:20480',
+            'uploadArquivo' => 'required|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,webp,txt',
         ], [
             'uploadTitulo.required'  => 'Informe um título para o documento.',
             'uploadArquivo.required' => 'Selecione um arquivo.',
             'uploadArquivo.max'      => 'O arquivo não pode passar de 20 MB.',
+            'uploadArquivo.mimes'    => 'Tipo de arquivo não permitido.',
         ]);
 
         $caminho = $this->uploadArquivo->store('documentos', 'public');

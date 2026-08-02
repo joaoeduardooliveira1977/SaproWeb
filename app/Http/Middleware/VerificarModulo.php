@@ -12,8 +12,12 @@ class VerificarModulo
     {
         $user = auth('usuarios')->user();
 
-        // Superadmin e master ignoram verificação de módulos
-        if (!$user || $user->perfil === 'super_admin') {
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        // Superadmin ignora verificação de módulos
+        if ($user->perfil === 'super_admin') {
             return $next($request);
         }
 

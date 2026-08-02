@@ -306,6 +306,10 @@ class Documentos extends Component
     {
         [$where, $params] = $this->buildWhere();
 
+        $colunasSafe = ['created_at', 'data_documento', 'titulo', 'tipo', 'tamanho'];
+        $col = in_array($this->ordenarPor, $colunasSafe) ? $this->ordenarPor : 'created_at';
+        $dir = $this->ordenarDir === 'ASC' ? 'ASC' : 'DESC';
+
         $docs = DB::select("
             SELECT d.titulo, d.tipo, d.data_documento, d.arquivo_original,
                    d.tamanho, d.portal_visivel, d.created_at,
@@ -314,7 +318,7 @@ class Documentos extends Component
             LEFT JOIN pessoas pe ON pe.id = d.cliente_id
             LEFT JOIN processos pr ON pr.id = d.processo_id
             {$where}
-            ORDER BY d.{$this->ordenarPor} {$this->ordenarDir}
+            ORDER BY d.{$col} {$dir}
         ", $params);
 
         $tipos = ['peticao'=>'Petição','contrato'=>'Contrato','procuracao'=>'Procuração',

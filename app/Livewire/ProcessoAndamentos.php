@@ -84,7 +84,7 @@ class ProcessoAndamentos extends Component
         $this->validate([
             'data'      => 'required|date',
             'descricao' => 'required|string|min:3',
-            'arquivo'   => 'nullable|file|max:20480',
+            'arquivo'   => 'nullable|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,webp,txt',
         ]);
 
         if ($this->editandoId) {
@@ -138,7 +138,7 @@ class ProcessoAndamentos extends Component
     public function salvarUploadAndamento(): void
     {
         $this->validate([
-            'arquivoUpload' => 'required|file|max:20480',
+            'arquivoUpload' => 'required|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,webp,txt',
         ]);
 
         $this->persistirArquivo($this->arquivoUpload, $this->uploadAndamentoId);

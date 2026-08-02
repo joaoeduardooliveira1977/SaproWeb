@@ -58,9 +58,15 @@ class AssinaturaWebhookController extends Controller
     {
         $secret = env('CLICKSIGN_WEBHOOK_SECRET');
 
-        // Se o secret não estiver configurado, pula a validação (dev/sandbox)
+        // Fora de local/testing, exigir sempre o secret configurado (fail-closed)
         if (empty($secret)) {
-            return true;
+            if (app()->environment(['local', 'testing'])) {
+                Log::warning('ClickSign webhook: CLICKSIGN_WEBHOOK_SECRET não configurado — validação pulada (ambiente local).');
+                return true;
+            }
+
+            Log::error('ClickSign webhook: CLICKSIGN_WEBHOOK_SECRET não configurado em ambiente não-local. Requisição rejeitada.');
+            return false;
         }
 
         $headerRecebido = $request->header('X-Clicksign-Hmac-Sha256');

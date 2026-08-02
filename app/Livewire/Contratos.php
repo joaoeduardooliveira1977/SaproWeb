@@ -173,9 +173,11 @@ class Contratos extends Component
 
     private function variaveisContrato(): array
     {
-        $cliente   = $this->clienteId   ? DB::table('pessoas')->where('id', $this->clienteId)->first()   : null;
-        $advogado  = $this->advogadoResponsavelId ? DB::table('pessoas')->where('id', $this->advogadoResponsavelId)->first() : null;
-        $processo  = $this->processoContratoId    ? DB::table('processos')->where('id', $this->processoContratoId)->first()  : null;
+        $tid = tenant_id();
+
+        $cliente   = $this->clienteId   ? DB::table('pessoas')->where('id', $this->clienteId)->where('tenant_id', $tid)->first()   : null;
+        $advogado  = $this->advogadoResponsavelId ? DB::table('pessoas')->where('id', $this->advogadoResponsavelId)->where('tenant_id', $tid)->first() : null;
+        $processo  = $this->processoContratoId    ? DB::table('processos')->where('id', $this->processoContratoId)->where('tenant_id', $tid)->first()  : null;
         $tipoAcao  = $processo ? DB::table('tipo_acoes')->where('id', $processo->tipo_acao_id)->value('descricao') : null;
         $tenant    = DB::table('tenants')->where('id', tenant_id())->first();
 

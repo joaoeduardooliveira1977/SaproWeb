@@ -26,6 +26,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\VerificarTrialExpirado::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/clicksign',
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

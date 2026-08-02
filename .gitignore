@@ -20,3 +20,6 @@ yarn-error.log
 /.idea
 /.vscode
 nul
+
+# Dumps reais de banco de dados com PII de clientes — nunca versionar
+/banco/

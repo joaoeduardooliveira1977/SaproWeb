@@ -703,7 +703,7 @@ class RelatorioController extends Controller
         $totais['saldo'] = $totais['receita_recebida'] - $totais['despesa_paga'];
 
         $clienteNome = $clienteId
-            ? (DB::table('pessoas')->where('id', $clienteId)->value('nome') ?? 'Todos')
+            ? (DB::table('pessoas')->where('id', $clienteId)->where('tenant_id', tenant_id())->value('nome') ?? 'Todos')
             : 'Todos os Clientes';
 
         if ($request->formato === 'csv') {

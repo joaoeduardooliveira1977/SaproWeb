@@ -3,7 +3,7 @@
 
 @section('content')
 @php
-    $totalUsuarios  = \App\Models\Usuario::where('ativo', true)->count();
+    $totalUsuarios  = \App\Models\Usuario::where('ativo', true)->where('tenant_id', tenant_id())->count();
     $totalClientes  = \App\Models\Pessoa::ativos()->doTipo('Cliente')->count();
     $portalAtivos   = \App\Models\Pessoa::where('portal_ativo', true)->count();
     $whatsappConfigurado = filled(config('services.twilio.sid')) && filled(config('services.twilio.token'));
