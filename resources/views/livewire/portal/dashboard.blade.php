@@ -62,7 +62,7 @@
     <div class="portal-help-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
         <button wire:click="trocarAba('processos')" style="text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px;cursor:pointer;">
             <strong style="display:block;font-size:13px;color:#1a3a5c;margin-bottom:4px;">Acompanhe seus processos</strong>
-            <span style="font-size:12px;color:#64748b;line-height:1.45;">Veja dados principais, prazos e últimos andamentos liberados pelo escritório.</span>
+            <span style="font-size:12px;color:#64748b;line-height:1.45;">Veja dados principais e últimos andamentos liberados pelo escritório.</span>
         </button>
         <button wire:click="trocarAba('documentos')" style="text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px;cursor:pointer;">
             <strong style="display:block;font-size:13px;color:#1a3a5c;margin-bottom:4px;">Baixe documentos</strong>
@@ -83,10 +83,6 @@
             <div class="stat-value" style="color:#16a34a;">{{ $stats['ativos'] }}</div>
             <div class="stat-label">Em andamento</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-value" style="color:#2563a8;">{{ $stats['agenda'] }}</div>
-            <div class="stat-label">Próximos compromissos</div>
-        </div>
         <div class="stat-card" style="cursor:pointer;" wire:click="trocarAba('mensagens')">
             <div class="stat-value" style="color:{{ $stats['msgs_nao_lidas'] > 0 ? '#dc2626' : '#334155' }};">
                 {{ $stats['msgs_nao_lidas'] }}
@@ -94,61 +90,6 @@
             <div class="stat-label">Mensagens não lidas</div>
         </div>
     </div>
-
-    {{-- Próximos eventos --}}
-    <div class="card">
-        <div class="card-header"><span style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Próximos Compromissos</span></div>
-        <div class="card-body" style="padding-top:8px;">
-            @forelse($proximosEventos as $ev)
-            <div class="agenda-item">
-                <div class="agenda-hora">{{ $ev->data_hora->format('d/m') }}<br><small>{{ $ev->data_hora->format('H:i') }}</small></div>
-                <div class="agenda-info">
-                    <div class="agenda-titulo">
-                        {{ $ev->titulo }}
-                        @if($ev->urgente) <span class="urgente-badge">URGENTE</span> @endif
-                    </div>
-                    <div class="agenda-meta">
-                        {{ $ev->tipo }}
-                        @if($ev->local) · {{ $ev->local }} @endif
-                        @if($ev->processo) · Proc. {{ $ev->processo->numero }} @endif
-                    </div>
-                </div>
-            </div>
-            @empty
-            <div class="empty"><div class="empty-icon" style="display:flex;justify-content:center;"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><p>Nenhum compromisso próximo.</p></div>
-            @endforelse
-        </div>
-    </div>
-
-    {{-- Prazos próximos --}}
-    @if($prazosProximos->isNotEmpty())
-    <div class="card">
-        <div class="card-header"><span style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Prazos Próximos (30 dias)</span></div>
-        <div class="card-body" style="padding-top:8px;">
-            @foreach($prazosProximos as $prazo)
-            @php
-                $dias = (int) now()->startOfDay()->diffInDays($prazo->data_prazo, false);
-                $cor  = $dias < 0 ? '#dc2626' : ($dias <= 5 ? '#ea580c' : ($dias <= 15 ? '#ca8a04' : '#16a34a'));
-            @endphp
-            <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f1f5f9;">
-                <span style="font-size:12px;font-weight:700;color:{{ $cor }};min-width:70px;white-space:nowrap;">
-                    {{ $prazo->data_prazo->format('d/m/Y') }}
-                </span>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                        {{ $prazo->titulo }}
-                    </div>
-                    <div style="font-size:11px;color:#64748b;">
-                        Proc. {{ $prazo->processo?->numero }}
-                        · {{ $dias >= 0 ? $dias.' dia(s)' : abs($dias).' dia(s) em atraso' }}
-                        @if($prazo->prazo_fatal) · <span style="color:#9d174d;font-weight:700;"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9d174d" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg> Fatal</span> @endif
-                    </div>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-    @endif
 
     {{-- Últimas atualizações --}}
     @if($ultimosAndamentos->isNotEmpty())
@@ -220,7 +161,7 @@
     <div style="background:#fff;border:1px solid #dbeafe;border-left:4px solid #2563a8;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;">
         <div style="min-width:260px;flex:1;">
             <div style="font-size:16px;font-weight:800;color:#1a3a5c;margin-bottom:4px;">Seus processos</div>
-            <div style="font-size:13px;color:#475569;line-height:1.5;">Clique em um processo para ver detalhes, prazos em aberto e histórico de andamentos liberados pelo escritório.</div>
+            <div style="font-size:13px;color:#475569;line-height:1.5;">Clique em um processo para ver detalhes e histórico de andamentos liberados pelo escritório.</div>
         </div>
         <button wire:click="trocarAba('mensagens')" class="btn btn-outline" style="white-space:nowrap;">Tenho uma dúvida</button>
     </div>
@@ -275,33 +216,6 @@
             </div>
         </div>
 
-        {{-- Prazos abertos --}}
-        @if($prazosProcesso->isNotEmpty())
-        <div class="card">
-            <div class="card-header"><span style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Prazos em Aberto</span></div>
-            <div class="card-body" style="padding-top:8px;">
-                @foreach($prazosProcesso as $prazo)
-                @php
-                    $dias = (int) now()->startOfDay()->diffInDays($prazo->data_prazo, false);
-                    $cor  = $dias < 0 ? '#dc2626' : ($dias <= 5 ? '#ea580c' : ($dias <= 15 ? '#ca8a04' : '#16a34a'));
-                @endphp
-                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9;">
-                    <span style="font-size:13px;font-weight:700;color:{{ $cor }};min-width:90px;">
-                        {{ $prazo->data_prazo->format('d/m/Y') }}
-                    </span>
-                    <div>
-                        <div style="font-size:13px;font-weight:600;">{{ $prazo->titulo }}</div>
-                        <div style="font-size:11px;color:#64748b;">
-                            {{ $dias >= 0 ? $dias.' dia(s) restante(s)' : abs($dias).' dia(s) em atraso' }}
-                            @if($prazo->prazo_fatal) · <span style="color:#9d174d;font-weight:700;"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9d174d" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg> Fatal</span> @endif
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-        @endif
-
         {{-- Linha do tempo --}}
         <div class="card">
             <div class="card-header"><span style="display:flex;align-items:center;gap:7px;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg> Histórico de Andamentos</span></div>
@@ -342,8 +256,8 @@
         {{-- Lista de processos --}}
         @foreach($processos as $proc)
         @php
-            $totalAndamentos = \App\Models\Andamento::where('processo_id', $proc->id)->count();
-            $ultimoAndamento = \App\Models\Andamento::where('processo_id', $proc->id)->latest('data')->first();
+            $totalAndamentos = \App\Models\Andamento::publico()->where('processo_id', $proc->id)->count();
+            $ultimoAndamento = \App\Models\Andamento::publico()->where('processo_id', $proc->id)->latest('data')->first();
         @endphp
         <div class="processo-card" wire:click="abrirProcesso({{ $proc->id }})">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;">

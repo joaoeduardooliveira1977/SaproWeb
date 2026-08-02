@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Portal;
 
-use App\Models\{Pessoa, Processo, Andamento, Agenda, FinanceiroLancamento};
+use App\Models\{Pessoa, Processo, Andamento, FinanceiroLancamento};
 use App\Services\PixService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\{DB, Session, Storage};
@@ -246,7 +246,6 @@ class PortalDashboard extends Component
         $stats = [
             'total'   => $processosIds->count(),
             'ativos'  => Processo::where('cliente_id', $this->pessoa->id)->where('status', 'Ativo')->count(),
-            'agenda'  => Agenda::whereIn('processo_id', $processosIds)->where('concluido', false)->where('data_hora', '>=', now())->count(),
             'msgs_nao_lidas' => DB::table('portal_mensagens')
                 ->where('pessoa_id', $this->pessoa->id)
                 ->where('de', 'escritorio')
@@ -254,26 +253,10 @@ class PortalDashboard extends Component
                 ->count(),
         ];
 
-        $proximosEventos = Agenda::with('processo')
-            ->whereIn('processo_id', $processosIds)
-            ->where('concluido', false)
-            ->where('data_hora', '>=', now())
-            ->orderBy('data_hora')
-            ->take(5)
-            ->get();
-
         $ultimosAndamentos = \App\Models\Andamento::publico()->with('processo')
             ->whereIn('processo_id', $processosIds)
             ->orderByDesc('data')
             ->take(6)
-            ->get();
-
-        $prazosProximos = \App\Models\Prazo::with('processo')
-            ->whereIn('processo_id', $processosIds)
-            ->where('status', 'aberto')
-            ->where('data_prazo', '<=', now()->addDays(30))
-            ->orderBy('data_prazo')
-            ->take(5)
             ->get();
 
         // ── Processos ──
@@ -287,7 +270,6 @@ class PortalDashboard extends Component
         // ── Detalhe do processo ──
         $processoDetalhe = null;
         $andamentos      = collect();
-        $prazosProcesso  = collect();
 
         if ($this->processoAberto) {
             $processoDetalhe = Processo::with(['fase', 'risco', 'advogado', 'tipoAcao'])
@@ -299,11 +281,6 @@ class PortalDashboard extends Component
                 $andamentos = \App\Models\Andamento::publico()
                     ->where('processo_id', $this->processoAberto)
                     ->orderByDesc('data')
-                    ->get();
-
-                $prazosProcesso = \App\Models\Prazo::where('processo_id', $this->processoAberto)
-                    ->where('status', 'aberto')
-                    ->orderBy('data_prazo')
                     ->get();
 
                 // Documentos agrupados por andamento_id (apenas os que têm andamento_id)
@@ -390,8 +367,8 @@ class PortalDashboard extends Component
         $docsAndamentos  = $docsAndamentos  ?? collect();
 
         return view('livewire.portal.dashboard', compact(
-            'stats', 'proximosEventos', 'ultimosAndamentos', 'prazosProximos',
-            'processos', 'processoDetalhe', 'andamentos', 'prazosProcesso', 'docsAndamentos',
+            'stats', 'ultimosAndamentos',
+            'processos', 'processoDetalhe', 'andamentos', 'docsAndamentos',
             'documentos', 'honorarios', 'mensagens', 'processosFiltro',
             'lancamentosFinanceiro', 'resumoFinanceiro'
         ))->layout('portal.layout');

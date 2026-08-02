@@ -7,6 +7,7 @@
     <span>Período: {{ $data_ini }} a {{ $data_fim }}</span>
     <span>Tipo: {{ $tipoLabel }}</span>
     <span>Total de andamentos: {{ $total }}</span>
+    <span>Processos arquivados: {{ $incluirArquivados ? 'Incluídos' : 'Não incluídos' }}</span>
 </div>
 
 @if($processos->isEmpty())

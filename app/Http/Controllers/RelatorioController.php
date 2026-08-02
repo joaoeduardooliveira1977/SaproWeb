@@ -285,6 +285,7 @@ class RelatorioController extends Controller
         [$ini, $fim] = $this->datas($request);
         $clienteId = $request->cliente_id ? (int) $request->cliente_id : null;
         $tipo      = $request->tipo ?? 'todos'; // todos | judiciais | extrajudiciais
+        $incluirArquivados = $request->boolean('incluir_arquivados');
 
         $query = Processo::with(['cliente', 'andamentos' => function ($q) use ($ini, $fim) {
             $q->publico()->whereBetween('data', [$ini->toDateString(), $fim->toDateString()])
@@ -293,6 +294,7 @@ class RelatorioController extends Controller
         ->when($clienteId, fn ($q) => $q->where('cliente_id', $clienteId))
         ->when($tipo === 'judiciais',      fn ($q) => $q->whereNotNull('numero')->where('numero', '!=', ''))
         ->when($tipo === 'extrajudiciais', fn ($q) => $q->where(fn ($i) => $i->whereNull('numero')->orWhere('numero', '')))
+        ->when(! $incluirArquivados, fn ($q) => $q->where('status', '!=', 'Arquivado'))
         ->whereHas('andamentos', function ($q) use ($ini, $fim) {
             $q->publico()->whereBetween('data', [$ini->toDateString(), $fim->toDateString()]);
         })
@@ -311,12 +313,13 @@ class RelatorioController extends Controller
         };
 
         return $this->pdf('pdf.andamentos-por-cliente', [
-            'processos'   => $processos,
-            'clienteNome' => $clienteNome,
-            'data_ini'    => $ini->format('d/m/Y'),
-            'data_fim'    => $fim->format('d/m/Y'),
-            'tipoLabel'   => $tipoLabel,
-            'total'       => $processos->sum(fn ($p) => $p->andamentos->count()),
+            'processos'         => $processos,
+            'clienteNome'       => $clienteNome,
+            'data_ini'          => $ini->format('d/m/Y'),
+            'data_fim'          => $fim->format('d/m/Y'),
+            'tipoLabel'         => $tipoLabel,
+            'total'             => $processos->sum(fn ($p) => $p->andamentos->count()),
+            'incluirArquivados' => $incluirArquivados,
         ], 'Andamentos por Cliente — ' . $clienteNome);
     }
 

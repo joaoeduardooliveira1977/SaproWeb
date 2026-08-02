@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -r \"echo 'ok';\")",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" -v)",
+      "Bash(\"/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" \"c:/Projetos/SaproWeb/storage/app/migracao_arruda/fix_encoding/gerar_fix_encoding_v2.php\")",
+      "Bash(sed 's/^COMMIT;$/ROLLBACK;/' fix_encoding_bittar_v2.sql)",
+      "Bash(cp fix_encoding_bittar_v2.sql /c/Users/joaoe/AppData/Local/Temp/dryrun_v2.sql)",
+      "Bash(cp fix_encoding_bittar_v2.sql \"C:/Users/joaoe/AppData/Local/Temp/claude/c--Projetos-SaproWeb/44ecde1d-d2b7-40b1-b644-3dadcdbd47fa/scratchpad/dryrun_v2.sql\")",
+      "Bash(PGPASSWORD=sapro2024 \"/c/Program Files/PostgreSQL/16/bin/psql.exe\" -h 127.0.0.1 -p 5432 -U postgres -d sapro_db -f \"C:/Users/joaoe/AppData/Local/Temp/claude/c--Projetos-SaproWeb/44ecde1d-d2b7-40b1-b644-3dadcdbd47fa/scratchpad/dryrun_v2.sql\")",
+      "Bash(PGPASSWORD=sapro2024 \"/c/Program Files/PostgreSQL/16/bin/psql.exe\" -h 127.0.0.1 -p 5432 -U postgres -d sapro_db -c \"SELECT id, nome FROM tenants ORDER BY id;\")",
+      "Bash(PGPASSWORD=sapro2024 \"/c/Program Files/PostgreSQL/16/bin/psql.exe\" -h 127.0.0.1 -p 5432 -U postgres -d sapro_db -c \"\\\\d andamentos\" -c \"\\\\d pessoas\" -c \"\\\\d processos\")",
+      "Bash(PGPASSWORD=sapro2024 \"/c/Program Files/PostgreSQL/16/bin/psql.exe\" -h 127.0.0.1 -p 5432 -U postgres -d sapro_db -c \"\\\\d pessoas\")"
+    ]
+  }
+}
