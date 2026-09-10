@@ -213,6 +213,7 @@ use App\Http\Controllers\IAController;
         Route::get('/custas-reembolso',   [RelatorioController::class, 'custasReembolso'])->name('custas-reembolso');
         Route::get('/aniversarios',       [RelatorioController::class, 'aniversarios'])->name('aniversarios');
         Route::get('/andamentos-cliente', [RelatorioController::class, 'andamentosPorCliente'])->name('andamentos-cliente');
+        Route::get('/andamento-clientes', [RelatorioController::class, 'andamentoClientes'])->name('andamento-clientes');
         Route::get('/honorarios-aberto',  [RelatorioController::class, 'honorariosEmAberto'])->name('honorarios-aberto');
         Route::get('/financeiro-periodo', [RelatorioController::class, 'financeiroPorPeriodo'])->name('financeiro-periodo');
         Route::get('/sem-andamento',         [RelatorioController::class, 'processosSemAndamento'])->name('sem-andamento');

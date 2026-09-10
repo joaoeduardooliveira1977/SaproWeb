@@ -23,3 +23,5 @@ nul
 
 # Dumps reais de banco de dados com PII de clientes — nunca versionar
 /banco/
+sapro_backup.dump 
+sapro_backup.dump.gz 

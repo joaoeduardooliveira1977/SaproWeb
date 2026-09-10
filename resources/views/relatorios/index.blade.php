@@ -662,6 +662,38 @@
       </form>
     </div>
 
+    {{-- 15b. Andamento de Clientes --}}
+    <div class="card" data-categoria="agenda">
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#eff6ff;">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563a8" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      </div>
+      <div style="font-weight:700;font-size:14px;color:var(--primary);margin-bottom:2px">Andamento de Clientes</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Histórico completo de andamentos do(s) cliente(s), sem filtro de período.</div>
+      <form method="GET" action="{{ route('relatorios.andamento-clientes') }}" target="_blank">
+        <div class="form-field">
+          <label class="lbl">Cliente</label>
+          <select name="cliente_id">
+            <option value="">Todos os Clientes</option>
+            @foreach($clientes as $c)
+              <option value="{{ $c->id }}">{{ $c->nome }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="lbl">Status do Cliente</label>
+          <select name="status_cliente">
+            <option value="Ativo" selected>Ativo</option>
+            <option value="Inativo">Inativo</option>
+            <option value="Todos">Todos</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          Gerar PDF
+        </button>
+      </form>
+    </div>
+
     {{-- 16. Produtividade por Advogado --}}
     <div class="card" data-categoria="produtividade">
       <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fffbeb;">

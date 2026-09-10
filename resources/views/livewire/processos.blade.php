@@ -158,7 +158,7 @@
 <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;">
 
     {{-- Linha 1 --}}
-    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:10px;">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:10px;">
 
         {{-- Busca --}}
         <div>
@@ -170,9 +170,20 @@
                     style="width:100%;padding:8px 10px 8px 32px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;"
                     onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
             </div>
+       </div>
+
+        {{-- Unidade --}}
+        <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Unidade</label>
+            <input wire:model.live.debounce.300ms="buscaUnidade" type="text"
+                placeholder="Ex: 001, Apt 12..."
+                style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;"
+                onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
         </div>
 
         {{-- Status --}}
+
+
         <div>
             <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Status</label>
             <select wire:model.live="status"
@@ -224,7 +235,7 @@
         <div>
             <label style="font-size:11px;font-weight:700;color:transparent;display:block;margin-bottom:6px;">.</label>
             <div style="display:flex;gap:6px;">
-                <button wire:click="$set('busca',''); $set('status',''); $set('fase_id',''); $set('risco_id',''); $set('filtroScore','')"
+                <button wire:click="$set('busca',''); $set('buscaUnidade',''); $set('status',''); $set('fase_id',''); $set('risco_id',''); $set('filtroScore','')"
                     style="flex:1;padding:8px 10px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--muted);cursor:pointer;font-weight:600;white-space:nowrap;transition:all .15s;"
                     onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
                     onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">

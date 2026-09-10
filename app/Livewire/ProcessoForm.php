@@ -95,6 +95,18 @@ class ProcessoForm extends Component
         return auth('usuarios')->user()->tenant_id;
     }
 
+    // ── Helper de busca normalizada (sem acento/caixa, º/ª/° equivalentes) ──
+    private function whereNormalizado($query, string $coluna, string $termo)
+    {
+        $termo = str_replace(['º', 'ª', '°'], '', $termo);
+        $termo = mb_strtolower(trim($termo));
+
+        return $query->whereRaw(
+            "lower(unaccent(regexp_replace(coalesce({$coluna}, ''), '[ºª°]', '', 'g'))) ilike ?",
+            ["%{$termo}%"]
+        );
+    }
+
     // ── Tribunal ─────────────────────────────────
 
     public function updatedNumero(): void
@@ -120,9 +132,11 @@ class ProcessoForm extends Component
             return;
         }
 
-        $this->clienteSugestoes = Pessoa::doTipo('Cliente')
-            ->where('tenant_id', $this->tenantId())
-            ->where('nome', 'ilike', "%{$this->clienteBusca}%")
+        $this->clienteSugestoes = $this->whereNormalizado(
+                Pessoa::doTipo('Cliente')->where('tenant_id', $this->tenantId()),
+                'nome',
+                $this->clienteBusca
+            )
             ->orderBy('nome')
             ->limit(10)
             ->get(['id', 'nome'])
@@ -171,9 +185,11 @@ class ProcessoForm extends Component
             return;
         }
 
-        $this->parteContrariaSugestoes = Pessoa::doTipo('Parte Contrária')
-            ->where('tenant_id', $this->tenantId())
-            ->where('nome', 'ilike', "%{$this->parteContrariaBusca}%")
+        $this->parteContrariaSugestoes = $this->whereNormalizado(
+                Pessoa::doTipo('Parte Contrária')->where('tenant_id', $this->tenantId()),
+                'nome',
+                $this->parteContrariaBusca
+            )
             ->orderBy('nome')
             ->limit(10)
             ->get(['id', 'nome'])
@@ -207,8 +223,11 @@ class ProcessoForm extends Component
             return;
         }
 
-        $this->faseSugestoes = \App\Models\Fase::where('tenant_id', $this->tenantId())
-            ->where('descricao', 'ilike', "%{$this->faseBusca}%")
+        $this->faseSugestoes = $this->whereNormalizado(
+                \App\Models\Fase::where('tenant_id', $this->tenantId()),
+                'descricao',
+                $this->faseBusca
+            )
             ->orderBy('descricao')
             ->limit(10)
             ->get(['id', 'descricao'])
@@ -241,8 +260,11 @@ class ProcessoForm extends Component
             return;
         }
 
-        $this->riscoSugestoes = \App\Models\GrauRisco::where('tenant_id', $this->tenantId())
-            ->where('descricao', 'ilike', "%{$this->riscoBusca}%")
+        $this->riscoSugestoes = $this->whereNormalizado(
+                \App\Models\GrauRisco::where('tenant_id', $this->tenantId()),
+                'descricao',
+                $this->riscoBusca
+            )
             ->orderBy('descricao')
             ->limit(10)
             ->get(['id', 'descricao'])
@@ -275,8 +297,11 @@ class ProcessoForm extends Component
             return;
         }
 
-        $this->tipoAcaoSugestoes = \App\Models\TipoAcao::where('tenant_id', $this->tenantId())
-            ->where('descricao', 'ilike', "%{$this->tipoAcaoBusca}%")
+        $this->tipoAcaoSugestoes = $this->whereNormalizado(
+                \App\Models\TipoAcao::where('tenant_id', $this->tenantId()),
+                'descricao',
+                $this->tipoAcaoBusca
+            )
             ->orderBy('descricao')
             ->limit(10)
             ->get(['id', 'descricao'])
@@ -309,8 +334,11 @@ class ProcessoForm extends Component
             return;
         }
 
-        $this->tipoProcessoSugestoes = \App\Models\TipoProcesso::where('tenant_id', $this->tenantId())
-            ->where('descricao', 'ilike', "%{$this->tipoProcessoBusca}%")
+        $this->tipoProcessoSugestoes = $this->whereNormalizado(
+                \App\Models\TipoProcesso::where('tenant_id', $this->tenantId()),
+                'descricao',
+                $this->tipoProcessoBusca
+            )
             ->orderBy('descricao')
             ->limit(10)
             ->get(['id', 'descricao'])
@@ -343,8 +371,11 @@ class ProcessoForm extends Component
             return;
         }
 
-        $this->reparticaoSugestoes = \App\Models\Reparticao::where('tenant_id', $this->tenantId())
-            ->where('descricao', 'ilike', "%{$this->reparticaoBusca}%")
+        $this->reparticaoSugestoes = $this->whereNormalizado(
+                \App\Models\Reparticao::where('tenant_id', $this->tenantId()),
+                'descricao',
+                $this->reparticaoBusca
+            )
             ->orderBy('descricao')
             ->limit(10)
             ->get(['id', 'descricao'])
@@ -377,10 +408,13 @@ class ProcessoForm extends Component
             return;
         }
 
-        $this->varaSugestoes = DB::table('varas')
-            ->where('tenant_id', $this->tenantId())
-            ->where('ativo', true)
-            ->where('descricao', 'ilike', "%{$this->varaBusca}%")
+        $this->varaSugestoes = $this->whereNormalizado(
+                DB::table('varas')
+                    ->where('tenant_id', $this->tenantId())
+                    ->where('ativo', true),
+                'descricao',
+                $this->varaBusca
+            )
             ->orderBy('descricao')
             ->limit(10)
             ->get(['descricao'])

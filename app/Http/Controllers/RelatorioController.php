@@ -323,6 +323,46 @@ class RelatorioController extends Controller
         ], 'Andamentos por Cliente — ' . $clienteNome);
     }
 
+    // ── 7b. Andamento de Clientes (histórico completo, sem data) ──
+
+    public function andamentoClientes(Request $request)
+    {
+        $clienteId     = $request->cliente_id ? (int) $request->cliente_id : null;
+        $statusCliente = $request->status_cliente ?? 'Ativo'; // Ativo | Inativo | Todos
+
+        $processos = Processo::with(['cliente', 'andamentos' => function ($q) {
+                $q->publico()->orderBy('data');
+            }])
+            ->when($clienteId, fn ($q) => $q->where('cliente_id', $clienteId))
+            ->whereHas('cliente', function ($q) use ($statusCliente) {
+                if ($statusCliente !== 'Todos') {
+                    $q->where('ativo', $statusCliente === 'Ativo');
+                }
+            })
+            ->whereHas('andamentos', fn ($q) => $q->publico())
+            ->orderBy('numero')
+            ->get()
+            ->filter(fn ($p) => $p->andamentos->isNotEmpty())
+            ->values();
+
+        $clienteNome = $clienteId
+            ? (Pessoa::find($clienteId)?->nome ?? 'Todos os Clientes')
+            : 'Todos os Clientes';
+
+        $statusLabel = match ($statusCliente) {
+            'Inativo' => 'Somente Inativos',
+            'Todos'   => 'Todos',
+            default   => 'Somente Ativos',
+        };
+
+        return $this->pdf('pdf.andamento-clientes', [
+            'processos'    => $processos,
+            'clienteNome'  => $clienteNome,
+            'statusLabel'  => $statusLabel,
+            'total'        => $processos->sum(fn ($p) => $p->andamentos->count()),
+        ], 'Andamento de Clientes — ' . $clienteNome);
+    }
+
     // ── 8. Honorários em Aberto ────────────────────────────────
 
     public function honorariosEmAberto(Request $request)

@@ -15,6 +15,7 @@ class Processos extends Component
     public bool     $lixeira    = false;
 
     public string  $busca      = '';
+	public string $buscaUnidade = '';
     public string  $status     = '';
     public string  $fase_id    = '';
     public string  $risco_id   = '';
@@ -36,13 +37,14 @@ class Processos extends Component
     public string  $perguntaIA = '';
     public ?string $respostaIA = null;
 
-    protected $queryString = ['busca', 'status', 'fase_id', 'risco_id', 'filtroScore'];
+	protected $queryString = ['busca', 'status', 'fase_id', 'risco_id', 'filtroScore', 'buscaUnidade'];
 
     public function updatingBusca():       void { $this->resetPage(); }
     public function updatingStatus():      void { $this->resetPage(); }
     public function updatingFaseId():      void { $this->resetPage(); }
     public function updatingRiscoId():     void { $this->resetPage(); }
     public function updatingFiltroScore(): void { $this->resetPage(); }
+	public function updatingBuscaUnidade(): void { $this->resetPage(); }
 
     public function recalcularScore(): void
     {
@@ -301,6 +303,7 @@ Responda em 1-3 frases objetivas. Se a pergunta pedir para filtrar ou mostrar al
             ->when($this->status,   fn($q) => $q->where('status', $this->status))
             ->when($this->fase_id,  fn($q) => $q->where('fase_id', $this->fase_id))
             ->when($this->risco_id, fn($q) => $q->where('risco_id', $this->risco_id))
+	    ->when($this->buscaUnidade, fn($q) => $q->unidade($this->buscaUnidade))
             ->orderByDesc('created_at')
             ->get();
 
@@ -337,11 +340,12 @@ Responda em 1-3 frases objetivas. Se a pergunta pedir para filtrar ou mostrar al
                 ->paginate(15);
         } else {
             $processos = Processo::with(['cliente', 'advogado', 'fase', 'risco'])
-                ->when($this->busca,       fn($q) => $q->busca($this->busca))
-                ->when($this->status,      fn($q) => $q->where('status', $this->status))
-                ->when($this->fase_id,     fn($q) => $q->where('fase_id', $this->fase_id))
-                ->when($this->risco_id,    fn($q) => $q->where('risco_id', $this->risco_id))
-                ->when($this->filtroScore, fn($q) => $q->where('score', $this->filtroScore))
+                ->when($this->busca,        fn($q) => $q->busca($this->busca))
+                ->when($this->buscaUnidade, fn($q) => $q->unidade($this->buscaUnidade))
+                ->when($this->status,       fn($q) => $q->where('status', $this->status))
+                ->when($this->fase_id,      fn($q) => $q->where('fase_id', $this->fase_id))
+                ->when($this->risco_id,     fn($q) => $q->where('risco_id', $this->risco_id))
+                ->when($this->filtroScore,  fn($q) => $q->where('score', $this->filtroScore))
                 ->orderByDesc('created_at')
                 ->paginate(15);
         }

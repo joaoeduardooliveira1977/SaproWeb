@@ -117,16 +117,46 @@ class Processo extends Model
         return $query->where('status', 'Ativo');
     }
 
-    public function scopeBusca($query, string $termo)
-	{
-    	return $query->where(function ($q) use ($termo) {
-        $q->where('numero', 'ilike', "%{$termo}%")
-          ->orWhere('parte_contraria', 'ilike', "%{$termo}%")
-          ->orWhereHas('cliente',        fn($c) => $c->where('nome', 'ilike', "%{$termo}%"))
-          ->orWhereHas('advogado',       fn($a) => $a->where('nome', 'ilike', "%{$termo}%"))
-          ->orWhereHas('parteContraria', fn($p) => $p->where('nome', 'ilike', "%{$termo}%"));
-    	});
-	}
+    
+public function scopeBusca($query, string $termo)
+{
+    $t = self::normalizarTermo($termo);
+
+    return $query->where(function ($q) use ($t) {
+        $q->whereRaw(self::sqlNormalizado('numero') . ' ilike ?', ["%{$t}%"])
+          ->orWhereRaw(self::sqlNormalizado('parte_contraria') . ' ilike ?', ["%{$t}%"])
+          ->orWhereRaw(self::sqlNormalizado('unidade') . ' ilike ?', ["%{$t}%"])
+          ->orWhereRaw(self::sqlNormalizado('vara') . ' ilike ?', ["%{$t}%"])
+          ->orWhereHas('cliente',        fn($c) => $c->whereRaw(self::sqlNormalizado('nome') . ' ilike ?', ["%{$t}%"]))
+          ->orWhereHas('advogado',       fn($a) => $a->whereRaw(self::sqlNormalizado('nome') . ' ilike ?', ["%{$t}%"]))
+          ->orWhereHas('parteContraria', fn($p) => $p->whereRaw(self::sqlNormalizado('nome') . ' ilike ?', ["%{$t}%"]));
+    });
+}
+
+public function scopeUnidade($query, string $termo)
+{
+    $t = self::normalizarTermo($termo);
+    return $query->whereRaw(self::sqlNormalizado('unidade') . ' ilike ?', ["%{$t}%"]);
+}
+
+protected static function sqlNormalizado(string $coluna): string
+{
+    // Remove º/ª/° antes de comparar, depois remove acentos e caixa
+    return "lower(unaccent(regexp_replace(coalesce({$coluna}, ''), '[ºª°]', '', 'g')))";
+}
+
+protected static function normalizarTermo(string $termo): string
+{
+    $termo = str_replace(['º', 'ª', '°'], '', $termo);
+    return mb_strtolower(trim($termo));
+}
+
+
+
+
+
+
+
 
     // ── Acessores ──────────────────────────────────
     public function getTotalCustasAttribute(): float
