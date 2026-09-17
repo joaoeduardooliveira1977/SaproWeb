@@ -24,6 +24,9 @@
 .processo-info   { flex:1; min-width:0; }
 .processo-titulo { font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .processo-sub    { font-size:12px; color:var(--muted); margin-top:2px; }
+.processo-parte  { flex:1; min-width:0; font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.processo-unidade{ width:110px; flex-shrink:0; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.processo-tipo   { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:600; background:#eef2ff; color:#4338ca; white-space:nowrap; }
 .prazo-item      { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--border); }
 .prazo-item:last-child { border-bottom:none; }
 .prazo-data      { min-width:80px; text-align:center; }
@@ -173,16 +176,24 @@
                             {{ $proc->numero ?? 'S/N' }}
                         </a>
                     </div>
+                    <div class="processo-parte" title="{{ $proc->parteContraria?->nome ?? $proc->parte_contraria ?? '' }}">
+                        {{ $proc->parteContraria?->nome ?? $proc->parte_contraria ?? '—' }}
+                    </div>
+                    <div class="processo-unidade" title="{{ $proc->unidade ?? '' }}">
+                        {{ $proc->unidade ?? '—' }}
+                    </div>
                     <div class="processo-info">
-                        <div class="processo-titulo">
-                            {{ $proc->tipoAcao?->descricao ?? '—' }}
-                        </div>
                         <div class="processo-sub">
                             {{ $proc->fase?->descricao ?? '' }}
                             @if($proc->advogado) &bull; {{ $proc->advogado->nome }} @endif
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                        @if($proc->tipoAcao)
+                        <span class="processo-tipo">
+                            {{ $proc->tipoAcao->descricao }}
+                        </span>
+                        @endif
                         @if($proc->risco)
                         <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#fff7ed;color:#ea580c;font-weight:600;">
                             {{ $proc->risco->descricao ?? '' }}
