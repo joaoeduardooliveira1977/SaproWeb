@@ -24,7 +24,7 @@
 .processo-info   { flex:1; min-width:0; }
 .processo-titulo { font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .processo-sub    { font-size:12px; color:var(--muted); margin-top:2px; }
-.processo-parte  { flex:1; min-width:0; font-size:13px; color:var(--text); font-weight:600; word-break:break-word; }
+.processo-parte  { flex:1; min-width:60px; font-size:13px; color:var(--text); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .processo-unidade{ flex-shrink:0; font-size:11px; padding:2px 10px; border-radius:10px; font-weight:600; background:#f1f5f9; color:#475569; white-space:nowrap; }
 .processo-tipo   { font-size:11px; padding:2px 10px; border-radius:10px; font-weight:600; background:#eef2ff; color:#4338ca; white-space:nowrap; flex-shrink:0; }
 .prazo-item      { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--border); }
@@ -170,25 +170,19 @@
                 <div class="pasta-empty">Nenhum processo encontrado para este cliente.</div>
             @else
                 @foreach($processos as $proc)
-                <div class="processo-row" style="flex-direction:column;align-items:stretch;gap:6px;">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <div class="processo-numero">
-                            <a href="{{ route('processos.show', $proc->id) }}" style="color:var(--primary-light);text-decoration:none;">
-                                {{ $proc->numero ?? 'S/N' }}
-                            </a>
-                        </div>
-                        <div class="processo-parte">
-                            {{ $proc->parteContraria?->nome ?? $proc->parte_contraria ?? '—' }}
-                        </div>
+                <div class="processo-row">
+                    <div class="processo-numero">
+                        <a href="{{ route('processos.show', $proc->id) }}" style="color:var(--primary-light);text-decoration:none;">
+                            {{ $proc->numero ?? 'S/N' }}
+                        </a>
                     </div>
-                    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding-left:110px;">
-                        <span class="processo-unidade">
-                            {{ $proc->unidade ?? '—' }}
-                        </span>
-                        <div class="processo-sub" style="flex:1;min-width:120px;margin-top:0;">
-                            {{ $proc->fase?->descricao ?? '' }}
-                            @if($proc->advogado) &bull; {{ $proc->advogado->nome }} @endif
-                        </div>
+                    <div class="processo-parte" title="{{ $proc->parteContraria?->nome ?? $proc->parte_contraria ?? '' }}">
+                        {{ $proc->parteContraria?->nome ?? $proc->parte_contraria ?? '—' }}
+                    </div>
+                    <span class="processo-unidade">
+                        {{ $proc->unidade ?? '—' }}
+                    </span>
+                    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
                         @if($proc->tipoAcao)
                         <span class="processo-tipo">
                             {{ $proc->tipoAcao->descricao }}
