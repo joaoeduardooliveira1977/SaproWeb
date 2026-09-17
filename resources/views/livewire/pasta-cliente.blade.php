@@ -20,13 +20,13 @@
 .processo-row   { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); transition:background .12s; }
 .processo-row:last-child { border-bottom:none; }
 .processo-row:hover { background:#f8faff; }
-.processo-numero { font-size:13px; font-weight:700; color:var(--primary-light); min-width:100px; }
+.processo-numero { font-size:13px; font-weight:700; color:var(--primary-light); min-width:100px; flex-shrink:0; white-space:nowrap; margin-right:10px; }
 .processo-info   { flex:1; min-width:0; }
 .processo-titulo { font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .processo-sub    { font-size:12px; color:var(--muted); margin-top:2px; }
-.processo-parte  { flex:1; min-width:0; font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.processo-unidade{ width:110px; flex-shrink:0; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.processo-tipo   { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:600; background:#eef2ff; color:#4338ca; white-space:nowrap; }
+.processo-parte  { flex:1.2; min-width:0; font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.processo-unidade{ flex-shrink:0; max-width:200px; font-size:11px; padding:2px 10px; border-radius:10px; font-weight:600; background:#f1f5f9; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.processo-tipo   { font-size:11px; padding:2px 10px; border-radius:10px; font-weight:600; background:#eef2ff; color:#4338ca; white-space:nowrap; flex-shrink:0; }
 .prazo-item      { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--border); }
 .prazo-item:last-child { border-bottom:none; }
 .prazo-data      { min-width:80px; text-align:center; }
