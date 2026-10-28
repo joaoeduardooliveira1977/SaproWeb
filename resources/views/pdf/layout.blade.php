@@ -54,8 +54,28 @@
 <div class="header">
     <div class="header-top">
         <div>
-            <div class="header-logo-clean">Software Jurídico</div>
-            <div class="header-sub">Sistema de Acompanhamento de Processos</div>
+            @php
+                $tenantAtual = tenant();
+                $logoBase64  = null;
+                if ($tenantAtual?->logo) {
+                    $logoPath = storage_path('app/public/' . $tenantAtual->logo);
+                    if (is_file($logoPath)) {
+                        $logoMime   = match (strtolower(pathinfo($logoPath, PATHINFO_EXTENSION))) {
+                            'png'   => 'image/png',
+                            'svg'   => 'image/svg+xml',
+                            default => 'image/jpeg',
+                        };
+                        $logoBase64 = 'data:' . $logoMime . ';base64,' . base64_encode(file_get_contents($logoPath));
+                    }
+                }
+            @endphp
+            @if($logoBase64)
+                <img src="{{ $logoBase64 }}" style="max-height:38px;max-width:180px;">
+                <div class="header-sub">{{ $tenantAtual->nome }}</div>
+            @else
+                <div class="header-logo-clean">Software Jurídico</div>
+                <div class="header-sub">Sistema de Acompanhamento de Processos</div>
+            @endif
         </div>
         <div class="header-meta-clean">
             Gerado em: {{ $gerado_em }}<br>
